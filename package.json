@@ -1,4 +1,5 @@
 {
+  "name": "authentication-hell",
   "private": true,
   "type": "module",
   "license": "SEE LICENSE IN LICENSE",
