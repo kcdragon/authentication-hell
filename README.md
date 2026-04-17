@@ -69,4 +69,9 @@ That's it! Now you can deploy your app with SSR support.
 
 ## License
 
-The project is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+This project is source-available under a dual-licensing arrangement:
+
+- Code in the repository as of 2026-04-16 remains under the [MIT License](./LICENSE) (upstream Inertia Rails React Starter Kit attribution).
+- All contributions merged on or after that date — from any contributor — are licensed under the [O'Sassy License](./LICENSE-OSAASY): MIT-style terms, with commercial SaaS rights reserved for the Licensor (Mike Dalton). See [osaasy.dev](https://osaasy.dev/) for background.
+
+By submitting a pull request or otherwise contributing to this repository, you agree that your contribution is licensed under the O'Sassy License with Mike Dalton designated as the Licensor. See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
