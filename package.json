@@ -1,6 +1,7 @@
 {
   "private": true,
   "type": "module",
+  "license": "SEE LICENSE IN LICENSE",
   "devDependencies": {
     "babel-plugin-react-compiler": "^1.0.0",
     "eslint": "^9.19.0",
