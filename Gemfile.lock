@@ -86,7 +86,7 @@ GEM
     bindex (0.8.1)
     bootsnap (1.23.0)
       msgpack (~> 1.2)
-    brakeman (8.0.2)
+    brakeman (8.0.4)
       racc
     builder (3.3.0)
     bundler-audit (0.9.3)
@@ -416,6 +416,7 @@ PLATFORMS
   aarch64-linux-musl
   arm-linux-gnu
   arm-linux-musl
+  arm64-darwin-23
   arm64-darwin-24
   x86_64-linux
   x86_64-linux-gnu
@@ -452,4 +453,4 @@ DEPENDENCIES
   web-console
 
 BUNDLED WITH
-  4.0.3
+  4.0.6
