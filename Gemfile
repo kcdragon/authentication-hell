@@ -49,6 +49,10 @@ gem "authentication-zero"
 # Brings Rails named routes to javascript
 gem "js-routes"
 
+# TOTP two-factor authentication
+gem "rotp"
+gem "rqrcode"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

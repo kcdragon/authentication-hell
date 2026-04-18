@@ -20,6 +20,9 @@ Rails.application.routes.draw do
     resource :profile, only: [:show, :update]
     resource :password, only: [:show, :update]
     resource :email, only: [:show, :update]
+    resource :two_factor, only: [:show, :new, :destroy] do
+      post :confirm
+    end
     resources :sessions, only: [:index]
     inertia :appearance
   end

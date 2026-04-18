@@ -11,6 +11,7 @@ import {
   settingsPasswordPath,
   settingsProfilePath,
   settingsSessionsPath,
+  settingsTwoFactorPath,
 } from "@/routes"
 import type { NavItem } from "@/types"
 
@@ -28,6 +29,11 @@ const sidebarNavItems: NavItem[] = [
   {
     title: "Password",
     href: settingsPasswordPath(),
+    icon: null,
+  },
+  {
+    title: "Two-factor",
+    href: settingsTwoFactorPath(),
     icon: null,
   },
   {
