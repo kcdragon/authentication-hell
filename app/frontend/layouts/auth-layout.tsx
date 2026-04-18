@@ -6,14 +6,21 @@ export default function AuthLayout({
   children,
   title,
   description,
+  eyebrow,
   ...props
 }: {
   children: ReactNode
   title: string
   description: string
+  eyebrow?: string
 }) {
   return (
-    <AuthLayoutTemplate title={title} description={description} {...props}>
+    <AuthLayoutTemplate
+      title={title}
+      description={description}
+      eyebrow={eyebrow}
+      {...props}
+    >
       {children}
     </AuthLayoutTemplate>
   )

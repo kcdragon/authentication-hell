@@ -13,5 +13,6 @@ cd $(dirname "$0")/..
 
 # Use CONDUCTOR_PORT if set, otherwise PORT, defaulting to 3000
 export PORT=${CONDUCTOR_PORT:-${PORT:-3000}}
+export VITE_RUBY_PORT=${VITE_RUBY_PORT:-$((PORT + 1))}
 
 bundle exec foreman start -p ${PORT} -f Procfile.dev
