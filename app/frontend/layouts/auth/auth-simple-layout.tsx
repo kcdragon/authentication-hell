@@ -17,20 +17,20 @@ export default function AuthSimpleLayout({
   eyebrow,
 }: PropsWithChildren<AuthLayoutProps>) {
   return (
-    <div className="relative flex min-h-svh flex-col items-center justify-center overflow-hidden bg-background p-6 text-foreground md:p-10">
+    <div className="bg-background text-foreground relative flex min-h-svh flex-col items-center justify-center overflow-hidden p-6 md:p-10">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--color-destructive)/0.12,transparent_60%)]" />
 
       <div className="relative z-10 flex w-full max-w-sm flex-col gap-8">
         <div className="flex flex-col items-center gap-4 text-center">
           <Link
             href={rootPath()}
-            className="text-sm font-bold uppercase tracking-[0.2em] text-muted-foreground transition-colors hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground text-sm font-bold tracking-[0.2em] uppercase transition-colors"
           >
             Authentication <span className="text-destructive">Hell</span>
           </Link>
 
           {eyebrow && (
-            <span className="inline-block rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-destructive">
+            <span className="border-destructive/40 bg-destructive/10 text-destructive inline-block rounded-full border px-3 py-1 text-xs font-medium tracking-[0.2em] uppercase">
               {eyebrow}
             </span>
           )}
@@ -38,14 +38,14 @@ export default function AuthSimpleLayout({
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight">{title}</h1>
             {description && (
-              <p className="text-sm text-muted-foreground">{description}</p>
+              <p className="text-muted-foreground text-sm">{description}</p>
             )}
           </div>
         </div>
 
-        <div className="rounded-lg border bg-card p-6">{children}</div>
+        <div className="bg-card rounded-lg border p-6">{children}</div>
 
-        <p className="text-center text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-center text-xs">
           By continuing, you consent to receive 2FA codes via carrier pigeon.
         </p>
       </div>

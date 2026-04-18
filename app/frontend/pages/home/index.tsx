@@ -10,11 +10,11 @@ export default function Welcome() {
     <>
       <Head title="Authentication Hell" />
 
-      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background p-6 text-foreground">
+      <div className="bg-background text-foreground relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-6">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--color-destructive)/0.12,transparent_60%)]" />
 
         <main className="relative z-10 flex w-full max-w-2xl flex-col items-center text-center">
-          <span className="mb-6 inline-block rounded-full border border-destructive/40 bg-destructive/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-destructive">
+          <span className="border-destructive/40 bg-destructive/10 text-destructive mb-6 inline-block rounded-full border px-3 py-1 text-xs font-medium tracking-[0.2em] uppercase">
             Now with 47 MFA methods
           </span>
 
@@ -22,7 +22,7 @@ export default function Welcome() {
             Authentication <span className="text-destructive">Hell</span>
           </h1>
 
-          <p className="mt-4 text-lg text-muted-foreground md:text-xl">
+          <p className="text-muted-foreground mt-4 text-lg md:text-xl">
             Login. Verify. Captcha. Repeat. Win?
           </p>
 
@@ -38,7 +38,12 @@ export default function Welcome() {
                 eyebrow="Been here before?"
                 description="Resume your doomed quest to remain logged in."
                 button={
-                  <Button asChild size="lg" variant="outline" className="w-full">
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="w-full"
+                  >
                     <Link href={signInPath()}>Sign In</Link>
                   </Button>
                 }
@@ -55,7 +60,7 @@ export default function Welcome() {
             </div>
           )}
 
-          <p className="mt-8 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-8 text-xs">
             By continuing, you consent to receive 2FA codes via carrier pigeon.
           </p>
         </main>
@@ -74,11 +79,11 @@ function CtaCard({
   button: React.ReactNode
 }) {
   return (
-    <div className="flex flex-col gap-3 rounded-lg border bg-card p-6 text-left">
-      <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
+    <div className="bg-card flex flex-col gap-3 rounded-lg border p-6 text-left">
+      <h2 className="text-muted-foreground text-sm font-semibold tracking-wider uppercase">
         {eyebrow}
       </h2>
-      <p className="text-sm text-card-foreground">{description}</p>
+      <p className="text-card-foreground text-sm">{description}</p>
       <div className="mt-auto pt-2">{button}</div>
     </div>
   )
