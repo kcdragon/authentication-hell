@@ -12,10 +12,11 @@ import { newIdentityPasswordResetPath, signInPath, signUpPath } from "@/routes"
 export default function Login() {
   return (
     <AuthLayout
-      title="Log in to your account"
-      description="Enter your email and password below to log in"
+      eyebrow="Returning sufferer"
+      title="Welcome back to Hell"
+      description="Reauthenticate your existence. Password resets only deepen the torment."
     >
-      <Head title="Log in" />
+      <Head title="Sign in" />
       <Form
         method="post"
         action={signInPath()}
@@ -32,7 +33,6 @@ export default function Login() {
                   name="email"
                   type="email"
                   required
-                  autoFocus
                   tabIndex={1}
                   autoComplete="email"
                   placeholder="email@example.com"

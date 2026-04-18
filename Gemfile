@@ -75,6 +75,9 @@ group :development do
 
   # Use letter_opener to preview emails in the browser in development [https://github.com/ryanb/letter_opener]
   gem "letter_opener"
+
+  # Run multiple processes from Procfile.dev (used by bin/dev)
+  gem "foreman"
 end
 
 group :test do

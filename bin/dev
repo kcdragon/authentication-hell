@@ -1,6 +1,7 @@
 #!/usr/bin/env sh
 
-export PORT="${PORT:-3000}"
+export PORT="${CONDUCTOR_PORT:-${PORT:-3000}}"
+export VITE_RUBY_PORT="${VITE_RUBY_PORT:-$((PORT + 1))}"
 
 if command -v overmind 1> /dev/null 2>&1
 then
@@ -20,4 +21,4 @@ if gem list --no-installed --exact --silent foreman; then
   gem install foreman
 fi
 
-foreman start -f Procfile.dev "$@"
+foreman start -p "$PORT" -f Procfile.dev "$@"

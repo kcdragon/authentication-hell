@@ -12,10 +12,11 @@ import { signInPath, signUpPath } from "@/routes"
 export default function Register() {
   return (
     <AuthLayout
-      title="Create an account"
-      description="Enter your details below to create your account"
+      eyebrow="First-time sufferer"
+      title="Begin the descent"
+      description="Create the credentials you will forget by Tuesday."
     >
-      <Head title="Register" />
+      <Head title="Sign up" />
       <Form
         method="post"
         action={signUpPath()}
@@ -33,7 +34,6 @@ export default function Register() {
                   type="text"
                   name="name"
                   required
-                  autoFocus
                   tabIndex={1}
                   autoComplete="name"
                   disabled={processing}
