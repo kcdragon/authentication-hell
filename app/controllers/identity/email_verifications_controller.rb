@@ -7,7 +7,7 @@ class Identity::EmailVerificationsController < InertiaController
 
   def show
     @user.update! verified: true
-    redirect_to root_path, notice: "Thank you for verifying your email address"
+    redirect_to dashboard_path, notice: "Thank you for verifying your email address"
   end
 
   def create

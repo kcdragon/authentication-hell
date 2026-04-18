@@ -26,7 +26,7 @@ RSpec.describe "Identity::EmailVerifications", type: :request do
         sid = user.generate_token_for(:email_verification)
 
         get identity_email_verification_url(sid:, email: user.email)
-        expect(response).to redirect_to(root_url)
+        expect(response).to redirect_to(dashboard_url)
       end
     end
 
