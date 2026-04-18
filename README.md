@@ -27,6 +27,24 @@ See also:
    ```
 3. Open http://localhost:3000
 
+## Production configuration
+
+### Active Record encryption keys
+
+TOTP secrets (and any future encrypted columns) use Active Record encryption. Production deploys must supply three environment variables:
+
+- `AR_ENCRYPTION_PRIMARY_KEY`
+- `AR_ENCRYPTION_DETERMINISTIC_KEY`
+- `AR_ENCRYPTION_KEY_DERIVATION_SALT`
+
+Generate a fresh set with:
+
+```bash
+bin/rails db:encryption:init
+```
+
+Copy the three values into your secret store (Kamal secrets, Docker env, etc.). The app boots with well-known non-secret defaults in development and test so the suite runs without setup; production raises on startup if any key is missing.
+
 ## Enabling SSR
 
 This starter kit comes with optional SSR support. To enable it, follow these steps:

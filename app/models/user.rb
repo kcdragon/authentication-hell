@@ -18,6 +18,7 @@ class User < ApplicationRecord
 
   has_many :sessions, dependent: :destroy
 
+  encrypts :otp_secret
   serialize :otp_recovery_codes, coder: JSON, type: Array
 
   validates :name, presence: true
