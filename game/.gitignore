@@ -1,0 +1,14 @@
+# These must not be committed to the repository per DragonRuby license terms
+# See https://docs.dragonruby.org/#/guides/starting-a-new-project?id=option-2-restrictions-apply
+dragonruby
+dragonruby.exe
+dragonruby-publish
+dragonruby-publish.exe
+dragonruby-bind
+dragonruby-bind.exe
+/tmp/
+/builds/
+/logs/
+/samples/
+/docs/
+/.dragonruby/
