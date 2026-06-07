@@ -1,5 +1,5 @@
 module Main
-  def tick args
+  def tick(args)
     args.state.logo_rect ||= { x: 576,
                                y: 200,
                                w: 128,
@@ -7,7 +7,7 @@ module Main
 
     args.outputs.labels  << { x: 640,
                               y: 600,
-                              text: 'Hello World!',
+                              text: 'Hello Mike!',
                               size_px: 30,
                               anchor_x: 0.5,
                               anchor_y: 0.5 }

@@ -59,6 +59,9 @@ end
 group :development do
   # Use console on exceptions pages [https://github.com/rails/web-console]
   gem "web-console"
+
+  # Watch game/mygame/ and rebuild the DragonRuby bundle in dev (see bin/watch-game)
+  gem "listen"
 end
 
 group :test do

@@ -1,0 +1,23 @@
+#!/usr/bin/env ruby
+require "listen"
+
+APP_ROOT = File.expand_path("..", __dir__)
+GAME_SRC = File.join(APP_ROOT, "game", "mygame")
+BUILD    = File.join(APP_ROOT, "bin", "build-game")
+
+def build!(reason)
+  puts "== [watch-game] building (#{reason}) =="
+  system(BUILD) || warn("== [watch-game] build failed; leaving previous bundle in place ==")
+end
+
+build!("initial")
+
+# Watch only game/mygame/ (the source). Build artifacts land in game/builds/ and
+# public/game/, both outside mygame/, so a rebuild never re-triggers itself.
+listener = Listen.to(GAME_SRC) do |modified, added, removed|
+  changed = (modified + added + removed).map { File.basename(it) }.join(", ")
+  build!("changed: #{changed}")
+end
+listener.start
+puts "== [watch-game] watching #{GAME_SRC} for changes =="
+sleep
