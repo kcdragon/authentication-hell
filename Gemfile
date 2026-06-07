@@ -20,7 +20,7 @@ gem "tailwindcss-rails"
 gem "jbuilder"
 
 # Use Active Model has_secure_password [https://guides.rubyonrails.org/active_model_basics.html#securepassword]
-# gem "bcrypt", "~> 3.1.7"
+gem "bcrypt", "~> 3.1.7"
 
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
@@ -62,10 +62,20 @@ group :development do
 
   # Watch game/mygame/ and rebuild the DragonRuby bundle in dev (see bin/watch-game)
   gem "listen"
+
+  # Open sent emails in the browser instead of delivering them (auth confirmation/reset)
+  gem "letter_opener"
 end
 
 group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+
+  # Drive system tests with Playwright instead of Selenium. The pinned versions
+  # matter: the npm `playwright` package must match playwright-ruby-client's
+  # COMPATIBLE_PLAYWRIGHT_VERSION, which bin/setup installs automatically. Bump
+  # both gems together and re-run bin/setup so the JS side stays in sync.
+  gem "capybara-playwright-driver", "0.5.9"
+  gem "playwright-ruby-client", "1.60.0"
 end

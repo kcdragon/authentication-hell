@@ -1,0 +1,4 @@
+Welcome, <%= @user.username %>! Please confirm your email on
+<%= email_confirmation_url(token: @token) %>
+
+This link will expire in 1 day.

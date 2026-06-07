@@ -1,0 +1,12 @@
+<%# Renders all flash messages. Rendered once in the application layout so views
+    don't each repeat alert/notice markup. %>
+<% flash.each do |type, message| %>
+  <% next if message.blank? %>
+  <%
+    style = case type.to_s
+            when "alert", "error" then "bg-red-50 text-red-500"
+            else "bg-green-50 text-green-500"
+            end
+  %>
+  <p class="py-2 px-3 mb-5 font-medium rounded-lg inline-block <%= style %>" id="<%= type %>"><%= message %></p>
+<% end %>

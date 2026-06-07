@@ -1,0 +1,19 @@
+<% password_digest = BCrypt::Password.create("password") %>
+
+one:
+  username: userone
+  email_address: one@example.com
+  password_digest: <%= password_digest %>
+  confirmed_at: <%= Time.current.to_fs(:db) %>
+
+two:
+  username: usertwo
+  email_address: two@example.com
+  password_digest: <%= password_digest %>
+  confirmed_at: <%= Time.current.to_fs(:db) %>
+
+unconfirmed:
+  username: pending
+  email_address: pending@example.com
+  password_digest: <%= password_digest %>
+  confirmed_at:
