@@ -16,6 +16,12 @@ module AuthenticationHell
     # Common ones are `templates`, `generators`, or `middleware`, for example.
     config.autoload_lib(ignore: %w[assets tasks])
 
+    # Add cross-origin isolation headers to the embedded DragonRuby game so its
+    # WASM runtime can use SharedArrayBuffer. Inserted before ActionDispatch::Static
+    # so it can stamp the headers onto the static file responses from public/game/.
+    require_relative "../app/middleware/game_cross_origin_isolation"
+    config.middleware.insert_before ActionDispatch::Static, GameCrossOriginIsolation
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

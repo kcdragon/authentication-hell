@@ -1,0 +1,27 @@
+<% content_for :title, "Authentication Hell — Play" %>
+
+<div class="w-full flex flex-col items-center gap-4 mt-8 px-5">
+  <h1 class="text-2xl font-bold">Authentication Hell</h1>
+
+  <%# DragonRuby canvas plus the status/progress elements its loader looks up by
+      id. Native game resolution is 1280x720 (16:9). %>
+  <div class="w-full max-w-[1280px]">
+    <div class="emscripten_border bg-black" id="borderdiv">
+      <canvas
+        class="emscripten block w-full"
+        style="aspect-ratio: 16 / 9;"
+        id="canvas"
+        oncontextmenu="event.preventDefault()"
+        tabindex="-1"></canvas>
+    </div>
+
+    <textarea style="display: none;" id="output" rows="8"></textarea>
+    <div class="emscripten text-center text-gray-500 text-sm mt-2" id="status"></div>
+    <div class="emscripten text-center" id="progressdiv">
+      <progress value="0" max="100" id="progress"></progress>
+    </div>
+  </div>
+
+  <%# Resolved to /game/dragonruby-html5-loader.js via the layout's <base href>. %>
+  <script src="dragonruby-html5-loader.js"></script>
+</div>

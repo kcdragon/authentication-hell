@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+require "fileutils"
+
+APP_ROOT = File.expand_path("..", __dir__)
+GAME_DIR = File.join(APP_ROOT, "game")
+ZIP      = File.join(GAME_DIR, "builds", "authentication-hell-html5.zip")
+PUBLIC   = File.join(APP_ROOT, "public", "game")
+
+def system!(*args) = system(*args, exception: true)
+
+FileUtils.chdir GAME_DIR do
+  puts "== Building DragonRuby HTML5 bundle =="
+  system! "./dragonruby-publish --only-package --platforms=html5 mygame"
+end
+
+abort "Build zip not found at #{ZIP}" unless File.exist?(ZIP)
+
+puts "== Refreshing #{PUBLIC} =="
+FileUtils.rm_rf(PUBLIC)
+FileUtils.mkdir_p(PUBLIC)
+
+puts "== Unzipping into public/game =="
+system! "unzip", "-o", "-q", ZIP, "-d", PUBLIC
+
+# Sanity-check the layout, then drop the bundle's standalone index.html: the game
+# is rendered inline by GamesController (app/views/games/show.html.erb loads the
+# loader directly), so DragonRuby's own HTML page is unused.
+index = File.join(PUBLIC, "index.html")
+abort "index.html missing — check zip layout!" unless File.exist?(index)
+FileUtils.rm_f(index)
+
+puts "== Done. Game assets in public/game/, Rails page at /play =="
