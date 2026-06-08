@@ -1,0 +1,13 @@
+---
+# Skip the vendored DragonRuby engine. Everything under game/ except our
+# editable source in game/mygame/ is an upstream artifact, not application
+# code — see CLAUDE.md. Directories must be app-relative and end in "/".
+:skip_files:
+- game/builds/
+- game/docs/
+- game/logs/
+- game/samples/
+- game/tmp/
+- game/.dragonruby/
+# DragonRuby's vendored console scratch file, shipped with the sample game.
+- game/mygame/app/repl.rb

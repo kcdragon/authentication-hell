@@ -1,6 +1,24 @@
 # Omakase Ruby styling for Rails
 inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
+AllCops:
+  # Merge these excludes with (rather than replace) the inherited defaults.
+  inherit_mode:
+    merge:
+      - Exclude
+  # Don't lint the vendored DragonRuby engine. Only game/mygame/ is ours to
+  # edit; everything else under game/ is an upstream artifact (see CLAUDE.md).
+  Exclude:
+    - "game/builds/**/*"
+    - "game/docs/**/*"
+    - "game/logs/**/*"
+    - "game/samples/**/*"
+    - "game/tmp/**/*"
+    - "game/.dragonruby/**/*"
+    # repl.rb is DragonRuby's vendored console scratch file, shipped with the
+    # sample game. main.rb is the only hand-written source in game/mygame/.
+    - "game/mygame/app/repl.rb"
+
 # Overwrite or add rules to create your own house style
 #
 # # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
