@@ -8,10 +8,8 @@
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
 
-# A confirmed user you can sign in with right away (email confirmation is required
-# to sign in, so this seed marks the account confirmed).
-User.find_or_create_by!(email_address: "mike@example.com") do |user|
-  user.username = "mike"
-  user.password = "password"
-  user.confirmed_at = Time.current
-end
+user = User.find_or_initialize_by(email_address: "mike@example.com")
+user.username = "mike"
+user.password = "password"
+user.confirmed_at ||= Time.current
+user.save!
