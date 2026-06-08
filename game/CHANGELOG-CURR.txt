@@ -1,3 +1,100 @@
+* 7.6
+** [Pro] [Support] [iOS] Added entitlements explaining that blutooth is required for gamepads.
+** [Pro] [Support] [iOS] Improvements to IOSWizard.
+   - Checks to see if imagemagick is installed.
+   - Icons for all devices sizes are generated automatically off of =./metadata/icon_ios.png=.
+   - Game will auto launch after installation.
+** [Support] ~dragonruby-publish~ now warns if audio files are not encoded correctly.
+** [Support] ~dragonruby-publish~ warning messages moved as a summary after build is completed.
+   Summary includes warnings about audio encoding, and warnings about file names with spaces and/or capital lettrs.
+** [Support] Removed warning message when ctrl+r shortcut is used to reset the game.
+** [Support] Improved invalidation of cached textures and render targets when reset occurs.
+** [Support] libSDL recompiled without camera apis.
+** [Support] RNG stable for replays regardless of whether it's started from CLI or through HUD.
+** [Bugfix] Fixed ~mouse.(relative_x|relative_y)~ to report correct values on monitors with high refresh rates.
+** [Bugfix] Fixed game focus issue when game is started up in dev mode on MacOS.
+** [Bugfix] Game's window size starts up at a logical 720p on Windows for any combination of hd/highdpi.
+** [Bugfix] Terminal on Windows correctly redirects logs to standard out instead of giving a blank screen.
+   Special thanks to RedComputer@discord, Lucas@discord, red_garuda@discord, redbeehive@discord,
+   Trevor@discord, and Null@discord for reporting/testing bugs that Ryan introduced.
+* 7.5
+** [Bugfix] Fixed allocator failures in ~Zlib.(compress|uncompress)~
+   Regression was introduced in 7.0.
+** [Bugfix] =./docs/version.txt= was not being updated on deployments. This has been fixed.
+   Regression was introduced in 7.4 (this was definitely Ryan's fault).
+* 7.4
+** [Support] [Pro] [iOS] iOS Wizard improved.
+   Better error messages (fixed silent failures). Game is uninstalled before deploying a new version.
+** [Support] [Pro] [iOS] Updated entitlements so that Game Mode is enabled by default.
+   This tells the device to give a larger share of resources to the game.
+** [Bugfix] [Support] New functions on ~Numeric~ ~(mid|mid?|between?|min|max)~.
+   See docs for more details.
+** [Bugfix] Fixed Geometry#intersect_circle? to use the correct primitive when testing for intersection.
+** [Bugfix] Keyboard#truthy_keys scrubbed for attr_readers that aren't directly associated with a key on the keyboard.
+** [Support] New ~Controller~ apis added.
+   - Added button aliases for ~y~, ~a~, ~b~, ~x~ -> ~n~/~north~, ~s~/~south~, ~e~/~east~, ~w~/~west~.
+   - Added button ~accept~ and ~cancel~ which contextually maps to A (east) for Switch Controller, X (south) for PS5, and A (south) for Xbox.
+   - ~directional_vector_left~ will give you DPAD + Left Analog
+   - ~directional_vector_right~ will give you Buttons + Right Analog (helpful for twin stick shooters).
+** [Support] ~Main~ module quacks like ~attr_dr~.
+   - ~args~ no longer needs to be passed in to top level functions.
+   - ~args~, ~inputs~, ~outputs~, ~state~, ~events~, and ~audio~ are directly accessible from any function defined in ~Main~.
+   - ~start~ function added to ~Main~ which will run before ~tick~ when ~Kernel.tick_count == 0~.
+
+   Example of new ~Main~ capabilities:
+
+   #+begin_src
+     module Main
+       def boot
+         # invoked once when the game boots
+         puts "boot: #{Kernel.tick_count}"
+       end
+
+       def start
+         # invoked on Kernel.tick_count == 0 before tick is invoked
+         puts "start: #{Kernel.tick_count}"
+         state.some_variable = 0
+       end
+
+       def tick
+         # invoked at 60hz
+         if Kernel.tick_count.zmod?(30)
+           # state top level function
+           state.some_variable += 1
+           puts "state.some_variable: #{state.some_variable}"
+         end
+
+         if Kernel.tick_count.zmod?(60)
+           puts "tick: #{Kernel.tick_count}"
+         end
+
+         # inputs top level function
+         if inputs.keyboard.key_down.enter
+           puts "inputs.keyboard.key_down.enter #{Kernel.tick_count}"
+         end
+
+         # outputs top level function
+         outputs.background_color = [30, 30, 30]
+       end
+
+       def reset
+         # invoked before reset occurs
+         puts "reset #{Kernel.tick_count}"
+       end
+
+       def did_reset
+         # invoked after reset occurs
+         puts "did_reset #{Kernel.tick_count}"
+       end
+
+       def shutdown
+         # invoked once before game exits
+         puts "shutdown #{Kernel.tick_count}"
+       end
+     end
+
+     DR.reset
+   #+end_src
 * 7.3
 ** [Bugfix] Ensure that ~hd=true~ is respected in Standard and Indie license tiers.
 ** [Support] [Pro] Added ~DR.start_text_input~ and ~DR.stop_text_input~ which will show a virtual keyboard on mobile devices.
