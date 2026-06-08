@@ -13,6 +13,7 @@ Rails.application.routes.draw do
   # (layout "game" sets <base href="/game/"> so the loader's relative assets, which
   # live in the static bundle at public/game/, resolve correctly).
   get "play" => "games#show", as: :play
+  get "play/me" => "games#me", as: :play_me
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest

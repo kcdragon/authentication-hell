@@ -5,9 +5,13 @@ class GamesController < ApplicationController
   # SharedArrayBuffer and therefore a cross-origin-isolated page. Set COOP/COEP
   # here for the game page itself; the matching headers for the static bundle
   # under /game/ are added by GameCrossOriginIsolation middleware.
-  before_action :set_cross_origin_isolation_headers
+  before_action :set_cross_origin_isolation_headers, only: :show
 
   def show
+  end
+
+  def me
+    render json: { username: Current.user.username }
   end
 
   private

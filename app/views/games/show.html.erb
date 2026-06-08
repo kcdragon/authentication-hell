@@ -31,6 +31,65 @@
     </div>
   </div>
 
+  <%# DragonRuby 7.x's HTML5 engine has a bug: its http_get response handler (the
+      EM_ASM in dragonruby-wasm.js that marshals response headers/body into wasm
+      memory) reads Module.HEAPU8, but Emscripten compiled the engine with HEAPU8
+      (and the WebAssembly.Memory itself) as runtime-scope LOCALS that are never
+      assigned back onto Module. So Module.HEAPU8 is undefined, and the first
+      http_get that SUCCEEDS (returns headers) throws "Cannot read properties of
+      undefined (reading 'set')", freezing the tick loop at tick 0. Same-origin
+      requests like ours reach that branch; cross-origin ones usually get blocked
+      first, which is why this bites here but not everyone.
+
+      Fix, in two parts:
+      1. Pre-create the WebAssembly.Memory and put it on Module.wasmMemory BEFORE
+         the engine boots. initMemory() in dragonruby-wasm.js does
+         `if (Module["wasmMemory"]) { wasmMemory = Module["wasmMemory"] }` — so the
+         engine adopts ours instead of making its own local. The config matches the
+         engine's own fallback: { initial: 16777216/65536 = 256 pages, maximum:
+         16384, shared: true }.
+      2. Define Module.HEAPU8 et al. as live getters over that shared memory's
+         buffer (fresh typed array each access, so they survive memory growth) —
+         exactly what the engine's updateMemoryViews builds internally.
+
+      The loader sets window.gtk.module = Module then loads dragonruby-wasm.js, so
+      we install both onto window.gtk.module before that script runs. %>
+  <script>
+    (function () {
+      var VIEWS = {
+        HEAP8: Int8Array, HEAPU8: Uint8Array,
+        HEAP16: Int16Array, HEAPU16: Uint16Array,
+        HEAP32: Int32Array, HEAPU32: Uint32Array,
+        HEAPF32: Float32Array, HEAPF64: Float64Array
+      };
+
+      function patch(m) {
+        if (!m.wasmMemory) {
+          // Matches initMemory()'s fallback config so the engine adopts this one.
+          m.wasmMemory = new WebAssembly.Memory({ initial: 256, maximum: 16384, shared: true });
+        }
+        Object.keys(VIEWS).forEach(function (name) {
+          if (Object.getOwnPropertyDescriptor(m, name)) return; // future fixed engine: leave as-is
+          var Ctor = VIEWS[name];
+          Object.defineProperty(m, name, {
+            configurable: true,
+            get: function () { return new Ctor(m.wasmMemory.buffer); }
+          });
+        });
+        console.log("[heapfix] pre-set Module.wasmMemory + HEAPU8 getters for http_get");
+      }
+
+      // window.gtk.module is assigned synchronously when the loader runs, BEFORE
+      // it injects dragonruby-wasm.js (which calls initMemory). Patch as soon as
+      // the module object exists so our memory is in place before the engine boots.
+      (function hook() {
+        var m = window.gtk && window.gtk.module;
+        if (!m) { setTimeout(hook, 1); return; }
+        patch(m);
+      })();
+    })();
+  </script>
+
   <%# Resolved to /game/dragonruby-html5-loader.js via the layout's <base href>. %>
   <script src="dragonruby-html5-loader.js"></script>
 </div>
