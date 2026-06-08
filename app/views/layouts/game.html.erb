@@ -18,7 +18,11 @@
     <%= yield :head %>
   </head>
 
-  <body>
+  <%# DragonRuby's HTML5 loader routes canvas clicks through
+      document.getElementById("toplevel").click()/focus(); its standalone build
+      puts this id on <body>. Without it the loader throws "Cannot read
+      properties of null (reading 'click')" on every canvas click. %>
+  <body id="toplevel">
     <%= yield %>
   </body>
 </html>
