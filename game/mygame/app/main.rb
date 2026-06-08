@@ -7,16 +7,15 @@ module Main
                                w: 128,
                                h: 101 }
 
+    # Fetch the logged-in user's name once from the Rails app. Same-origin, so the
+    # session cookie rides along and /play/me answers as the current user.
     args.state.username ||= 'there'
     if !args.state.name_request
-      puts "[username] GET #{ME_URL}"
       args.state.name_request = DR.http_get(ME_URL)
-      puts "[username] http_get returned: #{args.state.name_request.inspect}"
     end
 
     if args.state.name_request != :done && args.state.name_request[:complete]
       request = args.state.name_request
-      puts "[username] complete code=#{request[:http_response_code].inspect} body=#{request[:response_data].inspect}"
       if request[:http_response_code] == 200
         data = DR.parse_json(request[:response_data])
         args.state.username = data["username"] if data && data["username"]
