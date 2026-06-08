@@ -7,11 +7,16 @@ class GamesController < ApplicationController
   # under /game/ are added by GameCrossOriginIsolation middleware.
   before_action :set_cross_origin_isolation_headers, only: :show
 
+  # #me is how the game looks up the username. For now it's unauthenticated and
+  # returns a hardcoded value — we're verifying the game can fetch JSON from Rails
+  # at all before layering auth back on.
+  allow_unauthenticated_access only: :me
+
   def show
   end
 
   def me
-    render json: { username: Current.user.username }
+    render json: { username: "kcdragon" }
   end
 
   private
