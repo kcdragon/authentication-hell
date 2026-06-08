@@ -1,3 +1,5 @@
+ME_URL = "http://localhost:3000/play/me"
+
 module Main
   def tick(args)
     args.state.logo_rect ||= { x: 576,
@@ -5,9 +7,28 @@ module Main
                                w: 128,
                                h: 101 }
 
+    args.state.username ||= 'there'
+    if !args.state.name_request
+      puts "[username] GET #{ME_URL}"
+      args.state.name_request = DR.http_get(ME_URL)
+      puts "[username] http_get returned: #{args.state.name_request.inspect}"
+    end
+
+    if args.state.name_request != :done && args.state.name_request[:complete]
+      request = args.state.name_request
+      puts "[username] complete code=#{request[:http_response_code].inspect} body=#{request[:response_data].inspect}"
+      if request[:http_response_code] == 200
+        data = DR.parse_json(request[:response_data])
+        args.state.username = data["username"] if data && data["username"]
+      end
+      # Replace the (non-serializable) response object with a plain marker so the
+      # per-tick state export doesn't choke on it and we don't re-fetch.
+      args.state.name_request = :done
+    end
+
     args.outputs.labels  << { x: 640,
                               y: 600,
-                              text: 'Hello Mike!',
+                              text: "Hello, #{args.state.username}!",
                               size_px: 30,
                               anchor_x: 0.5,
                               anchor_y: 0.5 }
