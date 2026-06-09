@@ -1,3 +1,13 @@
+* 7.7
+** [Bugfix] Fixed HTTP apis for web builds.
+   Emscripten 5 changed ~Module.HEAPU8.set~ to ~HEAPU8.set~.
+** [Bugfix] Fixed framerate drops on Steam Deck (Linux x86_64).
+** [Bugfix] Fixed audio playback for web builds.
+   Cause was uninitialized pointer in PHYSFS (audio playback
+   accidentally worked if stack was aligned).
+
+   I asked Ryan when we were going to rewrite everything in Rust. He muted me.
+** [Supported] Updated Linux SDL builds to include Wayland.
 * 7.6
 ** [Pro] [Support] [iOS] Added entitlements explaining that blutooth is required for gamepads.
 ** [Pro] [Support] [iOS] Improvements to IOSWizard.

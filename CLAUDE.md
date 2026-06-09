@@ -55,6 +55,24 @@ RuboCop and Brakeman are scoped to *our* code only: everything under `game/` is 
 - The engine binaries and `game/{samples,docs,builds,logs,.dragonruby}` are vendored/gitignored upstream artifacts (see `game/.gitignore`). Avoid reformatting, linting, or "cleaning up" anything outside `game/mygame/` — it's not ours.
 - **Editable source is `game/mygame/`.** Edit it freely; it's what ships to `/play`.
 - Run the game natively (without Rails): `cd game && ./dragonruby mygame`. Hot-reloads `main.rb` on save while running.
+- Current engine version is in `game/VERSION.txt` (a date + git hash, no semver — the version number lives in the top heading of `game/CHANGELOG-CURR.txt`).
+
+### Upgrading DragonRuby
+
+DragonRuby is distributed as a zip (e.g. `dragonruby-7-7-gtk-macos.zip`) that unzips to a single `dragonruby-macos/` folder containing the engine plus a stock `mygame/`. To upgrade, replace our vendored copy with the new release **without clobbering `game/mygame/`** (our game source + customized metadata):
+
+1. Unzip the release to a temp dir: `unzip -q ~/Documents/dragonruby-X-Y-gtk-macos.zip -d /tmp/drXY` → contents land in `/tmp/drXY/dragonruby-macos/`.
+2. Copy every entry **except `mygame`** into `game/`, overwriting. **Critically, include dotfiles** — the release ships a `.dragonruby/` directory holding the per-platform build *stubs* (including the HTML5/WASM stub that `dragonruby-publish` bakes into the web bundle). A bare `for e in *` glob misses `.dragonruby`, leaving the old stubs in place — `bin/build-game` then silently produces a bundle running the **previous** engine's web runtime even though the native binaries upgraded. Enable dotglob (or list it explicitly):
+   ```bash
+   cd /tmp/drXY/dragonruby-macos
+   setopt local_options dotglob 2>/dev/null || shopt -s dotglob   # zsh/bash: make * match dotfiles
+   for e in *; do [ "$e" = mygame ] && continue; rm -rf "game/$e" && cp -R "$e" "game/$e"; done
+   ```
+   This swaps the binaries (`dragonruby`, `dragonruby-publish`, `dragonruby-httpd` — only `-httpd` is tracked; the other two are gitignored, so they won't show in `git status`), the `samples/`/`docs/`, the committed constants (`VERSION.txt`, `CHANGELOG-*.txt`, `README.txt`, `eula.txt`, fonts/images), **and `.dragonruby/` (the build-stub cache)**. Our `game/mygame/` (game code in `app/main.rb`, our `devid`/`devtitle` flags in `metadata/game_metadata.txt`) is left intact, as are local-only dirs the release doesn't ship (`builds/`, `logs/`, `tmp/`).
+3. Read the new release's `game/CHANGELOG-CURR.txt` for what changed — engine HTML5/WASM fixes can let us delete client-side workarounds in `app/views/games/show.html.erb` (see below).
+4. Rebuild and verify: `bin/build-game`, then **confirm the served bundle is actually the new engine** — e.g. `grep -c Module.HEAPU8.set public/game/dragonruby-wasm.js` (0 on 7.7+; nonzero means a stale `.dragonruby/` stub leaked through). Then load `/play`.
+
+**Engine WASM bug history:** 7.x before 7.7 shipped a broken HTML5 `http_get` (Emscripten compiled `HEAPU8` as a runtime local never assigned back onto `Module`, so the first successful same-origin request threw `Cannot read properties of undefined (reading 'set')` and froze the tick loop at tick 0). We worked around it with a JS polyfill in `show.html.erb` that pre-created `Module.wasmMemory` + `HEAPU8` getters. **7.7 fixed this** (changelog: "Fixed HTTP apis for web builds. Emscripten 5 changed `Module.HEAPU8.set` to `HEAPU8.set`"), so the polyfill was removed. If a future upgrade reintroduces a WASM/`http_get` regression, that script block is where a workaround would go.
 
 ### DragonRuby game served at /play
 
