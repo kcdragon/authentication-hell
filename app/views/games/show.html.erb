@@ -31,6 +31,30 @@
     </div>
   </div>
 
+  <%# Collision toasts land here. Subscribing with turbo_stream_from means the
+      controller can broadcast a rendered _toast partial straight onto the page
+      (Turbo appends it into #toasts) — no JS subscriber to maintain. The
+      container is fixed to the bottom-right and stacks toasts as a column, so it
+      floats over the page without shifting the game layout. %>
+  <%= turbo_stream_from Current.user, :toasts %>
+  <div id="toasts" class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2"></div>
+
   <%# Resolved to /game/dragonruby-html5-loader.js via the layout's <base href>. %>
   <script src="dragonruby-html5-loader.js"></script>
+
+  <%# This layout deliberately omits the app-wide importmap (so the
+      <base href="/game/"> can't rewrite the DragonRuby loader's bare asset
+      paths). Turbo Streams need Turbo on the page, so declare a page-scoped
+      import map pointing at Turbo's absolute, digested asset URL — absolute so
+      the base href leaves it alone — then import it to start Turbo. %>
+  <script type="importmap">
+    {
+      "imports": {
+        "@hotwired/turbo-rails": "<%= asset_path("turbo.min.js") %>"
+      }
+    }
+  </script>
+  <script type="module">
+    import "@hotwired/turbo-rails"
+  </script>
 </div>

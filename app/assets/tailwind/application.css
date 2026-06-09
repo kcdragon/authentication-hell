@@ -1,1 +1,32 @@
 @import "tailwindcss";
+
+/* Collision toasts (app/views/games/_toast.html.erb) are appended into #toasts
+   via Turbo Streams. Each one slides/fades in, holds, then fades out and stops
+   taking up space — driven entirely by CSS so no JS controller is needed. The
+   node stays in the DOM afterward but is invisible and zero-height.
+
+   Two separate animations on one timeline so the phases don't fight each other:
+   `toast-fade` fades the whole toast (text + box) in and out as one unit, while
+   `toast-collapse` only shrinks the box AFTER it's already fully invisible. If
+   the fade and the collapse overlapped, the text would clip/vanish while a
+   still-sized box lingered. */
+@keyframes toast-fade {
+  0%   { opacity: 0; transform: translateY(0.75rem); }
+  6%   { opacity: 1; transform: translateY(0); }
+  88%  { opacity: 1; transform: translateY(0); }
+  98%  { opacity: 0; transform: translateY(0.75rem); }
+  100% { opacity: 0; transform: translateY(0.75rem); }
+}
+
+@keyframes toast-collapse {
+  /* Hold every collapse property constant until 98% so the browser doesn't
+     interpolate them across the whole timeline; collapse only in the last 2%
+     (after the fade has finished). */
+  0%, 98% { max-height: 5rem; padding-top: 0.75rem; padding-bottom: 0.75rem; margin-top: 0; }
+  100%    { max-height: 0; padding-top: 0; padding-bottom: 0; margin-top: -0.5rem; }
+}
+
+.game-toast {
+  animation: toast-fade 4s ease forwards, toast-collapse 4s linear forwards;
+  overflow: hidden;
+}

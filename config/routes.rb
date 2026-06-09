@@ -14,6 +14,7 @@ Rails.application.routes.draw do
   # live in the static bundle at public/game/, resolve correctly).
   get "play" => "games#show", as: :play
   get "play/me" => "games#me", as: :play_me
+  post "play/collision" => "games#collision", as: :play_collision
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
