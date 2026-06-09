@@ -1,11 +1,18 @@
 ME_URL = "http://localhost:3000/play/me"
 
+SCREEN_W = 1280
+SCREEN_H = 720
+GROUND_Y = 100
+PLAYER_W = 64
+PLAYER_H = 96
+MOVE_SPEED = 8
+
 module Main
   def tick(args)
-    args.state.logo_rect ||= { x: 576,
-                               y: 200,
-                               w: 128,
-                               h: 101 }
+    args.state.player ||= { x: (SCREEN_W - PLAYER_W) / 2,
+                            y: GROUND_Y,
+                            w: PLAYER_W,
+                            h: PLAYER_H }
 
     # Fetch the logged-in user's name once from the Rails app. Same-origin, so the
     # session cookie rides along and /play/me answers as the current user.
@@ -25,83 +32,40 @@ module Main
       args.state.name_request = :done
     end
 
-    args.outputs.labels  << { x: 640,
-                              y: 600,
-                              text: "Hello, #{args.state.username}!",
-                              size_px: 30,
-                              anchor_x: 0.5,
-                              anchor_y: 0.5 }
-
-    args.outputs.labels  << { x: 640,
-                              y: 510,
-                              text: "Documentation is located under the ./docs directory. 150+ samples are located under the ./samples directory.",
-                              size_px: 20,
-                              anchor_x: 0.5,
-                              anchor_y: 0.5 }
-
-    args.outputs.labels  << { x: 640,
-                              y: 480,
-                              text: "You can also access these docs online at docs.dragonruby.org.",
-                              size_px: 20,
-                              anchor_x: 0.5,
-                              anchor_y: 0.5 }
-
-    args.outputs.labels  << { x: 640,
-                              y: 400,
-                              text: "The code that powers what you're seeing right now is located at ./mygame/app/main.rb.",
-                              size_px: 20,
-                              anchor_x: 0.5,
-                              anchor_y: 0.5 }
-
-    args.outputs.labels  << { x: 640,
-                              y: 380,
-                              text: "(you can change the code while the app is running and see the updates live)",
-                              size_px: 20,
-                              anchor_x: 0.5,
-                              anchor_y: 0.5 }
-
-    args.outputs.sprites << { x: args.state.logo_rect.x,
-                              y: args.state.logo_rect.y,
-                              w: args.state.logo_rect.w,
-                              h: args.state.logo_rect.h,
-                              path: 'dragonruby.png',
-                              angle: Kernel.tick_count }
-
-    args.outputs.labels  << { x: 640,
-                              y: 180,
-                              text: "(use arrow keys to move the logo around)",
-                              size_px: 20,
-                              anchor_x: 0.5,
-                              anchor_y: 0.5 }
-
-    args.outputs.labels  << { x: 640,
-                              y: 80,
-                              text: 'Join the Discord Server! https://discord.dragonruby.org',
-                              size_px: 30,
-                              anchor_x: 0.5 }
-
+    # Move the player left/right with the arrow keys. No wrapping — clamp to screen.
     if args.inputs.keyboard.left
-      args.state.logo_rect.x -= 10
+      args.state.player.x -= MOVE_SPEED
     elsif args.inputs.keyboard.right
-      args.state.logo_rect.x += 10
+      args.state.player.x += MOVE_SPEED
     end
 
-    if args.inputs.keyboard.down
-      args.state.logo_rect.y -= 10
-    elsif args.inputs.keyboard.up
-      args.state.logo_rect.y += 10
-    end
+    args.state.player.x = args.state.player.x.clamp(0, SCREEN_W - PLAYER_W)
 
-    if args.state.logo_rect.x > 1280
-      args.state.logo_rect.x = 0
-    elsif args.state.logo_rect.x < 0
-      args.state.logo_rect.x = 1280
-    end
+    # Sky background.
+    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H, r: 135, g: 206, b: 235 }
 
-    if args.state.logo_rect.y > 720
-      args.state.logo_rect.y = 0
-    elsif args.state.logo_rect.y < 0
-      args.state.logo_rect.y = 720
-    end
+    # Ground.
+    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: GROUND_Y, r: 83, g: 138, b: 64 }
+
+    # Player.
+    args.outputs.solids << { x: args.state.player.x,
+                             y: args.state.player.y,
+                             w: args.state.player.w,
+                             h: args.state.player.h,
+                             r: 200, g: 60, b: 60 }
+
+    args.outputs.labels << { x: 640,
+                             y: 680,
+                             text: "Hello, #{args.state.username}!",
+                             size_px: 30,
+                             anchor_x: 0.5,
+                             anchor_y: 0.5 }
+
+    args.outputs.labels << { x: 640,
+                             y: 640,
+                             text: "(use the arrow keys or A/D to move)",
+                             size_px: 20,
+                             anchor_x: 0.5,
+                             anchor_y: 0.5 }
   end
 end
