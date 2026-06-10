@@ -1,12 +1,22 @@
 #!/usr/bin/env ruby
 require "fileutils"
 
-APP_ROOT = File.expand_path("..", __dir__)
-GAME_DIR = File.join(APP_ROOT, "game")
-ZIP      = File.join(GAME_DIR, "builds", "authentication-hell-html5.zip")
-PUBLIC   = File.join(APP_ROOT, "public", "game")
+APP_ROOT  = File.expand_path("..", __dir__)
+GAME_DIR  = File.join(APP_ROOT, "game")
+ZIP       = File.join(GAME_DIR, "builds", "authentication-hell-html5.zip")
+PUBLIC    = File.join(APP_ROOT, "public", "game")
+PORT_FILE = File.join(GAME_DIR, "mygame", "app", "server_config.txt")
 
 def system!(*args) = system(*args, exception: true)
+
+# The game runs as WASM in the browser and can't read env vars at runtime, so
+# bake the Rails server port into the bundle here. Under Conductor the server
+# runs on CONDUCTOR_PORT; otherwise default to 3000. main.rb reads this file.
+port = ENV.fetch("CONDUCTOR_PORT", "3000")
+if !File.exist?(PORT_FILE) || File.read(PORT_FILE).strip != port
+  puts "== Baking server port #{port} into the bundle =="
+  File.write(PORT_FILE, port)
+end
 
 FileUtils.chdir GAME_DIR do
   puts "== Building DragonRuby HTML5 bundle =="

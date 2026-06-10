@@ -36,3 +36,16 @@ if [ -d "$root/config/credentials" ]; then
   mkdir -p config/credentials
   cp "$root"/config/credentials/*.key config/credentials/ 2>/dev/null || true
 fi
+
+# DragonRuby engine binaries + build stubs. These are gitignored per the engine's
+# license, so a fresh git worktree doesn't inherit them — and without them
+# bin/build-game can't package the /play bundle (dragonruby-publish needs the
+# .dragonruby/ HTML5/WASM build stub). Seed them from the root checkout.
+if [ -d "$root/game" ]; then
+  for e in dragonruby dragonruby-publish .dragonruby; do
+    if [ -e "$root/game/$e" ]; then
+      rm -rf "game/$e"
+      cp -R "$root/game/$e" "game/$e"
+    fi
+  done
+fi

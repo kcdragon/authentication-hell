@@ -40,6 +40,9 @@
 # Built DragonRuby HTML5 bundle (regenerated via bin/build-game)
 /public/game/
 
+# Server port baked into the game bundle by bin/build-game
+/game/mygame/app/server_config.txt
+
 # Node modules — only the Playwright CLI for system tests lives here; bin/setup
 # installs it from package.json. Keep package.json/package-lock.json tracked.
 /node_modules/
