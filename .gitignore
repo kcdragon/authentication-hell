@@ -44,3 +44,7 @@
 # installs it from package.json. Keep package.json/package-lock.json tracked.
 /node_modules/
 /.idea
+
+# Ignore key files for decrypting credentials and more.
+/config/credentials/*.key
+

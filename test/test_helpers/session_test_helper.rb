@@ -12,6 +12,15 @@ module SessionTestHelper
     Current.session&.destroy!
     cookies.delete("session_id")
   end
+
+  # Enables TOTP 2FA for a user (encrypted secret + recovery codes) and returns the
+  # raw secret so tests can compute valid codes with ROTP::TOTP.new(secret).now.
+  def enable_2fa_for(user)
+    secret = ROTP::Base32.random
+    user.enable_totp!(secret)
+    user.generate_recovery_codes!
+    secret
+  end
 end
 
 ActiveSupport.on_load(:action_dispatch_integration_test) do

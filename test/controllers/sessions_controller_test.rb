@@ -32,6 +32,15 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_enqueued_email_with ConfirmationsMailer, :confirm, args: [ unconfirmed ]
   end
 
+  test "create with a 2FA user redirects to the challenge without creating a session" do
+    enable_2fa_for(@user)
+
+    post session_path, params: { email_address: @user.email_address, password: "password" }
+
+    assert_redirected_to new_totp_challenge_path
+    assert_nil cookies[:session_id].presence
+  end
+
   test "destroy" do
     sign_in_as(@user)
 

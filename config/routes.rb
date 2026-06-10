@@ -3,6 +3,13 @@ Rails.application.routes.draw do
   resource :registration, only: %i[ new create ]
   resource :email_confirmation, only: %i[ new create show ], param: :token
   resources :passwords, param: :token
+
+  namespace :totp do
+    resource :settings, only: %i[ show destroy ]
+    resource :enrollment, only: %i[ new create ]
+    resource :recovery_codes, only: %i[ create ]
+    resource :challenge, only: %i[ new create ]
+  end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.

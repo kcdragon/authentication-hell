@@ -1,4 +1,5 @@
 {
+  "name": "authentication-hell",
   "devDependencies": {
     "playwright": "1.60.0"
   }

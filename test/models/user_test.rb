@@ -81,4 +81,82 @@ class UserTest < ActiveSupport::TestCase
       User.find_by_token_for!(:email_confirmation, "not-a-real-token")
     end
   end
+
+  test "enable_totp! stores an encrypted secret and flips the flag" do
+    user = users(:one)
+    secret = ROTP::Base32.random
+    user.enable_totp!(secret)
+
+    assert user.reload.totp_enabled?
+    assert_equal secret, user.totp_secret
+    assert_not_equal secret, user.ciphertext_for(:totp_secret), "secret should be stored encrypted"
+  end
+
+  test "verify_totp accepts a current code and rejects a wrong one" do
+    user = users(:one)
+    secret = ROTP::Base32.random
+    user.enable_totp!(secret)
+
+    assert user.verify_totp(ROTP::TOTP.new(secret).now)
+    assert_not user.verify_totp("000000")
+  end
+
+  test "verify_totp rejects a replayed code" do
+    user = users(:one)
+    secret = ROTP::Base32.random
+    user.enable_totp!(secret)
+    code = ROTP::TOTP.new(secret).now
+
+    assert user.verify_totp(code)
+    assert_not user.verify_totp(code), "the same code cannot be used twice"
+  end
+
+  test "verify_totp returns false when 2FA is not enabled" do
+    assert_not users(:one).verify_totp("123456")
+  end
+
+  test "generate_recovery_codes! returns plaintext codes and stores only digests" do
+    user = users(:one)
+    codes = user.generate_recovery_codes!
+
+    assert_equal User::RECOVERY_CODE_COUNT, codes.size
+    assert_equal codes.size, user.recovery_codes_remaining
+    assert user.recovery_codes.none? { |rc| rc.code_digest.in?(codes) }, "codes must be hashed at rest"
+  end
+
+  test "generate_recovery_codes! replaces any existing codes" do
+    user = users(:one)
+    first = user.generate_recovery_codes!
+    user.generate_recovery_codes!
+
+    assert_not user.consume_recovery_code(first.first), "old codes are invalidated on regeneration"
+  end
+
+  test "consume_recovery_code works once then is rejected" do
+    user = users(:one)
+    code = user.generate_recovery_codes!.first
+
+    assert user.consume_recovery_code(code)
+    assert_not user.consume_recovery_code(code)
+    assert_equal User::RECOVERY_CODE_COUNT - 1, user.recovery_codes_remaining
+  end
+
+  test "consume_recovery_code rejects an unknown code" do
+    user = users(:one)
+    user.generate_recovery_codes!
+    assert_not user.consume_recovery_code("not-a-real-code")
+  end
+
+  test "disable_totp! clears the secret, flag, and recovery codes" do
+    user = users(:one)
+    user.enable_totp!(ROTP::Base32.random)
+    user.generate_recovery_codes!
+
+    user.disable_totp!
+
+    assert_not user.reload.totp_enabled?
+    assert_nil user.totp_secret
+    assert_nil user.last_totp_at
+    assert_equal 0, user.recovery_codes.count
+  end
 end

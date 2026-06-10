@@ -1,0 +1,33 @@
+<div class="mx-auto md:w-2/3 w-full">
+  <h1 class="font-bold text-4xl">Set up two-factor authentication</h1>
+
+  <ol class="mt-6 space-y-2 text-gray-700 list-decimal list-inside">
+    <li>Scan the QR code below with your authenticator app.</li>
+    <li>Enter the 6-digit code it shows to confirm.</li>
+  </ol>
+
+  <div class="mt-6">
+    <%= totp_qr_code(@provisioning_uri) %>
+  </div>
+
+  <p class="mt-4 text-sm text-gray-500">
+    Can't scan? Enter this secret manually:
+    <code class="font-mono bg-gray-100 rounded px-2 py-1 break-all"><%= @secret %></code>
+  </p>
+
+  <%# turbo: false — on success this submits to a full-page render of the one-time
+      recovery codes (not a redirect), which Turbo rejects; a normal navigation also
+      keeps the secret codes out of Turbo's page cache. %>
+  <%= form_with url: totp_enrollment_path, method: :post, class: "contents", data: { turbo: false } do |form| %>
+    <div class="my-5">
+      <%= form.text_field :code, required: true, autofocus: true, autocomplete: "off", inputmode: "numeric", placeholder: "Enter the 6-digit code", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 mt-2 w-full sm:w-80" %>
+    </div>
+
+    <div class="sm:flex sm:items-center sm:gap-4">
+      <%= form.submit "Confirm and enable", class: "w-full sm:w-auto text-center rounded-lg px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+      <div class="mt-4 text-sm text-gray-500 sm:mt-0">
+        <%= link_to "Cancel", totp_settings_path, class: "text-gray-700 underline hover:no-underline" %>
+      </div>
+    </div>
+  <% end %>
+</div>

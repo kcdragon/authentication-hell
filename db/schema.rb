@@ -10,7 +10,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_07_075300) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_10_005139) do
+  create_table "recovery_codes", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "code_digest", null: false
+    t.datetime "used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "used_at"], name: "index_recovery_codes_on_user_id_and_used_at"
+    t.index ["user_id"], name: "index_recovery_codes_on_user_id"
+  end
+
   create_table "sessions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "ip_address"
@@ -27,9 +37,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_07_075300) do
     t.datetime "updated_at", null: false
     t.string "username", default: "", null: false
     t.datetime "confirmed_at"
+    t.string "totp_secret"
+    t.boolean "totp_enabled", default: false, null: false
+    t.integer "last_totp_at"
     t.index "lower(username)", name: "index_users_on_lower_username", unique: true
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "recovery_codes", "users"
   add_foreign_key "sessions", "users"
 end
