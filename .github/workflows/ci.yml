@@ -67,6 +67,8 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    # Pull RAILS_MASTER_KEY from the "test" GitHub Environment's secrets.
+    environment: test
 
     # services:
     #  redis:
@@ -90,13 +92,15 @@ jobs:
         env:
           RAILS_ENV: test
           # Decrypts config/credentials/test.yml.enc (test.key is gitignored).
-          # Add a repo secret RAILS_MASTER_KEY = contents of config/credentials/test.key.
+          # Set RAILS_MASTER_KEY in the "test" GitHub Environment = contents of config/credentials/test.key.
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           # REDIS_URL: redis://localhost:6379/0
         run: bin/rails db:test:prepare test
 
   system-test:
     runs-on: ubuntu-latest
+    # Pull RAILS_MASTER_KEY from the "test" GitHub Environment's secrets.
+    environment: test
 
     # services:
     #  redis:
