@@ -1,0 +1,29 @@
+<%# Persistent re-auth toast, broadcast on collision (Games::TotpController#collision);
+    stays until a correct TOTP code clears it. authenticity_token: false because it's
+    rendered in a broadcast with no session to mint a token — Turbo sends the
+    X-CSRF-Token header from csrf_meta_tags. %>
+<%= tag.div id: totp_challenge_toast_id(user), class: "game-challenge-toast max-w-sm rounded-md bg-purple-100 border border-purple-300 text-purple-900 px-4 py-3 shadow-lg pointer-events-auto" do %>
+  <p class="font-semibold">You bumped into the enemy!</p>
+  <p class="mt-1 text-sm">Re-authenticate with your TOTP code to keep playing.</p>
+
+  <% if local_assigns[:error].present? %>
+    <p class="mt-2 text-sm font-medium text-red-700"><%= error %></p>
+  <% end %>
+
+  <%= form_with url: games_totp_unlock_path, method: :post, authenticity_token: false, class: "mt-3 flex items-center gap-2" do |form| %>
+    <%= form.text_field :code, required: true, autofocus: true,
+          value: dev_totp_prefill(user),
+          autocomplete: "one-time-code", inputmode: "numeric",
+          placeholder: "6-digit code",
+          class: "block shadow-sm rounded-md border border-purple-300 focus:outline-solid focus:outline-purple-600 px-3 py-2 w-40" %>
+    <%= form.submit "Verify",
+          class: "rounded-md px-3.5 py-2 bg-purple-600 hover:bg-purple-500 text-white font-medium cursor-pointer" %>
+  <% end %>
+
+  <% unless user.totp_enabled? %>
+    <p class="mt-2 text-xs text-purple-800">
+      You haven't set up two-factor authentication yet, so you can't clear this.
+      Enable it from the “Two-factor authentication” button above.
+    </p>
+  <% end %>
+<% end %>

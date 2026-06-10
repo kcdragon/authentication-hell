@@ -11,4 +11,11 @@ module TotpHelper
     )
     tag.div(svg.html_safe, class: "inline-block w-48 h-48", role: "img", aria: { label: "Two-factor QR code" })
   end
+
+  # In development, the user's current TOTP code (they're enrolled via db/seeds
+  # with a known secret) so a code-entry form can prefill it and verifying is one
+  # click. Returns nil outside development or when the user isn't enrolled.
+  def dev_totp_prefill(user)
+    user.totp&.now if Rails.env.development?
+  end
 end

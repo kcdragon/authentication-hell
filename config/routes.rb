@@ -17,11 +17,17 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # DragonRuby game page. The canvas + loader are rendered inline by GamesController
-  # (layout "game" sets <base href="/game/"> so the loader's relative assets, which
-  # live in the static bundle at public/game/, resolve correctly).
+  # (layout "game" sets <base href="/game_assets/"> so the loader's relative assets,
+  # which live in the static bundle at public/game_assets/, resolve correctly).
   get "play" => "games#show", as: :play
   get "play/me" => "games#me", as: :play_me
-  post "play/collision" => "games#collision", as: :play_collision
+
+  # Game collision lock → TOTP re-auth (Games::TotpController).
+  namespace :games do
+    get  "totp/status"    => "totp#status",    as: :totp_status
+    post "totp/collision" => "totp#collision", as: :totp_collision
+    post "totp/unlock"    => "totp#unlock",    as: :totp_unlock
+  end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
