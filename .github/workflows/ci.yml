@@ -120,6 +120,17 @@ jobs:
         with:
           bundler-cache: true
 
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Playwright browser
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
       - name: Run System Tests
         env:
           RAILS_ENV: test
