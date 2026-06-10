@@ -1,6 +1,3 @@
-ME_URL = "http://localhost:3000/play/me"
-COLLISION_URL = "http://localhost:3000/play/collision"
-
 SCREEN_W = 1280
 SCREEN_H = 720
 GROUND_Y = 100
@@ -28,7 +25,7 @@ module Main
     # session cookie rides along and /play/me answers as the current user.
     args.state.username ||= 'there'
     if !args.state.name_request
-      args.state.name_request = DR.http_get(ME_URL)
+      args.state.name_request = DR.http_get(me_url(args))
     end
 
     if args.state.name_request != :done && args.state.name_request[:complete]
@@ -108,9 +105,20 @@ module Main
   def report_collision(args)
     args.state.collision_request = :pending
     args.state.collision_request = DR.http_post(
-      COLLISION_URL,
+      collision_url(args),
       {},
       [ "Content-Type: application/x-www-form-urlencoded" ]
     )
   end
+
+  # The Rails server's port, baked into the bundle by bin/build-game
+  # (CONDUCTOR_PORT under Conductor, else 3000). Falls back to 3000 when the
+  # file is absent, e.g. a native `./dragonruby mygame` run that never went
+  # through build-game. Read once, then memoized for the rest of the session.
+  def server_port(args)
+    args.state.server_port ||= (args.gtk.read_file("app/server_config.txt") || "3000").strip
+  end
+
+  def me_url(args) = "http://localhost:#{server_port(args)}/play/me"
+  def collision_url(args) = "http://localhost:#{server_port(args)}/play/collision"
 end
