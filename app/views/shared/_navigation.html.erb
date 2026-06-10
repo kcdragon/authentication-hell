@@ -1,0 +1,17 @@
+<%# locals: (turbo: true) %>
+<%# Shared top navigation for an authenticated user. Callers decide *when* to
+    render it (it assumes a signed-in user). Pass turbo: false on pages whose
+    layout sets <base href> / omits the importmap (e.g. /play), so the links are
+    full browser navigations rather than Turbo visits. %>
+<div class="flex items-center gap-3">
+  <span class="text-gray-700 font-medium"><%= Current.user.username %></span>
+
+  <%= link_to "Play", play_path, data: { turbo: turbo },
+        class: "rounded-md px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium" %>
+
+  <%= link_to "Two-factor authentication", totp_settings_path, data: { turbo: turbo },
+        class: "rounded-md px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium" %>
+
+  <%= button_to "Sign out", session_path, method: :delete,
+        class: "rounded-md px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium cursor-pointer" %>
+</div>
