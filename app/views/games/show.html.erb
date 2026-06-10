@@ -7,6 +7,12 @@
     <div class="flex items-center gap-3">
       <span class="text-gray-700 font-medium"><%= Current.user.username %></span>
 
+      <%# Force a full navigation (turbo: false): this page sets <base href="/game/">
+          and only loads Turbo for the toast stream, so let the browser handle the
+          cross-layout link to the standard app pages. %>
+      <%= link_to "Two-factor authentication", totp_settings_path, data: { turbo: false },
+            class: "rounded-md px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium" %>
+
       <%= button_to "Sign out", session_path, method: :delete,
             class: "rounded-md px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium cursor-pointer" %>
     </div>

@@ -1,0 +1,16 @@
+<% content_for :head do %>
+  <%# Keep these one-time codes out of Turbo's back/forward page snapshot cache. %>
+  <meta name="turbo-cache-control" content="no-cache">
+<% end %>
+
+<div class="mx-auto md:w-2/3 w-full">
+  <h1 class="font-bold text-4xl">Your recovery codes</h1>
+
+  <div class="mt-6">
+    <%= render "totp/recovery_codes_list", recovery_codes: @recovery_codes %>
+  </div>
+
+  <div class="mt-8">
+    <%= link_to "Done", totp_settings_path, class: "rounded-lg px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium" %>
+  </div>
+</div>

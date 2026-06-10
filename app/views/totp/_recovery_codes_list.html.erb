@@ -1,0 +1,12 @@
+<div class="rounded-lg border border-amber-300 bg-amber-50 p-5">
+  <p class="font-medium text-amber-900">Save these recovery codes now.</p>
+  <p class="mt-1 text-sm text-amber-800">
+    Each code can be used once to sign in if you lose access to your authenticator app.
+    They won't be shown again.
+  </p>
+  <ul class="mt-4 grid grid-cols-2 gap-2 font-mono text-sm">
+    <% recovery_codes.each do |code| %>
+      <li class="bg-white rounded border border-amber-200 px-3 py-1.5"><%= code %></li>
+    <% end %>
+  </ul>
+</div>

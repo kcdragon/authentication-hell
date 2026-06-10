@@ -1,6 +1,6 @@
 "$schema" = "https://conductor.build/schemas/settings.repo.schema.json"
 
 [scripts]
-setup = "bin/setup --skip-server"
+setup = ".conductor/setup.sh && bin/setup --skip-server"
 run = "PORT=$CONDUCTOR_PORT bin/dev"
 run_mode = "concurrent"

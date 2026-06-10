@@ -24,6 +24,12 @@
   </head>
 
   <body>
+    <% if authenticated? %>
+      <nav class="container mx-auto px-5 mt-6 flex justify-end gap-4 text-sm">
+        <%= link_to "Two-factor authentication", totp_settings_path, class: "text-gray-700 underline hover:no-underline" %>
+        <%= button_to "Sign out", session_path, method: :delete, class: "text-gray-700 underline hover:no-underline cursor-pointer bg-transparent border-0 p-0" %>
+      </nav>
+    <% end %>
     <main class="container mx-auto mt-28 px-5 flex flex-col">
       <div class="mx-auto md:w-2/3 w-full">
         <%= render "shared/flash" %>
