@@ -7,10 +7,10 @@
     <%= csp_meta_tag %>
 
     <%# The DragonRuby loader fetches its assets with bare relative paths, so a
-        document base of /game/ makes them resolve against the static bundle.
-        This layout intentionally omits Turbo/importmap so the base href has
-        nothing to interfere with. %>
-    <base href="/game/">
+        document base of /game_assets/ makes them resolve against the static
+        bundle. This layout intentionally omits Turbo/importmap so the base href
+        has nothing to interfere with. %>
+    <base href="/game_assets/">
 
     <link rel="icon" href="/icon.png" type="image/png">
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>

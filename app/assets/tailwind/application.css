@@ -30,3 +30,14 @@
   animation: toast-fade 4s ease forwards, toast-collapse 4s linear forwards;
   overflow: hidden;
 }
+
+/* The TOTP re-auth toast slides in once and stays (no fade-out/collapse) — it's
+   dismissed only by entering a valid code, not on a timer. */
+@keyframes challenge-toast-in {
+  0%   { opacity: 0; transform: translateY(0.75rem); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+.game-challenge-toast {
+  animation: challenge-toast-in 0.25s ease forwards;
+}

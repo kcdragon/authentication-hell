@@ -4,7 +4,7 @@ require "fileutils"
 APP_ROOT  = File.expand_path("..", __dir__)
 GAME_DIR  = File.join(APP_ROOT, "game")
 ZIP       = File.join(GAME_DIR, "builds", "authentication-hell-html5.zip")
-PUBLIC    = File.join(APP_ROOT, "public", "game")
+PUBLIC    = File.join(APP_ROOT, "public", "game_assets")
 PORT_FILE = File.join(GAME_DIR, "mygame", "app", "server_config.txt")
 
 def system!(*args) = system(*args, exception: true)
@@ -29,7 +29,7 @@ puts "== Refreshing #{PUBLIC} =="
 FileUtils.rm_rf(PUBLIC)
 FileUtils.mkdir_p(PUBLIC)
 
-puts "== Unzipping into public/game =="
+puts "== Unzipping into public/game_assets =="
 system! "unzip", "-o", "-q", ZIP, "-d", PUBLIC
 
 # Sanity-check the layout, then drop the bundle's standalone index.html: the game
@@ -39,4 +39,4 @@ index = File.join(PUBLIC, "index.html")
 abort "index.html missing — check zip layout!" unless File.exist?(index)
 FileUtils.rm_f(index)
 
-puts "== Done. Game assets in public/game/, Rails page at /play =="
+puts "== Done. Game assets in public/game_assets/, Rails page at /play =="

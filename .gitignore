@@ -38,7 +38,7 @@
 !/app/assets/builds/.keep
 
 # Built DragonRuby HTML5 bundle (regenerated via bin/build-game)
-/public/game/
+/public/game_assets/
 
 # Server port baked into the game bundle by bin/build-game
 /game/mygame/app/server_config.txt

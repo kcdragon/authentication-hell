@@ -1,8 +1,8 @@
 # The /play page is cross-origin isolated (COOP/COEP set in GamesController) so
 # its WASM runtime can use SharedArrayBuffer. Under COEP require-corp, every
 # subresource it loads must opt in with Cross-Origin-Resource-Policy, so stamp it
-# onto the static game bundle under /game/. Scoped to /game/ so the rest of the
-# site is unaffected.
+# onto the static game bundle under /game_assets/. Scoped to /game_assets/ so the
+# rest of the site is unaffected.
 #
 # The WASM runtime also spawns pthreads as dedicated Web Workers, loading
 # dragonruby-wasm.js as the worker script. Under require-corp a Worker script is
@@ -18,7 +18,7 @@ class GameCrossOriginIsolation
   def call(env)
     status, headers, body = @app.call(env)
 
-    if env["PATH_INFO"].to_s.start_with?("/game/")
+    if env["PATH_INFO"].to_s.start_with?("/game_assets/")
       headers["Cross-Origin-Resource-Policy"] = "same-origin"
       headers["Cross-Origin-Embedder-Policy"] = "require-corp"
       headers["Cross-Origin-Opener-Policy"] = "same-origin"
