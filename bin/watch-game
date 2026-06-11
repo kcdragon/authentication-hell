@@ -14,7 +14,7 @@ build!("initial")
 
 # Watch only game/mygame/ (the source). Most build artifacts land in game/builds/
 # and public/game_assets/, both outside mygame/. The exception is app/server_config.txt
-# (the baked Rails port), which must live inside mygame/ to ship in the bundle —
+# (the baked Rails server origin), which must live inside mygame/ to ship in the bundle —
 # ignore it, or each build's rewrite would re-trigger the watcher in a loop.
 listener = Listen.to(GAME_SRC, ignore: %r{app/server_config\.txt\z}) do |modified, added, removed|
   changed = (modified + added + removed).map { File.basename(it) }.join(", ")

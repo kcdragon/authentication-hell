@@ -153,15 +153,16 @@ module Main
     args.state.player.lock_confirmed = false
   end
 
-  # The Rails server's port, baked into the bundle by bin/build-game
-  # (CONDUCTOR_PORT under Conductor, else 3000). Falls back to 3000 when the
-  # file is absent, e.g. a native `./dragonruby mygame` run that never went
-  # through build-game. Read once, then memoized for the rest of the session.
-  def server_port(args)
-    args.state.server_port ||= (args.gtk.read_file("app/server_config.txt") || "3000").strip
+  # The Rails server's origin (scheme + host[:port]), baked into the bundle by
+  # bin/build-game — the production domain in a deploy build, else the local dev
+  # server. Falls back to http://localhost:3000 when the file is absent, e.g. a
+  # native `./dragonruby mygame` run that never went through build-game. Read
+  # once, then memoized for the rest of the session.
+  def server_base(args)
+    args.state.server_base ||= (args.gtk.read_file("app/server_config.txt") || "http://localhost:3000").strip
   end
 
-  def me_url(args) = "http://localhost:#{server_port(args)}/play/me"
-  def collision_url(args) = "http://localhost:#{server_port(args)}/games/totp/collision"
-  def status_url(args) = "http://localhost:#{server_port(args)}/games/totp/status"
+  def me_url(args) = "#{server_base(args)}/play/me"
+  def collision_url(args) = "#{server_base(args)}/games/totp/collision"
+  def status_url(args) = "#{server_base(args)}/games/totp/status"
 end

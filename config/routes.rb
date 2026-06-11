@@ -17,8 +17,8 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   # DragonRuby game page. The canvas + loader are rendered inline by GamesController
-  # (layout "game" sets <base href="/game_assets/"> so the loader's relative assets,
-  # which live in the static bundle at public/game_assets/, resolve correctly).
+  # (layout "game" sets <base href> to the per-environment bundle path so the loader's
+  # relative assets, which live in public/<env>_game_assets/, resolve correctly).
   get "play" => "games#show", as: :play
   get "play/me" => "games#me", as: :play_me
 

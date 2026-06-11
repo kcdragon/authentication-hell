@@ -4,18 +4,31 @@ require "fileutils"
 APP_ROOT  = File.expand_path("..", __dir__)
 GAME_DIR  = File.join(APP_ROOT, "game")
 ZIP       = File.join(GAME_DIR, "builds", "authentication-hell-html5.zip")
-PUBLIC    = File.join(APP_ROOT, "public", "game_assets")
-PORT_FILE = File.join(GAME_DIR, "mygame", "app", "server_config.txt")
+ORIGIN_FILE = File.join(GAME_DIR, "mygame", "app", "server_config.txt")
+
+# Output to a per-environment bundle dir so a dev build (baked for localhost) and
+# a production build (baked for the live domain) never overwrite each other.
+# Rails serves public/<env>_game_assets/ — see GamesController#game_assets_path.
+RAILS_ENV = ENV.fetch("RAILS_ENV", "development")
+PUBLIC    = File.join(APP_ROOT, "public", "#{RAILS_ENV}_game_assets")
 
 def system!(*args) = system(*args, exception: true)
 
 # The game runs as WASM in the browser and can't read env vars at runtime, so
-# bake the Rails server port into the bundle here. Under Conductor the server
-# runs on CONDUCTOR_PORT; otherwise default to 3000. main.rb reads this file.
-port = ENV.fetch("CONDUCTOR_PORT", "3000")
-if !File.exist?(PORT_FILE) || File.read(PORT_FILE).strip != port
-  puts "== Baking server port #{port} into the bundle =="
-  File.write(PORT_FILE, port)
+# bake the Rails server origin (scheme + host[:port]) into the bundle here. Dev
+# targets the local server (CONDUCTOR_PORT under Conductor, else 3000); any other
+# environment must pass GAME_SERVER_ORIGIN so we never ship a localhost build.
+# main.rb reads this file.
+origin =
+  if RAILS_ENV == "development"
+    ENV.fetch("GAME_SERVER_ORIGIN", "http://localhost:#{ENV.fetch("CONDUCTOR_PORT", "3000")}")
+  else
+    ENV.fetch("GAME_SERVER_ORIGIN") { abort "Set GAME_SERVER_ORIGIN for a #{RAILS_ENV} build (e.g. https://authenticationhell.com)" }
+  end
+
+if !File.exist?(ORIGIN_FILE) || File.read(ORIGIN_FILE).strip != origin
+  puts "== Baking server origin #{origin} into the bundle =="
+  File.write(ORIGIN_FILE, origin)
 end
 
 FileUtils.chdir GAME_DIR do
@@ -29,7 +42,7 @@ puts "== Refreshing #{PUBLIC} =="
 FileUtils.rm_rf(PUBLIC)
 FileUtils.mkdir_p(PUBLIC)
 
-puts "== Unzipping into public/game_assets =="
+puts "== Unzipping into public/#{RAILS_ENV}_game_assets =="
 system! "unzip", "-o", "-q", ZIP, "-d", PUBLIC
 
 # Sanity-check the layout, then drop the bundle's standalone index.html: the game
@@ -39,4 +52,4 @@ index = File.join(PUBLIC, "index.html")
 abort "index.html missing — check zip layout!" unless File.exist?(index)
 FileUtils.rm_f(index)
 
-puts "== Done. Game assets in public/game_assets/, Rails page at /play =="
+puts "== Done. Game assets in public/#{RAILS_ENV}_game_assets/, Rails page at /play =="
