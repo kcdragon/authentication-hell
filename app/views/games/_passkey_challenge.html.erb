@@ -1,9 +1,24 @@
-<%= tag.div id: passkey_challenge_toast_id(user), class: "game-challenge-toast max-w-sm rounded-md bg-blue-100 border border-blue-300 text-blue-900 px-4 py-3 shadow-lg pointer-events-auto" do %>
+<%= tag.div id: passkey_challenge_toast_id(user),
+      class: "game-challenge-toast max-w-sm rounded-md bg-blue-100 border border-blue-300 text-blue-900 px-4 py-3 shadow-lg pointer-events-auto",
+      data: {
+        controller: "games-passkey-challenge",
+        games_passkey_challenge_options_url_value: games_passkey_options_path,
+        games_passkey_challenge_callback_url_value: games_passkey_complete_path
+      } do %>
   <p class="font-semibold">You bumped into the passkey enemy!</p>
-  <p class="mt-1 text-sm">Passkey sign-in is coming soon. Dismiss this to keep playing for now.</p>
+  <p class="mt-1 text-sm">Re-authenticate with your passkey to keep playing.</p>
 
-  <%= form_with url: games_passkey_complete_path, method: :post, authenticity_token: false, class: "mt-3" do |form| %>
-    <%= form.submit "Dismiss",
-          class: "rounded-md px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium cursor-pointer" %>
+  <p class="mt-2 text-sm font-medium text-red-700" data-games-passkey-challenge-target="error"></p>
+
+  <% if user.webauthn_credentials.exists? %>
+    <button type="button" data-action="games-passkey-challenge#verify"
+            class="mt-3 rounded-md px-3.5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-medium cursor-pointer">
+      Verify with passkey
+    </button>
+  <% else %>
+    <p class="mt-2 text-xs text-blue-800">
+      You haven't registered a passkey yet, so you can't clear this.
+      Add one from the "Passkeys" settings first.
+    </p>
   <% end %>
 <% end %>

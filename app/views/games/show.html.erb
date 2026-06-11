@@ -39,18 +39,31 @@
   <script src="dragonruby-html5-loader.js"></script>
 
   <%# This layout deliberately omits the app-wide importmap (so the bundle-path
-      <base href> can't rewrite the DragonRuby loader's bare asset
-      paths). Turbo Streams need Turbo on the page, so declare a page-scoped
-      import map pointing at Turbo's absolute, digested asset URL — absolute so
-      the base href leaves it alone — then import it to start Turbo. %>
+      <base href> can't rewrite the DragonRuby loader's bare asset paths), which
+      also means no Stimulus boot. So declare a page-scoped import map of the few
+      modules this page needs, pinned to absolute, digested asset URLs (absolute
+      so the base href leaves them alone): Turbo for the toast stream, plus
+      Stimulus and the passkey collision controller (which reuses the shared
+      lib/webauthn_ceremony_controller and @github/webauthn-json). Then start
+      Turbo and a minimal Stimulus app with just that one controller registered —
+      it auto-connects to the toast Turbo Streams appends after load. %>
   <script type="importmap">
     {
       "imports": {
-        "@hotwired/turbo-rails": "<%= asset_path("turbo.min.js") %>"
+        "@hotwired/turbo-rails": "<%= asset_path("turbo.min.js") %>",
+        "@hotwired/stimulus": "<%= asset_path("stimulus.min.js") %>",
+        "@github/webauthn-json": "<%= asset_path("@github--webauthn-json.js") %>",
+        "lib/webauthn_ceremony_controller": "<%= asset_path("lib/webauthn_ceremony_controller.js") %>",
+        "controllers/games_passkey_challenge_controller": "<%= asset_path("controllers/games_passkey_challenge_controller.js") %>"
       }
     }
   </script>
   <script type="module">
     import "@hotwired/turbo-rails"
+    import { Application } from "@hotwired/stimulus"
+    import GamesPasskeyChallengeController from "controllers/games_passkey_challenge_controller"
+
+    const application = Application.start()
+    application.register("games-passkey-challenge", GamesPasskeyChallengeController)
   </script>
 </div>

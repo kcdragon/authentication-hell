@@ -43,6 +43,7 @@ Rails.application.routes.draw do
 
     get  "passkey/status"   => "passkey_challenge#status",   as: :passkey_status
     post "passkey/start"    => "passkey_challenge#start",    as: :passkey_start
+    post "passkey/options"  => "passkey_challenge#options",  as: :passkey_options
     post "passkey/complete" => "passkey_challenge#complete", as: :passkey_complete
   end
 

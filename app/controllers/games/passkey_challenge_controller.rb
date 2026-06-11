@@ -1,6 +1,9 @@
 class Games::PasskeyChallengeController < ApplicationController
+  include WebauthnCeremony
+
   # WASM can't send a CSRF token; safe since start is same-origin, session-gated,
-  # and only sets a flag + broadcasts. (complete keeps CSRF via the Turbo form.)
+  # and only sets a flag + broadcasts. options/complete are called from page JS
+  # that sends the X-CSRF-Token meta header, so they keep forgery protection.
   skip_forgery_protection only: :start
 
   def status
@@ -18,11 +21,39 @@ class Games::PasskeyChallengeController < ApplicationController
     head :no_content
   end
 
-  # Placeholder: clears the lock with no verification yet. Gate on a verified
-  # WebAuthn assertion once passkeys land.
+  # Re-auth (step-up): the player is already signed in, so scope the allow list to
+  # their own registered passkeys.
+  def options
+    get_options = WebAuthn::Credential.options_for_get(
+      allow: Current.user.webauthn_credentials.pluck(:external_id),
+      user_verification: "required"
+    )
+    session[:game_passkey_challenge] = get_options.challenge
+    render json: get_options
+  end
+
+  # A verified assertion clears the lock and broadcasts the toast removal; anything
+  # else surfaces an error. Mirrors webauthn/challenges#create, for Current.user.
   def complete
+    raise WebAuthn::Error unless session[:game_passkey_required]
+
+    webauthn_credential = WebAuthn::Credential.from_get(credential_param)
+    stored = Current.user.webauthn_credentials.find_by(external_id: webauthn_credential.id)
+    raise WebAuthn::Error unless stored
+
+    webauthn_credential.verify(
+      session.delete(:game_passkey_challenge),
+      public_key: stored.public_key,
+      sign_count: stored.sign_count
+    )
+
+    stored.update!(sign_count: webauthn_credential.sign_count, last_used_at: Time.current)
     session.delete(:game_passkey_required)
-    render turbo_stream: turbo_stream.remove(toast_id)
+    Turbo::StreamsChannel.broadcast_remove_to(Current.user, :toasts, target: toast_id)
+    render json: { ok: true }
+  rescue WebAuthn::Error
+    render json: { error: "That passkey didn't work. Please try again." },
+           status: :unprocessable_entity
   end
 
   private

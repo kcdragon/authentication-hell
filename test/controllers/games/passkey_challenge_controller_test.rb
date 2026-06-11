@@ -51,17 +51,72 @@ class Games::PasskeyChallengeControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
   end
 
-  # Placeholder dismiss: clears the lock with no verification yet (real WebAuthn pending).
-  test "complete dismisses the toast and clears the lock" do
+  test "a valid passkey assertion clears the lock and broadcasts the toast removal" do
+    client = enable_passkey_for(@user)
     sign_in_as(@user)
     post games_passkey_start_url
 
-    post games_passkey_complete_url, as: :turbo_stream
+    post games_passkey_options_url, as: :json
+    assertion = client.get(challenge: response.parsed_body["challenge"], user_verified: true)
+
+    streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+      post games_passkey_complete_url, params: { credential: assertion }, as: :json
+    end
 
     assert_response :success
-    assert_match "turbo-stream", response.media_type
-    assert_includes response.body, %(<turbo-stream action="remove" target="#{passkey_challenge_toast_id(@user)}">)
+    assert_equal({ "ok" => true }, response.parsed_body)
+    assert_equal "remove", streams.first["action"]
+
     get games_passkey_status_url
     assert_equal({ "locked" => false }, response.parsed_body)
+  end
+
+  test "an assertion signed against a forged challenge keeps the player locked" do
+    client = enable_passkey_for(@user)
+    sign_in_as(@user)
+    post games_passkey_start_url
+
+    post games_passkey_options_url, as: :json
+    forged = client.get(
+      challenge: WebAuthn.configuration.encoder.encode("not-the-challenge"),
+      user_verified: true
+    )
+
+    post games_passkey_complete_url, params: { credential: forged }, as: :json
+
+    assert_response :unprocessable_entity
+    assert response.parsed_body["error"].present?
+
+    get games_passkey_status_url
+    assert_equal({ "locked" => true }, response.parsed_body)
+  end
+
+  test "complete cannot clear the lock when no collision is pending" do
+    client = enable_passkey_for(@user)
+    sign_in_as(@user)
+
+    post games_passkey_options_url, as: :json
+    assertion = client.get(challenge: response.parsed_body["challenge"], user_verified: true)
+
+    post games_passkey_complete_url, params: { credential: assertion }, as: :json
+    assert_response :unprocessable_entity
+  end
+
+  test "complete cannot clear the lock for a player without a registered passkey" do
+    # A parseable assertion from someone else's authenticator: it won't match any
+    # of @user's (zero) credentials, so verification is refused.
+    other_client = enable_passkey_for(users(:two))
+    sign_in_as(@user)
+    post games_passkey_start_url
+
+    post games_passkey_options_url, as: :json
+    assertion = other_client.get(challenge: response.parsed_body["challenge"], user_verified: true)
+
+    post games_passkey_complete_url, params: { credential: assertion }, as: :json
+
+    assert_response :unprocessable_entity
+
+    get games_passkey_status_url
+    assert_equal({ "locked" => true }, response.parsed_body)
   end
 end
