@@ -1,0 +1,10 @@
+#!/bin/sh
+# Build the production /play bundle into public/production_game_assets/ before
+# Kamal builds the image. That dir is gitignored but not dockerignored, so the
+# fresh bundle ships in the image. Runs locally on deploy/redeploy.
+set -e
+
+echo "== pre-build: packaging production game bundle =="
+RAILS_ENV=production \
+  GAME_SERVER_ORIGIN=https://authenticationhell.com \
+  bin/build-game
