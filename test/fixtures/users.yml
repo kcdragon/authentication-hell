@@ -4,16 +4,26 @@ one:
   username: userone
   email_address: one@example.com
   password_digest: <%= password_digest %>
+  webauthn_id: <%= WebAuthn.generate_user_id %>
   confirmed_at: <%= Time.current.to_fs(:db) %>
 
 two:
   username: usertwo
   email_address: two@example.com
   password_digest: <%= password_digest %>
+  webauthn_id: <%= WebAuthn.generate_user_id %>
   confirmed_at: <%= Time.current.to_fs(:db) %>
 
 unconfirmed:
   username: pending
   email_address: pending@example.com
   password_digest: <%= password_digest %>
+  webauthn_id: <%= WebAuthn.generate_user_id %>
   confirmed_at:
+
+# Passkey-only account (no password). A credential is added in tests via enable_passkey_for.
+passwordless:
+  username: passkeyonly
+  email_address: passkeyonly@example.com
+  webauthn_id: <%= WebAuthn.generate_user_id %>
+  confirmed_at: <%= Time.current.to_fs(:db) %>

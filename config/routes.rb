@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   resource :session
   resource :registration, only: %i[ new create ]
+  resource :passkey_registration, only: :create
   resource :email_confirmation, only: %i[ new create show ], param: :token
   resources :passwords, param: :token
 
@@ -9,6 +10,19 @@ Rails.application.routes.draw do
     resource :enrollment, only: %i[ new create ]
     resource :recovery_codes, only: %i[ create ]
     resource :challenge, only: %i[ new create ]
+  end
+
+  namespace :webauthn do
+    resource  :settings, only: :show
+    resources :credentials, only: %i[ create destroy ] do
+      post :options, on: :collection
+    end
+    resource :authentication, only: :create do   # passwordless primary login
+      post :options, on: :collection
+    end
+    resource :challenge, only: :create do        # passkey as a second factor
+      post :options, on: :collection
+    end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
