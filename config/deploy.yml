@@ -67,10 +67,13 @@ aliases:
   logs: app logs -f
   dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
 
-# Use a persistent storage volume for sqlite database files and local Active Storage files.
-# Recommended to change this to a mounted volume path that is backed up off server.
+# Persist sqlite database files and local Active Storage files on the Hetzner
+# block volume "sqlite-volume-1" (ID 105430602), mounted at /mnt/HC_Volume_105430602.
+# The subdirectory must be owned by the container's rails user:
+#   mkdir -p /mnt/HC_Volume_105430602/authentication_hell_storage
+#   chown -R 1000:1000 /mnt/HC_Volume_105430602/authentication_hell_storage
 volumes:
-  - "authentication_hell_storage:/rails/storage"
+  - "/mnt/HC_Volume_105430602/authentication_hell_storage:/rails/storage"
 
 # Bridge fingerprinted assets, like JS and CSS, between versions to avoid
 # hitting 404 on in-flight requests. Combines all files from new and old
