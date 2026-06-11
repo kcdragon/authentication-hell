@@ -10,6 +10,21 @@ GRAVITY = 1
 ENEMY_W = 64
 ENEMY_H = 96
 
+PLATFORM_W = 260
+PLATFORM_H = 30
+PLATFORM_TOP = 250            # y of the side platforms' top surface
+# A higher ledge, 150px above the left platform: out of reach from the ground
+# (~290px apex) but reachable by jumping off the left platform (~440px apex).
+HIGH_PLATFORM_TOP = 400
+
+# Static one-way ledges. The two side ledges hug the left/right edges; the high
+# ledge overlaps the left one so you can hop up onto it from there.
+PLATFORMS = [
+  { x: 0,                     y: PLATFORM_TOP - PLATFORM_H,      w: PLATFORM_W, h: PLATFORM_H },
+  { x: SCREEN_W - PLATFORM_W, y: PLATFORM_TOP - PLATFORM_H,      w: PLATFORM_W, h: PLATFORM_H },
+  { x: 180,                   y: HIGH_PLATFORM_TOP - PLATFORM_H, w: PLATFORM_W, h: PLATFORM_H }
+]
+
 module Main
   def tick(args)
     args.state.player ||= { x: (SCREEN_W - PLAYER_W) / 2,
@@ -17,6 +32,7 @@ module Main
                             w: PLAYER_W,
                             h: PLAYER_H,
                             vy: 0,
+                            grounded: true,
                             locked: false,
                             colliding: false,
                             lock_confirmed: false,
@@ -64,15 +80,35 @@ module Main
       args.state.player.x = args.state.player.x.clamp(0, SCREEN_W - PLAYER_W)
 
       # Jump on the press edge so holding space doesn't re-launch every frame.
-      if args.inputs.keyboard.key_down.space && args.state.player.y <= GROUND_Y
+      # Only off the ground or a platform.
+      if args.inputs.keyboard.key_down.space && args.state.player.grounded
         args.state.player.vy = JUMP_SPEED
+        args.state.player.grounded = false
       end
 
       args.state.player.vy -= GRAVITY
+      prev_y = args.state.player.y
       args.state.player.y += args.state.player.vy
+
+      args.state.player.grounded = false
       if args.state.player.y <= GROUND_Y
         args.state.player.y = GROUND_Y
         args.state.player.vy = 0
+        args.state.player.grounded = true
+      elsif args.state.player.vy <= 0
+        # One-way platforms: land only while descending and only if the player's
+        # bottom crossed the platform's top this frame (so you pass up through it).
+        PLATFORMS.each do |plat|
+          top = plat.y + plat.h
+          horizontal = args.state.player.x + args.state.player.w > plat.x &&
+                       args.state.player.x < plat.x + plat.w
+          if horizontal && prev_y >= top && args.state.player.y <= top
+            args.state.player.y = top
+            args.state.player.vy = 0
+            args.state.player.grounded = true
+            break
+          end
+        end
       end
     end
 
@@ -107,6 +143,12 @@ module Main
 
     # Ground.
     args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: GROUND_Y, r: 83, g: 138, b: 64 }
+
+    # Platforms.
+    PLATFORMS.each do |plat|
+      args.outputs.solids << { x: plat.x, y: plat.y, w: plat.w, h: plat.h,
+                               r: 120, g: 85, b: 50 }
+    end
 
     # Enemies.
     args.state.enemies.each do |enemy|
