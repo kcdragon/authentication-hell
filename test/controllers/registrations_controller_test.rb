@@ -24,6 +24,24 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_nil cookies[:session_id]
   end
 
+  test "create with the honeypot filled is silently dropped" do
+    assert_no_difference -> { User.count } do
+      assert_no_enqueued_emails do
+        post registration_path, params: {
+          nickname: "spam",
+          user: {
+            username: "brandnew",
+            email_address: "brandnew@example.com",
+            password: "password",
+            password_confirmation: "password"
+          }
+        }
+      end
+    end
+
+    assert_redirected_to new_session_path
+  end
+
   test "create with a duplicate email is rejected" do
     assert_no_difference -> { User.count } do
       post registration_path, params: { user: {

@@ -41,6 +41,12 @@
         <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", placeholder: "Confirm your password", maxlength: 72, class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
       </div>
 
+      <%# Honeypot: hidden from humans, tempting to bots. A filled :nickname is dropped server-side. %>
+      <div class="absolute left-[-9999px] top-[-9999px]" aria-hidden="true">
+        <%= label_tag :nickname, "Nickname" %>
+        <%= text_field_tag :nickname, nil, tabindex: -1, autocomplete: "off" %>
+      </div>
+
       <%= form.submit "Create account", class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
     <% end %>
   </div>
