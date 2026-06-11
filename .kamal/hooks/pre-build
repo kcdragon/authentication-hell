@@ -1,7 +1,9 @@
 #!/bin/sh
 # Build the production /play bundle into public/production_game_assets/ before
-# Kamal builds the image. That dir is gitignored but not dockerignored, so the
-# fresh bundle ships in the image. Runs locally on deploy/redeploy.
+# Kamal builds the image. That dir is gitignored; it reaches the image because
+# deploy.yml sets builder.context: "." so Kamal builds from this working tree
+# (not a git clone of HEAD, which would omit the untracked bundle). Runs locally
+# on deploy/redeploy.
 set -e
 
 echo "== pre-build: packaging production game bundle =="

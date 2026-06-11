@@ -84,6 +84,13 @@ asset_path: /rails/public/assets
 builder:
   arch: amd64
 
+  # Build from the working directory instead of a git clone of HEAD. Kamal
+  # defaults to cloning (committed files only) when no context is set; setting
+  # context disables that. We need the working dir because the pre-build hook
+  # generates public/production_game_assets/ there, and that bundle is gitignored
+  # — a clone-based build would omit it and /play would 404 on the game assets.
+  context: "."
+
   # # Build image via remote server (useful for faster amd64 builds on arm64 computers)
   # remote: ssh://docker@docker-builder-server
   #
