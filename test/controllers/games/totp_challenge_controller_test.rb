@@ -1,27 +1,27 @@
 require "test_helper"
 
-class Games::TotpControllerTest < ActionDispatch::IntegrationTest
+class Games::TotpChallengeControllerTest < ActionDispatch::IntegrationTest
   include ActionView::RecordIdentifier
   include Games::TotpHelper
 
   setup { @user = users(:one) }
 
-  test "collision requires authentication" do
-    post games_totp_collision_url
+  test "start requires authentication" do
+    post games_totp_start_url
     assert_redirected_to new_session_path
   end
 
-  test "collision broadcasts the TOTP re-auth toast and locks the player" do
+  test "start broadcasts the TOTP re-auth toast and locks the player" do
     sign_in_as(@user)
 
     streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
-      post games_totp_collision_url
+      post games_totp_start_url
     end
 
     assert_equal 1, streams.size
     broadcast = streams.first
-    assert_equal "replace", broadcast["action"]
-    assert_equal totp_challenge_toast_id(@user), broadcast["target"]
+    assert_equal "append", broadcast["action"]
+    assert_equal "toasts", broadcast["target"]
     assert_includes broadcast.to_html, "Re-authenticate with your TOTP code"
 
     assert_response :no_content
@@ -41,22 +41,22 @@ class Games::TotpControllerTest < ActionDispatch::IntegrationTest
     get games_totp_status_url
     assert_equal({ "locked" => false }, response.parsed_body)
 
-    post games_totp_collision_url
+    post games_totp_start_url
     get games_totp_status_url
     assert_equal({ "locked" => true }, response.parsed_body)
   end
 
-  test "unlock requires authentication" do
-    post games_totp_unlock_url
+  test "complete requires authentication" do
+    post games_totp_complete_url
     assert_redirected_to new_session_path
   end
 
-  test "unlock with a valid TOTP code clears the lock" do
+  test "complete with a valid TOTP code clears the lock" do
     secret = enable_2fa_for(@user)
     sign_in_as(@user)
-    post games_totp_collision_url
+    post games_totp_start_url
 
-    post games_totp_unlock_url, params: { code: ROTP::TOTP.new(secret).now }, as: :turbo_stream
+    post games_totp_complete_url, params: { code: ROTP::TOTP.new(secret).now }, as: :turbo_stream
 
     assert_response :success
     assert_match "turbo-stream", response.media_type
@@ -66,12 +66,12 @@ class Games::TotpControllerTest < ActionDispatch::IntegrationTest
     assert_equal({ "locked" => false }, response.parsed_body)
   end
 
-  test "unlock with an invalid code keeps the player locked and shows an error" do
+  test "complete with an invalid code keeps the player locked and shows an error" do
     enable_2fa_for(@user)
     sign_in_as(@user)
-    post games_totp_collision_url
+    post games_totp_start_url
 
-    post games_totp_unlock_url, params: { code: "000000" }, as: :turbo_stream
+    post games_totp_complete_url, params: { code: "000000" }, as: :turbo_stream
 
     assert_response :success
     assert_includes response.body, "Invalid code. Try again."
@@ -79,11 +79,11 @@ class Games::TotpControllerTest < ActionDispatch::IntegrationTest
     assert_equal({ "locked" => true }, response.parsed_body)
   end
 
-  test "unlock cannot clear the lock for a player without TOTP enabled" do
+  test "complete cannot clear the lock for a player without TOTP enabled" do
     sign_in_as(@user)
-    post games_totp_collision_url
+    post games_totp_start_url
 
-    post games_totp_unlock_url, params: { code: "000000" }, as: :turbo_stream
+    post games_totp_complete_url, params: { code: "000000" }, as: :turbo_stream
 
     assert_response :success
     get games_totp_status_url
