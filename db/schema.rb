@@ -10,7 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_10_215453) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_11_154836) do
+  create_table "db_backups", force: :cascade do |t|
+    t.string "key"
+    t.datetime "occurred_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "recovery_codes", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "code_digest", null: false
