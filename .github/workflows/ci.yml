@@ -95,7 +95,15 @@ jobs:
           # Set RAILS_MASTER_KEY in the "test" GitHub Environment = contents of config/credentials/test.key.
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
           # REDIS_URL: redis://localhost:6379/0
+          # Generate the SimpleCov report; the threshold is checked in the next step.
+          COVERAGE: "1"
         run: bin/rails db:test:prepare test
+
+      - name: Check coverage threshold
+        # COVERAGE_MINIMUM_LINE is the tracked baseline (kept in sync with config/ci.rb).
+        env:
+          COVERAGE_MINIMUM_LINE: "85"
+        run: ruby script/check_coverage.rb
 
   system-test:
     runs-on: ubuntu-latest
