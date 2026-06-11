@@ -8,7 +8,7 @@ class SessionsController < ApplicationController
   def create
     if user = User.authenticate_by(params.permit(:email_address, :password))
       if user.confirmed?
-        if user.totp_enabled?
+        if user.second_factor?
           session[:pending_2fa_user_id] = user.id
           session[:pending_2fa_at] = Time.current.to_i
           redirect_to new_totp_challenge_path

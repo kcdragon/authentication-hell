@@ -9,6 +9,9 @@
   <%= link_to "Play", play_path, data: { turbo: turbo },
         class: "rounded-md px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium" %>
 
+  <%= link_to "Passkeys", webauthn_settings_path, data: { turbo: turbo },
+        class: "rounded-md px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium" %>
+
   <%= link_to "Two-factor authentication", totp_settings_path, data: { turbo: turbo },
         class: "rounded-md px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium" %>
 

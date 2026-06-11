@@ -48,6 +48,47 @@ class UserTest < ActiveSupport::TestCase
     assert_not User.new(valid_attributes(email_address: users(:one).email_address)).valid?
   end
 
+  test "assigns a webauthn_id on creation" do
+    user = User.create!(valid_attributes)
+    assert user.webauthn_id.present?
+  end
+
+  test "a passwordless user is valid when it has a passkey and is flagged passwordless" do
+    user = User.new(username: "pkuser", email_address: "pk@example.com")
+    user.webauthn_credentials.build(external_id: "ext", public_key: "key", nickname: "Phone")
+
+    assert user.valid?
+    assert user.passwordless?
+  end
+
+  test "an account with neither a password nor a passkey is invalid" do
+    user = User.new(username: "nofactor", email_address: "nf@example.com")
+
+    assert_not user.valid?
+    assert_includes user.errors[:base], "Add a password or a passkey to secure your account"
+  end
+
+  test "authenticate_by returns nil (not raises) for a passwordless user" do
+    user = User.new(username: "pkuser", email_address: "pk@example.com")
+    user.webauthn_credentials.build(external_id: "ext", public_key: "key", nickname: "Phone")
+    user.save!
+
+    assert_nil User.authenticate_by(email_address: "pk@example.com", password: "anything")
+  end
+
+  test "password confirmation is enforced when a password is set" do
+    assert_not User.new(valid_attributes(password: "secret", password_confirmation: "different")).valid?
+    assert User.new(valid_attributes(password: "secret", password_confirmation: "secret")).valid?
+  end
+
+  test "second_factor? is true with TOTP or a passkey" do
+    user = users(:one)
+    assert_not user.second_factor?
+
+    user.webauthn_credentials.create!(external_id: "ext", public_key: "key", nickname: "Phone")
+    assert user.second_factor?
+  end
+
   test "confirmed? reflects confirmed_at" do
     assert users(:one).confirmed?
     assert_not users(:unconfirmed).confirmed?

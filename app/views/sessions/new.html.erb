@@ -21,6 +21,21 @@
     </div>
   <% end %>
 
+  <div class="my-6 flex items-center gap-3 text-sm text-gray-400">
+    <span class="h-px flex-1 bg-gray-200"></span>or<span class="h-px flex-1 bg-gray-200"></span>
+  </div>
+
+  <div data-controller="webauthn-authentication"
+       data-webauthn-authentication-options-url-value="<%= options_webauthn_authentication_path %>"
+       data-webauthn-authentication-callback-url-value="<%= webauthn_authentication_path %>">
+    <p data-webauthn-authentication-target="error" class="mb-3 text-red-500 font-medium"></p>
+    <button type="button"
+            data-action="webauthn-authentication#authenticate"
+            class="w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white inline-block font-medium cursor-pointer">
+      Sign in with a passkey
+    </button>
+  </div>
+
   <div class="mt-8 text-sm text-gray-500">
     <%= link_to "Create an account", new_registration_path, class: "text-gray-700 underline hover:no-underline" %>
     &middot;

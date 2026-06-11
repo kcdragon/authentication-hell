@@ -2,11 +2,14 @@ class User < ApplicationRecord
   TOTP_ISSUER = "Authentication Hell".freeze
   RECOVERY_CODE_COUNT = 10
 
-  has_secure_password
+  has_secure_password validations: false
   has_many :sessions, dependent: :destroy
   has_many :recovery_codes, dependent: :destroy
+  has_many :webauthn_credentials, dependent: :destroy
 
   encrypts :totp_secret
+
+  before_create { self.webauthn_id ||= WebAuthn.generate_user_id }
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :username, with: ->(u) { u.strip }
@@ -17,9 +20,15 @@ class User < ApplicationRecord
     length: { in: 3..20 },
     format: { with: /\A[a-zA-Z0-9_]+\z/, message: "may only contain letters, numbers, and underscores" },
     uniqueness: { case_sensitive: false }
+  validates :password, confirmation: true, length: { maximum: 72 }, allow_nil: true, if: -> { password.present? }
+  validate :password_or_passkey_present
 
   generates_token_for :email_confirmation, expires_in: 1.day do
     email_address
+  end
+
+  def passwordless?
+    password_digest.blank?
   end
 
   def confirmed?
@@ -32,6 +41,11 @@ class User < ApplicationRecord
 
   def totp_enabled?
     totp_enabled
+  end
+
+  # Whether logging in with a password should be followed by a second-factor step.
+  def second_factor?
+    totp_enabled? || webauthn_credentials.exists?
   end
 
   def totp
@@ -92,5 +106,13 @@ class User < ApplicationRecord
 
   def recovery_codes_remaining
     recovery_codes.unused.count
+  end
+
+  private
+
+  def password_or_passkey_present
+    return if password_digest.present? || webauthn_credentials.any?
+
+    errors.add(:base, "Add a password or a passkey to secure your account")
   end
 end
