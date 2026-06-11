@@ -40,6 +40,9 @@ gem "solid_cache"
 gem "solid_queue"
 gem "solid_cable"
 
+# AWS S3 client for off-site database backups (see BackupDbToS3Job)
+gem "aws-sdk-s3", require: false
+
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 

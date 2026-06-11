@@ -1,0 +1,2 @@
+class DbBackup < ApplicationRecord
+end
