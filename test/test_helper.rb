@@ -14,6 +14,13 @@ require_relative "../config/environment"
 require "rails/test_help"
 require_relative "test_helpers/session_test_helper"
 
+# Hash passwords at bcrypt's minimum cost in tests. Fixtures, has_secure_password,
+# and recovery-code generation all create digests; at the default cost (12) this
+# dominates suite runtime. They all fall back to BCrypt::Engine.cost when no cost
+# is given, so this one knob speeds up every path.
+require "bcrypt"
+BCrypt::Engine.cost = BCrypt::Engine::MIN_COST
+
 module ActiveSupport
   class TestCase
     # Run tests in parallel with specified workers. Under coverage, run serially
