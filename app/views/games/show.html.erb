@@ -2,9 +2,9 @@
 
 <div class="w-full flex flex-col items-center gap-4 mt-8 px-5">
   <div class="w-full max-w-[1280px] flex items-center justify-end">
-    <%# turbo: false forces full navigations: this page sets <base href="/game_assets/">
-        and only loads Turbo for the toast stream, so let the browser handle the
-        cross-layout link to the standard app pages. %>
+    <%# turbo: false forces full navigations: this page sets a <base href> to the
+        game bundle path and only loads Turbo for the toast stream, so let the
+        browser handle the cross-layout link to the standard app pages. %>
     <%= render "shared/navigation", turbo: false %>
   </div>
 
@@ -35,11 +35,11 @@
   <%= turbo_stream_from Current.user, :toasts %>
   <div id="toasts" class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2"></div>
 
-  <%# Resolved to /game_assets/dragonruby-html5-loader.js via the layout's <base href>. %>
+  <%# Resolved to <bundle path>/dragonruby-html5-loader.js via the layout's <base href>. %>
   <script src="dragonruby-html5-loader.js"></script>
 
-  <%# This layout deliberately omits the app-wide importmap (so the
-      <base href="/game_assets/"> can't rewrite the DragonRuby loader's bare asset
+  <%# This layout deliberately omits the app-wide importmap (so the bundle-path
+      <base href> can't rewrite the DragonRuby loader's bare asset
       paths). Turbo Streams need Turbo on the page, so declare a page-scoped
       import map pointing at Turbo's absolute, digested asset URL — absolute so
       the base href leaves it alone — then import it to start Turbo. %>

@@ -36,6 +36,11 @@
 !/app/assets/builds/.keep
 /public/assets
 
+# Never ship the development game bundle (baked for localhost). The production
+# bundle (public/production_game_assets/, built via RAILS_ENV=production
+# bin/build-game) is intentionally NOT ignored so it goes into the image.
+/public/development_game_assets
+
 # Ignore CI service files.
 /.github
 

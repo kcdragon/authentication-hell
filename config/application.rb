@@ -18,7 +18,7 @@ module AuthenticationHell
 
     # Add cross-origin isolation headers to the embedded DragonRuby game so its
     # WASM runtime can use SharedArrayBuffer. Inserted before ActionDispatch::Static
-    # so it can stamp the headers onto the static file responses from public/game_assets/.
+    # so it can stamp the headers onto the static bundle responses (public/<env>_game_assets/).
     require_relative "../app/middleware/game_cross_origin_isolation"
     config.middleware.insert_before ActionDispatch::Static, GameCrossOriginIsolation
 

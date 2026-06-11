@@ -37,10 +37,11 @@
 /app/assets/builds/*
 !/app/assets/builds/.keep
 
-# Built DragonRuby HTML5 bundle (regenerated via bin/build-game)
-/public/game_assets/
+# Built DragonRuby HTML5 bundles, one per environment (regenerated via bin/build-game)
+/public/development_game_assets/
+/public/production_game_assets/
 
-# Server port baked into the game bundle by bin/build-game
+# Server origin baked into the game bundle by bin/build-game
 /game/mygame/app/server_config.txt
 
 # Node modules — only the Playwright CLI for system tests lives here; bin/setup
