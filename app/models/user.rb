@@ -27,6 +27,10 @@ class User < ApplicationRecord
     email_address
   end
 
+  # Signed, self-expiring handle for the post-password second-factor step, so the
+  # session carries a token (not a raw id) and the timeout is enforced by the token.
+  generates_token_for :pending_2fa, expires_in: 10.minutes
+
   def passwordless?
     password_digest.blank?
   end
