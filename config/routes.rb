@@ -22,11 +22,14 @@ Rails.application.routes.draw do
   get "play" => "games#show", as: :play
   get "play/me" => "games#me", as: :play_me
 
-  # Game collision lock → TOTP re-auth (Games::TotpController).
   namespace :games do
-    get  "totp/status"    => "totp#status",    as: :totp_status
-    post "totp/collision" => "totp#collision", as: :totp_collision
-    post "totp/unlock"    => "totp#unlock",    as: :totp_unlock
+    get  "totp/status"   => "totp_challenge#status",   as: :totp_status
+    post "totp/start"    => "totp_challenge#start",    as: :totp_start
+    post "totp/complete" => "totp_challenge#complete", as: :totp_complete
+
+    get  "passkey/status"   => "passkey_challenge#status",   as: :passkey_status
+    post "passkey/start"    => "passkey_challenge#start",    as: :passkey_start
+    post "passkey/complete" => "passkey_challenge#complete", as: :passkey_complete
   end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)

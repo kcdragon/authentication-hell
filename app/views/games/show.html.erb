@@ -33,10 +33,7 @@
       container is fixed to the bottom-right and stacks toasts as a column, so it
       floats over the page without shifting the game layout. %>
   <%= turbo_stream_from Current.user, :toasts %>
-  <div id="toasts" class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2">
-    <%# Target the collision broadcast fills with the TOTP re-auth toast. %>
-    <%= tag.div id: totp_challenge_toast_id(Current.user) %>
-  </div>
+  <div id="toasts" class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2"></div>
 
   <%# Resolved to /game_assets/dragonruby-html5-loader.js via the layout's <base href>. %>
   <script src="dragonruby-html5-loader.js"></script>
