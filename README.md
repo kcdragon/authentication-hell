@@ -63,5 +63,13 @@ Run `bin/ci` before pushing — it mirrors what `.github/workflows/ci.yml` check
 
 ## Deployment
 
-Deploys run via **Kamal** (Docker). `config/deploy.yml` still has placeholder
-servers/IPs and needs real values before a deploy will work.
+Deploys run via **Kamal** (Docker) to https://authenticationhell.com:
+
+```bash
+bin/kamal deploy
+```
+
+The production `/play` bundle is built automatically — the `.kamal/hooks/pre-build`
+hook runs `RAILS_ENV=production bin/build-game` before each image build, so the
+fresh bundle (`public/production_game_assets/`) is baked into the image. No manual
+`bin/build-game` step is needed.
