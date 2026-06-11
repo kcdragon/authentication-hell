@@ -4,6 +4,8 @@ GROUND_Y = 100
 PLAYER_W = 64
 PLAYER_H = 96
 MOVE_SPEED = 8
+JUMP_SPEED = 20
+GRAVITY = 1
 
 ENEMY_W = 64
 ENEMY_H = 96
@@ -14,6 +16,7 @@ module Main
                             y: GROUND_Y,
                             w: PLAYER_W,
                             h: PLAYER_H,
+                            vy: 0,
                             locked: false,
                             colliding: false,
                             lock_confirmed: false,
@@ -49,7 +52,8 @@ module Main
     end
 
     # Move the player left/right with the arrow keys. No wrapping — clamp to
-    # screen. Frozen while locked, until they re-authenticate.
+    # screen. Space jumps when grounded. All frozen while locked, until they
+    # re-authenticate.
     unless args.state.player.locked
       if args.inputs.keyboard.left
         args.state.player.x -= MOVE_SPEED
@@ -58,6 +62,18 @@ module Main
       end
 
       args.state.player.x = args.state.player.x.clamp(0, SCREEN_W - PLAYER_W)
+
+      # Jump on the press edge so holding space doesn't re-launch every frame.
+      if args.inputs.keyboard.key_down.space && args.state.player.y <= GROUND_Y
+        args.state.player.vy = JUMP_SPEED
+      end
+
+      args.state.player.vy -= GRAVITY
+      args.state.player.y += args.state.player.vy
+      if args.state.player.y <= GROUND_Y
+        args.state.player.y = GROUND_Y
+        args.state.player.vy = 0
+      end
     end
 
     # Fire once on contact (the transition, not every overlapping frame): report
@@ -122,7 +138,7 @@ module Main
 
   def draw_hint(args)
     hint = if !args.state.player.locked
-      "(use the arrow keys or A/D to move)"
+      "(arrow keys or A/D to move, space to jump)"
     elsif args.state.player.pending_challenge == :passkey
       "You bumped the passkey enemy! Use the passkey toast to continue."
     else
