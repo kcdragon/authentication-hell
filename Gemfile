@@ -29,6 +29,9 @@ gem "rqrcode"
 # WebAuthn passkey authentication: registration (attestation) + login (assertion) ceremonies
 gem "webauthn"
 
+# Deliver production email through Postmark's API (registers the :postmark delivery method)
+gem "postmark-rails"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 
