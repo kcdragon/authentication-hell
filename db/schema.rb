@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_10_005139) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_10_215453) do
   create_table "recovery_codes", force: :cascade do |t|
     t.integer "user_id", null: false
     t.string "code_digest", null: false
@@ -32,7 +32,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_10_005139) do
 
   create_table "users", force: :cascade do |t|
     t.string "email_address", null: false
-    t.string "password_digest", null: false
+    t.string "password_digest"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "username", default: "", null: false
@@ -40,10 +40,26 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_10_005139) do
     t.string "totp_secret"
     t.boolean "totp_enabled", default: false, null: false
     t.integer "last_totp_at"
+    t.string "webauthn_id"
     t.index "lower(username)", name: "index_users_on_lower_username", unique: true
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
+    t.index ["webauthn_id"], name: "index_users_on_webauthn_id", unique: true
+  end
+
+  create_table "webauthn_credentials", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "external_id", null: false
+    t.string "public_key", null: false
+    t.bigint "sign_count", default: 0, null: false
+    t.string "nickname", null: false
+    t.datetime "last_used_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["external_id"], name: "index_webauthn_credentials_on_external_id", unique: true
+    t.index ["user_id"], name: "index_webauthn_credentials_on_user_id"
   end
 
   add_foreign_key "recovery_codes", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "webauthn_credentials", "users"
 end

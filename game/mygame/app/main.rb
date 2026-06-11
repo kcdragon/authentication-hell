@@ -16,14 +16,19 @@ module Main
                             h: PLAYER_H,
                             locked: false,
                             colliding: false,
-                            lock_confirmed: false }
+                            lock_confirmed: false,
+                            pending_challenge: nil }
 
-    # A stationary enemy parked off to the right. Walk into it to collide.
-    args.state.enemy ||= { x: SCREEN_W - ENEMY_W - 120,
-                           y: GROUND_Y,
-                           w: ENEMY_W,
-                           h: ENEMY_H,
-                           alive: true }
+    # Stationary enemies parked off to each side; walk into one to collide. Each
+    # carries its own auth kind (which re-auth flow it triggers) and its own
+    # colliding flag so contact fires once per enemy. Right = TOTP (purple),
+    # left = passkey (blue).
+    args.state.enemies ||= [
+      { x: SCREEN_W - ENEMY_W - 120, y: GROUND_Y, w: ENEMY_W, h: ENEMY_H,
+        alive: true, colliding: false, auth: :totp, r: 90, g: 60, b: 160 },
+      { x: 120, y: GROUND_Y, w: ENEMY_W, h: ENEMY_H,
+        alive: true, colliding: false, auth: :passkey, r: 60, g: 120, b: 200 }
+    ]
 
     # Fetch the logged-in user's name once from the Rails app. Same-origin, so the
     # session cookie rides along and /play/me answers as the current user.
@@ -56,15 +61,18 @@ module Main
     end
 
     # Fire once on contact (the transition, not every overlapping frame): report
-    # it, freeze the player, and retire the enemy for good.
-    if args.state.enemy.alive
-      colliding = args.state.player.intersect_rect?(args.state.enemy)
-      if colliding && !args.state.player.colliding
-        report_collision(args)
+    # it to that enemy's auth flow, freeze the player, and retire the enemy for good.
+    args.state.enemies.each do |enemy|
+      next unless enemy.alive
+
+      colliding = args.state.player.intersect_rect?(enemy)
+      if colliding && !enemy.colliding
+        report_collision(args, enemy.auth)
         args.state.player.locked = true
-        args.state.enemy.alive = false
+        args.state.player.pending_challenge = enemy.auth
+        enemy.alive = false
       end
-      args.state.player.colliding = colliding
+      enemy.colliding = colliding
     end
 
     # Only poll once the collision POST has landed, so a status check can't beat
@@ -84,13 +92,15 @@ module Main
     # Ground.
     args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: GROUND_Y, r: 83, g: 138, b: 64 }
 
-    # Enemy.
-    if args.state.enemy.alive
-      args.outputs.solids << { x: args.state.enemy.x,
-                               y: args.state.enemy.y,
-                               w: args.state.enemy.w,
-                               h: args.state.enemy.h,
-                               r: 90, g: 60, b: 160 }
+    # Enemies.
+    args.state.enemies.each do |enemy|
+      next unless enemy.alive
+
+      args.outputs.solids << { x: enemy.x,
+                               y: enemy.y,
+                               w: enemy.w,
+                               h: enemy.h,
+                               r: enemy.r, g: enemy.g, b: enemy.b }
     end
 
     # Player.
@@ -107,11 +117,21 @@ module Main
                              anchor_x: 0.5,
                              anchor_y: 0.5 }
 
-    locked_hint = "You bumped the enemy! Enter your TOTP code in the toast to continue."
-    move_hint = "(use the arrow keys or A/D to move)"
+    draw_hint(args)
+  end
+
+  def draw_hint(args)
+    hint = if !args.state.player.locked
+      "(use the arrow keys or A/D to move)"
+    elsif args.state.player.pending_challenge == :passkey
+      "You bumped the passkey enemy! Use the passkey toast to continue."
+    else
+      "You bumped the enemy! Enter your TOTP code in the toast to continue."
+    end
+
     args.outputs.labels << { x: 640,
                              y: 640,
-                             text: args.state.player.locked ? locked_hint : move_hint,
+                             text: hint,
                              size_px: 20,
                              anchor_x: 0.5,
                              anchor_y: 0.5 }
@@ -120,23 +140,23 @@ module Main
   # POST to the Rails app so it can broadcast a message to the page. Same-origin,
   # so the session cookie identifies the player; the body is empty but the API
   # wants form-encoded content.
-  def report_collision(args)
+  def report_collision(args, kind)
     args.state.collision_request = :pending
     args.state.collision_request = DR.http_post(
-      collision_url(args),
+      start_url(args, kind),
       {},
       [ "Content-Type: application/x-www-form-urlencoded" ]
     )
   end
 
-  # Poll /games/totp/status (~twice a second) while frozen; unfreeze once the
-  # server reports the lock cleared (a valid TOTP code was entered on the page).
+  # Poll /games/<kind>/status (~twice a second) while frozen; unfreeze once the
+  # server reports the lock cleared (the page completed the pending re-auth).
   def poll_unlock(args)
     request = args.state.status_request
 
     if !request
       if args.state.tick_count >= (args.state.next_poll_tick || 0)
-        args.state.status_request = DR.http_get(status_url(args))
+        args.state.status_request = DR.http_get(status_url(args, args.state.player.pending_challenge))
       end
     elsif request[:complete]
       if request[:http_response_code] == 200
@@ -151,6 +171,7 @@ module Main
   def unlock_player(args)
     args.state.player.locked = false
     args.state.player.lock_confirmed = false
+    args.state.player.pending_challenge = nil
   end
 
   # The Rails server's origin (scheme + host[:port]), baked into the bundle by
@@ -163,6 +184,6 @@ module Main
   end
 
   def me_url(args) = "#{server_base(args)}/play/me"
-  def collision_url(args) = "#{server_base(args)}/games/totp/collision"
-  def status_url(args) = "#{server_base(args)}/games/totp/status"
+  def start_url(args, kind) = "#{server_base(args)}/games/#{kind}/start"
+  def status_url(args, kind) = "#{server_base(args)}/games/#{kind}/status"
 end

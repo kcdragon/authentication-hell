@@ -66,4 +66,15 @@ class Totp::ChallengesControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to new_session_path
     assert_nil cookies[:session_id].presence
   end
+
+  test "create after the pending window expires redirects to sign in" do
+    start_pending_login
+
+    travel 11.minutes do
+      post totp_challenge_path, params: { code: ROTP::TOTP.new(@secret).now }
+    end
+
+    assert_redirected_to new_session_path
+    assert_nil cookies[:session_id].presence
+  end
 end

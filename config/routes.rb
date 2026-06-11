@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
   resource :session
   resource :registration, only: %i[ new create ]
+  resource :passkey_registration, only: :create
   resource :email_confirmation, only: %i[ new create show ], param: :token
   resources :passwords, param: :token
 
@@ -9,6 +10,19 @@ Rails.application.routes.draw do
     resource :enrollment, only: %i[ new create ]
     resource :recovery_codes, only: %i[ create ]
     resource :challenge, only: %i[ new create ]
+  end
+
+  namespace :webauthn do
+    resource  :settings, only: :show
+    resources :credentials, only: %i[ create destroy ] do
+      post :options, on: :collection
+    end
+    resource :authentication, only: :create do   # passwordless primary login
+      post :options, on: :collection
+    end
+    resource :challenge, only: :create do        # passkey as a second factor
+      post :options, on: :collection
+    end
   end
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
@@ -22,11 +36,14 @@ Rails.application.routes.draw do
   get "play" => "games#show", as: :play
   get "play/me" => "games#me", as: :play_me
 
-  # Game collision lock → TOTP re-auth (Games::TotpController).
   namespace :games do
-    get  "totp/status"    => "totp#status",    as: :totp_status
-    post "totp/collision" => "totp#collision", as: :totp_collision
-    post "totp/unlock"    => "totp#unlock",    as: :totp_unlock
+    get  "totp/status"   => "totp_challenge#status",   as: :totp_status
+    post "totp/start"    => "totp_challenge#start",    as: :totp_start
+    post "totp/complete" => "totp_challenge#complete", as: :totp_complete
+
+    get  "passkey/status"   => "passkey_challenge#status",   as: :passkey_status
+    post "passkey/start"    => "passkey_challenge#start",    as: :passkey_start
+    post "passkey/complete" => "passkey_challenge#complete", as: :passkey_complete
   end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
