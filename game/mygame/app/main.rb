@@ -1,11 +1,8 @@
+require "app/entities/player.rb"
+
 SCREEN_W = 1280
 SCREEN_H = 720
 GROUND_Y = 100
-PLAYER_W = 64
-PLAYER_H = 96
-MOVE_SPEED = 8
-JUMP_SPEED = 20
-GRAVITY = 1
 
 ENEMY_W = 64
 ENEMY_H = 96
@@ -27,16 +24,7 @@ PLATFORMS = [
 
 module Main
   def tick(args)
-    args.state.player ||= { x: (SCREEN_W - PLAYER_W) / 2,
-                            y: GROUND_Y,
-                            w: PLAYER_W,
-                            h: PLAYER_H,
-                            vy: 0,
-                            grounded: true,
-                            locked: false,
-                            colliding: false,
-                            lock_confirmed: false,
-                            pending_challenge: nil }
+    args.state.player ||= Player.new
 
     # Stationary enemies parked off to each side; walk into one to collide. Each
     # carries its own auth kind (which re-auth flow it triggers) and its own
@@ -67,57 +55,16 @@ module Main
       args.state.name_request = :done
     end
 
-    # Move the player left/right with the arrow keys. No wrapping — clamp to
-    # screen. Space jumps when grounded. All frozen while locked, until they
-    # re-authenticate.
-    unless args.state.player.locked
-      if args.inputs.keyboard.left
-        args.state.player.x -= MOVE_SPEED
-      elsif args.inputs.keyboard.right
-        args.state.player.x += MOVE_SPEED
-      end
-
-      args.state.player.x = args.state.player.x.clamp(0, SCREEN_W - PLAYER_W)
-
-      # Jump on the press edge so holding space doesn't re-launch every frame.
-      # Only off the ground or a platform.
-      if args.inputs.keyboard.key_down.space && args.state.player.grounded
-        args.state.player.vy = JUMP_SPEED
-        args.state.player.grounded = false
-      end
-
-      args.state.player.vy -= GRAVITY
-      prev_y = args.state.player.y
-      args.state.player.y += args.state.player.vy
-
-      args.state.player.grounded = false
-      if args.state.player.y <= GROUND_Y
-        args.state.player.y = GROUND_Y
-        args.state.player.vy = 0
-        args.state.player.grounded = true
-      elsif args.state.player.vy <= 0
-        # One-way platforms: land only while descending and only if the player's
-        # bottom crossed the platform's top this frame (so you pass up through it).
-        PLATFORMS.each do |plat|
-          top = plat.y + plat.h
-          horizontal = args.state.player.x + args.state.player.w > plat.x &&
-                       args.state.player.x < plat.x + plat.w
-          if horizontal && prev_y >= top && args.state.player.y <= top
-            args.state.player.y = top
-            args.state.player.vy = 0
-            args.state.player.grounded = true
-            break
-          end
-        end
-      end
-    end
+    # Input, jumping, gravity, and platform/ground collision (frozen while
+    # locked) — all owned by the player.
+    args.state.player.update(args)
 
     # Fire once on contact (the transition, not every overlapping frame): report
     # it to that enemy's auth flow, freeze the player, and retire the enemy for good.
     args.state.enemies.each do |enemy|
       next unless enemy.alive
 
-      colliding = args.state.player.intersect_rect?(enemy)
+      colliding = enemy.intersect_rect?(args.state.player)
       if colliding && !enemy.colliding
         report_collision(args, enemy.auth)
         args.state.player.locked = true
@@ -161,12 +108,7 @@ module Main
                                r: enemy.r, g: enemy.g, b: enemy.b }
     end
 
-    # Player.
-    args.outputs.solids << { x: args.state.player.x,
-                             y: args.state.player.y,
-                             w: args.state.player.w,
-                             h: args.state.player.h,
-                             r: 200, g: 60, b: 60 }
+    args.state.player.render(args)
 
     args.outputs.labels << { x: 640,
                              y: 680,
