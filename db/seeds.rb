@@ -21,7 +21,7 @@ dev_passkey = Rails.application.credentials.dev_passkey if Rails.env.development
 
 user = User.find_or_initialize_by(email_address: "mike@example.com")
 user.username = "mike"
-user.password = "password"
+user.password = User::DEV_PASSWORD
 user.webauthn_id = dev_passkey[:webauthn_id] if dev_passkey
 user.confirmed_at ||= Time.current
 user.save!
