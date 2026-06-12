@@ -51,20 +51,27 @@ module Main
     # locked) — all owned by the player.
     args.state.player.update(args)
 
-    # Fire once on contact (the transition, not every overlapping frame): report
-    # it to that enemy's auth flow, freeze the player, and retire the enemy for good.
+    # Fire once on contact (the transition, not every overlapping frame): dock a
+    # heart, retire the enemy for good, then either game-over (last heart) or kick
+    # off that enemy's auth flow and freeze the player.
     args.state.enemies.each do |enemy|
       next unless enemy.alive
 
       colliding = args.geometry.intersect_rect?(enemy, args.state.player)
       if colliding && !enemy.colliding
-        report_collision(args, enemy.auth)
-        args.state.player.locked = true
-        args.state.player.pending_challenge = enemy.auth
+        args.state.player.hearts -= 1
         enemy.alive = false
+        if args.state.player.hearts <= 0
+          # Losing the last heart ends the run; skip the re-auth (nothing to unlock).
+          args.state.player.game_over = true
+        else
+          report_collision(args, enemy.auth)
+          args.state.player.locked = true
+          args.state.player.pending_challenge = enemy.auth
+        end
       end
       enemy.colliding = colliding
-    end
+    end unless args.state.player.game_over
 
     # Only poll once the collision POST has landed, so a status check can't beat
     # the server flag. Drop the (non-serializable) handle so state export works.
@@ -94,6 +101,8 @@ module Main
 
     args.state.player.render(args)
 
+    draw_hearts(args)
+
     args.outputs.labels << { x: 640,
                              y: 680,
                              text: "Hello, #{args.state.username}!",
@@ -101,7 +110,36 @@ module Main
                              anchor_x: 0.5,
                              anchor_y: 0.5 }
 
-    draw_hint(args)
+    if args.state.player.game_over
+      draw_game_over(args)
+    else
+      draw_hint(args)
+    end
+  end
+
+  # Three heart slots in the top-left: full alpha for hearts the player still has,
+  # dimmed for the ones they've lost.
+  def draw_hearts(args)
+    Player::MAX_HEARTS.times do |i|
+      args.outputs.sprites << { x: 20 + i * 40,
+                                y: SCREEN_H - 52,
+                                w: 32,
+                                h: 32,
+                                path: "sprites/ui/heart.png",
+                                a: i < args.state.player.hearts ? 255 : 60 }
+    end
+  end
+
+  # Dim the scene and announce the run is over (the player is frozen).
+  def draw_game_over(args)
+    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H, r: 0, g: 0, b: 0, a: 150 }
+    args.outputs.labels << { x: 640,
+                             y: 360,
+                             text: "Game Over",
+                             size_px: 60,
+                             r: 255, g: 255, b: 255,
+                             anchor_x: 0.5,
+                             anchor_y: 0.5 }
   end
 
   def draw_hint(args)
