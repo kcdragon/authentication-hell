@@ -1,11 +1,9 @@
 require "app/entities/player.rb"
+require "app/entities/enemy.rb"
 
 SCREEN_W = 1280
 SCREEN_H = 720
 GROUND_Y = 100
-
-ENEMY_W = 64
-ENEMY_H = 96
 
 PLATFORM_W = 260
 PLATFORM_H = 30
@@ -28,14 +26,8 @@ module Main
 
     # Stationary enemies parked off to each side; walk into one to collide. Each
     # carries its own auth kind (which re-auth flow it triggers) and its own
-    # colliding flag so contact fires once per enemy. Right = TOTP (purple),
-    # left = passkey (blue).
-    args.state.enemies ||= [
-      { x: SCREEN_W - ENEMY_W - 120, y: GROUND_Y, w: ENEMY_W, h: ENEMY_H,
-        alive: true, colliding: false, auth: :totp, r: 90, g: 60, b: 160 },
-      { x: 120, y: GROUND_Y, w: ENEMY_W, h: ENEMY_H,
-        alive: true, colliding: false, auth: :passkey, r: 60, g: 120, b: 200 }
-    ]
+    # colliding flag so contact fires once per enemy.
+    args.state.enemies ||= Enemy.spawn_defaults
 
     # Fetch the logged-in user's name once from the Rails app. Same-origin, so the
     # session cookie rides along and /play/me answers as the current user.
@@ -64,7 +56,7 @@ module Main
     args.state.enemies.each do |enemy|
       next unless enemy.alive
 
-      colliding = enemy.intersect_rect?(args.state.player)
+      colliding = args.geometry.intersect_rect?(enemy, args.state.player)
       if colliding && !enemy.colliding
         report_collision(args, enemy.auth)
         args.state.player.locked = true
@@ -98,15 +90,7 @@ module Main
     end
 
     # Enemies.
-    args.state.enemies.each do |enemy|
-      next unless enemy.alive
-
-      args.outputs.solids << { x: enemy.x,
-                               y: enemy.y,
-                               w: enemy.w,
-                               h: enemy.h,
-                               r: enemy.r, g: enemy.g, b: enemy.b }
-    end
+    args.state.enemies.each { |enemy| enemy.render(args) if enemy.alive }
 
     args.state.player.render(args)
 
