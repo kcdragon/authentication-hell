@@ -2,6 +2,10 @@ class User < ApplicationRecord
   TOTP_ISSUER = "Authentication Hell".freeze
   RECOVERY_CODE_COUNT = 10
 
+  # The password db/seeds.rb gives the dev user; also prefilled into the game's
+  # password challenge in development. Dev/seed convenience only, never used in production.
+  DEV_PASSWORD = "password".freeze
+
   has_secure_password validations: false
   has_many :sessions, dependent: :destroy
   has_many :recovery_codes, dependent: :destroy

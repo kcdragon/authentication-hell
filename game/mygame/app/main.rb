@@ -109,6 +109,8 @@ module Main
       "(arrow keys or A/D to move, space to jump)"
     elsif args.state.player.pending_challenge == :passkey
       "You bumped the passkey enemy! Use the passkey toast to continue."
+    elsif args.state.player.pending_challenge == :password
+      "You bumped the password enemy! Enter your password in the toast to continue."
     else
       "You bumped the enemy! Enter your TOTP code in the toast to continue."
     end

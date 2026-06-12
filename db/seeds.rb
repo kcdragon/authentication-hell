@@ -13,7 +13,7 @@ return unless Rails.env.local?
 
 user = User.find_or_initialize_by(email_address: "mike@example.com")
 user.username = "mike"
-user.password = "password"
+user.password = User::DEV_PASSWORD
 user.confirmed_at ||= Time.current
 user.save!
 

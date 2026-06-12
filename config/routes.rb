@@ -45,6 +45,10 @@ Rails.application.routes.draw do
     post "passkey/start"    => "passkey_challenge#start",    as: :passkey_start
     post "passkey/options"  => "passkey_challenge#options",  as: :passkey_options
     post "passkey/complete" => "passkey_challenge#complete", as: :passkey_complete
+
+    get  "password/status"   => "password_challenge#status",   as: :password_status
+    post "password/start"    => "password_challenge#start",    as: :password_start
+    post "password/complete" => "password_challenge#complete", as: :password_complete
   end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)

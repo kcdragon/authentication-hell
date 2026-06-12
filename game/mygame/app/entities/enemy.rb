@@ -5,19 +5,22 @@ class Enemy
   WIDTH = 64
   HEIGHT = 96
 
-  # Each auth kind colors its enemy: TOTP purple, passkey blue.
+  # Each auth kind colors its enemy: TOTP purple, passkey blue, password amber.
   AUTH_COLORS = {
     totp: { r: 90, g: 60, b: 160 },
-    passkey: { r: 60, g: 120, b: 200 }
+    passkey: { r: 60, g: 120, b: 200 },
+    password: { r: 200, g: 140, b: 40 }
   }
 
   attr_accessor :x, :y, :w, :h, :alive, :colliding, :auth, :r, :g, :b
 
-  # The two enemies parked off to each side: TOTP on the right, passkey on the left.
+  # The three enemies, spaced so none overlaps the player's centered spawn:
+  # passkey on the left, password right-of-center, TOTP on the right.
   def self.spawn_defaults
     [
       new(x: SCREEN_W - WIDTH - 120, auth: :totp),
-      new(x: 120, auth: :passkey)
+      new(x: 120, auth: :passkey),
+      new(x: (SCREEN_W - WIDTH) / 2 + 240, auth: :password)
     ]
   end
 
