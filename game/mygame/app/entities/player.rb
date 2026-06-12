@@ -6,6 +6,7 @@ class Player
   MOVE_SPEED = 8
   JUMP_SPEED = 20
   GRAVITY = 1
+  MAX_HEARTS = 3
 
   # The character art fills only a sub-rectangle of each 64x64 sprite frame (the
   # rest is transparent padding); SPRITE_CROP_* bounds it (cols 24..39, rows
@@ -17,7 +18,8 @@ class Player
   SPRITE_CROP_H = 31
 
   attr_accessor :x, :y, :w, :h, :vy, :grounded, :facing,
-                :locked, :colliding, :lock_confirmed, :pending_challenge
+                :locked, :colliding, :lock_confirmed, :pending_challenge,
+                :hearts, :game_over
 
   def initialize
     @x = (SCREEN_W - WIDTH) / 2
@@ -31,12 +33,14 @@ class Player
     @colliding = false
     @lock_confirmed = false
     @pending_challenge = nil
+    @hearts = MAX_HEARTS
+    @game_over = false
   end
 
   # Move left/right with the arrow keys (no wrapping — clamp to screen); space
   # jumps when grounded. Frozen while locked, until the player re-authenticates.
   def update(args)
-    return if @locked
+    return if @locked || @game_over
 
     if args.inputs.keyboard.left
       @x -= MOVE_SPEED
@@ -103,7 +107,7 @@ class Player
   def serialize
     { x: @x, y: @y, w: @w, h: @h, vy: @vy, grounded: @grounded, facing: @facing,
       locked: @locked, colliding: @colliding, lock_confirmed: @lock_confirmed,
-      pending_challenge: @pending_challenge }
+      pending_challenge: @pending_challenge, hearts: @hearts, game_over: @game_over }
   end
 
   def inspect = serialize.to_s
