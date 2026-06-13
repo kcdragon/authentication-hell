@@ -89,7 +89,7 @@ class PlayerTest < Minitest::Test
   end
 
   def test_lands_on_a_platform_while_descending
-    platform = Platform.new(180, 250, 200, 30) # top edge at y = 280
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
     @player.x = 200
     @player.y = 285
     @player.vy = -10

@@ -10,6 +10,10 @@ require "minitest/autorun"
 require_relative "../app/constants"
 require_relative "../app/entities/player"
 require_relative "../app/entities/enemy"
+require_relative "../app/entities/platform"
+require_relative "../app/entities/enemies/totp"
+require_relative "../app/entities/enemies/passkey"
+require_relative "../app/entities/enemies/password"
 require_relative "../app/levels/level"
 require_relative "../app/levels/00_tutorial"
 require_relative "../app/levels/01_main"
@@ -17,7 +21,7 @@ require_relative "../app/levels/01_main"
 # Minimal stand-ins for DragonRuby's `args`. The entities only read a handful of
 # input/state fields and append to output arrays, so plain Structs suffice. Use
 # Structs (not Hashes) because the engine's hashes quack like attr_accessor —
-# code reads `plat.x`, not `plat[:x]` — which plain Ruby hashes don't.
+# code reads `mouse.x`, not `mouse[:x]` — which plain Ruby hashes don't.
 module GameTest
   Mouse = Struct.new(:click, :x)
   KeyDown = Struct.new(:space)
@@ -26,7 +30,6 @@ module GameTest
   State = Struct.new(:camera_x, :platforms, :enemies, :player)
   Outputs = Struct.new(:sprites, :solids, :labels)
   Args = Struct.new(:inputs, :state, :outputs)
-  Platform = Struct.new(:x, :y, :w, :h)
 
   # Build an `args` double for a single tick. Defaults mean "no input".
   def build_args(mouse_click: false, mouse_x: 0, left: false, right: false,
