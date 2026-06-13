@@ -42,6 +42,29 @@ module Main
       args.state.name_request = :done
     end
 
+    # The "fake training video" frame: the game opens paused on a poster with a
+    # giant play button, as if a corporate-training clip hasn't started. The world
+    # stays frozen until the player presses play; everything below runs only once
+    # the run has begun (started), except rendering, which always draws so the
+    # poster is visible.
+    if !args.state.started
+      handle_poster_input(args)
+    else
+      update_world(args)
+    end
+
+    render_world(args)
+  end
+
+  # While paused on the poster, a click or space "presses play" and starts the run.
+  def handle_poster_input(args)
+    if args.inputs.mouse.click || args.inputs.keyboard.key_down.space
+      args.state.started = true
+    end
+  end
+
+  # One tick of live gameplay (only while the run is started and not over).
+  def update_world(args)
     # Input, jumping, gravity, and platform/ground collision (frozen while
     # locked) — all owned by the player.
     args.state.player.update(args)
@@ -128,12 +151,23 @@ module Main
 
     poll_unlock(args) if args.state.player.locked && args.state.player.lock_confirmed
 
-    cam = args.state.camera_x
+    # On game over the run can be restarted from the "Video Ended" card.
+    restart_run(args) if args.state.player.game_over && args.inputs.keyboard.key_down.r
+  end
 
-    # Wall and floor are flat and uniform, so they fill the viewport directly
-    # (no camera offset needed).
-    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H, r: 214, g: 209, b: 198 }
-    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: GROUND_Y, r: 118, g: 122, b: 128 }
+  # Draw the whole frame: the warm-paper playfield, the world entities, then the
+  # video-player chrome (control bar / scrubber / HUD) over it, then the active
+  # overlay (poster, buffering, or the game-over card).
+  def render_world(args)
+    # camera_x is set by update_world, which is gated behind `started` — so on the
+    # poster frames before play begins it's still unset. Default to 0 so rendering
+    # always has a numeric camera.
+    cam = args.state.camera_x ||= 0
+
+    # Warm paper wall fills the viewport; the control bar (= floor) is drawn by
+    # draw_control_bar below, so its top edge reads as the ground line.
+    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H,
+                             r: PAPER[0], g: PAPER[1], b: PAPER[2] }
 
     # World entities are in world coords; each subtracts the camera offset to draw.
     args.state.platforms.each { |plat| plat.render(args, cam) }
@@ -144,67 +178,221 @@ module Main
 
     args.state.player.render(args, cam)
 
+    # Video-player chrome over the world: the dark control bar (its lip is the
+    # floor line), the scrubber driven by world progress, and the HUD hearts.
+    draw_control_bar(args)
     draw_hearts(args)
 
     args.outputs.labels << { x: 640,
                              y: 680,
                              text: "Hello, #{args.state.username}!",
-                             size_px: 30,
+                             size_px: 26,
+                             font: FONT_MONO_B,
+                             r: INK[0], g: INK[1], b: INK[2],
                              anchor_x: 0.5,
                              anchor_y: 0.5 }
 
-    if args.state.player.game_over
-      draw_game_over(args)
+    if !args.state.started
+      draw_poster(args)
+    elsif args.state.player.game_over
+      draw_video_ended(args)
     elsif args.state.player.locked
-      draw_challenge_hint(args)
+      draw_buffering(args)
     else
       args.state.level.draw(args)
     end
   end
 
-  # Three heart slots in the top-left: full alpha for hearts the player still has,
-  # dimmed for the ones they've lost.
+  # Fraction of the world the player has crossed (0..1) — drives the scrubber fill
+  # and the faux timestamp so "playback progress" tracks how far they've advanced.
+  def progress(args)
+    (args.state.player.x.to_f / (WORLD_W - Player::WIDTH)).clamp(0.0, 1.0)
+  end
+
+  # m:ss for a 0..1 fraction of the faux VIDEO_SECONDS runtime.
+  def timecode(fraction)
+    total = (fraction * VIDEO_SECONDS).round
+    format("%d:%02d", total / 60, total % 60)
+  end
+
+  # The bottom control bar doubles as the floor: a dark indigo band filling
+  # everything below the floor line (GROUND_Y), with a lighter lip on top that the
+  # player visibly stands on. Holds the scrubber and the playback controls so the
+  # whole thing reads as a video player's transport.
+  def draw_control_bar(args)
+    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: BAR_TOP,
+                             r: INDIGO[0], g: INDIGO[1], b: INDIGO[2] }
+    args.outputs.solids << { x: 0, y: BAR_TOP - 3, w: SCREEN_W, h: 3,
+                             r: INDIGO_LIP[0], g: INDIGO_LIP[1], b: INDIGO_LIP[2] }
+
+    draw_scrubber(args)
+    draw_transport(args)
+  end
+
+  # The scrubber: a track, a cosmetic "buffered" bar running ahead of progress (so
+  # it always looks like a video pre-loading), the green progress fill, and a
+  # playhead handle. The handle goes red and stops advancing on game over; on a
+  # collision it stalls and rings in the enemy's color (handled by the caller's
+  # state — here it just reflects progress).
+  def draw_scrubber(args)
+    frac = progress(args)
+    track_y = SCRUBBER_Y
+
+    args.outputs.solids << { x: SCRUBBER_X, y: track_y, w: SCRUBBER_W, h: SCRUBBER_H,
+                             r: INDIGO_LIP[0], g: INDIGO_LIP[1], b: INDIGO_LIP[2] }
+
+    buffered = (frac + 0.22).clamp(0.0, 1.0)
+    args.outputs.solids << { x: SCRUBBER_X, y: track_y, w: SCRUBBER_W * buffered, h: SCRUBBER_H,
+                             r: MUTED[0], g: MUTED[1], b: MUTED[2] }
+
+    args.outputs.solids << { x: SCRUBBER_X, y: track_y, w: SCRUBBER_W * frac, h: SCRUBBER_H,
+                             r: GREEN[0], g: GREEN[1], b: GREEN[2] }
+
+    # Playhead: paper-white normally, red once the "video" has ended.
+    handle_color = args.state.player.game_over ? RED : CARD
+    hx = SCRUBBER_X + SCRUBBER_W * frac
+    args.outputs.solids << { x: hx - 8, y: track_y + SCRUBBER_H / 2 - 8, w: 16, h: 16,
+                             r: INDIGO[0], g: INDIGO[1], b: INDIGO[2] }
+    args.outputs.solids << { x: hx - 6, y: track_y + SCRUBBER_H / 2 - 6, w: 12, h: 12,
+                             r: handle_color[0], g: handle_color[1], b: handle_color[2] }
+  end
+
+  # The transport row: a play/pause button on the left and the faux timestamp next
+  # to it, plus the usual CC / speed / fullscreen affordances on the right — all
+  # static (the buttons aren't wired; they only sell the video-player disguise).
+  def draw_transport(args)
+    # Play/pause button (blue, paper glyph). Shows pause while playing, play when
+    # the run hasn't started or has ended.
+    bx = SCRUBBER_X
+    by = CONTROLS_Y
+    args.outputs.solids << { x: bx, y: by, w: 34, h: 34, r: BLUE[0], g: BLUE[1], b: BLUE[2] }
+    playing = args.state.started && !args.state.player.game_over && !args.state.player.locked
+    if playing
+      args.outputs.solids << { x: bx + 11, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+      args.outputs.solids << { x: bx + 19, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+    else
+      args.outputs.solids << { x: bx + 12, y: by + 8, w: 13, h: 18, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+    end
+
+    frac = progress(args)
+    args.outputs.labels << { x: bx + 48, y: by + 26,
+                             text: "#{timecode(frac)} / #{timecode(1.0)}",
+                             size_px: 22, font: FONT_MONO,
+                             r: TS_INK[0], g: TS_INK[1], b: TS_INK[2],
+                             anchor_x: 0, anchor_y: 1 }
+
+    args.outputs.labels << { x: SCREEN_W - SCRUBBER_X, y: by + 26,
+                             text: "CC   1.0×   ⛶",
+                             size_px: 20, font: FONT_MONO,
+                             r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2],
+                             anchor_x: 1, anchor_y: 1 }
+  end
+
+  # Three heart slots in the top-left: the full sprite for hearts the player still
+  # has, the spent (empty) sprite for the ones they've lost — a crisper read than
+  # fading the red one, and it matches the site's locked/empty treatment.
   def draw_hearts(args)
     Player::MAX_HEARTS.times do |i|
-      args.outputs.sprites << { x: 20 + i * 40,
-                                y: SCREEN_H - 52,
-                                w: 32,
-                                h: 32,
-                                path: "sprites/ui/heart.png",
-                                a: i < args.state.player.hearts ? 255 : 60 }
+      have = i < args.state.player.hearts
+      args.outputs.sprites << { x: 24 + i * 42,
+                                y: SCREEN_H - 60,
+                                w: 36,
+                                h: 33,
+                                path: have ? "sprites/ui/heart_hardmode.png" : "sprites/ui/heart_empty.png" }
     end
   end
 
-  # Dim the scene and announce the run is over (the player is frozen).
-  def draw_game_over(args)
-    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H, r: 0, g: 0, b: 0, a: 150 }
-    args.outputs.labels << { x: 640,
-                             y: 360,
-                             text: "Game Over",
-                             size_px: 60,
-                             r: 255, g: 255, b: 255,
-                             anchor_x: 0.5,
-                             anchor_y: 0.5 }
+  # The poster / paused start state: a scrim over the play area lifts a giant blue
+  # play button (the site's primary action) with a true-black ink border + hard
+  # offset shadow, plus the "AUTHENTICATION 101" title card. Clicking (or space)
+  # "presses play" and starts the run — see handle_poster_input.
+  def draw_poster(args)
+    # Scrim over the play area only (above the control bar), so the transport stays
+    # crisp underneath.
+    args.outputs.solids << { x: 0, y: BAR_TOP, w: SCREEN_W, h: SCREEN_H - BAR_TOP,
+                             r: PAPER[0], g: PAPER[1], b: PAPER[2], a: 90 }
+
+    cx = 640
+    cy = 392
+    size = 128
+    # Hard offset shadow, then the ink border, then the blue button face.
+    args.outputs.solids << { x: cx - size / 2 + 9, y: cy - size / 2 - 9, w: size, h: size,
+                             r: INK[0], g: INK[1], b: INK[2] }
+    args.outputs.solids << { x: cx - size / 2, y: cy - size / 2, w: size, h: size,
+                             r: INK[0], g: INK[1], b: INK[2] }
+    args.outputs.solids << { x: cx - size / 2 + 4, y: cy - size / 2 + 4, w: size - 8, h: size - 8,
+                             r: BLUE[0], g: BLUE[1], b: BLUE[2] }
+    # Play triangle (paper), nudged right to optically center. A solid-color
+    # triangle is a three-point entry on outputs.solids (x/y, x2/y2, x3/y3).
+    args.outputs.solids << { x: cx - 18, y: cy + 30, x2: cx - 18, y2: cy - 30,
+                             x3: cx + 32, y3: cy,
+                             r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+
+    args.outputs.labels << { x: cx, y: cy - 104, text: "AUTHENTICATION 101",
+                             size_px: 30, font: FONT_DISPLAY,
+                             r: INK[0], g: INK[1], b: INK[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
+    args.outputs.labels << { x: cx, y: cy - 140, text: "click play to begin onboarding",
+                             size_px: 18, font: FONT_MONO,
+                             r: MUTED[0], g: MUTED[1], b: MUTED[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
   end
 
-  # The locked re-auth prompt, shared by every level: which enemy you bumped and
-  # where to finish (the page toast).
-  def draw_challenge_hint(args)
-    hint = case args.state.player.pending_challenge
-    when :passkey
-      "You bumped the passkey enemy! Use the passkey toast to continue."
-    when :password
-      "You bumped the password enemy! Enter your password in the toast to continue."
-    else
-      "You bumped the enemy! Enter your TOTP code in the toast to continue."
+  # Collision → "the tape buffers." The loud brutalist challenge card lives in HTML
+  # over the canvas, so the in-canvas treatment stays quiet: a spinner and a single
+  # mono line tinted to the enemy's color, pointing at the toast.
+  def draw_buffering(args)
+    color = challenge_color(args.state.player.pending_challenge)
+
+    # Spinner: a faint full ring with a colored arc that rotates over time.
+    spin = (args.state.tick_count % 60) * 6
+    8.times do |i|
+      ang = (spin + i * 45) * Math::PI / 180
+      bx = 640 + Math.cos(ang) * 26
+      by = 470 + Math.sin(ang) * 26
+      lead = i >= 6
+      args.outputs.solids << { x: bx - 3, y: by - 3, w: 6, h: 6,
+                               r: lead ? color[0] : 217, g: lead ? color[1] : 205, b: lead ? color[2] : 176 }
     end
 
-    args.outputs.labels << { x: 640,
-                             y: 640,
-                             text: hint,
-                             size_px: 20,
-                             anchor_x: 0.5,
-                             anchor_y: 0.5 }
+    label = case args.state.player.pending_challenge
+    when :passkey then "BUFFERING — approve the passkey toast to resume →"
+    when :password then "BUFFERING — enter your password in the toast to resume →"
+    else "BUFFERING — enter your TOTP code in the toast to resume →"
+    end
+    args.outputs.labels << { x: 640, y: 420, text: label,
+                             size_px: 22, font: FONT_MONO_B,
+                             r: color[0], g: color[1], b: color[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
+  end
+
+  # Out of lives → "Video Ended": the one moment the canvas goes loud on its own.
+  # A full-canvas indigo dim, the Archivo Black headline in paper, a red rule, and
+  # a Replay prompt. No card — the site's flash/challenge surfaces use cards; this
+  # dim just speaks the red/error voice without copying a dialog.
+  def draw_video_ended(args)
+    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H,
+                             r: INDIGO[0], g: INDIGO[1], b: INDIGO[2], a: 184 }
+    args.outputs.labels << { x: 640, y: 408, text: "Video Ended",
+                             size_px: 96, font: FONT_DISPLAY,
+                             r: PAPER[0], g: PAPER[1], b: PAPER[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
+    # 5px red rule under the headline — the one bit of color on the dim.
+    args.outputs.solids << { x: 640 - 210, y: 350, w: 420, h: 5,
+                             r: RED[0], g: RED[1], b: RED[2] }
+    args.outputs.labels << { x: 640, y: 318, text: "↺ Replay · press R",
+                             size_px: 22, font: FONT_MONO,
+                             r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
+  end
+
+  # The semantic color for a pending challenge kind (matches the HTML toasts).
+  def challenge_color(kind)
+    case kind
+    when :passkey then BLUE
+    when :password then AMBER
+    else PURPLE
+    end
   end
 
   # POST to the Rails app so it can broadcast a message to the page. Same-origin,
@@ -262,6 +450,16 @@ module Main
     report_level_complete(args, args.state.level.number)
     args.state.level = args.state.level.next_level
     args.state.level.setup(args)
+  end
+
+  # Replay from the "Video Ended" card: reset the player and scene back to the
+  # opening tutorial and re-seed it. The poster is skipped (the run is already
+  # "playing" — they pressed Replay), so play resumes immediately.
+  def restart_run(args)
+    args.state.player = Player.new
+    args.state.level = TutorialLevel.new
+    args.state.level.setup(args)
+    args.state.camera_x = 0
   end
 
   # The Rails server's origin (scheme + host[:port]), baked into the bundle by

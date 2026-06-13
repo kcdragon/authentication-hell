@@ -18,13 +18,17 @@ class PlatformTest < Minitest::Test
     assert_equal 3, Platform.scatter(count: 3).length
   end
 
-  def test_render_emits_a_camera_offset_solid
+  def test_render_emits_camera_offset_solids
     platform = Platform.new(x: 500, y: 220, w: 200, h: 30)
     args = build_args
     platform.render(args, 100)
-    solid = args.outputs.solids.first
-    assert_equal 400, solid[:x] # world x minus camera
-    assert_equal 220, solid[:y]
+    # Two solids: the ink border/underside, then the inset white face. Both are
+    # camera-offset; the face sits at the ledge top (inset 3px).
+    border, face = args.outputs.solids
+    assert_equal 400, border[:x]                    # world x minus camera
+    assert_equal 220 - Platform::UNDERSIDE_H, border[:y]
+    assert_equal 403, face[:x]                       # inset 3px
+    assert_equal 223, face[:y]
   end
 
   def test_serialize_exposes_the_rect

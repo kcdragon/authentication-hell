@@ -15,6 +15,8 @@ class MainLevel < Level
   def draw(args)
     args.outputs.labels << { x: 640, y: 640,
                              text: "(arrow keys or A/D to move, space to jump, click to swing)",
-                             size_px: 20, anchor_x: 0.5, anchor_y: 0.5 }
+                             size_px: 18, font: FONT_MONO,
+                             r: MUTED[0], g: MUTED[1], b: MUTED[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
   end
 end

@@ -20,8 +20,11 @@ class HeartPickup
 
   def render(args, camera_x = 0)
     bob = Math.sin(args.state.tick_count / 15.0) * BOB
-    args.outputs.sprites << { x: @x - camera_x, y: @y + bob, w: @w, h: @h,
-                              path: "sprites/ui/heart.png" }
+    # Draw the HUD heart sprite (120x110) at the pickup's width, keeping its aspect
+    # ratio so it isn't squished into the square hitbox.
+    sprite_h = @w * 110 / 120
+    args.outputs.sprites << { x: @x - camera_x, y: @y + bob, w: @w, h: sprite_h,
+                              path: "sprites/ui/heart_hardmode.png" }
   end
 
   # DragonRuby exports args.state for its dev tools; give it a plain-hash view (see

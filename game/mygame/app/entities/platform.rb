@@ -31,8 +31,20 @@ class Platform
     @h = h
   end
 
+  # A "desk/shelf" ledge drawn as a brutalist white card: an ink border, a white
+  # face inset 3px, and an ink "underside" band flush below the face for built-in
+  # thickness. The band is part of the object, so it scrolls with the platform —
+  # no offset drop-shadow (which would crawl against the parallax). Border + band
+  # use INDIGO to match the video chrome; the face stays neutral so the semantic
+  # colors stay reserved for enemies/HUD.
+  UNDERSIDE_H = 7
+
   def render(args, camera_x = 0)
-    args.outputs.solids << { x: @x - camera_x, y: @y, w: @w, h: @h, r: 168, g: 138, b: 102 }
+    sx = @x - camera_x
+    args.outputs.solids << { x: sx, y: @y - UNDERSIDE_H, w: @w, h: @h + UNDERSIDE_H,
+                             r: INDIGO[0], g: INDIGO[1], b: INDIGO[2] }
+    args.outputs.solids << { x: sx + 3, y: @y + 3, w: @w - 6, h: @h - 6,
+                             r: CARD[0], g: CARD[1], b: CARD[2] }
   end
 
   # DragonRuby exports args.state for its dev tools; give it a plain-hash view (see

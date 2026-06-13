@@ -60,6 +60,24 @@ The app is a gamified auth system: a full credential stack (sign-up, sign-in, em
 - **Presentation helpers:** `application_helper#avatar_badge` (uploaded variant or initial-letter fallback), `totp_helper#totp_qr_code` (inline SVG via rqrcode). The `games/*_helper` files only compute per-user DOM ids for the challenge toasts.
 - **Game overlay toasts** (`app/views/games/_*.html.erb`, fixed bottom-right over the canvas): the three persistent challenge toasts (`_totp_challenge` purple, `_password_challenge` amber, `_passkey_challenge` blue — each an inline re-auth form dismissed only by a valid answer) and two ephemeral auto-fading ones (`_toast` generic collision, `_achievement_toast` gold). The keyframes (`toast-fade`/`toast-collapse` for ephemeral, `challenge-toast-in` for persistent) live in the Tailwind source; comments there explain the two-animation split.
 
+#### Game visual re-skin — "The Onboarding Tape" (video-player frame)
+
+The game at `/game` is re-skinned (Claude Design handoff in `game/README-video-player.md`) to read as an embedded **corporate-training video player**: the fiction is that a new hire thinks they're *watching* "Authentication 101," but they're actually *playing* the platformer. It's **visual-only** — no geometry, collision, camera, or resolution change (fixed 1280×720, world 6400px wide). Character art (player + enemy sprites) was **deferred** — this pass is environment + video-player chrome only.
+
+Design tokens + chrome geometry live in `game/mygame/app/constants.rb` (palette `PAPER/INK/INDIGO/...` as `[r,g,b]`, the semantic `BLUE/GREEN/RED/PURPLE/AMBER`, scrubber/bar layout, font paths). The drawing all lives in `main.rb` (engine-only, untested); the entities/levels stay plain-Ruby testable.
+
+- **Scene:** warm-paper wall (`PAPER`); the bottom **control bar = the floor** — a dark `INDIGO` band filling everything below `GROUND_Y` with an `INDIGO_LIP` lip the player stands on. Keeping the bar height = `GROUND_Y` means physics is unchanged (the lip lands exactly on the existing ground line).
+- **Platforms** (`entities/platform.rb`): white card face + `INDIGO` ink border + a 7px ink underside band (drawn *with* the platform, no offset drop-shadow — a baked shadow would crawl against the scroll).
+- **Video chrome** (`main.rb` `draw_control_bar`/`draw_scrubber`/`draw_transport`): a scrubber (track / cosmetic "buffered" bar / green progress fill / playhead) whose fill + a faux `m:ss / 3:20` timestamp are driven by `player.x / WORLD_W`; a play/pause glyph and static CC/speed/fullscreen affordances. **No chapter ticks** (decided against — they'd spoil enemy positions).
+- **New states** (beyond the original locked/game-over):
+  - **Poster / paused start** (`args.state.started`): the game opens paused behind a giant blue play button + "AUTHENTICATION 101" card; a click or space "presses play" and starts the run. The world is frozen until then (`update_world` is gated on `started`).
+  - **Buffering** (replaces the old `draw_challenge_hint`): on collision the in-canvas treatment is quiet — a spinner + one mono line tinted to the enemy's color pointing at the HTML toast (the toast still owns the loud challenge card).
+  - **Video Ended** (replaces `draw_game_over`): indigo dim + Archivo Black "Video Ended" + red rule + "press R to replay"; **R restarts the run** (`restart_run` resets player/level to the tutorial).
+- **Hearts:** `sprites/ui/heart_hardmode.png` (full) / `heart_empty.png` (spent) swapped per life instead of alpha-fading one sprite.
+- **Fonts** (`game/mygame/fonts/`, ttf): `archivo-black-400` (display, "Video Ended"), `space-mono-400`/`-700` (HUD/greeting/hints/timestamp) — **converted from the site's self-hosted woff2** (`app/assets/fonts/`) via fonttools so the glyphs match the site exactly. Lowercase-kebab filenames so the case-sensitive WASM asset lookup resolves. Referenced via the label `font:` key (path relative to `mygame/`).
+
+Any future game art must ship as bare PNGs (IHDR/IDAT/IEND, no ancillary chunks) or it checkerboards in the WebGL build — see [[reference-dragonruby-png-encoder]]. Note: solid-color **triangles** go on `args.outputs.solids` with `x/y,x2/y2,x3/y3` + `r/g/b` (not a separate `triangles` output).
+
 ## DragonRuby (`game/`)
 
 - `game/dragonruby` is a Mach-O binary (the engine). Game code lives in `game/mygame/app/main.rb` — the entry point is a `tick` method called every frame. `game/samples/` has 150+ example apps and `game/docs/` has the offline docs.

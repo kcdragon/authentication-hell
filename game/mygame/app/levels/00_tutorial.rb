@@ -94,7 +94,8 @@ class TutorialLevel < Level
     end
 
     lines.each_with_index do |line, i|
-      args.outputs.labels << { x: 640, y: 420 - i * 44, text: line, size_px: 32,
+      args.outputs.labels << { x: 640, y: 420 - i * 44, text: line, size_px: 26,
+                               font: FONT_MONO, r: INK[0], g: INK[1], b: INK[2],
                                anchor_x: 0.5, anchor_y: 0.5 }
     end
   end
