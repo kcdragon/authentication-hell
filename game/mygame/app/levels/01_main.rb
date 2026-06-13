@@ -1,7 +1,13 @@
-# The endless main world the tutorial hands off to. Its scene (random enemies +
-# platforms) is seeded inline by Main#start_main_game; this class just carries the
-# level-level behavior — melee is live (inherited), with a controls reminder.
+# The endless main world the tutorial hands off to. Owns its scene (random enemies
+# + a scattered platform field, seeded in setup) and its level-level behavior —
+# melee is live (inherited), with a controls reminder.
 class MainLevel < Level
+  # Seed the endless world: random enemies and a scattered field of one-way ledges.
+  def setup(args)
+    args.state.enemies = Enemy.spawn_random
+    args.state.platforms = Platform.scatter
+  end
+
   # The unlocked controls reminder, shown while the player is free to roam.
   def draw(args)
     args.outputs.labels << { x: 640, y: 640,
