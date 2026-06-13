@@ -11,31 +11,33 @@
       <%= "code".pluralize(Current.user.recovery_codes_remaining) %> remaining.
     </p>
 
-    <div class="mt-8 border-t border-gray-200 pt-6">
-      <h2 class="font-bold text-xl">Regenerate recovery codes</h2>
-      <p class="mt-1 text-sm text-gray-500">Generates a new set and invalidates your old codes.</p>
-      <%# turbo: false — on success this renders a full page of new one-time codes
-          rather than redirecting, which Turbo rejects (and would otherwise cache). %>
-      <%= form_with url: totp_recovery_codes_path, method: :post, class: "contents", data: { turbo: false } do |form| %>
-        <div class="my-4">
-          <%= form.text_field :code, autocomplete: "off", inputmode: "text", placeholder: "Current 6-digit or recovery code", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 w-full sm:w-80" %>
-        </div>
-        <%= form.submit "Regenerate codes", class: "rounded-lg px-3.5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white inline-block font-medium cursor-pointer" %>
-      <% end %>
-    </div>
+    <div class="mt-8 border-t border-gray-200 pt-6 flex flex-col md:flex-row gap-8">
+      <div class="flex-1">
+        <h2 class="font-bold text-xl">Regenerate recovery codes</h2>
+        <p class="mt-1 text-sm text-gray-500">Generates a new set and invalidates your old codes.</p>
+        <%# turbo: false — on success this renders a full page of new one-time codes
+            rather than redirecting, which Turbo rejects (and would otherwise cache). %>
+        <%= form_with url: totp_recovery_codes_path, method: :post, class: "contents", data: { turbo: false } do |form| %>
+          <div class="my-4">
+            <%= form.text_field :code, autocomplete: "off", inputmode: "text", placeholder: "Current 6-digit or recovery code", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 w-full" %>
+          </div>
+          <%= form.submit "Regenerate codes", class: "rounded-lg px-3.5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white inline-block font-medium cursor-pointer" %>
+        <% end %>
+      </div>
 
-    <div class="mt-8 border-t border-gray-200 pt-6">
-      <h2 class="font-bold text-xl">Disable two-factor authentication</h2>
-      <p class="mt-1 text-sm text-gray-500">Confirm with a current code or your password.</p>
-      <%= form_with url: totp_settings_path, method: :delete, class: "contents" do |form| %>
-        <div class="my-4">
-          <%= form.text_field :code, autocomplete: "off", inputmode: "text", placeholder: "Current 6-digit or recovery code", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 w-full sm:w-80" %>
-        </div>
-        <div class="my-4">
-          <%= form.password_field :password, autocomplete: "current-password", placeholder: "…or your account password", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 w-full sm:w-80" %>
-        </div>
-        <%= form.submit "Disable", class: "rounded-lg px-3.5 py-2.5 bg-red-600 hover:bg-red-500 text-white inline-block font-medium cursor-pointer" %>
-      <% end %>
+      <div class="flex-1">
+        <h2 class="font-bold text-xl">Disable two-factor authentication</h2>
+        <p class="mt-1 text-sm text-gray-500">Confirm with a current code or your password.</p>
+        <%= form_with url: totp_settings_path, method: :delete, class: "contents" do |form| %>
+          <div class="my-4">
+            <%= form.text_field :code, autocomplete: "off", inputmode: "text", placeholder: "Current 6-digit or recovery code", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 w-full" %>
+          </div>
+          <div class="my-4">
+            <%= form.password_field :password, autocomplete: "current-password", placeholder: "…or your account password", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 w-full" %>
+          </div>
+          <%= form.submit "Disable", class: "rounded-lg px-3.5 py-2.5 bg-red-600 hover:bg-red-500 text-white inline-block font-medium cursor-pointer" %>
+        <% end %>
+      </div>
     </div>
   <% else %>
     <p class="mt-4 inline-flex items-center gap-2 rounded-full bg-gray-100 text-gray-700 px-3 py-1 text-sm font-medium">
