@@ -3,11 +3,11 @@ class Games::TotpChallengeController < ApplicationController
   skip_forgery_protection only: :start
 
   def status
-    render json: { locked: session[:game_totp_required].present? }
+    render json: { locked: Current.session.game_challenges.exists?(kind: "totp") }
   end
 
   def start
-    session[:game_totp_required] = true
+    Current.session.game_challenges.find_or_create_by!(kind: "totp")
     Turbo::StreamsChannel.broadcast_append_to(
       Current.user, :toasts,
       target: "toasts",
@@ -19,8 +19,8 @@ class Games::TotpChallengeController < ApplicationController
 
   # A correct code clears the lock; anything else re-renders the toast with an error.
   def complete
-    if session[:game_totp_required] && Current.user.verify_totp(params[:code])
-      session.delete(:game_totp_required)
+    if Current.session.game_challenges.exists?(kind: "totp") && Current.user.verify_totp(params[:code])
+      Current.session.game_challenges.where(kind: "totp").delete_all
       Achievement::Awarder.call(Current.user, :totp_survivor)
       render turbo_stream: turbo_stream.remove(toast_id)
     else

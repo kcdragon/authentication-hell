@@ -5,11 +5,11 @@ class Games::PasskeyChallengeController < ApplicationController
   skip_forgery_protection only: :start
 
   def status
-    render json: { locked: session[:game_passkey_required].present? }
+    render json: { locked: Current.session.game_challenges.exists?(kind: "passkey") }
   end
 
   def start
-    session[:game_passkey_required] = true
+    Current.session.game_challenges.find_or_create_by!(kind: "passkey")
     Turbo::StreamsChannel.broadcast_append_to(
       Current.user, :toasts,
       target: "toasts",
@@ -33,7 +33,7 @@ class Games::PasskeyChallengeController < ApplicationController
   # A verified assertion clears the lock and broadcasts the toast removal; anything
   # else surfaces an error. Mirrors webauthn/challenges#create, for Current.user.
   def complete
-    raise WebAuthn::Error unless session[:game_passkey_required]
+    raise WebAuthn::Error unless Current.session.game_challenges.exists?(kind: "passkey")
 
     webauthn_credential = WebAuthn::Credential.from_get(credential_param)
     stored = Current.user.webauthn_credentials.find_by(external_id: webauthn_credential.id)
@@ -46,7 +46,7 @@ class Games::PasskeyChallengeController < ApplicationController
     )
 
     stored.update!(sign_count: webauthn_credential.sign_count, last_used_at: Time.current)
-    session.delete(:game_passkey_required)
+    Current.session.game_challenges.where(kind: "passkey").delete_all
     Turbo::StreamsChannel.broadcast_remove_to(Current.user, :toasts, target: toast_id)
     Achievement::Awarder.call(Current.user, :passkey_survivor)
     render json: { ok: true }

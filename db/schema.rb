@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_13_030000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_13_040000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -53,6 +53,15 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_030000) do
     t.datetime "updated_at", null: false
     t.index ["user_id", "achievement_key"], name: "index_earned_achievements_on_user_id_and_achievement_key", unique: true
     t.index ["user_id"], name: "index_earned_achievements_on_user_id"
+  end
+
+  create_table "game_challenges", force: :cascade do |t|
+    t.integer "session_id", null: false
+    t.string "kind", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["session_id", "kind"], name: "index_game_challenges_on_session_id_and_kind", unique: true
+    t.index ["session_id"], name: "index_game_challenges_on_session_id"
   end
 
   create_table "recovery_codes", force: :cascade do |t|
@@ -107,6 +116,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_030000) do
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "earned_achievements", "users"
+  add_foreign_key "game_challenges", "sessions"
   add_foreign_key "recovery_codes", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "webauthn_credentials", "users"

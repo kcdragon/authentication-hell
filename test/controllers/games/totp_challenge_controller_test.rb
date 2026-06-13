@@ -119,6 +119,38 @@ class Games::TotpChallengeControllerTest < ActionDispatch::IntegrationTest
     assert_equal({ "locked" => true }, response.parsed_body)
   end
 
+  # Regression: the lock used to live in the cookie session, where the game's
+  # concurrent /status polls and the page's /complete clobbered each other's
+  # cookie snapshot and could resurrect a cleared lock — freezing the player for
+  # good. It now lives in game_challenges rows, authoritative and cookie-independent.
+  test "the lock lives in game_challenges, not the cookie session" do
+    secret = enable_2fa_for(@user)
+    sign_in_as(@user)
+    session_record = @user.sessions.last
+
+    post games_totp_start_url
+    assert session_record.game_challenges.exists?(kind: "totp")
+
+    post games_totp_complete_url, params: { code: ROTP::TOTP.new(secret).now }, as: :turbo_stream
+    assert_not session_record.game_challenges.exists?(kind: "totp")
+  end
+
+  # Concurrent challenges are tracked independently: clearing TOTP must not clear
+  # a password challenge the player also owes.
+  test "completing TOTP leaves a concurrent password challenge locked" do
+    secret = enable_2fa_for(@user)
+    sign_in_as(@user)
+    post games_totp_start_url
+    post games_password_start_url
+
+    post games_totp_complete_url, params: { code: ROTP::TOTP.new(secret).now }, as: :turbo_stream
+
+    get games_totp_status_url
+    assert_equal({ "locked" => false }, response.parsed_body)
+    get games_password_status_url
+    assert_equal({ "locked" => true }, response.parsed_body)
+  end
+
   test "complete cannot clear the lock for a player without TOTP enabled" do
     sign_in_as(@user)
     post games_totp_start_url
