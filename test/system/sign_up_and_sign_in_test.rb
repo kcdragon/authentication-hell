@@ -30,12 +30,12 @@ class SignUpAndSignInTest < ApplicationSystemTestCase
     assert_text "Email confirmed"
     assert user.reload.confirmed?
 
-    # Now sign in succeeds and lands on the play page (root).
+    # Now sign in succeeds and lands straight in the game.
     fill_in "Enter your email address", with: "newplayer@example.com"
     fill_in "Enter your password", with: "secretpassword"
     click_on "Sign in"
 
-    assert_current_path root_path
+    assert_current_path game_path
     assert_button "Sign out"
   end
 end

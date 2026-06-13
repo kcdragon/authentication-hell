@@ -1,4 +1,4 @@
-# The /play page is cross-origin isolated (COOP/COEP set in GamesController) so
+# The /game page is cross-origin isolated (COOP/COEP set in GamesController) so
 # its WASM runtime can use SharedArrayBuffer. Under COEP require-corp, every
 # subresource it loads must opt in with Cross-Origin-Resource-Policy, so stamp it
 # onto the static game bundle (served under the per-environment path

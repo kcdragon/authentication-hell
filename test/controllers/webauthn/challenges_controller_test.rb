@@ -22,7 +22,7 @@ class Webauthn::ChallengesControllerTest < ActionDispatch::IntegrationTest
     response = assert_with_passkey(@client, options_webauthn_challenge_path, webauthn_challenge_path)
 
     assert_response :success
-    assert_equal root_url, response.parsed_body["redirect"]
+    assert_equal game_url, response.parsed_body["redirect"]
     assert cookies[:session_id].present?
   end
 
