@@ -1,6 +1,7 @@
 require "app/constants.rb"
 require "app/entities/player.rb"
 require "app/entities/enemy.rb"
+require "app/entities/platform.rb"
 require "app/entities/enemies/totp.rb"
 require "app/entities/enemies/passkey.rb"
 require "app/entities/enemies/password.rb"
@@ -12,13 +13,6 @@ require "app/levels/01_main.rb"
 # app/constants.rb — shared with the entities and their unit tests).
 SCREEN_W = 1280
 SCREEN_H = 720
-
-PLATFORM_H = 30
-
-# Reachable one-way ledge tops: ~290px apex from the ground reaches the low
-# tier; the higher tiers are reachable by hopping up off a lower ledge.
-PLATFORM_TIERS = [ 250, 330, 410 ]
-PLATFORM_COUNT = 9
 
 module Main
   def tick(args)
@@ -120,11 +114,8 @@ module Main
     args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H, r: 135, g: 206, b: 235 }
     args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: GROUND_Y, r: 83, g: 138, b: 64 }
 
-    # World entities are in world coords; subtract the camera offset to draw.
-    args.state.platforms.each do |plat|
-      args.outputs.solids << { x: plat.x - cam, y: plat.y, w: plat.w, h: plat.h,
-                               r: 120, g: 85, b: 50 }
-    end
+    # World entities are in world coords; each subtracts the camera offset to draw.
+    args.state.platforms.each { |plat| plat.render(args, cam) }
 
     args.state.enemies.each { |enemy| enemy.render(args, cam) if enemy.alive }
 
@@ -193,19 +184,6 @@ module Main
                              anchor_y: 0.5 }
   end
 
-  # Scatter one-way ledges across the world, one per evenly spaced slot (so they
-  # spread out instead of clumping) with a random width and a random reachable
-  # tier height. Generated once per run.
-  def generate_platforms
-    slot = (WORLD_W - 400) / PLATFORM_COUNT
-    PLATFORM_COUNT.times.map do |i|
-      w = 180 + rand(100)
-      x = 200 + i * slot + rand([ slot - w, 0 ].max)
-      top = PLATFORM_TIERS.sample
-      { x: x, y: top - PLATFORM_H, w: w, h: PLATFORM_H }
-    end
-  end
-
   # POST to the Rails app so it can broadcast a message to the page. Same-origin,
   # so the session cookie identifies the player; the body is empty but the API
   # wants form-encoded content.
@@ -244,13 +222,12 @@ module Main
     start_main_game(args) if args.state.level.is_a?(TutorialLevel)
   end
 
-  # Tutorial cleared (password verified): swap in the endless main world — random
-  # enemies and platforms — and switch to the main level. The player keeps its
+  # Tutorial cleared (password verified): swap in the endless main world, which
+  # seeds its own scene (random enemies + platforms). The player keeps its
   # position and (docked) hearts.
   def start_main_game(args)
     args.state.level = MainLevel.new
-    args.state.enemies = Enemy.spawn_random
-    args.state.platforms = generate_platforms
+    args.state.level.setup(args)
   end
 
   # The Rails server's origin (scheme + host[:port]), baked into the bundle by
