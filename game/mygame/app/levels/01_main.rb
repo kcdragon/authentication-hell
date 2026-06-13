@@ -6,7 +6,7 @@ class MainLevel < Level
 
   # Seed the endless world: random enemies and a scattered field of one-way ledges.
   def setup(args)
-    args.state.enemies = Enemy.spawn_random
+    args.state.enemies = Enemy.spawn_random(args.state.player.x)
     args.state.platforms = Platform.scatter
   end
 

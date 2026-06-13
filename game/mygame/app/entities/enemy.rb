@@ -7,17 +7,20 @@ class Enemy
   WIDTH = 64
   HEIGHT = 96
   PATROL_RANGE = 220 # half-width of the patrol span around the spawn x
+  # Clearance ahead of the player so the nearest enemy's patrol never reaches it.
+  SAFE_GAP = PATROL_RANGE + WIDTH + 64
 
   attr_accessor :x, :y, :w, :h, :alive, :colliding, :auth, :r, :g, :b,
                 :vx, :patrol_min_x, :patrol_max_x
 
   # Two of each kind, scattered across the world: one per evenly spaced slot (so
-  # they spread out) starting well past the player's spawn, each at a random x
-  # within its slot. Listed here (not a constant) so the subclasses — required
-  # after this file — are already defined when spawn runs.
-  def self.spawn_random
+  # they spread out) starting a safe gap to the right of the player (who carries
+  # their position over from the tutorial) so none can collide on load, each at a
+  # random x within its slot. Listed here (not a constant) so the subclasses —
+  # required after this file — are already defined when spawn runs.
+  def self.spawn_random(player_x)
     kinds = [ TotpEnemy, TotpEnemy, PasskeyEnemy, PasskeyEnemy, PasswordEnemy, PasswordEnemy ].shuffle
-    start = 800
+    start = [ player_x + SAFE_GAP, 800 ].max
     slot = (WORLD_W - start - WIDTH) / kinds.length
     kinds.map.with_index do |kind, i|
       x = start + i * slot + rand([ slot - WIDTH, 0 ].max)
