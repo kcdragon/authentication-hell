@@ -4,14 +4,14 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
   setup { @user = users(:one) }
 
   test "show requires authentication" do
-    get play_url
+    get root_url
     assert_redirected_to new_session_path
   end
 
   test "show renders the game page when signed in" do
     sign_in_as(@user)
 
-    get play_url
+    get root_url
     assert_response :success
   end
 

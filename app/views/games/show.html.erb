@@ -54,7 +54,8 @@
         "@hotwired/stimulus": "<%= asset_path("stimulus.min.js") %>",
         "@github/webauthn-json": "<%= asset_path("@github--webauthn-json.js") %>",
         "lib/webauthn_ceremony_controller": "<%= asset_path("lib/webauthn_ceremony_controller.js") %>",
-        "controllers/games_passkey_challenge_controller": "<%= asset_path("controllers/games_passkey_challenge_controller.js") %>"
+        "controllers/games_passkey_challenge_controller": "<%= asset_path("controllers/games_passkey_challenge_controller.js") %>",
+        "controllers/dropdown_controller": "<%= asset_path("controllers/dropdown_controller.js") %>"
       }
     }
   </script>
@@ -62,8 +63,10 @@
     import "@hotwired/turbo-rails"
     import { Application } from "@hotwired/stimulus"
     import GamesPasskeyChallengeController from "controllers/games_passkey_challenge_controller"
+    import DropdownController from "controllers/dropdown_controller"
 
     const application = Application.start()
     application.register("games-passkey-challenge", GamesPasskeyChallengeController)
+    application.register("dropdown", DropdownController)
   </script>
 </div>
