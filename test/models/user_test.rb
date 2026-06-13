@@ -208,6 +208,38 @@ class UserTest < ActiveSupport::TestCase
     assert user.errors[:avatar].any?
   end
 
+  test "record_level_completed advances the high-water mark and returns true" do
+    user = users(:one)
+    assert user.record_level_completed(2)
+    assert_equal 2, user.reload.highest_level_completed
+  end
+
+  test "record_level_completed never moves backward and returns false" do
+    user = users(:one)
+    user.update!(highest_level_completed: 3)
+
+    assert_not user.record_level_completed(1)
+    assert_equal 3, user.reload.highest_level_completed
+  end
+
+  test "current_level is the first level before any are cleared" do
+    user = users(:one)
+    assert_nil user.highest_level_completed
+    assert_equal 0, user.current_level.number
+  end
+
+  test "current_level advances to the level after the furthest cleared" do
+    user = users(:one)
+    user.update!(highest_level_completed: 0)
+    assert_equal 1, user.current_level.number
+  end
+
+  test "current_level stays on the last level once everything is cleared" do
+    user = users(:one)
+    user.update!(highest_level_completed: GameLevel.all.map(&:number).max)
+    assert_equal GameLevel.all.map(&:number).max, user.current_level.number
+  end
+
   test "disable_totp! clears the secret, flag, and recovery codes" do
     user = users(:one)
     user.enable_totp!(ROTP::Base32.random)

@@ -140,6 +140,20 @@ class User < ApplicationRecord
     record if record.persisted?
   end
 
+  def record_level_completed(level)
+    return false if highest_level_completed && level <= highest_level_completed
+
+    update!(highest_level_completed: level)
+    true
+  end
+
+  # The level the player is currently on: the one after their furthest cleared
+  # level (the first level if they've cleared none, the last level once they've
+  # cleared everything).
+  def current_level
+    GameLevel.find((highest_level_completed || -1) + 1) || GameLevel.find(highest_level_completed)
+  end
+
   private
 
   def password_or_passkey_present

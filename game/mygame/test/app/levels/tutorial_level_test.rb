@@ -29,4 +29,8 @@ class TutorialLevelTest < Minitest::Test
   def test_serialize_names_the_level
     assert_equal "TutorialLevel", @level.serialize[:level]
   end
+
+  def test_number_is_zero
+    assert_equal 0, @level.number
+  end
 end
