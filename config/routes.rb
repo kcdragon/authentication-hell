@@ -40,6 +40,8 @@ Rails.application.routes.draw do
   get "game" => "games#show", as: :game
   get "play/me" => "games#me", as: :play_me
 
+  get "leaderboard" => "leaderboard#index", as: :leaderboard
+
   namespace :games do
     get  "totp/status"   => "totp_challenge#status",   as: :totp_status
     post "totp/start"    => "totp_challenge#start",    as: :totp_start
