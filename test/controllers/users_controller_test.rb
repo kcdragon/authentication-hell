@@ -34,6 +34,18 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show lists achievements as earned or locked" do
+    @user.grant_achievement(:totp_survivor)
+    sign_in_as(@user)
+
+    get user_path
+
+    assert_response :success
+    assert_select "h2", text: "Achievements"
+    assert_select "li", text: /Code Cracker/      # earned
+    assert_select "li", text: /Locked/             # an unearned one
+  end
+
   test "update attaches an avatar" do
     sign_in_as(@user)
 

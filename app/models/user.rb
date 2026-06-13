@@ -13,6 +13,7 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :recovery_codes, dependent: :destroy
   has_many :webauthn_credentials, dependent: :destroy
+  has_many :earned_achievements, dependent: :destroy
 
   has_one_attached :avatar do |attachable|
     attachable.variant :nav, resize_to_fill: [ 64, 64 ]
@@ -122,6 +123,21 @@ class User < ApplicationRecord
 
   def recovery_codes_remaining
     recovery_codes.unused.count
+  end
+
+  def earned_achievement_keys
+    earned_achievements.pluck(:achievement_key)
+  end
+
+  def earned?(key)
+    earned_achievements.exists?(achievement_key: key.to_s)
+  end
+
+  # Records an achievement, returning it only the first time it's earned (nil if
+  # the user already had it). The uniqueness validation/index makes repeats no-ops.
+  def grant_achievement(key)
+    record = earned_achievements.create(achievement_key: key.to_s)
+    record if record.persisted?
   end
 
   private

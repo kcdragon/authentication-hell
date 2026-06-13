@@ -1,0 +1,33 @@
+<div class="mt-8 border-t border-gray-200 pt-6">
+  <h2 class="font-bold text-xl">Achievements</h2>
+  <p class="mt-1 text-sm text-gray-500">
+    <%= earned_achievements_by_key.size %> of <%= Achievement.all.size %> unlocked.
+  </p>
+
+  <ul class="mt-4 flex flex-col gap-3">
+    <% Achievement.all.each do |achievement| %>
+      <% earned = earned_achievements_by_key[achievement.key] %>
+      <li class="flex items-start gap-4 rounded-lg border px-4 py-3
+                 <%= earned ? "border-amber-300 bg-amber-50" : "border-gray-200 bg-gray-50" %>">
+        <span class="text-2xl <%= "opacity-30 grayscale" unless earned %>" aria-hidden="true">
+          <%= achievement.emoji %>
+        </span>
+        <div class="flex-1">
+          <p class="font-medium <%= earned ? "text-amber-900" : "text-gray-400" %>">
+            <%= achievement.name %>
+          </p>
+          <p class="text-sm <%= earned ? "text-amber-800" : "text-gray-400" %>">
+            <%= achievement.description %>
+          </p>
+        </div>
+        <% if earned %>
+          <span class="text-xs font-medium text-amber-700 whitespace-nowrap">
+            <%= earned.created_at.to_date.to_fs(:long) %>
+          </span>
+        <% else %>
+          <span class="text-xs font-medium text-gray-400 whitespace-nowrap">Locked</span>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+</div>

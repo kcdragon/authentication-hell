@@ -65,6 +65,43 @@ class Games::PasswordChallengeControllerTest < ActionDispatch::IntegrationTest
     assert_equal({ "locked" => false }, response.parsed_body)
   end
 
+  test "completing the challenge awards the survivor achievement and toasts it" do
+    sign_in_as(@user)
+    post games_password_start_url
+
+    streams = nil
+    assert_difference -> { @user.earned_achievements.count }, 1 do
+      streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+        post games_password_complete_url, params: { password: "password" }, as: :turbo_stream
+      end
+    end
+    assert @user.earned?(:password_survivor)
+    assert(streams.any? { |s| s.to_html.include?("Achievement unlocked") })
+  end
+
+  test "completing again does not re-award or re-toast an already-earned achievement" do
+    @user.grant_achievement(:password_survivor)
+    sign_in_as(@user)
+    post games_password_start_url
+
+    streams = nil
+    assert_no_difference -> { @user.earned_achievements.count } do
+      streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+        post games_password_complete_url, params: { password: "password" }, as: :turbo_stream
+      end
+    end
+    assert_not(streams.any? { |s| s.to_html.include?("Achievement unlocked") })
+  end
+
+  test "failing the challenge awards nothing" do
+    sign_in_as(@user)
+    post games_password_start_url
+
+    assert_no_difference -> { @user.earned_achievements.count } do
+      post games_password_complete_url, params: { password: "wrong" }, as: :turbo_stream
+    end
+  end
+
   test "complete with an invalid password keeps the player locked and shows an error" do
     sign_in_as(@user)
     post games_password_start_url

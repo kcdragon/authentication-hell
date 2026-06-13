@@ -66,6 +66,46 @@ class Games::TotpChallengeControllerTest < ActionDispatch::IntegrationTest
     assert_equal({ "locked" => false }, response.parsed_body)
   end
 
+  test "completing the challenge awards the survivor achievement and toasts it" do
+    secret = enable_2fa_for(@user)
+    sign_in_as(@user)
+    post games_totp_start_url
+
+    streams = nil
+    assert_difference -> { @user.earned_achievements.count }, 1 do
+      streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+        post games_totp_complete_url, params: { code: ROTP::TOTP.new(secret).now }, as: :turbo_stream
+      end
+    end
+    assert @user.earned?(:totp_survivor)
+    assert(streams.any? { |s| s.to_html.include?("Achievement unlocked") })
+  end
+
+  test "completing again does not re-award or re-toast an already-earned achievement" do
+    secret = enable_2fa_for(@user)
+    @user.grant_achievement(:totp_survivor)
+    sign_in_as(@user)
+    post games_totp_start_url
+
+    streams = nil
+    assert_no_difference -> { @user.earned_achievements.count } do
+      streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+        post games_totp_complete_url, params: { code: ROTP::TOTP.new(secret).now }, as: :turbo_stream
+      end
+    end
+    assert_not(streams.any? { |s| s.to_html.include?("Achievement unlocked") })
+  end
+
+  test "failing the challenge awards nothing" do
+    enable_2fa_for(@user)
+    sign_in_as(@user)
+    post games_totp_start_url
+
+    assert_no_difference -> { @user.earned_achievements.count } do
+      post games_totp_complete_url, params: { code: "000000" }, as: :turbo_stream
+    end
+  end
+
   test "complete with an invalid code keeps the player locked and shows an error" do
     enable_2fa_for(@user)
     sign_in_as(@user)
