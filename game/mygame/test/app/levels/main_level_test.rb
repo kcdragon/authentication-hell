@@ -26,4 +26,8 @@ class MainLevelTest < Minitest::Test
   def test_serialize_names_the_level
     assert_equal "MainLevel", @level.serialize[:level]
   end
+
+  def test_number_is_one
+    assert_equal 1, @level.number
+  end
 end

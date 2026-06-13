@@ -3,6 +3,8 @@
 # the only way past is the password re-auth. Clearing it hands off to the endless
 # main world (Main#start_main_game).
 class TutorialLevel < Level
+  def number = 0
+
   def setup(args)
     enemy = PasswordEnemy.new(x: 600)
     enemy.vx = 0

@@ -105,6 +105,12 @@ module Main
       args.state.player.lock_confirmed = true
     end
 
+    # Fire-and-forget level report: drop the (non-serializable) handle once it
+    # lands so the per-tick state export doesn't choke on it.
+    if args.state.level_complete_request && args.state.level_complete_request[:complete]
+      args.state.level_complete_request = nil
+    end
+
     poll_unlock(args) if args.state.player.locked && args.state.player.lock_confirmed
 
     cam = args.state.camera_x
@@ -196,6 +202,17 @@ module Main
     )
   end
 
+  # Tell the Rails app the player cleared a level (records progress + grants the
+  # level achievement). Fire-and-forget: same-origin so the session cookie
+  # identifies the player; the level number rides in a form-encoded body.
+  def report_level_complete(args, level)
+    args.state.level_complete_request = DR.http_post(
+      levels_complete_url(args),
+      { level: level },
+      [ "Content-Type: application/x-www-form-urlencoded" ]
+    )
+  end
+
   # Poll /games/<kind>/status (~twice a second) while frozen; unfreeze once the
   # server reports the lock cleared (the page completed the pending re-auth).
   def poll_unlock(args)
@@ -222,10 +239,11 @@ module Main
     start_main_game(args) if args.state.level.is_a?(TutorialLevel)
   end
 
-  # Tutorial cleared (password verified): swap in the endless main world, which
-  # seeds its own scene (random enemies + platforms). The player keeps its
-  # position and (docked) hearts.
+  # Tutorial cleared (password verified): report it, then swap in the endless main
+  # world, which seeds its own scene (random enemies + platforms). The player keeps
+  # its position and (docked) hearts.
   def start_main_game(args)
+    report_level_complete(args, args.state.level.number)
     args.state.level = MainLevel.new
     args.state.level.setup(args)
   end
@@ -242,4 +260,5 @@ module Main
   def me_url(args) = "#{server_base(args)}/play/me"
   def start_url(args, kind) = "#{server_base(args)}/games/#{kind}/start"
   def status_url(args, kind) = "#{server_base(args)}/games/#{kind}/status"
+  def levels_complete_url(args) = "#{server_base(args)}/games/levels/complete"
 end

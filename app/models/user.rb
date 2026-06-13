@@ -147,6 +147,13 @@ class User < ApplicationRecord
     true
   end
 
+  # The level the player is currently on: the one after their furthest cleared
+  # level (the first level if they've cleared none, the last level once they've
+  # cleared everything).
+  def current_level
+    GameLevel.find((highest_level_completed || -1) + 1) || GameLevel.find(highest_level_completed)
+  end
+
   private
 
   def password_or_passkey_present

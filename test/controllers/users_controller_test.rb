@@ -46,6 +46,17 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select "li", text: /Locked/             # an unearned one
   end
 
+  test "show displays the player's current level" do
+    @user.update!(highest_level_completed: 0)
+    sign_in_as(@user)
+
+    get user_path
+
+    assert_response :success
+    assert_select "h2", text: "Current level"
+    assert_select "p", text: /Level 1: The Open World/
+  end
+
   test "update attaches an avatar" do
     sign_in_as(@user)
 

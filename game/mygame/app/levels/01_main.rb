@@ -2,6 +2,8 @@
 # + a scattered platform field, seeded in setup) and its level-level behavior —
 # melee is live (inherited), with a controls reminder.
 class MainLevel < Level
+  def number = 1
+
   # Seed the endless world: random enemies and a scattered field of one-way ledges.
   def setup(args)
     args.state.enemies = Enemy.spawn_random

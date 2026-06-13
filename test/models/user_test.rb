@@ -222,6 +222,24 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 3, user.reload.highest_level_completed
   end
 
+  test "current_level is the first level before any are cleared" do
+    user = users(:one)
+    assert_nil user.highest_level_completed
+    assert_equal 0, user.current_level.number
+  end
+
+  test "current_level advances to the level after the furthest cleared" do
+    user = users(:one)
+    user.update!(highest_level_completed: 0)
+    assert_equal 1, user.current_level.number
+  end
+
+  test "current_level stays on the last level once everything is cleared" do
+    user = users(:one)
+    user.update!(highest_level_completed: GameLevel.all.map(&:number).max)
+    assert_equal GameLevel.all.map(&:number).max, user.current_level.number
+  end
+
   test "disable_totp! clears the secret, flag, and recovery codes" do
     user = users(:one)
     user.enable_totp!(ROTP::Base32.random)
