@@ -32,6 +32,11 @@ if !File.exist?(ORIGIN_FILE) || File.read(ORIGIN_FILE).strip != origin
 end
 
 FileUtils.chdir GAME_DIR do
+  # The downloaded engine binaries carry com.apple.quarantine, which makes macOS
+  # Gatekeeper prompt on every shell-launched build. Strip it (idempotent; the
+  # attribute returns after a DragonRuby re-download/upgrade, so re-strip here).
+  system "xattr", "-d", "com.apple.quarantine", "dragonruby-publish", err: File::NULL
+
   puts "== Building DragonRuby HTML5 bundle =="
   system! "./dragonruby-publish --only-package --platforms=html5 mygame"
 end
