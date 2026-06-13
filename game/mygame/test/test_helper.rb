@@ -27,17 +27,18 @@ module GameTest
   KeyDown = Struct.new(:space)
   Keyboard = Struct.new(:left, :right, :key_down)
   Inputs = Struct.new(:mouse, :keyboard)
-  State = Struct.new(:camera_x, :platforms, :enemies, :player)
+  State = Struct.new(:camera_x, :platforms, :enemies, :collectables, :player)
   Outputs = Struct.new(:sprites, :solids, :labels)
   Args = Struct.new(:inputs, :state, :outputs)
 
   # Build an `args` double for a single tick. Defaults mean "no input".
   def build_args(mouse_click: false, mouse_x: 0, left: false, right: false,
-                 space: false, camera_x: 0, platforms: [], enemies: nil, player: nil)
+                 space: false, camera_x: 0, platforms: [], enemies: nil,
+                 collectables: nil, player: nil)
     Args.new(
       Inputs.new(Mouse.new(mouse_click, mouse_x),
                  Keyboard.new(left, right, KeyDown.new(space))),
-      State.new(camera_x, platforms, enemies, player),
+      State.new(camera_x, platforms, enemies, collectables, player),
       Outputs.new([], [], [])
     )
   end
