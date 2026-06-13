@@ -42,6 +42,16 @@ class Enemy
     @b = color[:b]
   end
 
+  # Reconfigure this enemy to march left from its current x, patrolling the full
+  # width to its left (the tutorial uses this to walk it in from the right screen
+  # edge). It still patrols, so if it's never touched it turns around at the far
+  # left and comes back.
+  def march_left(speed)
+    @vx = -speed
+    @patrol_max_x = @x
+    @patrol_min_x = -@w
+  end
+
   # Pace horizontally within the patrol bounds, reversing at each edge. Clamp to
   # the bound before flipping so a fast step can't drift past the region.
   def update

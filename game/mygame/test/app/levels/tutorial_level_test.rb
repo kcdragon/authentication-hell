@@ -12,13 +12,43 @@ class TutorialLevelTest < Minitest::Test
     refute @level.melee?
   end
 
-  def test_setup_seeds_one_stationary_password_enemy_and_no_platforms
+  def test_setup_seeds_a_reachable_ledge_and_no_enemy_yet
     @level.setup(@args)
+    assert_empty @args.state.enemies
+
+    assert_equal 1, @args.state.platforms.length
+    platform = @args.state.platforms.first
+    assert_includes Platform::TIERS, platform.y + platform.h
+  end
+
+  def test_update_holds_the_enemy_until_the_player_reaches_the_platform
+    @level.setup(@args)
+    @args.state.player.reached_platform = false
+    @level.update(@args)
+    assert_empty @args.state.enemies
+  end
+
+  def test_update_sends_in_a_leftbound_password_enemy_from_the_right_edge
+    @level.setup(@args)
+    @args.state.player.reached_platform = true
+    @args.state.camera_x = 0
+    @level.update(@args)
+
     assert_equal 1, @args.state.enemies.length
     enemy = @args.state.enemies.first
     assert_equal :password, enemy.auth
-    assert_equal 0, enemy.vx
-    assert_empty @args.state.platforms
+    assert_equal SCREEN_W, enemy.x          # enters at the right edge of the view
+    assert_operator enemy.vx, :<, 0          # marching left
+    assert_equal enemy.x, enemy.patrol_max_x # won't wander back past its entry
+  end
+
+  def test_update_spawns_the_enemy_only_once
+    @level.setup(@args)
+    @args.state.player.reached_platform = true
+    @level.update(@args)
+    @args.state.enemies.first.alive = false  # player defeated/passed it
+    @level.update(@args)
+    assert_equal 1, @args.state.enemies.length
   end
 
   def test_draw_emits_a_prompt

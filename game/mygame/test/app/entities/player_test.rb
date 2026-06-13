@@ -26,6 +26,10 @@ class PlayerTest < Minitest::Test
     refute @player.moved
   end
 
+  def test_starts_having_not_reached_a_platform
+    refute @player.reached_platform
+  end
+
   # --- horizontal movement ---
 
   def test_moves_right_and_faces_east
@@ -86,6 +90,7 @@ class PlayerTest < Minitest::Test
     assert_equal GROUND_Y, @player.y
     assert_equal 0, @player.vy
     assert @player.grounded
+    refute @player.reached_platform # landing on the ground is not a platform
   end
 
   def test_lands_on_a_platform_while_descending
@@ -98,6 +103,7 @@ class PlayerTest < Minitest::Test
     assert_equal 280, @player.y
     assert_equal 0, @player.vy
     assert @player.grounded
+    assert @player.reached_platform
   end
 
   # --- keyboard swing ---
@@ -207,5 +213,6 @@ class PlayerTest < Minitest::Test
     assert_equal Player::MAX_HEARTS, data[:hearts]
     assert_equal @player.x, data[:x]
     assert_equal false, data[:moved]
+    assert_equal false, data[:reached_platform]
   end
 end
