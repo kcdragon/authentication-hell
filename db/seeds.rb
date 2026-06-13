@@ -34,16 +34,33 @@ if dev_passkey
   end
 end
 
-# Pre-enroll the dev user with a fixed secret so a fresh DB doesn't force
-# re-enrollment — add it to your authenticator once (printed below). Dev only.
+# A spread of players to exercise the leaderboard. Level and achievement count are
+# deliberately uncorrelated (e.g. ada is furthest but least decorated, grace is the
+# reverse) so the two sort columns produce visibly different orderings.
+# Idempotent — grant_achievement/record_level_completed are no-ops once set.
+leaderboard_players = [
+  { username: "ada",      level: 1,   achievements: %w[ passkey_survivor ] },
+  { username: "mike",     level: 1,   achievements: %w[ level_0_complete password_survivor totp_survivor ] },
+  { username: "grace",    level: 0,   achievements: Achievement.keys },
+  { username: "linus",    level: 0,   achievements: %w[ level_0_complete password_survivor totp_survivor passkey_survivor ] },
+  { username: "margaret", level: nil, achievements: %w[ password_survivor totp_survivor ] }
+]
+
+leaderboard_players.each do |attrs|
+  player = User.find_or_initialize_by(email_address: "#{attrs[:username]}@example.com")
+  player.username = attrs[:username]
+  player.password ||= User::DEV_PASSWORD
+  player.confirmed_at ||= Time.current
+  player.save!
+
+  player.record_level_completed(attrs[:level]) if attrs[:level]
+  attrs[:achievements].each { |key| player.grant_achievement(key) }
+end
+
+# Pre-enroll the dev user with a fixed secret (JBSWY3DPEHPK3PXP) so a fresh DB
+# doesn't force re-enrollment — add it to your authenticator once. Dev only.
 if Rails.env.development?
   dev_totp_secret = "JBSWY3DPEHPK3PXP" # dev seed fixture, not a real secret
 
   user.enable_totp!(dev_totp_secret) unless user.totp_enabled? && user.totp_secret == dev_totp_secret
-
-  provisioning_uri = ROTP::TOTP.new(dev_totp_secret, issuer: User::TOTP_ISSUER)
-    .provisioning_uri(user.email_address)
-  puts "TOTP enabled for #{user.email_address}. Add this to your authenticator app once:"
-  puts "  secret:  #{dev_totp_secret}"
-  puts "  otpauth: #{provisioning_uri}"
 end

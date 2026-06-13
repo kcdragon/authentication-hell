@@ -21,6 +21,19 @@ class User < ApplicationRecord
 
   encrypts :totp_secret
 
+  scope :ranked, ->(by: :level) {
+    ordering = if by.to_s == "achievements"
+      "achievements_count DESC, COALESCE(highest_level_completed, -1) DESC"
+    else
+      "COALESCE(highest_level_completed, -1) DESC, achievements_count DESC"
+    end
+
+    left_joins(:earned_achievements)
+      .group(:id)
+      .select("users.*, COUNT(earned_achievements.id) AS achievements_count")
+      .order(Arel.sql(ordering))
+  }
+
   before_create { self.webauthn_id ||= WebAuthn.generate_user_id }
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
