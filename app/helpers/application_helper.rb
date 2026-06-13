@@ -3,10 +3,10 @@ module ApplicationHelper
     if user.avatar.attached? && user.avatar.blob.persisted? && user.avatar.variable?
       image_tag rails_storage_proxy_path(user.avatar.variant(:nav)),
         alt: user.username, crossorigin: "anonymous",
-        class: "#{size_classes} rounded-full object-cover bg-gray-200"
+        class: "#{size_classes} rounded-[3px] border-2 border-ink object-cover bg-card"
     else
       tag.span user.username.first.upcase,
-        class: "flex #{size_classes} items-center justify-center rounded-full bg-gray-200 text-gray-700 font-semibold"
+        class: "grid #{size_classes} place-items-center rounded-[3px] border-2 border-ink bg-password font-display text-sm text-ink"
     end
   end
 end

@@ -1,40 +1,37 @@
-<div class="mx-auto md:w-2/3 w-full">
-  <h1 class="font-bold text-4xl">Two-step verification</h1>
+<div class="mx-auto max-w-md w-full ah-card p-6">
+  <h1 class="text-[28px]">Two-step verification</h1>
 
   <% if @pending_user.totp_enabled? %>
-    <p class="mt-4 text-gray-700">Enter the 6-digit code from your authenticator app.</p>
+    <p class="mt-4 font-medium text-muted">Enter the 6-digit code from your authenticator app.</p>
 
-    <%= form_with url: totp_challenge_path, method: :post, class: "contents" do |form| %>
-      <div class="my-5">
-        <%= form.text_field :code, required: true, autofocus: true, value: dev_totp_prefill(@pending_user), autocomplete: "one-time-code", inputmode: "text", placeholder: "6-digit code or recovery code", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 mt-2 w-full sm:w-80" %>
+    <%= form_with url: totp_challenge_path, method: :post, class: "mt-4 space-y-3.5" do |form| %>
+      <div class="space-y-1.5">
+        <%= form.label :code, "Code", class: "ah-label" %>
+        <%= form.text_field :code, required: true, autofocus: true, value: dev_totp_prefill(@pending_user), autocomplete: "one-time-code", inputmode: "text", placeholder: "6-digit code or recovery code", class: "ah-input focus:border-totp focus:shadow-[3px_3px_0_var(--color-totp)]" %>
       </div>
 
-      <div class="sm:flex sm:items-center sm:gap-4">
-        <%= form.submit "Verify", class: "w-full sm:w-auto text-center rounded-lg px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
-        <div class="mt-4 text-sm text-gray-500 sm:mt-0">
-          Lost your device? Enter one of your recovery codes instead.
-        </div>
-      </div>
+      <%= form.submit "Verify", class: "ah-btn ah-btn--primary shadow-brut cursor-pointer", style: "background: var(--color-totp)" %>
+      <p class="ah-hint">Lost your device? Enter one of your recovery codes instead.</p>
     <% end %>
   <% else %>
-    <p class="mt-4 text-gray-700">Confirm it's you with one of your passkeys.</p>
+    <p class="mt-4 font-medium text-muted">Confirm it's you with one of your passkeys.</p>
   <% end %>
 
   <% if @pending_user.webauthn_credentials.exists? %>
-    <div class="mt-6 <%= "border-t border-gray-200 pt-6" if @pending_user.totp_enabled? %>"
+    <div class="mt-5 <%= "border-t-[3px] border-ink pt-5" if @pending_user.totp_enabled? %>"
          data-controller="webauthn-authentication"
          data-webauthn-authentication-options-url-value="<%= options_webauthn_challenge_path %>"
          data-webauthn-authentication-callback-url-value="<%= webauthn_challenge_path %>">
-      <p data-webauthn-authentication-target="error" class="mb-3 text-red-500 font-medium"></p>
+      <p data-webauthn-authentication-target="error" class="ah-error mb-3 empty:hidden"></p>
       <button type="button"
               data-action="webauthn-authentication#authenticate"
-              class="w-full sm:w-auto text-center rounded-lg px-3.5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white inline-block font-medium cursor-pointer">
-        <%= @pending_user.totp_enabled? ? "Use a passkey instead" : "Continue with a passkey" %>
+              class="ah-btn ah-btn--outline w-full">
+        ⬡ <%= @pending_user.totp_enabled? ? "Use a passkey instead" : "Continue with a passkey" %>
       </button>
     </div>
   <% end %>
 
-  <div class="mt-8 text-sm text-gray-500">
-    <%= link_to "Cancel and sign in again", new_session_path, class: "text-gray-700 underline hover:no-underline" %>
-  </div>
+  <p class="mt-8 font-medium text-sm text-muted">
+    <%= link_to "Cancel and sign in again", new_session_path, class: "text-ink underline underline-offset-[3px] decoration-2 hover:no-underline" %>
+  </p>
 </div>

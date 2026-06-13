@@ -42,8 +42,8 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h2", text: "Achievements"
-    assert_select "li", text: /Code Cracker/      # earned
-    assert_select "li", text: /Locked/             # an unearned one
+    assert_select "div", text: /Code Cracker/      # earned
+    assert_select "span", text: /Locked/           # an unearned one's badge
   end
 
   test "show displays the player's current level" do
@@ -54,7 +54,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h2", text: "Current level"
-    assert_select "p", text: /Level 1: The Open World/
+    assert_select "p", text: /Lv 1 · The Open World/
   end
 
   test "update attaches an avatar" do

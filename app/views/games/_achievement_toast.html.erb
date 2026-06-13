@@ -3,12 +3,12 @@
     ephemeral game-toast fade/auto-dismiss styling (toast-fade keyframes in the
     Tailwind build) — no JS controller. `achievement` is an Achievement value object. %>
 <div id="<%= achievement_toast_id(achievement) %>"
-     class="game-toast max-w-sm rounded-md bg-amber-100 border border-amber-300 text-amber-900 px-4 py-3 shadow-lg pointer-events-none">
+     class="game-toast w-[346px] max-w-[90vw] border-[3px] border-ink rounded-[3px] bg-password text-ink px-3.5 py-3 shadow-brut pointer-events-none">
   <div class="flex items-center gap-3">
     <span class="text-2xl" aria-hidden="true"><%= achievement.emoji %></span>
     <div>
-      <p class="text-xs font-semibold uppercase tracking-wide text-amber-700">Achievement unlocked</p>
-      <p class="font-medium"><%= achievement.name %></p>
+      <p class="font-display text-[11px] uppercase tracking-tight">🏆 Achievement unlocked</p>
+      <p class="font-display text-lg uppercase tracking-tight mt-0.5"><%= achievement.name %></p>
     </div>
   </div>
 </div>

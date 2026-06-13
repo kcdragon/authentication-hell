@@ -3,10 +3,11 @@
 <% flash.each do |type, message| %>
   <% next if message.blank? %>
   <%
-    style = case type.to_s
-            when "alert", "error" then "bg-red-50 text-red-500"
-            else "bg-green-50 text-green-500"
-            end
+    modifier = case type.to_s
+               when "alert", "error" then "ah-flash--error"
+               when "notice" then "ah-flash--notice"
+               else "ah-flash--success"
+               end
   %>
-  <p class="py-2 px-3 mb-5 font-medium rounded-lg inline-block <%= style %>" id="<%= type %>"><%= message %></p>
+  <p class="ah-flash <%= modifier %> mb-5" id="<%= type %>"><%= message %></p>
 <% end %>

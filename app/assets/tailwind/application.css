@@ -1,15 +1,197 @@
+/* =========================================================================
+   AUTHENTICATION HELL — "HARD MODE" design system
+   app/assets/tailwind/application.css  (Tailwind CSS v4 + tailwindcss-rails)
+   =========================================================================
+   Fonts are self-hosted (app/assets/fonts/*.woff2) and served through
+   Propshaft — no external font CDN, matching the app's no-dependency stance.
+   tailwindcss-rails compiles this file to app/assets/builds/tailwind.css,
+   whose Propshaft logical_path is the root "tailwind.css" (logical dir "."),
+   NOT "builds/...". So @font-face url() refs are bare filenames
+   ("space-mono-400.woff2"), which resolve against the font on the load-path
+   root; a "../" prefix would point above root and silently fail to rewrite.
+   ========================================================================= */
+
 @import "tailwindcss";
 
-/* Collision toasts (app/views/games/_toast.html.erb) are appended into #toasts
-   via Turbo Streams. Each one slides/fades in, holds, then fades out and stops
-   taking up space — driven entirely by CSS so no JS controller is needed. The
-   node stays in the DOM afterward but is invisible and zero-height.
+/* ---- 0. SELF-HOSTED FONTS -------------------------------------------- */
+@font-face {
+  font-family: "Archivo Black";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("archivo-black-400.woff2") format("woff2");
+}
+@font-face {
+  /* variable font — one file covers the 400–700 range */
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("space-grotesk-var.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("space-mono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("space-mono-700.woff2") format("woff2");
+}
 
-   Two separate animations on one timeline so the phases don't fight each other:
-   `toast-fade` fades the whole toast (text + box) in and out as one unit, while
-   `toast-collapse` only shrinks the box AFTER it's already fully invisible. If
-   the fade and the collapse overlapped, the text would clip/vanish while a
-   still-sized box lingered. */
+/* ---- 1. TOKENS -------------------------------------------------------- */
+@theme {
+  /* surfaces / ink */
+  --color-paper:      #f5f2e9;  /* page background (warm) */
+  --color-card:       #ffffff;  /* raised surfaces */
+  --color-ink:        #111111;  /* borders, text, the "frame" */
+  --color-muted:      #5b5750;  /* secondary text */
+  --color-faint:      #e7e3d7;  /* hairline dividers inside cards */
+  --color-locked:     #efece3;  /* disabled/locked surface */
+  --color-locked-ink: #a7a297;  /* disabled/locked text */
+
+  /* 5 SEMANTIC ROLES — kept distinct (remapped from the stock palette) */
+  --color-totp:       #8b5cf6;  /* TOTP / 2FA            (was purple) */
+  --color-password:   #f5a623;  /* password & achievements (was amber) */
+  --color-passkey:    #2f6bff;  /* passkey  + primary CTA  (was blue) */
+  --color-success:    #16a34a;  /* enabled / success       (green) */
+  --color-error:      #e5342a;  /* error / destructive     (red) */
+
+  /* type */
+  --font-display: "Archivo Black", system-ui, sans-serif; /* headings, labels */
+  --font-sans:    "Space Grotesk", system-ui, sans-serif; /* body / UI */
+  --font-mono:    "Space Mono", ui-monospace, monospace;  /* codes, secrets */
+
+  /* brutalist geometry */
+  --radius-brut: 3px;
+  --shadow-brut-sm: 3px 3px 0 var(--color-ink);
+  --shadow-brut:    6px 6px 0 var(--color-ink);
+  --shadow-brut-lg: 8px 8px 0 var(--color-ink);
+}
+
+/* ---- 2. BASE ---------------------------------------------------------- */
+@layer base {
+  body { @apply bg-paper text-ink font-sans; }
+  h1, h2 { @apply font-display uppercase tracking-tight; }
+}
+
+/* ---- 3. COMPONENT PATTERNS ------------------------------------------- */
+/* Use the class names below straight in your ERB. Variants compose:
+   class="ah-btn ah-btn--primary"  /  class="ah-input ah-input--error"      */
+@layer components {
+
+  /* CARD / CALLOUT --------------------------------------------------- */
+  .ah-card {
+    @apply bg-card border-[3px] border-ink rounded-[3px] shadow-brut;
+  }
+  .ah-card--flush { @apply shadow-none; }            /* nested, no lift */
+
+  /* the two-column SECTION DIVIDER used on settings pages */
+  .ah-split { @apply grid grid-cols-2 border-t-[3px] border-ink; }
+  .ah-split > * + * { @apply border-l-[3px] border-ink; }
+
+  /* BUTTONS ---------------------------------------------------------- */
+  .ah-btn {
+    @apply inline-flex items-center justify-center gap-2 whitespace-nowrap
+           font-sans font-bold text-[15px] leading-none cursor-pointer
+           border-[3px] border-ink rounded-[3px] px-5 py-3
+           shadow-brut-sm transition-transform duration-75
+           active:translate-x-[2px] active:translate-y-[2px] active:shadow-none;
+  }
+  .ah-btn--primary     { @apply bg-passkey text-white; }
+  .ah-btn--secondary   { @apply bg-card text-ink; }
+  .ah-btn--destructive { @apply bg-error text-white; }
+  .ah-btn--outline     { @apply bg-card text-ink border-dashed; }
+  .ah-btn--ghost       { @apply bg-ink text-white border-ink shadow-[3px_3px_0_var(--color-muted)]; }
+
+  /* INPUTS ----------------------------------------------------------- */
+  .ah-input {
+    @apply w-full font-sans font-medium text-[15px] text-ink bg-card
+           border-[3px] border-ink rounded-[3px] px-3 py-2.5 outline-none
+           placeholder:text-muted/70
+           focus:border-passkey focus:shadow-[3px_3px_0_var(--color-passkey)];
+  }
+  .ah-input--error {
+    @apply border-error focus:border-error focus:shadow-[3px_3px_0_var(--color-error)];
+  }
+  .ah-label  { @apply font-sans font-bold text-xs uppercase tracking-wider text-ink; }
+  .ah-hint   { @apply font-sans font-medium text-[13px] text-muted; }
+  .ah-error  { @apply font-sans font-semibold text-[13px] text-error; }
+
+  /* a single OTP / 6-digit cell (render 6 of them in a flex row, gap-2) */
+  .ah-otp {
+    @apply flex-1 h-12 grid place-items-center bg-card border-[3px] border-ink
+           font-display text-lg text-ink;
+  }
+  .ah-otp--active { @apply border-totp; }            /* tint to the challenge color */
+
+  /* STATUS BADGES ---------------------------------------------------- */
+  .ah-badge {
+    @apply inline-flex items-center gap-1.5 font-sans font-bold text-xs
+           uppercase tracking-wide border-2 border-ink rounded-[3px]
+           px-2.5 py-1.5 shadow-[2px_2px_0_var(--color-ink)];
+  }
+  .ah-badge--success { @apply bg-success text-ink; }
+  .ah-badge--error   { @apply bg-error text-white; }
+  .ah-badge--totp    { @apply bg-totp text-white; }
+  .ah-badge--password{ @apply bg-password text-ink; }
+  .ah-badge--passkey { @apply bg-passkey text-white; }
+
+  /* FLASH MESSAGES (thick left rule = role color) -------------------- */
+  .ah-flash {
+    @apply font-sans font-semibold text-sm text-ink bg-card
+           border-[3px] border-ink border-l-[9px] rounded-[3px]
+           px-4 py-3 shadow-brut-sm;
+  }
+  .ah-flash--success { @apply border-l-success; }
+  .ah-flash--error   { @apply border-l-error; }
+  .ah-flash--notice  { @apply border-l-password; }
+}
+
+/* ---- 4. GAME CHALLENGE TOASTS (the centerpiece) ----------------------- */
+/* Fixed bottom-right over the 1280x720 canvas. Tint the header + OTP cells
+   to the challenge color: --tone is set per variant below.                */
+@layer components {
+  .toast {
+    @apply fixed bottom-6 right-6 z-50 w-[346px] bg-card
+           border-[3px] border-ink rounded-[3px] shadow-brut-lg;
+    animation: challenge-toast-in .5s cubic-bezier(.2,1.4,.4,1) both;
+  }
+  .toast__head {
+    @apply flex items-center justify-between border-b-[3px] border-ink
+           px-4 py-2.5 font-display text-[13px] uppercase tracking-tight;
+    background: var(--tone);
+  }
+  .toast--totp     { --tone: var(--color-totp);     }  /* header text white */
+  .toast--password { --tone: var(--color-password); }  /* header text ink   */
+  .toast--passkey  { --tone: var(--color-passkey);  }  /* header text white */
+  .toast__body { @apply p-4; }
+
+  /* ephemeral toasts (generic collision = totp tone, achievement = gold) */
+  .toast-ephemeral {
+    @apply fixed bottom-6 right-6 z-50 border-[3px] border-ink
+           rounded-[3px] p-3.5 shadow-brut;
+  }
+  .toast-ephemeral--collision   { @apply bg-totp text-white; }
+  .toast-ephemeral--achievement { @apply bg-password text-ink; }
+}
+
+/* =========================================================================
+   GAME OVERLAY TOAST ANIMATIONS
+   The persistent challenge toasts (.game-challenge-toast) slide in once and
+   stay until a valid answer dismisses them. The ephemeral collision /
+   achievement toasts (.game-toast) fade in, hold, then fade + collapse out of
+   the flow entirely so stacked toasts don't leave dead space. Two animations
+   on one timeline keep the fade and the collapse from clipping each other —
+   see the per-keyframe notes.
+   ========================================================================= */
+
+/* Ephemeral toast fade: in, hold, out. Box + text move as one unit. */
 @keyframes toast-fade {
   0%   { opacity: 0; transform: translateY(0.75rem); }
   6%   { opacity: 1; transform: translateY(0); }
@@ -22,7 +204,7 @@
   /* Hold every collapse property constant until 98% so the browser doesn't
      interpolate them across the whole timeline; collapse only in the last 2%
      (after the fade has finished). */
-  0%, 98% { max-height: 5rem; padding-top: 0.75rem; padding-bottom: 0.75rem; margin-top: 0; }
+  0%, 98% { max-height: 5rem; padding-top: 0.875rem; padding-bottom: 0.875rem; margin-top: 0; }
   100%    { max-height: 0; padding-top: 0; padding-bottom: 0; margin-top: -0.5rem; }
 }
 
@@ -31,13 +213,14 @@
   overflow: hidden;
 }
 
-/* The TOTP re-auth toast slides in once and stays (no fade-out/collapse) — it's
-   dismissed only by entering a valid code, not on a timer. */
+/* Persistent challenge toast: a quarter-arcade overshoot pop on entry, then it
+   holds. Dismissed only by a valid answer, never on a timer. */
 @keyframes challenge-toast-in {
-  0%   { opacity: 0; transform: translateY(0.75rem); }
-  100% { opacity: 1; transform: translateY(0); }
+  0%   { transform: translateY(26px) scale(.92); opacity: 0; }
+  58%  { transform: translateY(-7px) scale(1.035); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 
 .game-challenge-toast {
-  animation: challenge-toast-in 0.25s ease forwards;
+  animation: challenge-toast-in 0.5s cubic-bezier(.2, 1.4, .4, 1) both;
 }

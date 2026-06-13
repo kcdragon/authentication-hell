@@ -1,10 +1,10 @@
 <% level = Current.user.current_level %>
-<div class="mt-8 border-t border-gray-200 pt-6">
-  <h2 class="font-bold text-xl">Current level</h2>
-  <p class="mt-1 text-sm text-gray-500">Where you are in the game.</p>
+<div class="mt-6 border-t-[3px] border-ink pt-5">
+  <h2 class="text-xl">Current level</h2>
+  <p class="ah-hint mt-1">Where you are in the game.</p>
 
-  <div class="mt-4 flex items-center gap-4 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+  <div class="mt-4 flex items-center gap-4 border-[3px] border-ink rounded-[3px] bg-paper px-4 py-3 shadow-brut-sm">
     <span class="text-2xl" aria-hidden="true"><%= level.emoji %></span>
-    <p class="font-medium">Level <%= level.number %>: <%= level.name %></p>
+    <p class="font-display text-lg uppercase tracking-tight">Lv <%= level.number %> · <%= level.name %></p>
   </div>
 </div>

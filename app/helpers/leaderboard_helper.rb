@@ -5,6 +5,6 @@ module LeaderboardHelper
     active = @sort == key
     label = "#{label} ▾" if active
     link_to label, leaderboard_path(sort: key),
-      class: "hover:text-gray-700 #{active ? "font-semibold text-gray-700" : "text-gray-500"}"
+      class: "hover:text-ink #{active ? "text-ink underline underline-offset-2 decoration-2" : "text-muted"}"
   end
 end

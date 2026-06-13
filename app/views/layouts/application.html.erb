@@ -24,12 +24,18 @@
   </head>
 
   <body>
-    <% if authenticated? %>
-      <nav class="container mx-auto px-5 mt-6 flex justify-end">
-        <%= render "shared/navigation" %>
-      </nav>
-    <% end %>
-    <main class="container mx-auto mt-28 px-5 flex flex-col">
+    <header class="border-b-[3px] border-ink bg-paper">
+      <div class="container mx-auto px-5 py-4 flex items-center justify-between gap-4">
+        <%= link_to root_path, class: "font-display text-xl uppercase tracking-tight" do %>
+          AUTH<span class="text-error">HELL</span>
+        <% end %>
+        <% if authenticated? %>
+          <%= render "shared/navigation" %>
+        <% end %>
+      </div>
+    </header>
+
+    <main class="container mx-auto mt-12 px-5 flex flex-col">
       <div class="mx-auto md:w-2/3 w-full">
         <%= render "shared/flash" %>
       </div>

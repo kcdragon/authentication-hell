@@ -5,32 +5,32 @@
     navigations rather than Turbo visits. %>
 <div class="relative" data-controller="dropdown">
   <button type="button" data-action="dropdown#toggle"
-          class="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-gray-100 cursor-pointer">
+          class="flex items-center gap-2.5 border-[3px] border-ink rounded-[3px] bg-card shadow-[3px_3px_0_var(--color-ink)] pl-1.5 pr-3 py-1.5 cursor-pointer transition-transform duration-75 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none">
     <%= avatar_badge(Current.user) %>
-    <span class="text-gray-700 font-medium"><%= Current.user.username %></span>
-    <svg class="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+    <span class="font-bold text-sm text-ink"><%= Current.user.username %></span>
+    <svg class="h-4 w-4 text-ink" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
       <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
     </svg>
   </button>
 
   <div data-dropdown-target="menu" hidden
-       class="absolute right-0 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-black/5 py-1 z-50">
-    <%= link_to "Play", game_path, data: { turbo: turbo },
-          class: "block px-4 py-2 text-gray-800 hover:bg-gray-100" %>
+       class="absolute right-0 mt-2 w-60 border-[3px] border-ink rounded-[3px] bg-card shadow-[6px_6px_0_var(--color-ink)] overflow-hidden font-semibold text-sm z-50">
+    <%= link_to "▶ Play", game_path, data: { turbo: turbo },
+          class: "block px-4 py-3 bg-passkey text-white border-b-[3px] border-ink" %>
 
     <%= link_to "Profile", user_path, data: { turbo: turbo },
-          class: "block px-4 py-2 text-gray-800 hover:bg-gray-100" %>
+          class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
 
     <%= link_to "Leaderboard", leaderboard_path, data: { turbo: turbo },
-          class: "block px-4 py-2 text-gray-800 hover:bg-gray-100" %>
+          class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
 
     <%= link_to "Passkeys", webauthn_settings_path, data: { turbo: turbo },
-          class: "block px-4 py-2 text-gray-800 hover:bg-gray-100" %>
+          class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
 
     <%= link_to "Two-factor authentication", totp_settings_path, data: { turbo: turbo },
-          class: "block px-4 py-2 text-gray-800 hover:bg-gray-100" %>
+          class: "block px-4 py-3 text-ink border-b-[3px] border-ink hover:bg-paper" %>
 
     <%= button_to "Sign out", session_path, method: :delete,
-          class: "block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer" %>
+          class: "block w-full text-left px-4 py-3 text-error hover:bg-error/10 cursor-pointer" %>
   </div>
 </div>

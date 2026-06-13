@@ -1,25 +1,25 @@
-<div class="mx-auto md:w-2/3 w-full"
+<div class="mx-auto max-w-md w-full ah-card p-6"
      data-controller="webauthn-registration"
      data-webauthn-registration-options-url-value="<%= options_webauthn_credentials_path %>"
      data-webauthn-registration-callback-url-value="<%= webauthn_credentials_path %>">
-  <h1 class="font-bold text-4xl">Add your passkey</h1>
-  <p class="mt-4 text-gray-700">
-    Finish creating <strong><%= @user.username %></strong> by registering a passkey on this
+  <h1 class="text-[28px]">Add your passkey</h1>
+  <p class="mt-4 font-medium text-muted">
+    Finish creating <strong class="text-ink"><%= @user.username %></strong> by registering a passkey on this
     device. Your browser will ask you to confirm with a fingerprint, face, PIN, or security key.
   </p>
 
-  <p data-webauthn-registration-target="error" class="mt-4 text-red-500 font-medium"></p>
+  <p data-webauthn-registration-target="error" class="ah-error mt-4 empty:hidden"></p>
 
   <div class="mt-6">
     <button type="button"
             data-action="webauthn-registration#register"
             data-webauthn-registration-target="submit"
-            class="rounded-lg px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer">
-      Create passkey
+            class="ah-btn ah-btn--primary shadow-brut">
+      ⬡ Create passkey
     </button>
   </div>
 
-  <div class="mt-8 text-sm text-gray-500">
-    <%= link_to "Start over", new_registration_path, class: "text-gray-700 underline hover:no-underline" %>
-  </div>
+  <p class="mt-8 font-medium text-sm text-muted">
+    <%= link_to "Start over", new_registration_path, class: "text-ink underline underline-offset-[3px] decoration-2 hover:no-underline" %>
+  </p>
 </div>

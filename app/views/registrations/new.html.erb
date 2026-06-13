@@ -1,19 +1,19 @@
-<div class="mx-auto md:w-2/3 w-full"
+<div class="mx-auto max-w-md w-full ah-card p-6"
      data-controller="tabs"
      data-tabs-active-value="<%= @signup_method || "password" %>"
-     data-tabs-active-class="bg-white shadow-sm text-gray-900"
-     data-tabs-inactive-class="text-gray-500">
-  <h1 class="font-bold text-4xl">Create an account</h1>
+     data-tabs-active-class="bg-password text-ink"
+     data-tabs-inactive-class="bg-card text-muted hover:bg-paper">
+  <h1 class="text-[28px] leading-[.95]">Create an account</h1>
 
-  <div class="mt-6 inline-flex rounded-lg bg-gray-100 p-1 gap-1">
+  <div class="inline-flex border-[3px] border-ink rounded-[3px] overflow-hidden mt-4">
     <button type="button" data-tabs-target="tab" data-tabs-name="password" data-action="tabs#select"
-            class="rounded-md px-4 py-2 text-sm font-medium cursor-pointer">Password</button>
+            class="px-[18px] py-2.5 font-bold text-[13px] uppercase tracking-wide border-r-[3px] border-ink cursor-pointer">Password</button>
     <button type="button" data-tabs-target="tab" data-tabs-name="passkey" data-action="tabs#select"
-            class="rounded-md px-4 py-2 text-sm font-medium cursor-pointer">Passkey</button>
+            class="px-[18px] py-2.5 font-bold text-[13px] uppercase tracking-wide cursor-pointer">Passkey</button>
   </div>
 
   <% if @user.errors.any? %>
-    <div class="py-2 px-3 bg-red-50 mt-5 text-red-500 font-medium rounded-lg">
+    <div class="ah-flash ah-flash--error mt-5">
       <ul class="list-disc list-inside">
         <% @user.errors.full_messages.each do |message| %>
           <li><%= message %></li>
@@ -24,21 +24,25 @@
 
   <%# Password signup %>
   <div data-tabs-target="panel" data-tabs-name="password">
-    <%= form_with model: @user, url: registration_path, class: "contents" do |form| %>
-      <div class="my-5">
-        <%= form.text_field :username, required: true, autocomplete: "username", placeholder: "Choose a username", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+    <%= form_with model: @user, url: registration_path, class: "mt-5 space-y-3.5" do |form| %>
+      <div class="space-y-1.5">
+        <%= form.label :username, class: "ah-label" %>
+        <%= form.text_field :username, required: true, autocomplete: "username", placeholder: "Choose a username", class: "ah-input" %>
       </div>
 
-      <div class="my-5">
-        <%= form.email_field :email_address, required: true, autocomplete: "email", placeholder: "Enter your email address", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+      <div class="space-y-1.5">
+        <%= form.label :email_address, "Email", class: "ah-label" %>
+        <%= form.email_field :email_address, required: true, autocomplete: "email", placeholder: "Enter your email address", class: "ah-input" %>
       </div>
 
-      <div class="my-5">
-        <%= form.password_field :password, required: true, autocomplete: "new-password", placeholder: "Choose a password", maxlength: 72, class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+      <div class="space-y-1.5">
+        <%= form.label :password, class: "ah-label" %>
+        <%= form.password_field :password, required: true, autocomplete: "new-password", placeholder: "Choose a password", maxlength: 72, class: "ah-input" %>
       </div>
 
-      <div class="my-5">
-        <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", placeholder: "Confirm your password", maxlength: 72, class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+      <div class="space-y-1.5">
+        <%= form.label :password_confirmation, "Confirm password", class: "ah-label" %>
+        <%= form.password_field :password_confirmation, required: true, autocomplete: "new-password", placeholder: "Confirm your password", maxlength: 72, class: "ah-input" %>
       </div>
 
       <%# Honeypot: hidden from humans, tempting to bots. A filled :nickname is dropped server-side. %>
@@ -47,7 +51,7 @@
         <%= text_field_tag :nickname, nil, tabindex: -1, autocomplete: "off" %>
       </div>
 
-      <%= form.submit "Create account", class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
+      <%= form.submit "Create account", class: "ah-btn ah-btn--primary shadow-brut cursor-pointer" %>
     <% end %>
   </div>
 
@@ -57,25 +61,27 @@
   <div data-tabs-target="panel" data-tabs-name="passkey" hidden>
     <%# turbo: false — on success this renders the full "add your passkey" page rather
         than redirecting, which Turbo rejects for form submissions. %>
-    <%= form_with model: @user, url: passkey_registration_path, class: "contents", data: { turbo: false } do |form| %>
-      <p class="my-5 text-gray-700">
+    <%= form_with model: @user, url: passkey_registration_path, class: "mt-5 space-y-3.5", data: { turbo: false } do |form| %>
+      <p class="font-medium text-muted">
         Create your account with a passkey — your fingerprint, face, screen lock, or a
         security key. No password to remember.
       </p>
 
-      <div class="my-5">
-        <%= form.text_field :username, required: true, id: "passkey_username", autocomplete: "username", placeholder: "Choose a username", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+      <div class="space-y-1.5">
+        <%= form.label :username, class: "ah-label" %>
+        <%= form.text_field :username, required: true, id: "passkey_username", autocomplete: "username", placeholder: "Choose a username", class: "ah-input" %>
       </div>
 
-      <div class="my-5">
-        <%= form.email_field :email_address, required: true, id: "passkey_email_address", autocomplete: "email", placeholder: "Enter your email address", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-blue-600 px-3 py-2 mt-2 w-full" %>
+      <div class="space-y-1.5">
+        <%= form.label :email_address, "Email", class: "ah-label" %>
+        <%= form.email_field :email_address, required: true, id: "passkey_email_address", autocomplete: "email", placeholder: "Enter your email address", class: "ah-input" %>
       </div>
 
-      <%= form.submit "Continue with a passkey", class: "w-full sm:w-auto text-center rounded-md px-3.5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white inline-block font-medium cursor-pointer" %>
+      <%= form.submit "⬡ Continue with a passkey", class: "ah-btn ah-btn--outline w-full cursor-pointer" %>
     <% end %>
   </div>
 
-  <div class="mt-8 text-sm text-gray-500">
-    <%= link_to "Already have an account? Sign in", new_session_path, class: "text-gray-700 underline hover:no-underline" %>
-  </div>
+  <p class="mt-8 font-medium text-sm text-muted">
+    <%= link_to "Already have an account? Sign in", new_session_path, class: "text-ink underline underline-offset-[3px] decoration-2 hover:no-underline" %>
+  </p>
 </div>

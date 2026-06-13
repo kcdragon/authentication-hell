@@ -19,7 +19,7 @@ class SignUpAndSignInTest < ApplicationSystemTestCase
     assert_not user.confirmed?
 
     # Sign-in is blocked until the email is confirmed.
-    fill_in "Enter your email address", with: "newplayer@example.com"
+    fill_in "Email", with: "newplayer@example.com"
     fill_in "Enter your password", with: "secretpassword"
     click_on "Sign in"
     assert_text "Please confirm your email first"
@@ -31,7 +31,7 @@ class SignUpAndSignInTest < ApplicationSystemTestCase
     assert user.reload.confirmed?
 
     # Now sign in succeeds and lands straight in the game.
-    fill_in "Enter your email address", with: "newplayer@example.com"
+    fill_in "Email", with: "newplayer@example.com"
     fill_in "Enter your password", with: "secretpassword"
     click_on "Sign in"
 

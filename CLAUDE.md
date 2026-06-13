@@ -50,6 +50,16 @@ RuboCop and Brakeman are scoped to *our* code only: everything under `game/` is 
 - For `has_secure_password`, uncomment `bcrypt` in the `Gemfile` first (it ships commented out).
 - Comments are fine where the code isn't self-explanatory — explain the *why*, not the *what*. Keep them short; don't restate the code or pad with detail.
 
+### UI surface and visual conventions
+
+The app is a gamified auth system: a full credential stack (sign-up, sign-in, email confirmation, password reset, TOTP 2FA, recovery codes, WebAuthn passkeys, profile, achievements) wrapped around the embedded game, where colliding with an enemy forces re-authentication mid-play.
+
+- **Two layouts.** `layouts/application.html.erb` is the standard chrome: a centered `container mx-auto md:w-2/3 w-full px-5` content column with a top-right authenticated nav (`shared/_navigation.html.erb` — avatar badge + username dropdown: Play / Profile / Passkeys / Two-factor / Sign out) and flash via `shared/_flash.html.erb`. `layouts/game.html.erb` is the minimal game shell (see the DragonRuby section). Pages served under each look different by design.
+- **Styling is stock Tailwind v4**, no customization: system-ui fonts, default palette, no `tailwind.config.js`, no `@theme` tokens. The only custom CSS is the toast keyframes in `app/assets/tailwind/application.css`. Recurring class patterns (not extracted into helpers — copied per view): primary button `rounded-lg px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium`; secondary/passkey button uses `bg-gray-800`; destructive uses `bg-red-600`; inputs `block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 w-full`; page `h1` is `font-bold text-4xl`.
+- **Semantic color system** — these hues carry meaning and recur across views; keep them distinct if restyling: **purple** = TOTP/2FA, **amber/gold** = password challenges + achievements, **blue** = passkeys (and primary actions), **green** = enabled/success status, **red** = errors + destructive actions.
+- **Presentation helpers:** `application_helper#avatar_badge` (uploaded variant or initial-letter fallback), `totp_helper#totp_qr_code` (inline SVG via rqrcode). The `games/*_helper` files only compute per-user DOM ids for the challenge toasts.
+- **Game overlay toasts** (`app/views/games/_*.html.erb`, fixed bottom-right over the canvas): the three persistent challenge toasts (`_totp_challenge` purple, `_password_challenge` amber, `_passkey_challenge` blue — each an inline re-auth form dismissed only by a valid answer) and two ephemeral auto-fading ones (`_toast` generic collision, `_achievement_toast` gold). The keyframes (`toast-fade`/`toast-collapse` for ephemeral, `challenge-toast-in` for persistent) live in the Tailwind source; comments there explain the two-animation split.
+
 ## DragonRuby (`game/`)
 
 - `game/dragonruby` is a Mach-O binary (the engine). Game code lives in `game/mygame/app/main.rb` — the entry point is a `tick` method called every frame. `game/samples/` has 150+ example apps and `game/docs/` has the offline docs.

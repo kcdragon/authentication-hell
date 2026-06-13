@@ -1,33 +1,33 @@
-<div class="mx-auto md:w-2/3 w-full">
-  <h1 class="font-bold text-4xl">Set up two-factor authentication</h1>
+<div class="mx-auto max-w-xl w-full ah-card p-7">
+  <span class="ah-badge ah-badge--totp text-white">2FA Setup</span>
+  <h1 class="text-[28px] mt-3">Set up two-factor authentication</h1>
 
-  <ol class="mt-6 space-y-2 text-gray-700 list-decimal list-inside">
+  <ol class="mt-5 space-y-2 font-medium text-ink list-decimal list-inside marker:font-display marker:text-totp">
     <li>Scan the QR code below with your authenticator app.</li>
     <li>Enter the 6-digit code it shows to confirm.</li>
   </ol>
 
-  <div class="mt-6">
+  <div class="mt-5 inline-block border-[3px] border-ink rounded-[3px] bg-card p-3 shadow-brut-sm">
     <%= totp_qr_code(@provisioning_uri) %>
   </div>
 
-  <p class="mt-4 text-sm text-gray-500">
+  <p class="mt-4 font-medium text-sm text-muted">
     Can't scan? Enter this secret manually:
-    <code class="font-mono bg-gray-100 rounded px-2 py-1 break-all"><%= @secret %></code>
+    <code class="font-mono font-bold border-2 border-ink rounded-[3px] bg-paper px-2 py-1 break-all"><%= @secret %></code>
   </p>
 
   <%# turbo: false — on success this submits to a full-page render of the one-time
       recovery codes (not a redirect), which Turbo rejects; a normal navigation also
       keeps the secret codes out of Turbo's page cache. %>
-  <%= form_with url: totp_enrollment_path, method: :post, class: "contents", data: { turbo: false } do |form| %>
-    <div class="my-5">
-      <%= form.text_field :code, required: true, autofocus: true, autocomplete: "off", inputmode: "numeric", placeholder: "Enter the 6-digit code", class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 mt-2 w-full sm:w-80" %>
+  <%= form_with url: totp_enrollment_path, method: :post, class: "mt-5 space-y-3.5", data: { turbo: false } do |form| %>
+    <div class="space-y-1.5">
+      <%= form.label :code, "Verification code", class: "ah-label" %>
+      <%= form.text_field :code, required: true, autofocus: true, autocomplete: "off", inputmode: "numeric", placeholder: "Enter the 6-digit code", class: "ah-input sm:w-80 focus:border-totp focus:shadow-[3px_3px_0_var(--color-totp)]" %>
     </div>
 
-    <div class="sm:flex sm:items-center sm:gap-4">
-      <%= form.submit "Confirm and enable", class: "w-full sm:w-auto text-center rounded-lg px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white inline-block font-medium cursor-pointer" %>
-      <div class="mt-4 text-sm text-gray-500 sm:mt-0">
-        <%= link_to "Cancel", totp_settings_path, class: "text-gray-700 underline hover:no-underline" %>
-      </div>
+    <div class="flex items-center gap-5 pt-1">
+      <%= form.submit "Confirm and enable", class: "ah-btn ah-btn--primary shadow-brut cursor-pointer", style: "background: var(--color-totp)" %>
+      <%= link_to "Cancel", totp_settings_path, class: "font-semibold text-sm text-ink underline underline-offset-[3px] decoration-2 hover:no-underline" %>
     </div>
   <% end %>
 </div>

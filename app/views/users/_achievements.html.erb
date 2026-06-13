@@ -1,33 +1,35 @@
-<div class="mt-8 border-t border-gray-200 pt-6">
-  <h2 class="font-bold text-xl">Achievements</h2>
-  <p class="mt-1 text-sm text-gray-500">
-    <%= earned_achievements_by_key.size %> of <%= Achievement.all.size %> unlocked.
-  </p>
+<div class="mt-6 border-t-[3px] border-ink pt-5">
+  <div class="flex items-baseline gap-3 flex-wrap">
+    <h2 class="text-xl">Achievements</h2>
+    <span class="font-mono font-bold text-sm text-muted">
+      <%= earned_achievements_by_key.size %> of <%= Achievement.all.size %> unlocked
+    </span>
+  </div>
 
-  <ul class="mt-4 flex flex-col gap-3">
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 mt-4">
     <% Achievement.all.each do |achievement| %>
       <% earned = earned_achievements_by_key[achievement.key] %>
-      <li class="flex items-start gap-4 rounded-lg border px-4 py-3
-                 <%= earned ? "border-amber-300 bg-amber-50" : "border-gray-200 bg-gray-50" %>">
-        <span class="text-2xl <%= "opacity-30 grayscale" unless earned %>" aria-hidden="true">
-          <%= achievement.emoji %>
-        </span>
-        <div class="flex-1">
-          <p class="font-medium <%= earned ? "text-amber-900" : "text-gray-400" %>">
-            <%= achievement.name %>
-          </p>
-          <p class="text-sm <%= earned ? "text-amber-800" : "text-gray-400" %>">
-            <%= achievement.description %>
-          </p>
+      <% if earned %>
+        <div class="border-[3px] border-ink rounded-[3px] bg-password p-4 shadow-brut">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[26px]" aria-hidden="true"><%= achievement.emoji %></span>
+            <span class="font-mono font-bold text-[10px] uppercase tracking-wide border-2 border-ink rounded-[3px] bg-card px-2 py-0.5 whitespace-nowrap">
+              ★ <%= earned.created_at.to_date.to_fs(:long) %>
+            </span>
+          </div>
+          <div class="font-display text-[15px] uppercase mt-3"><%= achievement.name %></div>
+          <p class="font-semibold text-[13px] text-ink/80 mt-1"><%= achievement.description %></p>
         </div>
-        <% if earned %>
-          <span class="text-xs font-medium text-amber-700 whitespace-nowrap">
-            <%= earned.created_at.to_date.to_fs(:long) %>
-          </span>
-        <% else %>
-          <span class="text-xs font-medium text-gray-400 whitespace-nowrap">Locked</span>
-        <% end %>
-      </li>
+      <% else %>
+        <div class="border-[3px] border-dashed border-[#b8b3a8] rounded-[3px] bg-locked p-4">
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[26px] grayscale opacity-40" aria-hidden="true"><%= achievement.emoji %></span>
+            <span class="font-mono font-bold text-[10px] uppercase tracking-wide text-locked-ink border-2 border-[#c9c4bb] rounded-[3px] px-2 py-0.5">Locked</span>
+          </div>
+          <div class="font-display text-[15px] uppercase mt-3 text-locked-ink"><%= achievement.name %></div>
+          <p class="font-semibold text-[13px] text-locked-ink mt-1"><%= achievement.description %></p>
+        </div>
+      <% end %>
     <% end %>
-  </ul>
+  </div>
 </div>
