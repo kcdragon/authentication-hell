@@ -3,11 +3,11 @@ class Games::PasswordChallengeController < ApplicationController
   skip_forgery_protection only: :start
 
   def status
-    render json: { locked: session[:game_password_required].present? }
+    render json: { locked: Current.session.game_challenges.exists?(kind: "password") }
   end
 
   def start
-    session[:game_password_required] = true
+    Current.session.game_challenges.find_or_create_by!(kind: "password")
     Turbo::StreamsChannel.broadcast_append_to(
       Current.user, :toasts,
       target: "toasts",
@@ -19,8 +19,8 @@ class Games::PasswordChallengeController < ApplicationController
 
   # A correct password clears the lock; anything else re-renders the toast with an error.
   def complete
-    if session[:game_password_required] && Current.user.authenticate(params[:password])
-      session.delete(:game_password_required)
+    if Current.session.game_challenges.exists?(kind: "password") && Current.user.authenticate(params[:password])
+      Current.session.game_challenges.where(kind: "password").delete_all
       Achievement::Awarder.call(Current.user, :password_survivor)
       render turbo_stream: turbo_stream.remove(toast_id)
     else
