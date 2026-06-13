@@ -140,6 +140,13 @@ class User < ApplicationRecord
     record if record.persisted?
   end
 
+  def record_level_completed(level)
+    return false if highest_level_completed && level <= highest_level_completed
+
+    update!(highest_level_completed: level)
+    true
+  end
+
   private
 
   def password_or_passkey_present

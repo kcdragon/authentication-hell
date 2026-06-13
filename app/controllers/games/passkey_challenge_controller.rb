@@ -1,9 +1,7 @@
 class Games::PasskeyChallengeController < ApplicationController
   include WebauthnCeremony
 
-  # WASM can't send a CSRF token; safe since start is same-origin, session-gated,
-  # and only sets a flag + broadcasts. options/complete are called from page JS
-  # that sends the X-CSRF-Token meta header, so they keep forgery protection.
+  # WASM can't send a CSRF token.
   skip_forgery_protection only: :start
 
   def status

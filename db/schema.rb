@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_13_020000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_13_030000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -85,6 +85,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_13_020000) do
     t.boolean "totp_enabled", default: false, null: false
     t.integer "last_totp_at"
     t.string "webauthn_id"
+    t.integer "highest_level_completed"
     t.index "lower(username)", name: "index_users_on_lower_username", unique: true
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["webauthn_id"], name: "index_users_on_webauthn_id", unique: true

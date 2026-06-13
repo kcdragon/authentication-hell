@@ -12,7 +12,7 @@ class Achievement
     @emoji = emoji
   end
 
-  ALL = [
+  SURVIVOR = [
     new(key: "password_survivor", name: "Password Survivor", emoji: "🔑",
       description: "Survive a collision by entering your password."),
     new(key: "totp_survivor", name: "Code Cracker", emoji: "🔢",
@@ -20,6 +20,8 @@ class Achievement
     new(key: "passkey_survivor", name: "Key Master", emoji: "🛡️",
       description: "Survive a collision with your passkey.")
   ].freeze
+
+  ALL = (SURVIVOR + GameLevel.all.map(&:achievement)).freeze
 
   def self.all
     ALL

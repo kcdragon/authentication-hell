@@ -208,6 +208,20 @@ class UserTest < ActiveSupport::TestCase
     assert user.errors[:avatar].any?
   end
 
+  test "record_level_completed advances the high-water mark and returns true" do
+    user = users(:one)
+    assert user.record_level_completed(2)
+    assert_equal 2, user.reload.highest_level_completed
+  end
+
+  test "record_level_completed never moves backward and returns false" do
+    user = users(:one)
+    user.update!(highest_level_completed: 3)
+
+    assert_not user.record_level_completed(1)
+    assert_equal 3, user.reload.highest_level_completed
+  end
+
   test "disable_totp! clears the secret, flag, and recovery codes" do
     user = users(:one)
     user.enable_totp!(ROTP::Base32.random)
