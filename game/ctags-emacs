@@ -858,15 +858,15 @@ module GTKGTK6,121
     def controller_fourcontroller_four263,6207
     def autocomplete_methodsautocomplete_methods267,6270
     def tick_beforetick_before271,6383
-    def __clear_events____clear_events__275,6484
-    def tick_aftertick_after283,6713
-    def resetreset323,7812
-    def method_missing name, *args, &blockmethod_missing335,8189
-class AudioHash < HashAudioHash354,8577
-  def volumevolume357,8715
-  def volume= valuevolume=380,9341
-  def sync!sync!385,9426
-  def []= key, value[]=389,9483
+    def __clear_events____clear_events__274,6412
+    def tick_aftertick_after282,6641
+    def resetreset292,6869
+    def method_missing name, *args, &blockmethod_missing304,7246
+class AudioHash < HashAudioHash323,7634
+  def volumevolume326,7772
+  def volume= valuevolume=349,8398
+  def sync!sync!354,8483
+  def []= key, value[]=358,8540
 
 ../../../../dragon/runte/c_bridgdge.rb,7108
 module GTKGTK6,125
@@ -953,7 +953,7 @@ module GTKGTK6,125
       def right_controller_position x, y, z, orientation_x, orientation_y, orientation_zright_controller_position1090,46704
       def headset_position x, y, z, orientation_x, orientation_y, orientation_zheadset_position1099,47221
       def windowevent_size_changed orientation_w, orientation_h,windowevent_size_changed1108,47621
-      def raw_event eventraw_event1206,51524
+      def raw_event eventraw_event1207,51585
 
 ../../../../dragon/ntime/draw.rbrb,492
 module GTKGTK6,121
@@ -2262,77 +2262,77 @@ module GTKGTK22,273
     def __sdl_tick__simulation____sdl_tick__simulation__1697,53924
     def disable_aggressive_gc!disable_aggressive_gc!1768,56510
     def __sdl_tick__ sdl_tick__sdl_tick__1772,56586
-    def unhandled_exception eunhandled_exception1813,57862
-    def export_error! exception_textexport_error!1828,58431
-    def pretty_print_exception_and_export! epretty_print_exception_and_export!1836,58652
-    def text_fonttext_font1870,59809
-    def calcstringbox str, sz_enum = 0, fnt = "font.ttf", size_enum: nil, size_px: nil, font: nilcalcstringbox1874,59846
-    def calcstringbox_h str, sz_enum = 0, fnt = "font.ttf", size_enum: nil, size_px: nil, font: nilcalcstringbox_h1907,60570
-    def autocomplete_methodsautocomplete_methods1912,60799
-    def ignore_search_term? wordignore_search_term?1916,60908
-    def grep_did_you_mean_recommendations instance, methodgrep_did_you_mean_recommendations1923,61075
-    def grep_did_you_mean instance, method, prefix = "", delimeter = ", ", take: nilgrep_did_you_mean1934,61410
-    def grep_source_file file, *strings_with_recommendationsgrep_source_file1958,62105
-    def grep_source *strings_with_recommendationsgrep_source1991,63134
-    def teststests2031,64363
-    def log_levellog_level2035,64399
-    def log_levelslog_levels2039,64451
-    def log_level= valuelog_level=2043,64497
-    def seedseed2055,64789
-    def system cmdsystem2059,64827
-    def exec cmdexec2063,64877
-    def self.argv_window_scale argvargv_window_scale2067,64918
-    def self.argv_window_position_x argvargv_window_position_x2071,65025
-    def self.argv_window_position_y argvargv_window_position_y2075,65141
-    def self.parse_cli_argument_i argv, name, default = 0parse_cli_argument_i2079,65257
-    def self.parse_cli_argument argv, name, default = nilparse_cli_argument2083,65380
-    def show_cursorshow_cursor2104,66022
-    def hide_cursorhide_cursor2110,66147
-    def cursor_shown?cursor_shown?2123,66399
-    def set_system_cursor typeset_system_cursor2127,66450
-    def set_cursor fname, hot_x=0, hot_y=0set_cursor2131,66538
-    def set_mouse_grab valueset_mouse_grab2135,66641
-    def openurl urlopenurl2141,66788
-    def mailto email:, subject:, body: nil, exception: nil;mailto2147,66887
-    def take_screenshottake_screenshot2152,67070
-    def simulate_render_targets_resetsimulate_render_targets_reset2156,67146
-    def simulate_render_device_resetsimulate_render_device_reset2160,67243
-    def serializeserialize2164,67338
-    def get_base_dirget_base_dir2173,67518
-    def open_docsopen_docs2177,67591
-    def export_docs!export_docs!2181,67682
-    def get_game_idget_game_id2185,67738
-    def get_pixels pathget_pixels2195,68028
-    def trace_nil_punning!trace_nil_punning!2204,68175
-    def untrace_nil_punning!untrace_nil_punning!2215,68511
-    def disable_nil_punning!disable_nil_punning!2219,68590
-            def tick argstick2230,68929
-    def enable_nil_punning!enable_nil_punning!2258,69522
-            def tick argstick2269,69870
-    def disable_nil_coersion!disable_nil_coersion!2291,70233
-    def start_server!(port: nil, enable_in_prod: false, **rest)start_server!2295,70299
-    def dlopen namedlopen2319,70984
-    def get_dlopen_path(*args)get_dlopen_path2323,71045
-    def disable_controller_config!disable_controller_config!2327,71124
-    def disable_controller_configdisable_controller_config2331,71209
-    def enable_controller_config!enable_controller_config!2335,71285
-    def enable_controller_configenable_controller_config2339,71370
-    def __tick_count____tick_count__2343,71444
-    def __global_tick_count____global_tick_count__2347,71500
-    def quitquit2351,71570
-    def benchmark(opts = nil, **kwargs)benchmark2355,71612
-    def get_texture_atlas sprites_directoryget_texture_atlas2362,71874
-    def create_uuidcreate_uuid2368,72107
-    def start_text_inputstart_text_input2372,72164
-    def stop_text_inputstop_text_input2378,72327
-class FileFile2387,72487
-  def self.read pathread2388,72498
-  def self.write path, contentswrite2392,72550
-  def self.append path, contentsappend2396,72624
-module GTKGTK2401,72704
-    def reset rng_override = nil, seed: nil, include_sprites: truereset2403,72731
-    def unhandled_exception eunhandled_exception2407,72883
-    def method_missing(m, *args, &block)method_missing2412,73003
+    def unhandled_exception eunhandled_exception1811,57825
+    def export_error! exception_textexport_error!1826,58394
+    def pretty_print_exception_and_export! epretty_print_exception_and_export!1834,58615
+    def text_fonttext_font1868,59772
+    def calcstringbox str, sz_enum = 0, fnt = "font.ttf", size_enum: nil, size_px: nil, font: nilcalcstringbox1872,59809
+    def calcstringbox_h str, sz_enum = 0, fnt = "font.ttf", size_enum: nil, size_px: nil, font: nilcalcstringbox_h1905,60533
+    def autocomplete_methodsautocomplete_methods1910,60762
+    def ignore_search_term? wordignore_search_term?1914,60871
+    def grep_did_you_mean_recommendations instance, methodgrep_did_you_mean_recommendations1921,61038
+    def grep_did_you_mean instance, method, prefix = "", delimeter = ", ", take: nilgrep_did_you_mean1932,61373
+    def grep_source_file file, *strings_with_recommendationsgrep_source_file1956,62068
+    def grep_source *strings_with_recommendationsgrep_source1989,63097
+    def teststests2029,64326
+    def log_levellog_level2033,64362
+    def log_levelslog_levels2037,64414
+    def log_level= valuelog_level=2041,64460
+    def seedseed2053,64752
+    def system cmdsystem2057,64790
+    def exec cmdexec2061,64840
+    def self.argv_window_scale argvargv_window_scale2065,64881
+    def self.argv_window_position_x argvargv_window_position_x2069,64988
+    def self.argv_window_position_y argvargv_window_position_y2073,65104
+    def self.parse_cli_argument_i argv, name, default = 0parse_cli_argument_i2077,65220
+    def self.parse_cli_argument argv, name, default = nilparse_cli_argument2081,65343
+    def show_cursorshow_cursor2102,65985
+    def hide_cursorhide_cursor2108,66110
+    def cursor_shown?cursor_shown?2121,66362
+    def set_system_cursor typeset_system_cursor2125,66413
+    def set_cursor fname, hot_x=0, hot_y=0set_cursor2129,66501
+    def set_mouse_grab valueset_mouse_grab2133,66604
+    def openurl urlopenurl2139,66751
+    def mailto email:, subject:, body: nil, exception: nil;mailto2145,66850
+    def take_screenshottake_screenshot2150,67033
+    def simulate_render_targets_resetsimulate_render_targets_reset2154,67109
+    def simulate_render_device_resetsimulate_render_device_reset2158,67206
+    def serializeserialize2162,67301
+    def get_base_dirget_base_dir2171,67481
+    def open_docsopen_docs2175,67554
+    def export_docs!export_docs!2179,67645
+    def get_game_idget_game_id2183,67701
+    def get_pixels pathget_pixels2193,67991
+    def trace_nil_punning!trace_nil_punning!2202,68138
+    def untrace_nil_punning!untrace_nil_punning!2213,68474
+    def disable_nil_punning!disable_nil_punning!2217,68553
+            def tick argstick2228,68892
+    def enable_nil_punning!enable_nil_punning!2256,69485
+            def tick argstick2267,69833
+    def disable_nil_coersion!disable_nil_coersion!2289,70196
+    def start_server!(port: nil, enable_in_prod: false, **rest)start_server!2293,70262
+    def dlopen namedlopen2317,70947
+    def get_dlopen_path(*args)get_dlopen_path2321,71008
+    def disable_controller_config!disable_controller_config!2325,71087
+    def disable_controller_configdisable_controller_config2329,71172
+    def enable_controller_config!enable_controller_config!2333,71248
+    def enable_controller_configenable_controller_config2337,71333
+    def __tick_count____tick_count__2341,71407
+    def __global_tick_count____global_tick_count__2345,71463
+    def quitquit2349,71533
+    def benchmark(opts = nil, **kwargs)benchmark2353,71575
+    def get_texture_atlas sprites_directoryget_texture_atlas2360,71837
+    def create_uuidcreate_uuid2366,72070
+    def start_text_inputstart_text_input2370,72127
+    def stop_text_inputstop_text_input2376,72290
+class FileFile2385,72450
+  def self.read pathread2386,72461
+  def self.write path, contentswrite2390,72513
+  def self.append path, contentsappend2394,72587
+module GTKGTK2399,72667
+    def reset rng_override = nil, seed: nil, include_sprites: truereset2401,72694
+    def unhandled_exception eunhandled_exception2405,72846
+    def method_missing(m, *args, &block)method_missing2410,72966
 
 ../../../../dragon/assert.rb,778
 module GTKGTK6,123
@@ -3658,126 +3658,127 @@ module GTKGTK11,329
     def slide_progressslide_progress1035,30312
     def clear_logs global_at: Kernel.global_tick_countclear_logs1045,30740
 
-../../../../dragon/grid.rb,6786
+../../../../dragon/grid.rb,6852
 module GTKGTK6,121
   class GridGrid7,132
-    def orientation_changed?orientation_changed?68,1140
-    def initialize runtimeinitialize72,1205
-    def orientationorientation78,1331
-    def transform_x xtransform_x82,1387
-    def untransform_x xuntransform_x86,1445
-    def transform_y ytransform_y90,1505
-    def untransform_y yuntransform_y94,1584
-    def ffi_drawffi_draw98,1665
-    def ffi_draw= valueffi_draw=102,1707
-    def __origin_bottom_left__!(force: false)__origin_bottom_left__!106,1764
-    def origin_bottom_left!(force: false)origin_bottom_left!129,2543
-    def origin_center!(force: false)origin_center!134,2718
-    def xx158,3652
-    def x_pxx_px162,3683
-    def yy166,3720
-    def y_pxy_px170,3753
-    def allscreen_xallscreen_x174,3792
-    def allscreen_x_pxallscreen_x_px178,3843
-    def allscreen_yallscreen_y182,3900
-    def allscreen_y_pxallscreen_y_px186,3953
-    def w_halfw_half190,4012
-    def h_halfh_half194,4049
-    def rectrect198,4086
-    def rect_pxrect_px202,4153
-    def allscreen_offsetallscreen_offset206,4235
-    def allscreen_offset_pxallscreen_offset_px210,4326
-    def allscreen_rectallscreen_rect214,4426
-    def allscreen_rect_pxallscreen_rect_px218,4543
-    def letterbox?letterbox?222,4675
-    def letterboxletterbox226,4720
-    def letterbox= valueletterbox=230,4764
-    def landscape?landscape?234,4823
-    def portrait?portrait?238,4892
-    def origin_center?origin_center?242,4959
-    def origin_bottom_left?origin_bottom_left?246,5021
-    def aspect_ratio_waspect_ratio_w250,5093
-    def aspect_ratio_haspect_ratio_h254,5151
-    def hd?hd?258,5209
-    def highdpi?highdpi?264,5310
-      def origin_name = $grid.origin_nameorigin_name271,5448
-      def x = $grid.xx272,5490
-      def x_px = $grid.x_pxx_px273,5512
-      def y = $grid.yy274,5540
-      def y_px = $grid.y_pxy_px275,5562
-      def w = $grid.ww276,5590
-      def w_px = $grid.w_pxw_px277,5612
-      def h = $grid.hh278,5640
-      def h_px = $grid.h_pxh_px279,5662
-      def bottom = $grid.bottombottom280,5690
-      def bottom_px = $grid.bottom_pxbottom_px281,5722
-      def top = $grid.toptop282,5760
-      def top_px = $grid.top_pxtop_px283,5786
-      def left = $grid.leftleft284,5818
-      def left_px = $grid.left_pxleft_px285,5846
-      def right = $grid.rightright286,5880
-      def right_px = $grid.right_pxright_px287,5910
-      def center_x = $grid.center_xcenter_x288,5946
-      def center_y = $grid.center_ycenter_y289,5982
-      def center = $grid.centercenter290,6018
-      def origin_x = $grid.origin_xorigin_x291,6050
-      def origin_y = $grid.origin_yorigin_y292,6086
-      def render_origin_x = $grid.render_origin_xrender_origin_x293,6122
-      def render_origin_y = $grid.render_origin_yrender_origin_y294,6172
-      def allscreen_left = $grid.allscreen_leftallscreen_left295,6222
-      def allscreen_left_px = $grid.allscreen_left_pxallscreen_left_px296,6270
-      def allscreen_right = $grid.allscreen_rightallscreen_right297,6324
-      def allscreen_right_px = $grid.allscreen_right_pxallscreen_right_px298,6374
-      def allscreen_top = $grid.allscreen_topallscreen_top299,6430
-      def allscreen_top_px = $grid.allscreen_top_pxallscreen_top_px300,6476
-      def allscreen_bottom = $grid.allscreen_bottomallscreen_bottom301,6528
-      def allscreen_bottom_px = $grid.allscreen_bottom_pxallscreen_bottom_px302,6580
-      def allscreen_w = $grid.allscreen_wallscreen_w303,6638
-      def allscreen_w_px = $grid.allscreen_w_pxallscreen_w_px304,6680
-      def allscreen_w_pt = $grid.allscreen_w_ptallscreen_w_pt305,6728
-      def allscreen_h = $grid.allscreen_hallscreen_h306,6776
-      def allscreen_h_px = $grid.allscreen_h_pxallscreen_h_px307,6818
-      def allscreen_h_pt = $grid.allscreen_h_ptallscreen_h_pt308,6866
-      def allscreen_offset_x = $grid.allscreen_offset_xallscreen_offset_x309,6914
-      def allscreen_offset_x_px = $grid.allscreen_offset_x_pxallscreen_offset_x_px310,6970
-      def allscreen_offset_y = $grid.allscreen_offset_yallscreen_offset_y311,7032
-      def allscreen_offset_y_px = $grid.allscreen_offset_y_pxallscreen_offset_y_px312,7088
-      def native_scale = $grid.native_scalenative_scale313,7150
-      def render_scale = $grid.render_scalerender_scale314,7194
-      def texture_scale = $grid.texture_scaletexture_scale315,7238
-      def texture_scale_enum = $grid.texture_scale_enumtexture_scale_enum316,7284
-      def high_dpi_scale = $grid.high_dpi_scalehigh_dpi_scale317,7340
-      def orientation_changed = $grid.orientation_changedorientation_changed318,7388
-      def orientation_changed? = $grid.orientation_changed?orientation_changed?319,7446
-      def orientation = $grid.orientationorientation320,7506
-      def origin_bottom_left!(force: false) = $grid.origin_bottom_left!(force: force)origin_bottom_left!321,7548
-      def origin_center!(force: false) = $grid.origin_center!(force: force)origin_center!322,7634
-      def x = $grid.xx323,7710
-      def x_px = $grid.x_pxx_px324,7732
-      def y = $grid.yy325,7760
-      def y_px = $grid.y_pxy_px326,7782
-      def allscreen_x = $grid.allscreen_xallscreen_x327,7810
-      def allscreen_x_px = $grid.allscreen_x_pxallscreen_x_px328,7852
-      def allscreen_y = $grid.allscreen_yallscreen_y329,7900
-      def allscreen_y_px = $grid.allscreen_y_pxallscreen_y_px330,7942
-      def w_half = $grid.w_halfw_half331,7990
-      def h_half = $grid.h_halfh_half332,8022
-      def rect = $grid.rectrect333,8054
-      def rect_px = $grid.rect_pxrect_px334,8082
-      def allscreen_rect = $grid.allscreen_rectallscreen_rect335,8116
-      def allscreen_rect_px = $grid.allscreen_rect_pxallscreen_rect_px336,8164
-      def allscreen_offset = $grid.allscreen_offsetallscreen_offset337,8218
-      def allscreen_offset_px = $grid.allscreen_offset_pxallscreen_offset_px338,8270
-      def letterbox? = $grid.letterbox?letterbox?339,8328
-      def letterbox = $grid.letterboxletterbox340,8368
-      def landscape? = $grid.landscape?landscape?341,8406
-      def portrait? = $grid.portrait?portrait?342,8446
-      def origin_center? = $grid.origin_center?origin_center?343,8484
-      def origin_bottom_left? = $grid.origin_bottom_left?origin_bottom_left?344,8532
-      def aspect_ratio_w = $grid.aspect_ratio_waspect_ratio_w345,8590
-      def aspect_ratio_h = $grid.aspect_ratio_haspect_ratio_h346,8638
-      def hd? = $grid.hd?hd?347,8686
-      def hd = $grid.hdhd348,8712
-      def highdpi? = $grid.highdpi?highdpi?349,8736
-      def highdpi = $grid.highdpihighdpi350,8772
-      def method_missing(m, *args, &block)method_missing352,8807
+    def orientation_changed?orientation_changed?68,1155
+    def initialize runtimeinitialize72,1220
+    def orientationorientation78,1346
+    def transform_x xtransform_x82,1402
+    def untransform_x xuntransform_x86,1460
+    def transform_y ytransform_y90,1520
+    def untransform_y yuntransform_y94,1599
+    def ffi_drawffi_draw98,1680
+    def ffi_draw= valueffi_draw=102,1722
+    def __origin_bottom_left__!(force: false)__origin_bottom_left__!106,1779
+    def origin_bottom_left!(force: false)origin_bottom_left!129,2558
+    def origin_center!(force: false)origin_center!134,2733
+    def xx158,3667
+    def x_pxx_px162,3698
+    def yy166,3735
+    def y_pxy_px170,3768
+    def allscreen_xallscreen_x174,3807
+    def allscreen_x_pxallscreen_x_px178,3858
+    def allscreen_yallscreen_y182,3915
+    def allscreen_y_pxallscreen_y_px186,3968
+    def w_halfw_half190,4027
+    def h_halfh_half194,4064
+    def rectrect198,4101
+    def rect_pxrect_px202,4168
+    def allscreen_offsetallscreen_offset206,4250
+    def allscreen_offset_pxallscreen_offset_px210,4341
+    def allscreen_rectallscreen_rect214,4441
+    def allscreen_rect_pxallscreen_rect_px218,4558
+    def letterbox?letterbox?222,4690
+    def letterboxletterbox226,4735
+    def letterbox= valueletterbox=230,4779
+    def landscape?landscape?234,4838
+    def portrait?portrait?238,4907
+    def origin_center?origin_center?242,4974
+    def origin_bottom_left?origin_bottom_left?246,5036
+    def aspect_ratio_waspect_ratio_w250,5108
+    def aspect_ratio_haspect_ratio_h254,5166
+    def hd?hd?258,5224
+    def highdpi?highdpi?264,5325
+      def origin_name = $grid.origin_nameorigin_name271,5463
+      def x = $grid.xx272,5505
+      def x_px = $grid.x_pxx_px273,5527
+      def y = $grid.yy274,5555
+      def y_px = $grid.y_pxy_px275,5577
+      def w = $grid.ww276,5605
+      def w_px = $grid.w_pxw_px277,5627
+      def h = $grid.hh278,5655
+      def h_px = $grid.h_pxh_px279,5677
+      def bottom = $grid.bottombottom280,5705
+      def bottom_px = $grid.bottom_pxbottom_px281,5737
+      def top = $grid.toptop282,5775
+      def top_px = $grid.top_pxtop_px283,5801
+      def left = $grid.leftleft284,5833
+      def left_px = $grid.left_pxleft_px285,5861
+      def right = $grid.rightright286,5895
+      def right_px = $grid.right_pxright_px287,5925
+      def center_x = $grid.center_xcenter_x288,5961
+      def center_y = $grid.center_ycenter_y289,5997
+      def center = $grid.centercenter290,6033
+      def origin_x = $grid.origin_xorigin_x291,6065
+      def origin_y = $grid.origin_yorigin_y292,6101
+      def render_origin_x = $grid.render_origin_xrender_origin_x293,6137
+      def render_origin_y = $grid.render_origin_yrender_origin_y294,6187
+      def allscreen_left = $grid.allscreen_leftallscreen_left295,6237
+      def allscreen_left_px = $grid.allscreen_left_pxallscreen_left_px296,6285
+      def allscreen_right = $grid.allscreen_rightallscreen_right297,6339
+      def allscreen_right_px = $grid.allscreen_right_pxallscreen_right_px298,6389
+      def allscreen_top = $grid.allscreen_topallscreen_top299,6445
+      def allscreen_top_px = $grid.allscreen_top_pxallscreen_top_px300,6491
+      def allscreen_bottom = $grid.allscreen_bottomallscreen_bottom301,6543
+      def allscreen_bottom_px = $grid.allscreen_bottom_pxallscreen_bottom_px302,6595
+      def allscreen_w = $grid.allscreen_wallscreen_w303,6653
+      def allscreen_w_px = $grid.allscreen_w_pxallscreen_w_px304,6695
+      def allscreen_w_pt = $grid.allscreen_w_ptallscreen_w_pt305,6743
+      def allscreen_h = $grid.allscreen_hallscreen_h306,6791
+      def allscreen_h_px = $grid.allscreen_h_pxallscreen_h_px307,6833
+      def allscreen_h_pt = $grid.allscreen_h_ptallscreen_h_pt308,6881
+      def allscreen_offset_x = $grid.allscreen_offset_xallscreen_offset_x309,6929
+      def allscreen_offset_x_px = $grid.allscreen_offset_x_pxallscreen_offset_x_px310,6985
+      def allscreen_offset_y = $grid.allscreen_offset_yallscreen_offset_y311,7047
+      def allscreen_offset_y_px = $grid.allscreen_offset_y_pxallscreen_offset_y_px312,7103
+      def native_scale = $grid.native_scalenative_scale313,7165
+      def render_scale = $grid.render_scalerender_scale314,7209
+      def refresh_rate = $grid.refresh_raterefresh_rate315,7253
+      def texture_scale = $grid.texture_scaletexture_scale316,7297
+      def texture_scale_enum = $grid.texture_scale_enumtexture_scale_enum317,7343
+      def high_dpi_scale = $grid.high_dpi_scalehigh_dpi_scale318,7399
+      def orientation_changed = $grid.orientation_changedorientation_changed319,7447
+      def orientation_changed? = $grid.orientation_changed?orientation_changed?320,7505
+      def orientation = $grid.orientationorientation321,7565
+      def origin_bottom_left!(force: false) = $grid.origin_bottom_left!(force: force)origin_bottom_left!322,7607
+      def origin_center!(force: false) = $grid.origin_center!(force: force)origin_center!323,7693
+      def x = $grid.xx324,7769
+      def x_px = $grid.x_pxx_px325,7791
+      def y = $grid.yy326,7819
+      def y_px = $grid.y_pxy_px327,7841
+      def allscreen_x = $grid.allscreen_xallscreen_x328,7869
+      def allscreen_x_px = $grid.allscreen_x_pxallscreen_x_px329,7911
+      def allscreen_y = $grid.allscreen_yallscreen_y330,7959
+      def allscreen_y_px = $grid.allscreen_y_pxallscreen_y_px331,8001
+      def w_half = $grid.w_halfw_half332,8049
+      def h_half = $grid.h_halfh_half333,8081
+      def rect = $grid.rectrect334,8113
+      def rect_px = $grid.rect_pxrect_px335,8141
+      def allscreen_rect = $grid.allscreen_rectallscreen_rect336,8175
+      def allscreen_rect_px = $grid.allscreen_rect_pxallscreen_rect_px337,8223
+      def allscreen_offset = $grid.allscreen_offsetallscreen_offset338,8277
+      def allscreen_offset_px = $grid.allscreen_offset_pxallscreen_offset_px339,8329
+      def letterbox? = $grid.letterbox?letterbox?340,8387
+      def letterbox = $grid.letterboxletterbox341,8427
+      def landscape? = $grid.landscape?landscape?342,8465
+      def portrait? = $grid.portrait?portrait?343,8505
+      def origin_center? = $grid.origin_center?origin_center?344,8543
+      def origin_bottom_left? = $grid.origin_bottom_left?origin_bottom_left?345,8591
+      def aspect_ratio_w = $grid.aspect_ratio_waspect_ratio_w346,8649
+      def aspect_ratio_h = $grid.aspect_ratio_haspect_ratio_h347,8697
+      def hd? = $grid.hd?hd?348,8745
+      def hd = $grid.hdhd349,8771
+      def highdpi? = $grid.highdpi?highdpi?350,8795
+      def highdpi = $grid.highdpihighdpi351,8831
+      def method_missing(m, *args, &block)method_missing353,8866
