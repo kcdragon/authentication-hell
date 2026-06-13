@@ -9,6 +9,20 @@ class Level
   # player does something). Runs every tick after the player + camera update.
   def update(_args) = nil
 
+  # Called once a re-auth clears (the player just unlocked). Lets a level script
+  # what happens next, e.g. the tutorial dropping a heal heart.
+  def on_unlock(_args) = nil
+
+  # Called when the player picks up a collectable. The heal itself is generic (in
+  # Main's tick); this is the level's chance to react.
+  def on_collect(_args) = nil
+
+  # Whether the player has satisfied this stage's goal and it should hand off.
+  def complete? = false
+
+  # The level to hand off to once complete? (nil for an endless/terminal stage).
+  def next_level = nil
+
   # Whether the keyboard melee can defeat enemies on this level.
   def melee? = true
 

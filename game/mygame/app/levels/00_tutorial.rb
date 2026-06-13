@@ -8,9 +8,15 @@ class TutorialLevel < Level
 
   def number = 0
 
+  def initialize
+    @healed = false
+  end
+
   def setup(args)
-    # No enemy yet — update spawns it once the player reaches the platform.
+    # No enemy yet — update spawns it once the player reaches the platform. The
+    # heal heart is dropped later, on re-auth (#on_unlock).
     args.state.enemies = []
+    args.state.collectables = []
     # One reachable ledge near the player's start (x:200) so the jump lesson has
     # something to land on.
     args.state.platforms = [
@@ -31,6 +37,20 @@ class TutorialLevel < Level
 
   def melee? = false
 
+  # Re-auth cleared: drop a heal heart on the ground a short walk ahead of the
+  # player (clamped to the world so it stays reachable). Collecting it heals the
+  # heart the enemy cost and completes the tutorial.
+  def on_unlock(args)
+    x = (args.state.player.x + 220).clamp(0, WORLD_W - HeartPickup::SIZE)
+    args.state.collectables << HeartPickup.new(x: x, y: GROUND_Y + HeartPickup::LIFT)
+  end
+
+  def on_collect(_args) = @healed = true
+
+  def complete? = @healed
+
+  def next_level = MainLevel.new
+
   # Large centered prompt, staged by progress: move, then jump onto the ledge, then
   # touch the enemy (which players would normally avoid — see the wording).
   # (Never shown while locked — tick renders the shared challenge prompt then.)
@@ -40,6 +60,8 @@ class TutorialLevel < Level
       [ "Use A/D or the arrow keys to move" ]
     elsif !player.reached_platform
       [ "Press space to jump up onto the platform" ]
+    elsif args.state.collectables.any?(&:alive)
+      [ "Re-authenticated! Grab the heart to heal — that finishes the tutorial." ]
     else
       [ "The * is a password enemy — normally you'd avoid enemies.",
         "Just this once, run into it to learn the re-auth challenge ->" ]

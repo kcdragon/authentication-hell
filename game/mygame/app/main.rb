@@ -2,6 +2,7 @@ require "app/constants.rb"
 require "app/entities/player.rb"
 require "app/entities/enemy.rb"
 require "app/entities/platform.rb"
+require "app/entities/heart_pickup.rb"
 require "app/entities/enemies/totp.rb"
 require "app/entities/enemies/passkey.rb"
 require "app/entities/enemies/password.rb"
@@ -95,6 +96,21 @@ module Main
       enemy.colliding = colliding
     end unless args.state.player.game_over
 
+    # Walking into a heal heart restores one heart (capped) and retires the pickup;
+    # the level decides what that means (the tutorial counts it as cleared).
+    args.state.collectables.each do |pickup|
+      next unless pickup.alive
+      next unless args.geometry.intersect_rect?(pickup.hitbox, args.state.player)
+
+      pickup.alive = false
+      args.state.player.hearts = [ args.state.player.hearts + 1, Player::MAX_HEARTS ].min
+      args.state.level.on_collect(args)
+    end unless args.state.player.game_over
+
+    # Hand off once the active stage reports its goal met (e.g. the tutorial after
+    # the heal). Endless stages never complete, so this is a no-op there.
+    advance_level(args) if args.state.level.complete?
+
     # Only poll once the collision POST has landed, so a status check can't beat
     # the server flag. Drop the (non-serializable) handle so state export works.
     if args.state.collision_request &&
@@ -123,6 +139,8 @@ module Main
     args.state.platforms.each { |plat| plat.render(args, cam) }
 
     args.state.enemies.each { |enemy| enemy.render(args, cam) if enemy.alive }
+
+    args.state.collectables.each { |pickup| pickup.render(args, cam) if pickup.alive }
 
     args.state.player.render(args, cam)
 
@@ -235,15 +253,14 @@ module Main
     args.state.player.locked = false
     args.state.player.lock_confirmed = false
     args.state.player.pending_challenge = nil
-    start_main_game(args) if args.state.level.is_a?(TutorialLevel)
+    args.state.level.on_unlock(args)
   end
 
-  # Tutorial cleared (password verified): report it, then swap in the endless main
-  # world, which seeds its own scene (random enemies + platforms). The player keeps
-  # its position and (docked) hearts.
-  def start_main_game(args)
+  # The active stage is cleared: report it to the server, then swap in the level it
+  # hands off to and seed that scene. The player keeps its position and hearts.
+  def advance_level(args)
     report_level_complete(args, args.state.level.number)
-    args.state.level = MainLevel.new
+    args.state.level = args.state.level.next_level
     args.state.level.setup(args)
   end
 

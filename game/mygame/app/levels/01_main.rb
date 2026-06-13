@@ -8,6 +8,7 @@ class MainLevel < Level
   def setup(args)
     args.state.enemies = Enemy.spawn_random(args.state.player.x)
     args.state.platforms = Platform.scatter
+    args.state.collectables = []
   end
 
   # The unlocked controls reminder, shown while the player is free to roam.
