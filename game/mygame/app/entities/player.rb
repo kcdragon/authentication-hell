@@ -29,7 +29,7 @@ class Player
 
   attr_accessor :x, :y, :w, :h, :vy, :grounded, :facing,
                 :locked, :colliding, :lock_confirmed, :pending_challenge,
-                :hearts, :game_over, :swing_ticks_left, :swing_dir
+                :hearts, :game_over, :swing_ticks_left, :swing_dir, :moved
 
   def initialize
     @x = 200            # near the left of the world; the scene extends right
@@ -47,6 +47,7 @@ class Player
     @game_over = false
     @swing_ticks_left = 0
     @swing_dir = :east
+    @moved = false
   end
 
   # Move left/right with the arrow keys (no wrapping — clamp to screen); space
@@ -71,9 +72,11 @@ class Player
     if args.inputs.keyboard.left
       @x -= MOVE_SPEED
       @facing = :west
+      @moved = true
     elsif args.inputs.keyboard.right
       @x += MOVE_SPEED
       @facing = :east
+      @moved = true
     else
       @facing = :south
     end
@@ -162,7 +165,7 @@ class Player
     { x: @x, y: @y, w: @w, h: @h, vy: @vy, grounded: @grounded, facing: @facing,
       locked: @locked, colliding: @colliding, lock_confirmed: @lock_confirmed,
       pending_challenge: @pending_challenge, hearts: @hearts, game_over: @game_over,
-      swing_ticks_left: @swing_ticks_left, swing_dir: @swing_dir }
+      swing_ticks_left: @swing_ticks_left, swing_dir: @swing_dir, moved: @moved }
   end
 
   def inspect = serialize.to_s

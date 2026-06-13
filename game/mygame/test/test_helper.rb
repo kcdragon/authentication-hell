@@ -9,6 +9,10 @@ require "minitest/autorun"
 # is engine-only and can't load here). Load them before the entity under test.
 require_relative "../app/constants"
 require_relative "../app/entities/player"
+require_relative "../app/entities/enemy"
+require_relative "../app/levels/level"
+require_relative "../app/levels/00_tutorial"
+require_relative "../app/levels/01_main"
 
 # Minimal stand-ins for DragonRuby's `args`. The entities only read a handful of
 # input/state fields and append to output arrays, so plain Structs suffice. Use
@@ -19,19 +23,19 @@ module GameTest
   KeyDown = Struct.new(:space)
   Keyboard = Struct.new(:left, :right, :key_down)
   Inputs = Struct.new(:mouse, :keyboard)
-  State = Struct.new(:camera_x, :platforms)
-  Outputs = Struct.new(:sprites, :solids)
+  State = Struct.new(:camera_x, :platforms, :enemies, :player)
+  Outputs = Struct.new(:sprites, :solids, :labels)
   Args = Struct.new(:inputs, :state, :outputs)
   Platform = Struct.new(:x, :y, :w, :h)
 
   # Build an `args` double for a single tick. Defaults mean "no input".
   def build_args(mouse_click: false, mouse_x: 0, left: false, right: false,
-                 space: false, camera_x: 0, platforms: [])
+                 space: false, camera_x: 0, platforms: [], enemies: nil, player: nil)
     Args.new(
       Inputs.new(Mouse.new(mouse_click, mouse_x),
                  Keyboard.new(left, right, KeyDown.new(space))),
-      State.new(camera_x, platforms),
-      Outputs.new([], [])
+      State.new(camera_x, platforms, enemies, player),
+      Outputs.new([], [], [])
     )
   end
 end
