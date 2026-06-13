@@ -17,7 +17,7 @@
 
   <div data-dropdown-target="menu" hidden
        class="absolute right-0 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-black/5 py-1 z-50">
-    <%= link_to "Play", root_path, data: { turbo: turbo },
+    <%= link_to "Play", game_path, data: { turbo: turbo },
           class: "block px-4 py-2 text-gray-800 hover:bg-gray-100" %>
 
     <%= link_to "Passkeys", webauthn_settings_path, data: { turbo: turbo },

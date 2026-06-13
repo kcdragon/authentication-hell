@@ -11,7 +11,7 @@ class Webauthn::AuthenticationsControllerTest < ActionDispatch::IntegrationTest
       user_handle: @user.webauthn_id)
 
     assert_response :success
-    assert_equal root_url, response.parsed_body["redirect"]
+    assert_equal game_url, response.parsed_body["redirect"]
     assert cookies[:session_id].present?
   end
 

@@ -6,7 +6,7 @@ class AutoSignInControllerTest < ActionDispatch::IntegrationTest
       in_environment("development") { get auto_sign_in_path }
     end
 
-    assert_redirected_to root_path
+    assert_redirected_to game_path
     assert cookies[:session_id]
   end
 

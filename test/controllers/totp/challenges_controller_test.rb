@@ -27,7 +27,7 @@ class Totp::ChallengesControllerTest < ActionDispatch::IntegrationTest
 
     post totp_challenge_path, params: { code: ROTP::TOTP.new(@secret).now }
 
-    assert_redirected_to root_path
+    assert_redirected_to game_path
     assert cookies[:session_id].present?
   end
 
@@ -36,20 +36,20 @@ class Totp::ChallengesControllerTest < ActionDispatch::IntegrationTest
     start_pending_login
 
     post totp_challenge_path, params: { code: code }
-    assert_redirected_to root_path
+    assert_redirected_to game_path
     assert cookies[:session_id].present?
 
     assert_not @user.reload.consume_recovery_code(code), "recovery code is single-use"
   end
 
   test "create preserves the return-to destination through the challenge" do
-    get root_path
+    get game_path
     assert_redirected_to new_session_path
 
     start_pending_login
     post totp_challenge_path, params: { code: ROTP::TOTP.new(@secret).now }
 
-    assert_redirected_to root_path
+    assert_redirected_to game_path
   end
 
   test "create with an invalid code re-prompts and does not sign in" do
