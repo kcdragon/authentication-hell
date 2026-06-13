@@ -11,6 +11,8 @@ CI.run do
   step "Tests: Rails", "env COVERAGE=1 bin/rails test"
   # COVERAGE_MINIMUM_LINE is the tracked baseline; fails if line coverage drops below it.
   step "Coverage: Line >= 85%", "env COVERAGE_MINIMUM_LINE=85 ruby script/check_coverage.rb"
+  # Plain-Ruby unit tests for the DragonRuby game entities (no engine binary needed).
+  step "Tests: Game", "bin/test-game"
   step "Tests: Seeds", "env RAILS_ENV=test bin/rails db:seed:replant"
 
   # Optional: Run system tests
