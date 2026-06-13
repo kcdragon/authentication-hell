@@ -51,6 +51,10 @@ module Main
       (args.state.player.x + args.state.player.w / 2 - SCREEN_W / 2)
         .clamp(0, WORLD_W - SCREEN_W)
 
+    # Patrol: each enemy paces within its region. Keeps going while the player is
+    # locked mid re-auth — only the player freezes — and stops only on game-over.
+    args.state.enemies.each { |enemy| enemy.update if enemy.alive } unless args.state.player.game_over
+
     # Fire once on contact (the transition, not every overlapping frame): dock a
     # heart, retire the enemy for good, then either game-over (last heart) or kick
     # off that enemy's auth flow and freeze the player.
