@@ -115,10 +115,10 @@ module Main
 
     cam = args.state.camera_x
 
-    # Sky and ground are flat and uniform, so they fill the viewport directly
+    # Wall and floor are flat and uniform, so they fill the viewport directly
     # (no camera offset needed).
-    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H, r: 135, g: 206, b: 235 }
-    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: GROUND_Y, r: 83, g: 138, b: 64 }
+    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H, r: 214, g: 209, b: 198 }
+    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: GROUND_Y, r: 118, g: 122, b: 128 }
 
     # World entities are in world coords; each subtracts the camera offset to draw.
     args.state.platforms.each { |plat| plat.render(args, cam) }

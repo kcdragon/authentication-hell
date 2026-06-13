@@ -32,7 +32,7 @@ class Platform
   end
 
   def render(args, camera_x = 0)
-    args.outputs.solids << { x: @x - camera_x, y: @y, w: @w, h: @h, r: 120, g: 85, b: 50 }
+    args.outputs.solids << { x: @x - camera_x, y: @y, w: @w, h: @h, r: 168, g: 138, b: 102 }
   end
 
   # DragonRuby exports args.state for its dev tools; give it a plain-hash view (see
