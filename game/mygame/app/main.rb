@@ -9,11 +9,6 @@ require "app/levels/level.rb"
 require "app/levels/00_tutorial.rb"
 require "app/levels/01_main.rb"
 
-# SCREEN_* is the viewport the world scrolls under (WORLD_W/GROUND_Y live in
-# app/constants.rb — shared with the entities and their unit tests).
-SCREEN_W = 1280
-SCREEN_H = 720
-
 module Main
   def tick(args)
     args.state.player ||= Player.new
@@ -54,6 +49,10 @@ module Main
     args.state.camera_x =
       (args.state.player.x + args.state.player.w / 2 - SCREEN_W / 2)
         .clamp(0, WORLD_W - SCREEN_W)
+
+    # Per-tick level scripting (e.g. the tutorial spawns its enemy once the player
+    # has jumped onto the platform). Reads the camera set just above.
+    args.state.level.update(args)
 
     # Patrol: each enemy paces within its region. Keeps going while the player is
     # locked mid re-auth — only the player freezes — and stops only on game-over.

@@ -5,6 +5,10 @@ class Level
   # Seed args.state.enemies / args.state.platforms for this stage.
   def setup(_args) = nil
 
+  # Per-tick hook for scripted stages (e.g. spawning an enemy mid-level once the
+  # player does something). Runs every tick after the player + camera update.
+  def update(_args) = nil
+
   # Whether the keyboard melee can defeat enemies on this level.
   def melee? = true
 
