@@ -32,7 +32,8 @@ class Webauthn::AuthenticationsController < ApplicationController
     stored.update!(sign_count: webauthn_credential.sign_count, last_used_at: Time.current)
     start_new_session_for stored.user
     render json: { redirect: after_authentication_url }
-  rescue WebAuthn::Error
+  rescue WebAuthn::Error => e
+    Rails.logger.warn("Passkey authentication failed: #{e.class} - #{e.message}")
     render json: { error: "That passkey didn't work. Please try again." }, status: :unprocessable_entity
   end
 end

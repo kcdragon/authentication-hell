@@ -52,7 +52,8 @@ class Games::PasskeyChallengeController < ApplicationController
     Turbo::StreamsChannel.broadcast_remove_to(Current.user, :toasts, target: toast_id)
     Achievement::Awarder.call(Current.user, :passkey_survivor)
     render json: { ok: true }
-  rescue WebAuthn::Error
+  rescue WebAuthn::Error => e
+    Rails.logger.warn("Game passkey re-auth failed: #{e.class} - #{e.message}")
     render json: { error: "That passkey didn't work. Please try again." },
            status: :unprocessable_entity
   end
