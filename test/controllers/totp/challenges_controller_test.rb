@@ -43,13 +43,13 @@ class Totp::ChallengesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "create preserves the return-to destination through the challenge" do
-    get play_path
+    get root_path
     assert_redirected_to new_session_path
 
     start_pending_login
     post totp_challenge_path, params: { code: ROTP::TOTP.new(@secret).now }
 
-    assert_redirected_to play_path
+    assert_redirected_to root_path
   end
 
   test "create with an invalid code re-prompts and does not sign in" do

@@ -1,20 +1,32 @@
 <%# locals: (turbo: true) %>
-<%# Shared top navigation for an authenticated user. Callers decide *when* to
+<%# Shared account menu for an authenticated user. Callers decide *when* to
     render it (it assumes a signed-in user). Pass turbo: false on pages whose
-    layout sets <base href> / omits the importmap (e.g. /play), so the links are
-    full browser navigations rather than Turbo visits. %>
-<div class="flex items-center gap-3">
-  <span class="text-gray-700 font-medium"><%= Current.user.username %></span>
+    layout sets <base href> / omits the importmap, so the links are full browser
+    navigations rather than Turbo visits. %>
+<div class="relative" data-controller="dropdown">
+  <button type="button" data-action="dropdown#toggle"
+          class="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-gray-100 cursor-pointer">
+    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-gray-200 text-gray-700 font-semibold">
+      <%= Current.user.username.first.upcase %>
+    </span>
+    <span class="text-gray-700 font-medium"><%= Current.user.username %></span>
+    <svg class="h-4 w-4 text-gray-500" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 0 1 1.06.02L10 11.17l3.71-3.94a.75.75 0 1 1 1.08 1.04l-4.25 4.5a.75.75 0 0 1-1.08 0l-4.25-4.5a.75.75 0 0 1 .02-1.06Z" clip-rule="evenodd" />
+    </svg>
+  </button>
 
-  <%= link_to "Play", play_path, data: { turbo: turbo },
-        class: "rounded-md px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium" %>
+  <div data-dropdown-target="menu" hidden
+       class="absolute right-0 mt-2 w-56 rounded-md bg-white shadow-lg ring-1 ring-black/5 py-1 z-50">
+    <%= link_to "Play", root_path, data: { turbo: turbo },
+          class: "block px-4 py-2 text-gray-800 hover:bg-gray-100" %>
 
-  <%= link_to "Passkeys", webauthn_settings_path, data: { turbo: turbo },
-        class: "rounded-md px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium" %>
+    <%= link_to "Passkeys", webauthn_settings_path, data: { turbo: turbo },
+          class: "block px-4 py-2 text-gray-800 hover:bg-gray-100" %>
 
-  <%= link_to "Two-factor authentication", totp_settings_path, data: { turbo: turbo },
-        class: "rounded-md px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium" %>
+    <%= link_to "Two-factor authentication", totp_settings_path, data: { turbo: turbo },
+          class: "block px-4 py-2 text-gray-800 hover:bg-gray-100" %>
 
-  <%= button_to "Sign out", session_path, method: :delete,
-        class: "rounded-md px-3.5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium cursor-pointer" %>
+    <%= button_to "Sign out", session_path, method: :delete,
+          class: "block w-full text-left px-4 py-2 text-gray-800 hover:bg-gray-100 cursor-pointer" %>
+  </div>
 </div>

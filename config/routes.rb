@@ -30,10 +30,8 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # DragonRuby game page. The canvas + loader are rendered inline by GamesController
-  # (layout "game" sets <base href> to the per-environment bundle path so the loader's
-  # relative assets, which live in public/<env>_game_assets/, resolve correctly).
-  get "play" => "games#show", as: :play
+  # The DragonRuby game itself lives at root (see games#show below). /play/me is a
+  # small JSON endpoint the running game fetches to greet the current user by name.
   get "play/me" => "games#me", as: :play_me
 
   namespace :games do
