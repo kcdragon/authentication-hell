@@ -1,6 +1,9 @@
 require "app/constants.rb"
 require "app/entities/player.rb"
 require "app/entities/enemy.rb"
+require "app/levels/level.rb"
+require "app/levels/00_tutorial.rb"
+require "app/levels/01_main.rb"
 
 # SCREEN_* is the viewport the world scrolls under (WORLD_W/GROUND_Y live in
 # app/constants.rb — shared with the entities and their unit tests).
@@ -18,11 +21,15 @@ module Main
   def tick(args)
     args.state.player ||= Player.new
 
-    # Stationary enemies scattered across the world; walk into one to collide.
-    # Each carries its own auth kind (which re-auth flow it triggers) and its own
-    # colliding flag so contact fires once per enemy.
-    args.state.enemies ||= Enemy.spawn_random
-    args.state.platforms ||= generate_platforms
+    # The game opens on the tutorial level (one password enemy on flat ground) and
+    # hands off to the main world once the player clears it. args.state.level always
+    # holds the active level (a TutorialLevel, then a MainLevel) — unset only on the
+    # very first tick. Each enemy carries its own auth kind (which re-auth flow it
+    # triggers) and its own colliding flag so contact fires once per enemy.
+    unless args.state.level
+      args.state.level = TutorialLevel.new
+      args.state.level.setup(args)
+    end
 
     # Fetch the logged-in user's name once from the Rails app. Same-origin, so the
     # session cookie rides along and /play/me answers as the current user.
@@ -59,7 +66,8 @@ module Main
     # the keyboard hitbox is defeated outright — no heart loss, no re-auth. Runs
     # before the body-collision loop, so a defeated enemy (alive=false) is already
     # skipped there and can't also trigger the lock flow this tick.
-    if args.state.player.swing_ticks_left.positive? &&
+    if args.state.level.melee? &&
+       args.state.player.swing_ticks_left.positive? &&
        !args.state.player.locked && !args.state.player.game_over
       hitbox = args.state.player.keyboard_hitbox
       args.state.enemies.each do |enemy|
@@ -130,8 +138,10 @@ module Main
 
     if args.state.player.game_over
       draw_game_over(args)
+    elsif args.state.player.locked
+      draw_challenge_hint(args)
     else
-      draw_hint(args)
+      args.state.level.draw(args)
     end
   end
 
@@ -160,12 +170,13 @@ module Main
                              anchor_y: 0.5 }
   end
 
-  def draw_hint(args)
-    hint = if !args.state.player.locked
-      "(arrow keys or A/D to move, space to jump, click to swing)"
-    elsif args.state.player.pending_challenge == :passkey
+  # The locked re-auth prompt, shared by every level: which enemy you bumped and
+  # where to finish (the page toast).
+  def draw_challenge_hint(args)
+    hint = case args.state.player.pending_challenge
+    when :passkey
       "You bumped the passkey enemy! Use the passkey toast to continue."
-    elsif args.state.player.pending_challenge == :password
+    when :password
       "You bumped the password enemy! Enter your password in the toast to continue."
     else
       "You bumped the enemy! Enter your TOTP code in the toast to continue."
@@ -227,6 +238,16 @@ module Main
     args.state.player.locked = false
     args.state.player.lock_confirmed = false
     args.state.player.pending_challenge = nil
+    start_main_game(args) if args.state.level.is_a?(TutorialLevel)
+  end
+
+  # Tutorial cleared (password verified): swap in the endless main world — random
+  # enemies and platforms — and switch to the main level. The player keeps its
+  # position and (docked) hearts.
+  def start_main_game(args)
+    args.state.level = MainLevel.new
+    args.state.enemies = Enemy.spawn_random
+    args.state.platforms = generate_platforms
   end
 
   # The Rails server's origin (scheme + host[:port]), baked into the bundle by

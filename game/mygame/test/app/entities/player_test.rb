@@ -22,6 +22,10 @@ class PlayerTest < Minitest::Test
     assert_equal :east, @player.swing_dir
   end
 
+  def test_starts_having_not_moved
+    refute @player.moved
+  end
+
   # --- horizontal movement ---
 
   def test_moves_right_and_faces_east
@@ -41,6 +45,16 @@ class PlayerTest < Minitest::Test
   def test_idle_faces_south
     @player.update(build_args)
     assert_equal :south, @player.facing
+  end
+
+  def test_records_the_first_movement
+    @player.update(build_args(right: true))
+    assert @player.moved
+  end
+
+  def test_idle_does_not_record_movement
+    @player.update(build_args)
+    refute @player.moved
   end
 
   def test_clamps_to_the_left_world_edge
@@ -192,5 +206,6 @@ class PlayerTest < Minitest::Test
     assert_equal :east, data[:swing_dir]
     assert_equal Player::MAX_HEARTS, data[:hearts]
     assert_equal @player.x, data[:x]
+    assert_equal false, data[:moved]
   end
 end
