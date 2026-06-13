@@ -4,7 +4,7 @@
 # main world (Main#start_main_game).
 class TutorialLevel < Level
   def setup(args)
-    enemy = Enemy.new(x: 600, auth: :password)
+    enemy = PasswordEnemy.new(x: 600)
     enemy.vx = 0
     args.state.enemies = [ enemy ]
     args.state.platforms = []

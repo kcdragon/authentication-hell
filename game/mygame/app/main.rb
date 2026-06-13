@@ -1,6 +1,9 @@
 require "app/constants.rb"
 require "app/entities/player.rb"
 require "app/entities/enemy.rb"
+require "app/entities/enemies/totp.rb"
+require "app/entities/enemies/passkey.rb"
+require "app/entities/enemies/password.rb"
 require "app/levels/level.rb"
 require "app/levels/00_tutorial.rb"
 require "app/levels/01_main.rb"
@@ -73,7 +76,7 @@ module Main
       args.state.enemies.each do |enemy|
         next unless enemy.alive
 
-        enemy.alive = false if args.geometry.intersect_rect?(hitbox, enemy)
+        enemy.alive = false if args.geometry.intersect_rect?(hitbox, enemy.hitbox)
       end
     end
 
@@ -83,7 +86,7 @@ module Main
     args.state.enemies.each do |enemy|
       next unless enemy.alive
 
-      colliding = args.geometry.intersect_rect?(enemy, args.state.player)
+      colliding = args.geometry.intersect_rect?(enemy.hitbox, args.state.player)
       if colliding && !enemy.colliding
         args.state.player.hearts -= 1
         enemy.alive = false
