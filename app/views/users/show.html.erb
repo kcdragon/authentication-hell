@@ -1,0 +1,31 @@
+<div class="mx-auto md:w-2/3 w-full">
+  <h1 class="font-bold text-4xl">Profile</h1>
+
+  <div class="mt-6 flex items-center gap-4">
+    <%= avatar_badge(Current.user, size_classes: "h-20 w-20") %>
+    <div>
+      <h2 class="font-bold text-xl">Avatar</h2>
+      <p class="mt-1 text-sm text-gray-500">PNG, JPEG, GIF, or WebP, up to 5 MB.</p>
+    </div>
+  </div>
+
+  <%= form_with model: Current.user, url: user_path, method: :patch, class: "contents" do |form| %>
+    <div class="my-4">
+      <%= form.file_field :avatar, accept: "image/png,image/jpeg,image/gif,image/webp",
+            class: "block text-sm text-gray-700 cursor-pointer
+                    file:mr-4 file:rounded-lg file:border-0 file:px-3.5 file:py-2.5
+                    file:bg-gray-800 hover:file:bg-gray-700 file:text-white file:font-medium file:cursor-pointer" %>
+    </div>
+    <%= form.submit "Save avatar", class: "rounded-lg px-3.5 py-2.5 bg-gray-800 hover:bg-gray-700 text-white inline-block font-medium cursor-pointer" %>
+  <% end %>
+
+  <% if Current.user.avatar.attached? %>
+    <div class="mt-8 border-t border-gray-200 pt-6">
+      <h2 class="font-bold text-xl">Remove avatar</h2>
+      <p class="mt-1 text-sm text-gray-500">Revert to the initial-letter badge.</p>
+      <div class="my-4">
+        <%= button_to "Remove avatar", avatar_path, method: :delete, class: "rounded-lg px-3.5 py-2.5 bg-red-600 hover:bg-red-500 text-white inline-block font-medium cursor-pointer" %>
+      </div>
+    </div>
+  <% end %>
+</div>
