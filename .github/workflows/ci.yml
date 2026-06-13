@@ -65,6 +65,22 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+  game-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          bundler-cache: true
+
+      # The DragonRuby engine is macOS-only and gitignored, so the game entities
+      # are tested as plain Ruby (with a stubbed `args`) — no engine binary needed.
+      - name: Run game unit tests
+        run: bin/test-game
+
   test:
     runs-on: ubuntu-latest
     # Pull RAILS_MASTER_KEY from the "test" GitHub Environment's secrets.

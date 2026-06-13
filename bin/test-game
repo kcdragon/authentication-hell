@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+# Run the DragonRuby game's unit tests (Minitest under plain MRI). The engine
+# binary is gitignored and macOS-only, so the entities are tested as ordinary
+# Ruby with a stubbed `args` (see game/mygame/test/test_helper.rb) — no engine
+# needed, runnable anywhere including CI. Tests mirror the source tree under
+# game/mygame/test/ and run via minitest/autorun on process exit.
+
+APP_ROOT = File.expand_path("..", __dir__)
+TEST_DIR = File.join(APP_ROOT, "game", "mygame", "test")
+
+tests = Dir.glob(File.join(TEST_DIR, "**", "*_test.rb")).sort
+abort "No game tests found under #{TEST_DIR}" if tests.empty?
+
+tests.each { |file| require file }

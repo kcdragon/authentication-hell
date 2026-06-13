@@ -1,11 +1,11 @@
+require "app/constants.rb"
 require "app/entities/player.rb"
 require "app/entities/enemy.rb"
 
-# SCREEN_* is the viewport; the world is five screens wide and scrolls under it.
+# SCREEN_* is the viewport the world scrolls under (WORLD_W/GROUND_Y live in
+# app/constants.rb — shared with the entities and their unit tests).
 SCREEN_W = 1280
 SCREEN_H = 720
-WORLD_W = 6400
-GROUND_Y = 100
 
 PLATFORM_H = 30
 
@@ -54,6 +54,20 @@ module Main
     # Patrol: each enemy paces within its region. Keeps going while the player is
     # locked mid re-auth — only the player freezes — and stops only on game-over.
     args.state.enemies.each { |enemy| enemy.update if enemy.alive } unless args.state.player.game_over
+
+    # Keyboard melee: while the player is mid-swing, any alive enemy overlapping
+    # the keyboard hitbox is defeated outright — no heart loss, no re-auth. Runs
+    # before the body-collision loop, so a defeated enemy (alive=false) is already
+    # skipped there and can't also trigger the lock flow this tick.
+    if args.state.player.swing_ticks_left.positive? &&
+       !args.state.player.locked && !args.state.player.game_over
+      hitbox = args.state.player.keyboard_hitbox
+      args.state.enemies.each do |enemy|
+        next unless enemy.alive
+
+        enemy.alive = false if args.geometry.intersect_rect?(hitbox, enemy)
+      end
+    end
 
     # Fire once on contact (the transition, not every overlapping frame): dock a
     # heart, retire the enemy for good, then either game-over (last heart) or kick
@@ -148,7 +162,7 @@ module Main
 
   def draw_hint(args)
     hint = if !args.state.player.locked
-      "(arrow keys or A/D to move, space to jump)"
+      "(arrow keys or A/D to move, space to jump, click to swing)"
     elsif args.state.player.pending_challenge == :passkey
       "You bumped the passkey enemy! Use the passkey toast to continue."
     elsif args.state.player.pending_challenge == :password
