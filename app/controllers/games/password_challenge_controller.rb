@@ -22,6 +22,7 @@ class Games::PasswordChallengeController < ApplicationController
   def complete
     if session[:game_password_required] && Current.user.authenticate(params[:password])
       session.delete(:game_password_required)
+      Achievement::Awarder.call(Current.user, :password_survivor)
       render turbo_stream: turbo_stream.remove(toast_id)
     else
       render turbo_stream: turbo_stream.replace(

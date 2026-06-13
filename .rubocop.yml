@@ -24,3 +24,16 @@ AllCops:
 # # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
 # Layout/SpaceInsideArrayLiteralBrackets:
 #   Enabled: false
+
+# Namespaced classes/modules use the compact form (`class Achievement::Awarder`),
+# never nested (`class Achievement; class Awarder`). Rails-generated boilerplate
+# is exempt: config/application.rb loads before autoloading (compact would raise
+# `uninitialized constant`), and the rest are framework namespace stubs we don't
+# own stylistically.
+Style/ClassAndModuleChildren:
+  Enabled: true
+  EnforcedStyle: compact
+  Exclude:
+    - "config/application.rb"
+    - "app/channels/application_cable/*.rb"
+    - "test/test_helper.rb"

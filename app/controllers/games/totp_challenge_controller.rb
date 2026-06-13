@@ -22,6 +22,7 @@ class Games::TotpChallengeController < ApplicationController
   def complete
     if session[:game_totp_required] && Current.user.verify_totp(params[:code])
       session.delete(:game_totp_required)
+      Achievement::Awarder.call(Current.user, :totp_survivor)
       render turbo_stream: turbo_stream.remove(toast_id)
     else
       render turbo_stream: turbo_stream.replace(

@@ -1,0 +1,14 @@
+<%# An "achievement unlocked" toast, appended into the #toasts container via Turbo
+    Streams when a player earns an achievement for the first time. Reuses the
+    ephemeral game-toast fade/auto-dismiss styling (toast-fade keyframes in the
+    Tailwind build) — no JS controller. `achievement` is an Achievement value object. %>
+<div id="<%= achievement_toast_id(achievement) %>"
+     class="game-toast max-w-sm rounded-md bg-amber-100 border border-amber-300 text-amber-900 px-4 py-3 shadow-lg pointer-events-none">
+  <div class="flex items-center gap-3">
+    <span class="text-2xl" aria-hidden="true"><%= achievement.emoji %></span>
+    <div>
+      <p class="text-xs font-semibold uppercase tracking-wide text-amber-700">Achievement unlocked</p>
+      <p class="font-medium"><%= achievement.name %></p>
+    </div>
+  </div>
+</div>

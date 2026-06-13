@@ -50,6 +50,7 @@ class Games::PasskeyChallengeController < ApplicationController
     stored.update!(sign_count: webauthn_credential.sign_count, last_used_at: Time.current)
     session.delete(:game_passkey_required)
     Turbo::StreamsChannel.broadcast_remove_to(Current.user, :toasts, target: toast_id)
+    Achievement::Awarder.call(Current.user, :passkey_survivor)
     render json: { ok: true }
   rescue WebAuthn::Error
     render json: { error: "That passkey didn't work. Please try again." },

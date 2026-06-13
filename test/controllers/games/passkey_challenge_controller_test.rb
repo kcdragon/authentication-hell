@@ -71,6 +71,37 @@ class Games::PasskeyChallengeControllerTest < ActionDispatch::IntegrationTest
     assert_equal({ "locked" => false }, response.parsed_body)
   end
 
+  test "completing the challenge awards the survivor achievement and toasts it" do
+    client = enable_passkey_for(@user)
+    sign_in_as(@user)
+    post games_passkey_start_url
+
+    post games_passkey_options_url, as: :json
+    assertion = client.get(challenge: response.parsed_body["challenge"], user_verified: true)
+
+    streams = nil
+    assert_difference -> { @user.earned_achievements.count }, 1 do
+      streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+        post games_passkey_complete_url, params: { credential: assertion }, as: :json
+      end
+    end
+    assert @user.earned?(:passkey_survivor)
+    assert(streams.any? { |s| s.to_html.include?("Achievement unlocked") })
+  end
+
+  test "failing the challenge awards nothing" do
+    other_client = enable_passkey_for(users(:two))
+    sign_in_as(@user)
+    post games_passkey_start_url
+
+    post games_passkey_options_url, as: :json
+    assertion = other_client.get(challenge: response.parsed_body["challenge"], user_verified: true)
+
+    assert_no_difference -> { @user.earned_achievements.count } do
+      post games_passkey_complete_url, params: { credential: assertion }, as: :json
+    end
+  end
+
   test "an assertion signed against a forged challenge keeps the player locked" do
     client = enable_passkey_for(@user)
     sign_in_as(@user)
