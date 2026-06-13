@@ -59,29 +59,29 @@ class Player
     # swing can't start until it reaches 0 (the duration is the cooldown).
     @swing_ticks_left -= 1 if @swing_ticks_left.positive?
 
-    # Left-click swings the keyboard, aimed by the mouse: toward whichever side of
-    # the player's screen center the cursor is on. camera_x is last tick's value
-    # (set after update in tick), so map mouse screen-x with a harmless 1-frame lag.
-    if args.inputs.mouse.click && @swing_ticks_left.zero?
-      cam = args.state.camera_x || 0
-      player_screen_cx = @x - cam + @w / 2
-      @swing_dir = args.inputs.mouse.x >= player_screen_cx ? :east : :west
-      @swing_ticks_left = SWING_TICKS
-    end
-
+    # @swing_dir tracks movement so the held keyboard flips the instant the player
+    # turns, not only when they swing. Idle (:south) leaves it on the last side.
     if args.inputs.keyboard.left
       @x -= MOVE_SPEED
       @facing = :west
+      @swing_dir = :west
       @moved = true
     elsif args.inputs.keyboard.right
       @x += MOVE_SPEED
       @facing = :east
+      @swing_dir = :east
       @moved = true
     else
       @facing = :south
     end
 
     @x = @x.clamp(0, WORLD_W - WIDTH)
+
+    # Left-click swings the keyboard; it points whichever way @swing_dir already
+    # holds (the last side the player faced).
+    if args.inputs.mouse.click && @swing_ticks_left.zero?
+      @swing_ticks_left = SWING_TICKS
+    end
 
     # Jump on the press edge so holding space doesn't re-launch every frame.
     if args.inputs.keyboard.key_down.space && @grounded

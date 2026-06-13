@@ -103,41 +103,44 @@ class PlayerTest < Minitest::Test
   # --- keyboard swing ---
 
   def test_click_starts_a_full_length_swing
-    @player.update(build_args(mouse_click: true, mouse_x: 1000))
+    @player.update(build_args(mouse_click: true))
     assert_equal Player::SWING_TICKS, @player.swing_ticks_left
   end
 
-  def test_swing_aims_toward_the_cursor_side
-    @player.update(build_args(mouse_click: true, mouse_x: 1000))
+  def test_swing_aims_the_way_the_player_faces
+    @player.update(build_args(mouse_click: true, right: true))
     assert_equal :east, @player.swing_dir
 
     other = Player.new
-    other.update(build_args(mouse_click: true, mouse_x: 0))
+    other.update(build_args(mouse_click: true, left: true))
     assert_equal :west, other.swing_dir
   end
 
-  def test_swing_direction_accounts_for_the_camera_offset
-    # Player at world x=200 (screen center 232 with no camera): cursor at 100 is
-    # to its left → west. Shift the camera so the player sits at screen center 32
-    # and the same cursor is now to its right → east.
-    @player.update(build_args(mouse_click: true, mouse_x: 100, camera_x: 0))
+  def test_swing_direction_follows_movement_without_swinging
+    @player.update(build_args(left: true))
     assert_equal :west, @player.swing_dir
+    @player.update(build_args(right: true))
+    assert_equal :east, @player.swing_dir
+  end
 
-    other = Player.new
-    other.update(build_args(mouse_click: true, mouse_x: 100, camera_x: 200))
-    assert_equal :east, other.swing_dir
+  def test_idle_swing_keeps_the_last_swing_direction
+    @player.update(build_args(mouse_click: true, left: true)) # swing west
+    assert_equal :west, @player.swing_dir
+    Player::SWING_TICKS.times { @player.update(build_args) } # let it finish; now idle
+    @player.update(build_args(mouse_click: true)) # idle (south) when clicking
+    assert_equal :west, @player.swing_dir
   end
 
   def test_swing_counts_down_each_tick
-    @player.update(build_args(mouse_click: true, mouse_x: 1000))
+    @player.update(build_args(mouse_click: true))
     assert_equal Player::SWING_TICKS, @player.swing_ticks_left
     @player.update(build_args)
     assert_equal Player::SWING_TICKS - 1, @player.swing_ticks_left
   end
 
   def test_cannot_restart_a_swing_until_the_current_one_finishes
-    @player.update(build_args(mouse_click: true, mouse_x: 1000))
-    @player.update(build_args(mouse_click: true, mouse_x: 1000)) # click ignored mid-swing
+    @player.update(build_args(mouse_click: true))
+    @player.update(build_args(mouse_click: true)) # click ignored mid-swing
     assert_equal Player::SWING_TICKS - 1, @player.swing_ticks_left
   end
 
