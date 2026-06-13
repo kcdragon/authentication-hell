@@ -32,7 +32,8 @@ class Webauthn::CredentialsController < ApplicationController
     else
       complete_passwordless_registration(webauthn_credential)
     end
-  rescue WebAuthn::Error, ActiveRecord::RecordInvalid
+  rescue WebAuthn::Error, ActiveRecord::RecordInvalid => e
+    Rails.logger.warn("Passkey registration failed: #{e.class} - #{e.message}")
     render json: { error: "We couldn't register that passkey. Please try again." }, status: :unprocessable_entity
   end
 

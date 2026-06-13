@@ -33,7 +33,8 @@ class Webauthn::ChallengesController < ApplicationController
     clear_pending_2fa
     start_new_session_for @pending_user
     render json: { redirect: after_authentication_url }
-  rescue WebAuthn::Error
+  rescue WebAuthn::Error => e
+    Rails.logger.warn("Passkey 2FA failed: #{e.class} - #{e.message}")
     render json: { error: "That passkey didn't work. Please try again." }, status: :unprocessable_entity
   end
 end
