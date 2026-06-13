@@ -36,6 +36,9 @@ class SignUpAndSignInTest < ApplicationSystemTestCase
     click_on "Sign in"
 
     assert_current_path game_path
+
+    # The account menu is collapsed into a dropdown; open it to reach "Sign out".
+    click_on "newplayer"
     assert_button "Sign out"
   end
 end
