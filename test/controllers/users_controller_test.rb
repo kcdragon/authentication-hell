@@ -1,0 +1,63 @@
+require "test_helper"
+
+class UsersControllerTest < ActionDispatch::IntegrationTest
+  setup { @user = users(:one) }
+
+  def image_upload
+    fixture_file_upload(Rails.root.join("public/icon.png"), "image/png")
+  end
+
+  # A genuinely non-image file: Active Storage re-sniffs the bytes, so a mislabeled
+  # image would just be re-identified as an image and pass.
+  def non_image_upload
+    fixture_file_upload(Rails.root.join("Gemfile"), "text/plain")
+  end
+
+  # A real PNG (so it sniffs as image/png and is variant-able) padded past the size
+  # limit, to exercise the failed-update re-render with a still-unpersisted blob.
+  def oversized_image_upload
+    file = Tempfile.new([ "big", ".png" ], binmode: true)
+    file.write(Rails.root.join("public/icon.png").binread)
+    file.write("0" * User::AVATAR_MAX_SIZE)
+    file.rewind
+    fixture_file_upload(file.path, "image/png")
+  end
+
+  test "requires authentication" do
+    get user_path
+    assert_redirected_to new_session_path
+  end
+
+  test "show renders" do
+    sign_in_as(@user)
+    get user_path
+    assert_response :success
+  end
+
+  test "update attaches an avatar" do
+    sign_in_as(@user)
+
+    patch user_path, params: { user: { avatar: image_upload } }
+
+    assert_redirected_to user_path
+    assert @user.reload.avatar.attached?
+  end
+
+  test "update rejects a non-image avatar" do
+    sign_in_as(@user)
+
+    patch user_path, params: { user: { avatar: non_image_upload } }
+
+    assert_response :unprocessable_entity
+    assert_not @user.reload.avatar.attached?
+  end
+
+  test "update re-renders without blowing up when an oversized image is rejected" do
+    sign_in_as(@user)
+
+    patch user_path, params: { user: { avatar: oversized_image_upload } }
+
+    assert_response :unprocessable_entity
+    assert_not @user.reload.avatar.attached?
+  end
+end

@@ -1,5 +1,7 @@
 Rails.application.routes.draw do
   resource :session
+  resource :user, only: %i[ show update ]
+  resource :avatar, only: :destroy
   resource :registration, only: %i[ new create ]
   resource :passkey_registration, only: :create
   resource :email_confirmation, only: %i[ new create show ], param: :token

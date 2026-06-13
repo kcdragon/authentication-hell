@@ -188,6 +188,26 @@ class UserTest < ActiveSupport::TestCase
     assert_not user.consume_recovery_code("not-a-real-code")
   end
 
+  test "valid with an acceptable avatar attached" do
+    user = users(:one)
+    user.avatar.attach(io: Rails.root.join("public/icon.png").open, filename: "icon.png", content_type: "image/png")
+    assert user.valid?
+  end
+
+  test "rejects a non-image avatar" do
+    user = users(:one)
+    user.avatar.attach(io: StringIO.new("nope"), filename: "a.txt", content_type: "text/plain")
+    assert_not user.valid?
+    assert user.errors[:avatar].any?
+  end
+
+  test "rejects an oversized avatar" do
+    user = users(:one)
+    user.avatar.attach(io: StringIO.new("x" * (User::AVATAR_MAX_SIZE + 1)), filename: "big.png", content_type: "image/png")
+    assert_not user.valid?
+    assert user.errors[:avatar].any?
+  end
+
   test "disable_totp! clears the secret, flag, and recovery codes" do
     user = users(:one)
     user.enable_totp!(ROTP::Base32.random)

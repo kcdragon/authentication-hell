@@ -2,6 +2,9 @@ class User < ApplicationRecord
   TOTP_ISSUER = "Authentication Hell".freeze
   RECOVERY_CODE_COUNT = 10
 
+  AVATAR_CONTENT_TYPES = %w[ image/png image/jpeg image/gif image/webp ].freeze
+  AVATAR_MAX_SIZE = 5.megabytes
+
   # The password db/seeds.rb gives the dev user; also prefilled into the game's
   # password challenge in development. Dev/seed convenience only, never used in production.
   DEV_PASSWORD = "password".freeze
@@ -10,6 +13,10 @@ class User < ApplicationRecord
   has_many :sessions, dependent: :destroy
   has_many :recovery_codes, dependent: :destroy
   has_many :webauthn_credentials, dependent: :destroy
+
+  has_one_attached :avatar do |attachable|
+    attachable.variant :nav, resize_to_fill: [ 64, 64 ]
+  end
 
   encrypts :totp_secret
 
@@ -26,6 +33,7 @@ class User < ApplicationRecord
     uniqueness: { case_sensitive: false }
   validates :password, confirmation: true, length: { maximum: 72 }, allow_nil: true, if: -> { password.present? }
   validate :password_or_passkey_present
+  validate :acceptable_avatar
 
   generates_token_for :email_confirmation, expires_in: 1.day do
     email_address
@@ -122,5 +130,14 @@ class User < ApplicationRecord
     return if password_digest.present? || webauthn_credentials.any?
 
     errors.add(:base, "Add a password or a passkey to secure your account")
+  end
+
+  def acceptable_avatar
+    return unless avatar.attached?
+
+    errors.add(:avatar, "is too large (max 5 MB)") unless avatar.blob.byte_size <= AVATAR_MAX_SIZE
+    unless AVATAR_CONTENT_TYPES.include?(avatar.blob.content_type)
+      errors.add(:avatar, "must be a PNG, JPEG, GIF, or WebP image")
+    end
   end
 end
