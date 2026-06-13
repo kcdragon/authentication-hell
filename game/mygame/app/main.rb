@@ -1,6 +1,9 @@
 require "app/constants.rb"
 require "app/entities/player.rb"
 require "app/entities/enemy.rb"
+require "app/entities/enemies/totp.rb"
+require "app/entities/enemies/passkey.rb"
+require "app/entities/enemies/password.rb"
 
 # SCREEN_* is the viewport the world scrolls under (WORLD_W/GROUND_Y live in
 # app/constants.rb — shared with the entities and their unit tests).
@@ -65,7 +68,7 @@ module Main
       args.state.enemies.each do |enemy|
         next unless enemy.alive
 
-        enemy.alive = false if args.geometry.intersect_rect?(hitbox, enemy)
+        enemy.alive = false if args.geometry.intersect_rect?(hitbox, enemy.hitbox)
       end
     end
 
@@ -75,7 +78,7 @@ module Main
     args.state.enemies.each do |enemy|
       next unless enemy.alive
 
-      colliding = args.geometry.intersect_rect?(enemy, args.state.player)
+      colliding = args.geometry.intersect_rect?(enemy.hitbox, args.state.player)
       if colliding && !enemy.colliding
         args.state.player.hearts -= 1
         enemy.alive = false
