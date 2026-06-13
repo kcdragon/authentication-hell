@@ -18,6 +18,14 @@ class MainLevelTest < Minitest::Test
     assert_equal Platform::COUNT, @args.state.platforms.length
   end
 
+  def test_enemies_never_spawn_on_top_of_a_carried_over_player
+    @args.state.player.x = 1200 # as if the player roamed right during the tutorial
+    @level.setup(@args)
+    nearest_reach = @args.state.enemies.map { |e| e.x - Enemy::PATROL_RANGE }.min
+    assert nearest_reach > @args.state.player.x + Player::WIDTH,
+           "nearest enemy patrol reach (#{nearest_reach}) must clear the player's right edge"
+  end
+
   def test_draw_emits_a_prompt
     @level.draw(@args)
     refute_empty @args.outputs.labels
