@@ -1,33 +1,28 @@
 require "app/entities/player.rb"
 require "app/entities/enemy.rb"
 
+# SCREEN_* is the viewport; the world is five screens wide and scrolls under it.
 SCREEN_W = 1280
 SCREEN_H = 720
+WORLD_W = 6400
 GROUND_Y = 100
 
-PLATFORM_W = 260
 PLATFORM_H = 30
-PLATFORM_TOP = 250            # y of the side platforms' top surface
-# A higher ledge, 150px above the left platform: out of reach from the ground
-# (~290px apex) but reachable by jumping off the left platform (~440px apex).
-HIGH_PLATFORM_TOP = 400
 
-# Static one-way ledges. The two side ledges hug the left/right edges; the high
-# ledge overlaps the left one so you can hop up onto it from there.
-PLATFORMS = [
-  { x: 0,                     y: PLATFORM_TOP - PLATFORM_H,      w: PLATFORM_W, h: PLATFORM_H },
-  { x: SCREEN_W - PLATFORM_W, y: PLATFORM_TOP - PLATFORM_H,      w: PLATFORM_W, h: PLATFORM_H },
-  { x: 180,                   y: HIGH_PLATFORM_TOP - PLATFORM_H, w: PLATFORM_W, h: PLATFORM_H }
-]
+# Reachable one-way ledge tops: ~290px apex from the ground reaches the low
+# tier; the higher tiers are reachable by hopping up off a lower ledge.
+PLATFORM_TIERS = [ 250, 330, 410 ]
+PLATFORM_COUNT = 9
 
 module Main
   def tick(args)
     args.state.player ||= Player.new
 
-    # Stationary enemies parked off to each side; walk into one to collide. Each
-    # carries its own auth kind (which re-auth flow it triggers) and its own
+    # Stationary enemies scattered across the world; walk into one to collide.
+    # Each carries its own auth kind (which re-auth flow it triggers) and its own
     # colliding flag so contact fires once per enemy.
-    args.state.enemies ||= Enemy.spawn_defaults
+    args.state.enemies ||= Enemy.spawn_random
+    args.state.platforms ||= generate_platforms
 
     # Fetch the logged-in user's name once from the Rails app. Same-origin, so the
     # session cookie rides along and /play/me answers as the current user.
@@ -50,6 +45,11 @@ module Main
     # Input, jumping, gravity, and platform/ground collision (frozen while
     # locked) — all owned by the player.
     args.state.player.update(args)
+
+    # Horizontal camera: keep the player centered, clamped to the world edges.
+    args.state.camera_x =
+      (args.state.player.x + args.state.player.w / 2 - SCREEN_W / 2)
+        .clamp(0, WORLD_W - SCREEN_W)
 
     # Fire once on contact (the transition, not every overlapping frame): dock a
     # heart, retire the enemy for good, then either game-over (last heart) or kick
@@ -84,22 +84,22 @@ module Main
 
     poll_unlock(args) if args.state.player.locked && args.state.player.lock_confirmed
 
-    # Sky background.
-    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H, r: 135, g: 206, b: 235 }
+    cam = args.state.camera_x
 
-    # Ground.
+    # Sky and ground are flat and uniform, so they fill the viewport directly
+    # (no camera offset needed).
+    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H, r: 135, g: 206, b: 235 }
     args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: GROUND_Y, r: 83, g: 138, b: 64 }
 
-    # Platforms.
-    PLATFORMS.each do |plat|
-      args.outputs.solids << { x: plat.x, y: plat.y, w: plat.w, h: plat.h,
+    # World entities are in world coords; subtract the camera offset to draw.
+    args.state.platforms.each do |plat|
+      args.outputs.solids << { x: plat.x - cam, y: plat.y, w: plat.w, h: plat.h,
                                r: 120, g: 85, b: 50 }
     end
 
-    # Enemies.
-    args.state.enemies.each { |enemy| enemy.render(args) if enemy.alive }
+    args.state.enemies.each { |enemy| enemy.render(args, cam) if enemy.alive }
 
-    args.state.player.render(args)
+    args.state.player.render(args, cam)
 
     draw_hearts(args)
 
@@ -159,6 +159,19 @@ module Main
                              size_px: 20,
                              anchor_x: 0.5,
                              anchor_y: 0.5 }
+  end
+
+  # Scatter one-way ledges across the world, one per evenly spaced slot (so they
+  # spread out instead of clumping) with a random width and a random reachable
+  # tier height. Generated once per run.
+  def generate_platforms
+    slot = (WORLD_W - 400) / PLATFORM_COUNT
+    PLATFORM_COUNT.times.map do |i|
+      w = 180 + rand(100)
+      x = 200 + i * slot + rand([ slot - w, 0 ].max)
+      top = PLATFORM_TIERS.sample
+      { x: x, y: top - PLATFORM_H, w: w, h: PLATFORM_H }
+    end
   end
 
   # POST to the Rails app so it can broadcast a message to the page. Same-origin,

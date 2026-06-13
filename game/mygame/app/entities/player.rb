@@ -22,7 +22,7 @@ class Player
                 :hearts, :game_over
 
   def initialize
-    @x = (SCREEN_W - WIDTH) / 2
+    @x = 200            # near the left of the world; the scene extends right
     @y = GROUND_Y
     @w = WIDTH
     @h = HEIGHT
@@ -52,7 +52,7 @@ class Player
       @facing = :south
     end
 
-    @x = @x.clamp(0, SCREEN_W - WIDTH)
+    @x = @x.clamp(0, WORLD_W - WIDTH)
 
     # Jump on the press edge so holding space doesn't re-launch every frame.
     if args.inputs.keyboard.key_down.space && @grounded
@@ -72,7 +72,7 @@ class Player
     elsif @vy <= 0
       # One-way platforms: land only while descending and only if the player's
       # bottom crossed the platform's top this frame (so you pass up through it).
-      PLATFORMS.each do |plat|
+      args.state.platforms.each do |plat|
         top = plat.y + plat.h
         horizontal = @x + @w > plat.x && @x < plat.x + plat.w
         if horizontal && prev_y >= top && @y <= top
@@ -87,11 +87,12 @@ class Player
 
   # Draw just the character (cropped from its padded frame) hitbox-tall and
   # centered over the 64x96 hitbox, anchored at y so its feet meet the ground.
-  # Facing follows movement, south (facing the camera) when idle.
-  def render(args)
+  # Facing follows movement, south (facing the camera) when idle. World x is
+  # shifted by the camera offset to screen space.
+  def render(args, camera_x = 0)
     sprite_h = @h
     sprite_w = sprite_h * SPRITE_CROP_W / SPRITE_CROP_H
-    args.outputs.sprites << { x: @x + (@w - sprite_w) / 2,
+    args.outputs.sprites << { x: @x - camera_x + (@w - sprite_w) / 2,
                               y: @y,
                               w: sprite_w,
                               h: sprite_h,

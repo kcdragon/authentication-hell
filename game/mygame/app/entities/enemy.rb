@@ -14,14 +14,16 @@ class Enemy
 
   attr_accessor :x, :y, :w, :h, :alive, :colliding, :auth, :r, :g, :b
 
-  # The three enemies, spaced so none overlaps the player's centered spawn:
-  # passkey on the left, password right-of-center, TOTP on the right.
-  def self.spawn_defaults
-    [
-      new(x: SCREEN_W - WIDTH - 120, auth: :totp),
-      new(x: 120, auth: :passkey),
-      new(x: (SCREEN_W - WIDTH) / 2 + 240, auth: :password)
-    ]
+  # Two enemies of each auth kind, scattered across the world: one per evenly
+  # spaced slot (so they spread out) starting well past the player's spawn, each
+  # at a random x within its slot.
+  def self.spawn_random
+    auths = [ :totp, :totp, :passkey, :passkey, :password, :password ].shuffle
+    start = 800
+    slot = (WORLD_W - start - WIDTH) / auths.length
+    auths.map.with_index do |auth, i|
+      new(x: start + i * slot + rand([ slot - WIDTH, 0 ].max), auth: auth)
+    end
   end
 
   def initialize(x:, auth:)
@@ -38,8 +40,8 @@ class Enemy
     @b = color[:b]
   end
 
-  def render(args)
-    args.outputs.solids << { x: @x, y: @y, w: @w, h: @h, r: @r, g: @g, b: @b }
+  def render(args, camera_x = 0)
+    args.outputs.solids << { x: @x - camera_x, y: @y, w: @w, h: @h, r: @r, g: @g, b: @b }
   end
 
   # DragonRuby exports args.state for its dev tools; a plain object without a
