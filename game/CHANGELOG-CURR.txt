@@ -1,3 +1,21 @@
+* 7.9
+** [Bugfix] ~looping~ property is respected objects sent to ~args.audio~.
+* 7.8
+** [Pro] [News] Experimental release of new shader capabilities queued for the first week of July.
+** [Support] Increased max limit of texture entries to 2048.
+   More textures will be cached behind the scenes before cache ejection occurs.
+** [Support] Improved audio playback synchronization/performance.
+   Machinery moved to C. Removed unnecessary resynchronization calls
+   during ~tick~.
+** [Support] Added warning + backtrace for audio references that are already playing.
+   Warning message about queueing a ~Hash~ reference that's already
+   playing will print the callstack before skipping the queue request.
+** [Bugfix] Audio playtime now returns the correct value for the seek head.
+** [Support] Added ~Grid#refresh_rate~.
+** [Bugfix] Fixed high CPU usage while waiting for export of render primitives.
+   Displays with high refresh rates (mobile devices specifically) had
+   high CPU usage while waiting for what to render next. Regression
+   was introduced in 6.51.
 * 7.7
 ** [Bugfix] Fixed HTTP apis for web builds.
    Emscripten 5 changed ~Module.HEAPU8.set~ to ~HEAPU8.set~.
@@ -9,14 +27,14 @@
    I asked Ryan when we were going to rewrite everything in Rust. He muted me.
 ** [Supported] Updated Linux SDL builds to include Wayland.
 * 7.6
-** [Pro] [Support] [iOS] Added entitlements explaining that blutooth is required for gamepads.
+** [Pro] [Support] [iOS] Added entitlements explaining that bluetooth is required for gamepads.
 ** [Pro] [Support] [iOS] Improvements to IOSWizard.
    - Checks to see if imagemagick is installed.
    - Icons for all devices sizes are generated automatically off of =./metadata/icon_ios.png=.
    - Game will auto launch after installation.
 ** [Support] ~dragonruby-publish~ now warns if audio files are not encoded correctly.
 ** [Support] ~dragonruby-publish~ warning messages moved as a summary after build is completed.
-   Summary includes warnings about audio encoding, and warnings about file names with spaces and/or capital lettrs.
+   Summary includes warnings about audio encoding, and warnings about file names with spaces and/or capital letters.
 ** [Support] Removed warning message when ctrl+r shortcut is used to reset the game.
 ** [Support] Improved invalidation of cached textures and render targets when reset occurs.
 ** [Support] libSDL recompiled without camera apis.
