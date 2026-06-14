@@ -1,0 +1,41 @@
+/* Re-skin the DragonRuby HTML5 loader splash to match the in-game poster.
+ *
+ * The vendored loader (regenerated each build) injects div#clicktoplaydiv with the
+ * metadata/icon.png logo + two <p> (title, "Click or tap…"), all inline-styled. We
+ * can't durably edit that JS, so we override its inline styles here (!important beats
+ * inline) and rewrite the two text lines in frame.html.erb once they appear.
+ *
+ * Loaded only inside the game <iframe> (layouts/game_frame.html.erb), which omits the
+ * site CSS — so re-declare the two faces here. Bare url() filenames so Propshaft
+ * digests them (the fonts share the asset-load-path root). Colors mirror constants.rb
+ * (PAPER #F5F2E9 / INK #141417 / MUTED #5B5750; Archivo Black + Space Mono). */
+
+@font-face {
+  font-family: "Archivo Black";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("archivo-black-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("space-mono-400.woff2") format("woff2");
+}
+
+#clicktoplaydiv { background-color: #F5F2E9 !important; border: 3px solid #141417 !important; }
+#clicktoplaydiv p { background-color: transparent !important; }
+#clicktoplaydiv p:nth-of-type(1) {
+  font-family: "Archivo Black", system-ui, sans-serif !important;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  color: #141417 !important;
+  font-size: 28px !important;
+}
+#clicktoplaydiv p:nth-of-type(2) {
+  font-family: "Space Mono", ui-monospace, monospace !important;
+  color: #5B5750 !important;
+  font-size: 18px !important;
+}

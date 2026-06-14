@@ -17,3 +17,26 @@
 
 <%# Resolved to <bundle path>/dragonruby-html5-loader.js via the layout's <base href>. %>
 <script src="dragonruby-html5-loader.js"></script>
+
+<%# Re-skin the loader splash to match the in-game poster: its look lives in the
+    game_splash stylesheet (loaded by the game_frame layout); the game-splash
+    Stimulus controller rewrites the loader's two <p> text lines once the splash
+    appears. This frame omits the app-wide importmap (so the <base href> can't
+    rewrite the loader's bare asset paths), so declare a page-scoped one pinned to
+    absolute, digested asset URLs and boot a minimal Stimulus app with just that
+    controller registered. %>
+<script type="importmap">
+  {
+    "imports": {
+      "@hotwired/stimulus": "<%= asset_path("stimulus.min.js") %>",
+      "controllers/game_splash_controller": "<%= asset_path("controllers/game_splash_controller.js") %>"
+    }
+  }
+</script>
+<script type="module">
+  import { Application } from "@hotwired/stimulus"
+  import GameSplashController from "controllers/game_splash_controller"
+
+  const application = Application.start()
+  application.register("game-splash", GameSplashController)
+</script>
