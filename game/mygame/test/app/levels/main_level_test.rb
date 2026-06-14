@@ -37,4 +37,21 @@ class MainLevelTest < Minitest::Test
   def test_world_is_the_full_width
     assert_equal WORLD_W, @level.world_w
   end
+
+  def test_completes_at_the_right_wall_and_hands_off_to_the_gauntlet
+    @level.setup(@args)
+    refute @level.complete?, "shouldn't be clear before reaching the wall"
+
+    @args.state.player.x = WORLD_W - Player::WIDTH
+    @level.update(@args)
+
+    assert @level.complete?
+    assert_instance_of GauntletLevel, @level.next_level
+  end
+
+  def test_does_not_complete_mid_world
+    @args.state.player.x = 3000
+    @level.update(@args)
+    refute @level.complete?
+  end
 end

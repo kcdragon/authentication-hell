@@ -17,6 +17,7 @@ require_relative "../app/entities/enemies/password"
 require_relative "../app/levels/level"
 require_relative "../app/levels/00_tutorial"
 require_relative "../app/levels/01_main"
+require_relative "../app/levels/02_gauntlet"
 
 # Minimal stand-ins for DragonRuby's `args`. The entities only read a handful of
 # input/state fields and append to output arrays, so plain Structs suffice. Use

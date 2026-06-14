@@ -31,6 +31,11 @@ class Level
   # tutorial fits one screen).
   def world_w = WORLD_W
 
+  # Whether the player has walked to the world's right wall (the player's x clamps
+  # to world_w - WIDTH, so this is exact). Levels that finish by reaching the end
+  # latch a flag on this in #update, since #complete? is called without args.
+  def reached_end?(args) = args.state.player.x >= world_w - Player::WIDTH
+
   # The level's HUD overlay (drawn only while the player is free, not locked).
   def draw(_args) = nil
 

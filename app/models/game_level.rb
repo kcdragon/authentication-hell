@@ -14,7 +14,9 @@ class GameLevel
     new(number: 0, name: "Tutorial", emoji: "🎓",
       achievement_description: "Finish the tutorial and step into the world."),
     new(number: 1, name: "The Open World", emoji: "🌅",
-      achievement_description: "Clear the main level.")
+      achievement_description: "Clear the main level."),
+    new(number: 2, name: "The Gauntlet", emoji: "🏃",
+      achievement_description: "Cross the gauntlet without touching the floor.")
   ].freeze
 
   def achievement_key = "level_#{number}_complete"
