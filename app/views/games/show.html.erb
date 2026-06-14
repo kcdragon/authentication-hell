@@ -20,7 +20,7 @@
         before; the toast/playlist/nav chrome stays here on the parent. The 16:9
         box scales with the column width via aspect-ratio. %>
     <div class="flex-1 min-w-0 w-full max-w-[1280px]">
-      <div class="w-full bg-black" style="aspect-ratio: 16 / 9;">
+      <div class="w-full bg-black border-[3px] border-ink rounded-[3px] shadow-brut overflow-hidden" style="aspect-ratio: 16 / 9;">
         <iframe
           src="<%= game_frame_path %>"
           title="Authentication Hell"
