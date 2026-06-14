@@ -6,7 +6,7 @@ class HomeControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h1", "Authentication Hell"
-    assert_match "Alpha", response.body
+    assert_match "Required training", response.body
     assert_match "RubyConf 2026", response.body
   end
 
