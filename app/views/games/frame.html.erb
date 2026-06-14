@@ -18,35 +18,10 @@
 <%# Resolved to <bundle path>/dragonruby-html5-loader.js via the layout's <base href>. %>
 <script src="dragonruby-html5-loader.js"></script>
 
-<%# Re-skin the DragonRuby loader splash to match the in-game poster. The loader
-    (vendored, regenerated each build) injects div#clicktoplaydiv with the
-    metadata/icon.png logo + two <p> (title, "Click or tap…"), all inline-styled.
-    We can't durably edit that JS, so we override its inline styles here with
-    !important and rewrite the two text lines to the poster copy once they appear.
-    Colors/fonts mirror constants.rb (PAPER/INK/MUTED, Archivo Black/Space Mono);
-    this frame omits the site CSS, so re-declare the two faces, pinned to absolute
-    digested asset URLs so the <base href> can't rewrite them. %>
-<style>
-  @font-face {
-    font-family: "Archivo Black"; font-style: normal; font-weight: 400; font-display: swap;
-    src: url("<%= asset_path("archivo-black-400.woff2") %>") format("woff2");
-  }
-  @font-face {
-    font-family: "Space Mono"; font-style: normal; font-weight: 400; font-display: swap;
-    src: url("<%= asset_path("space-mono-400.woff2") %>") format("woff2");
-  }
-  #clicktoplaydiv { background-color: #F5F2E9 !important; border: 3px solid #141417 !important; }
-  #clicktoplaydiv p { background-color: transparent !important; }
-  #clicktoplaydiv p:nth-of-type(1) {
-    font-family: "Archivo Black", system-ui, sans-serif !important;
-    text-transform: uppercase; letter-spacing: -0.01em;
-    color: #141417 !important; font-size: 28px !important;
-  }
-  #clicktoplaydiv p:nth-of-type(2) {
-    font-family: "Space Mono", ui-monospace, monospace !important;
-    color: #5B5750 !important; font-size: 18px !important;
-  }
-</style>
+<%# Re-skin the loader splash to match the in-game poster: styles (incl. the
+    !important overrides of the loader's inline styles) live in the game_splash
+    stylesheet, loaded by the game_frame layout. Here we only rewrite the loader's
+    two <p> text lines to the poster copy once div#clicktoplaydiv appears. %>
 <script>
   (function () {
     function rebrand(div) {

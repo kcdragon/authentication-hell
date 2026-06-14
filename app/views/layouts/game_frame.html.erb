@@ -18,6 +18,10 @@
       .emscripten_border { border: 0; }
       canvas.emscripten { display: block; border: 0; background: #000; }
     </style>
+
+    <%# Re-skins the loader splash to match the in-game poster (see the stylesheet);
+        absolute /assets/ href, so the <base href> above leaves it alone. %>
+    <%= stylesheet_link_tag "game_splash" %>
   </head>
 
   <%# DragonRuby's loader routes canvas clicks through getElementById("toplevel"). %>
