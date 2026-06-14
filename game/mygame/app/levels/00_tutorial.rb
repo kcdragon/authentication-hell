@@ -4,10 +4,15 @@
 # is the password re-auth). Clearing it drops a heal heart; grabbing it turns melee
 # on and sends a second enemy in from the left for the player to defeat with the
 # keyboard swing, which finishes the tutorial and hands off to the endless main world.
+#
+# Sized to a single screen (world_w = SCREEN_W): the whole lesson plays in one view,
+# so the player can't wander off into the empty main world and the camera never scrolls.
 class TutorialLevel < Level
   ENEMY_SPEED = 3 # px/frame the password enemies advance toward the player
 
   def number = 0
+
+  def world_w = SCREEN_W
 
   def initialize
     @healed = false
@@ -39,7 +44,7 @@ class TutorialLevel < Level
       args.state.enemies = [ enemy ]
     elsif @healed && !@combat_spawned
       enemy = PasswordEnemy.new(x: args.state.camera_x - Enemy::WIDTH)
-      enemy.march_right(ENEMY_SPEED)
+      enemy.march_right(ENEMY_SPEED, max: world_w)
       args.state.enemies = [ enemy ]
       @combat_spawned = true
     end
@@ -63,7 +68,7 @@ class TutorialLevel < Level
   # player (clamped to the world so it stays reachable). Collecting it heals the
   # heart the enemy cost and triggers the keyboard-combat beat (see #update).
   def on_unlock(args)
-    x = (args.state.player.x + 220).clamp(0, WORLD_W - HeartPickup::SIZE)
+    x = (args.state.player.x + 220).clamp(0, world_w - HeartPickup::SIZE)
     args.state.collectables << HeartPickup.new(x: x, y: GROUND_Y + HeartPickup::LIFT)
   end
 

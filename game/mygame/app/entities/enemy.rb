@@ -55,13 +55,14 @@ class Enemy
     @patrol_min_x = -@w
   end
 
-  # Mirror of #march_left: march right from the current x, patrolling the full
-  # width to its right (the tutorial uses this to walk it in from the left screen
-  # edge). It still patrols, turning around at the far right if never touched.
-  def march_right(speed)
+  # Mirror of #march_left: march right from the current x, patrolling to `max` on
+  # its right (the tutorial uses this to walk it in from the left screen edge, and
+  # caps max at the one-screen world so it can't escape). It still patrols, turning
+  # around at the far edge if never touched.
+  def march_right(speed, max: WORLD_W)
     @vx = speed
     @patrol_min_x = @x
-    @patrol_max_x = WORLD_W
+    @patrol_max_x = max
   end
 
   # Pace horizontally within the patrol bounds, reversing at each edge. Clamp to

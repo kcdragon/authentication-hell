@@ -26,6 +26,11 @@ class Level
   # Whether the keyboard melee can defeat enemies on this level.
   def melee? = true
 
+  # The level's playable world width (the player + camera are bounded by it). The
+  # main world is many screens wide; a short scripted stage can shrink it (the
+  # tutorial fits one screen).
+  def world_w = WORLD_W
+
   # The level's HUD overlay (drawn only while the player is free, not locked).
   def draw(_args) = nil
 

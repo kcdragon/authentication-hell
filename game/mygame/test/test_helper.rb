@@ -27,18 +27,21 @@ module GameTest
   KeyDown = Struct.new(:space)
   Keyboard = Struct.new(:left, :right, :key_down)
   Inputs = Struct.new(:mouse, :keyboard)
-  State = Struct.new(:camera_x, :platforms, :enemies, :collectables, :player)
+  State = Struct.new(:camera_x, :platforms, :enemies, :collectables, :player, :level)
   Outputs = Struct.new(:sprites, :solids, :labels)
   Args = Struct.new(:inputs, :state, :outputs)
 
-  # Build an `args` double for a single tick. Defaults mean "no input".
+  # Build an `args` double for a single tick. Defaults mean "no input". The level
+  # defaults to MainLevel (the full-width world) so the player clamps to WORLD_W
+  # like it does in the running game; pass a TutorialLevel to exercise the
+  # one-screen bound.
   def build_args(mouse_click: false, mouse_x: 0, left: false, right: false,
                  space: false, camera_x: 0, platforms: [], enemies: nil,
-                 collectables: nil, player: nil)
+                 collectables: nil, player: nil, level: MainLevel.new)
     Args.new(
       Inputs.new(Mouse.new(mouse_click, mouse_x),
                  Keyboard.new(left, right, KeyDown.new(space))),
-      State.new(camera_x, platforms, enemies, collectables, player),
+      State.new(camera_x, platforms, enemies, collectables, player, level),
       Outputs.new([], [], [])
     )
   end

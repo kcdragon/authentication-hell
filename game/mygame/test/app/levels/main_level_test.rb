@@ -33,4 +33,8 @@ class MainLevelTest < Minitest::Test
   def test_number_is_one
     assert_equal 1, @level.number
   end
+
+  def test_world_is_the_full_width
+    assert_equal WORLD_W, @level.world_w
+  end
 end
