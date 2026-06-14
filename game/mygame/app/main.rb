@@ -50,7 +50,8 @@ module Main
     if !args.state.started
       handle_poster_input(args)
     else
-      update_world(args)
+      toggled = handle_pause_input(args)
+      update_world(args) unless args.state.paused || toggled
     end
 
     render_world(args)
@@ -61,6 +62,20 @@ module Main
     if args.inputs.mouse.click || args.inputs.keyboard.key_down.space
       args.state.started = true
     end
+  end
+
+  # Pause / resume mid-run via the Escape key or a click on the play/pause button
+  # (the only wired transport control). Disallowed while the run is over or buffering
+  # a re-auth: there's nothing to pause there, and pausing a lock would stall the
+  # unlock poll. Returns whether it toggled this tick so the caller can skip the world
+  # update — the same click then won't also swing the keyboard.
+  def handle_pause_input(args)
+    return false if args.state.player.game_over || args.state.player.locked
+
+    toggle = args.inputs.keyboard.key_down.escape ||
+             (args.inputs.mouse.click && args.inputs.mouse.point.inside_rect?(PLAY_BUTTON))
+    args.state.paused = !args.state.paused if toggle
+    !!toggle
   end
 
   # One tick of live gameplay (only while the run is started and not over).
@@ -198,6 +213,8 @@ module Main
       draw_video_ended(args)
     elsif args.state.player.locked
       draw_buffering(args)
+    elsif args.state.paused
+      draw_paused(args)
     else
       args.state.level.draw(args)
     end
@@ -261,17 +278,20 @@ module Main
   # to it, plus the usual CC / speed / fullscreen affordances on the right — all
   # static (the buttons aren't wired; they only sell the video-player disguise).
   def draw_transport(args)
-    # Play/pause button (blue, paper glyph). Shows pause while playing, play when
-    # the run hasn't started or has ended.
-    bx = SCRUBBER_X
-    by = CONTROLS_Y
-    args.outputs.solids << { x: bx, y: by, w: 34, h: 34, r: BLUE[0], g: BLUE[1], b: BLUE[2] }
-    playing = args.state.started && !args.state.player.game_over && !args.state.player.locked
+    # Play/pause button (blue, paper glyph). Shows the pause bars while playing and
+    # a play triangle when the run is paused, hasn't started, or has ended.
+    bx = PLAY_BUTTON[:x]
+    by = PLAY_BUTTON[:y]
+    args.outputs.solids << { **PLAY_BUTTON, r: BLUE[0], g: BLUE[1], b: BLUE[2] }
+    playing = args.state.started && !args.state.player.game_over &&
+              !args.state.player.locked && !args.state.paused
     if playing
       args.outputs.solids << { x: bx + 11, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
       args.outputs.solids << { x: bx + 19, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
     else
-      args.outputs.solids << { x: bx + 12, y: by + 8, w: 13, h: 18, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+      args.outputs.solids << { x: bx + 12, y: by + 9, x2: bx + 12, y2: by + 25,
+                               x3: bx + 26, y3: by + 17,
+                               r: PAPER[0], g: PAPER[1], b: PAPER[2] }
     end
 
     frac = progress(args)
@@ -334,6 +354,26 @@ module Main
                              anchor_x: 0.5, anchor_y: 0.5 }
     args.outputs.labels << { x: cx, y: cy - 140, text: "click play to begin onboarding",
                              size_px: 18, font: FONT_MONO,
+                             r: MUTED[0], g: MUTED[1], b: MUTED[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
+  end
+
+  # Paused mid-run: a quiet paper scrim over the play area + a centered play glyph,
+  # the video "stopped." Resume with Escape or the play button.
+  def draw_paused(args)
+    args.outputs.solids << { x: 0, y: BAR_TOP, w: SCREEN_W, h: SCREEN_H - BAR_TOP,
+                             r: PAPER[0], g: PAPER[1], b: PAPER[2], a: 90 }
+    cx = 640
+    cy = 408
+    args.outputs.solids << { x: cx - 16, y: cy + 26, x2: cx - 16, y2: cy - 26,
+                             x3: cx + 30, y3: cy,
+                             r: INK[0], g: INK[1], b: INK[2] }
+    args.outputs.labels << { x: cx, y: cy - 64, text: "PAUSED",
+                             size_px: 24, font: FONT_MONO_B,
+                             r: INK[0], g: INK[1], b: INK[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
+    args.outputs.labels << { x: cx, y: cy - 96, text: "press play or escape to resume",
+                             size_px: 16, font: FONT_MONO,
                              r: MUTED[0], g: MUTED[1], b: MUTED[2],
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
