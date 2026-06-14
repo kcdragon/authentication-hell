@@ -8,6 +8,7 @@ class Games::LevelsController < ApplicationController
 
     Current.user.record_level_completed(level.number)
     Achievement::Awarder.call(Current.user, level.achievement_key)
+    Game::PlaylistBroadcaster.call(Current.user)
     head :no_content
   end
 end
