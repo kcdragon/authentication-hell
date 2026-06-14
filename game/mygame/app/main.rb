@@ -179,6 +179,11 @@ module Main
     # always has a numeric camera.
     cam = args.state.camera_x ||= 0
 
+    # Clear the whole window — including the letterbox outside the 1280x720 safe
+    # area — to the paper color, so the bars blend into the surrounding page
+    # instead of reading as black.
+    args.outputs.background_color = PAPER
+
     # Warm paper wall fills the viewport; the control bar (= floor) is drawn by
     # draw_control_bar below, so its top edge reads as the ground line.
     args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H,
