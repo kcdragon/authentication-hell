@@ -259,6 +259,19 @@ class UserTest < ActiveSupport::TestCase
     assert_equal GameLevel.all.map(&:number).max, user.current_level.number
   end
 
+  test "now_playing falls back to current_level when unreported" do
+    user = users(:one)
+    user.update!(highest_level_completed: 0)
+    assert_nil user.now_playing_level
+    assert_equal 1, user.now_playing
+  end
+
+  test "now_playing reflects a reported level, even a replayed cleared one" do
+    user = users(:one)
+    user.update!(highest_level_completed: 2, now_playing_level: 0)
+    assert_equal 0, user.now_playing
+  end
+
   test "ranked exposes an achievements_count aggregate" do
     users(:one).grant_achievement(:password_survivor)
     users(:one).grant_achievement(:totp_survivor)

@@ -4,7 +4,8 @@
     Games::LevelsController#complete). The outer id is the broadcast target. %>
 <% hlc = user.highest_level_completed
    levels = GameLevel.all
-   current_number = user.current_level&.number
+   now_playing = user.now_playing
+   frontier = user.current_level&.number
    watched_count = levels.count { |l| hlc && l.number <= hlc }
    # Cosmetic m:ss per level (the in-game scrubber fakes a 3:20 runtime).
    durations = { 0 => "0:45", 1 => "3:20" }
@@ -19,9 +20,14 @@
   </div>
 
   <% levels.each do |level|
-       watched = hlc && level.number <= hlc
-       current = !watched && level.number == current_number %>
-    <div class="flex items-center gap-3 px-3 py-3 border-b-[3px] border-ink last:border-b-0 <%= "bg-passkey/10" if current %> <%= "opacity-80" if watched %>">
+       current = level.number == now_playing
+       watched = hlc && level.number <= hlc && !current
+       selectable = frontier && level.number <= frontier
+       row_class = "flex items-center gap-3 px-3 py-3 border-b-[3px] border-ink last:border-b-0"
+       row_class += " bg-passkey/10" if current
+       row_class += " opacity-80" if watched
+       row_class += " hover:opacity-100 hover:bg-passkey/5 transition cursor-pointer" if selectable %>
+    <% inner = capture do %>
       <div class="relative w-24 aspect-video flex-shrink-0 grid place-items-center border-[3px] border-ink rounded-[2px] bg-paper">
         <span class="text-2xl" aria-hidden="true"><%= level.emoji %></span>
         <% if current %>
@@ -34,15 +40,23 @@
 
       <div class="min-w-0">
         <p class="font-display text-xs uppercase tracking-tight truncate">Lv <%= level.number %> · <%= level.name %></p>
-        <% if watched %>
-          <p class="font-mono text-[11px] font-bold text-success mt-1">✓ Watched</p>
-        <% elsif current %>
+        <% if current %>
           <span class="inline-block font-display text-[10px] uppercase tracking-tight bg-passkey text-white border-2 border-ink rounded-[2px] px-1.5 py-0.5 mt-1">▶ Now playing</span>
+        <% elsif watched %>
+          <p class="font-mono text-[11px] mt-1"><span class="font-bold text-success">✓ Watched</span> <span class="text-muted">· ↻ Rewatch</span></p>
+        <% elsif selectable %>
+          <p class="font-mono text-[11px] text-muted mt-1">▶ Play</p>
         <% else %>
           <p class="font-mono text-[11px] text-muted mt-1">Up next</p>
         <% end %>
       </div>
-    </div>
+    <% end %>
+    <% if selectable %>
+      <%= link_to inner, game_frame_path(level: level.number), target: game_frame_name,
+            class: row_class, title: "Play #{level.name}" %>
+    <% else %>
+      <div class="<%= row_class %>"><%= inner %></div>
+    <% end %>
   <% end %>
 
   <% coming_soon.each do |title| %>

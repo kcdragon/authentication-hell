@@ -21,11 +21,21 @@ class GamesController < ApplicationController
   # frame whose viewport is exactly 16:9 makes its render fill the frame with no
   # letterbox. Uses the "game_frame" layout (just <base href> + the canvas shell).
   def frame
+    if params[:level].present?
+      n = params[:level].to_i
+      frontier = Current.user.current_level&.number
+      if frontier && n.between?(0, frontier)
+        session[:selected_level] = n
+        Current.user.update!(now_playing_level: n)
+        Game::PlaylistBroadcaster.call(Current.user)
+      end
+    end
     render layout: "game_frame"
   end
 
   def me
-    render json: { username: Current.user.username }
+    start = session.delete(:selected_level) || Current.user.current_level&.number || 0
+    render json: { username: Current.user.username, start_level: start }
   end
 
   private

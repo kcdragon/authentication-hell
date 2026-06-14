@@ -5,8 +5,6 @@ class User < ApplicationRecord
   AVATAR_CONTENT_TYPES = %w[ image/png image/jpeg image/gif image/webp ].freeze
   AVATAR_MAX_SIZE = 5.megabytes
 
-  # The password db/seeds.rb gives the dev user; also prefilled into the game's
-  # password challenge in development. Dev/seed convenience only, never used in production.
   DEV_PASSWORD = "password".freeze
 
   has_secure_password validations: false
@@ -169,6 +167,10 @@ class User < ApplicationRecord
   # cleared everything).
   def current_level
     GameLevel.find((highest_level_completed || -1) + 1) || GameLevel.find(highest_level_completed)
+  end
+
+  def now_playing
+    now_playing_level || current_level&.number
   end
 
   private

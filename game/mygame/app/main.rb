@@ -20,13 +20,19 @@ module Main
     # holds the active level (a TutorialLevel, then a MainLevel) — unset only on the
     # very first tick. Each enemy carries its own auth kind (which re-auth flow it
     # triggers) and its own colliding flag so contact fires once per enemy.
+    # A default scene so rendering has something to draw behind the poster; the
+    # real starting level arrives from /play/me below and swaps in before play
+    # begins (the poster is gated on that response).
+    args.state.start_level ||= 0
     unless args.state.level
       args.state.level = TutorialLevel.new
       args.state.level.setup(args)
     end
 
-    # Fetch the logged-in user's name once from the Rails app. Same-origin, so the
-    # session cookie rides along and /play/me answers as the current user.
+    # Fetch the logged-in user's name and starting level once from the Rails app.
+    # Same-origin, so the session cookie rides along and /play/me answers as the
+    # current user (start_level = where their progress resumes, or a level they
+    # just clicked in the playlist).
     args.state.username ||= 'there'
     if !args.state.name_request
       args.state.name_request = DR.http_get(me_url(args))
@@ -36,7 +42,19 @@ module Main
       request = args.state.name_request
       if request[:http_response_code] == 200
         data = DR.parse_json(request[:response_data])
-        args.state.username = data["username"] if data && data["username"]
+        if data
+          args.state.username = data["username"] if data["username"]
+          # Swap to the resolved starting level before the run begins (the world is
+          # frozen on the poster, so this is invisible) and report it as now playing.
+          if data["start_level"] && !args.state.started
+            args.state.start_level = data["start_level"]
+            if args.state.level.number != args.state.start_level
+              args.state.level = Level.build(args.state.start_level)
+              args.state.level.setup(args)
+            end
+            report_now_playing(args, args.state.start_level)
+          end
+        end
       end
       # Replace the (non-serializable) response object with a plain marker so the
       # per-tick state export doesn't choke on it and we don't re-fetch.
@@ -58,8 +76,12 @@ module Main
     render_world(args)
   end
 
-  # While paused on the poster, a click or space "presses play" and starts the run.
+  # While paused on the poster, a click or space "presses play" and starts the run
+  # — but only once /play/me has resolved, so we never start on the wrong level
+  # while the starting level is still in flight (a fast, same-origin call).
   def handle_poster_input(args)
+    return unless args.state.name_request == :done
+
     if args.inputs.mouse.click || args.inputs.keyboard.key_down.space
       args.state.started = true
     end
@@ -464,13 +486,22 @@ module Main
     )
   end
 
-  # Tell the Rails app the player cleared a level (records progress + grants the
-  # level achievement). Fire-and-forget: same-origin so the session cookie
-  # identifies the player; the level number rides in a form-encoded body.
+  # Tell the Rails app the player cleared a level (records progress + grants its
+  # achievement). The level goes in the query string, not the body: DR.http_post
+  # sends a Hash body as multipart, which Rails won't parse under our urlencoded
+  # header, so params[:level] would arrive empty (→ 0).
   def report_level_complete(args, level)
     args.state.level_complete_request = DR.http_post(
-      levels_complete_url(args),
-      { level: level },
+      "#{levels_complete_url(args)}?level=#{level}",
+      {},
+      [ "Content-Type: application/x-www-form-urlencoded" ]
+    )
+  end
+
+  def report_now_playing(args, level)
+    args.state.now_playing_request = DR.http_post(
+      "#{levels_playing_url(args)}?level=#{level}",
+      {},
       [ "Content-Type: application/x-www-form-urlencoded" ]
     )
   end
@@ -507,16 +538,19 @@ module Main
     report_level_complete(args, args.state.level.number)
     args.state.level = args.state.level.next_level
     args.state.level.setup(args)
+    report_now_playing(args, args.state.level.number)
   end
 
   # Replay from the "Video Ended" card: reset the player and scene back to the
-  # opening tutorial and re-seed it. The poster is skipped (the run is already
-  # "playing" — they pressed Replay), so play resumes immediately.
+  # level this run began on (where their progress resumes, or a level they
+  # picked from the playlist) and re-seed it. The poster is skipped (the run is
+  # already "playing" — they pressed Replay), so play resumes immediately.
   def restart_run(args)
     args.state.player = Player.new
-    args.state.level = TutorialLevel.new
+    args.state.level = Level.build(args.state.start_level || 0)
     args.state.level.setup(args)
     args.state.camera_x = 0
+    report_now_playing(args, args.state.level.number)
   end
 
   # The Rails server's origin (scheme + host[:port]), baked into the bundle by
@@ -532,4 +566,5 @@ module Main
   def start_url(args, kind) = "#{server_base(args)}/games/#{kind}/start"
   def status_url(args, kind) = "#{server_base(args)}/games/#{kind}/status"
   def levels_complete_url(args) = "#{server_base(args)}/games/levels/complete"
+  def levels_playing_url(args) = "#{server_base(args)}/games/levels/playing"
 end
