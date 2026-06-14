@@ -33,6 +33,9 @@
           class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
 
     <%= link_to "Two-factor authentication", totp_settings_path, data: { turbo: turbo },
+          class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
+
+    <%= link_to "Change password", password_change_path, data: { turbo: turbo },
           class: "block px-4 py-3 text-ink border-b-[3px] border-ink hover:bg-paper" %>
 
     <%= button_to "Sign out", session_path, method: :delete,

@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   resource :passkey_registration, only: :create
   resource :email_confirmation, only: %i[ new create show ], param: :token
   resources :passwords, param: :token
+  resource :password_change, only: %i[ show update ], controller: "users/passwords"
 
   resource :onboarding, only: :show, controller: "onboarding"
   namespace :onboarding do
