@@ -1,38 +1,128 @@
 <% content_for :title, "Authentication Hell" %>
+<% start_path = authenticated? ? game_path : new_registration_path
+   levels = GameLevel.all
+   # Cosmetic m:ss per module — matches the in-game scrubber / "Authentication 101" playlist.
+   durations = { 0 => "0:45", 1 => "3:20" }
+   coming_soon = [ "OAuth & SSO", "Session Hygiene", "Spotting Phishing", "Recovery Codes 201" ]
+   module_count = levels.size + coming_soon.size %>
 
-<section class="mx-auto w-full max-w-4xl ah-card overflow-hidden">
-  <div class="p-8 md:p-12" style="background-image:radial-gradient(circle at 1px 1px,#1111110f 1px,transparent 0);background-size:22px 22px">
-    <span class="ah-badge ah-badge--totp text-white">
-      <span class="size-2 rounded-full bg-ink animate-pulse"></span> Alpha · In development
-    </span>
+<div class="mx-auto w-full max-w-6xl space-y-6">
+  <%# === Course header: info on the left, video preview on the right === %>
+  <section class="ah-card overflow-hidden">
+    <div class="grid lg:grid-cols-2">
+      <div class="p-8 md:p-10 border-b-[3px] lg:border-b-0 lg:border-r-[3px] border-ink"
+           style="background-image:radial-gradient(circle at 1px 1px,#1111110f 1px,transparent 0);background-size:22px 22px">
+        <span class="ah-badge ah-badge--totp text-white">
+          <span class="size-2 rounded-full bg-ink animate-pulse"></span> New-hire onboarding · Required training
+        </span>
 
-    <h1 class="font-display text-5xl md:text-[74px] leading-[.92] uppercase tracking-tight mt-6">
-      Authentication<br>
-      <span class="text-paper [-webkit-text-stroke:3px_#111]">Hell</span>
-    </h1>
+        <h1 class="font-display text-4xl md:text-5xl leading-[.95] uppercase tracking-tight mt-5">
+          Authentication<br>
+          <span class="text-paper [-webkit-text-stroke:3px_#111]">Hell</span>
+        </h1>
 
-    <p class="font-medium text-lg text-muted max-w-[52ch] mt-6">
-      A tongue-in-cheek platformer about the pain of logging in. Run, jump, and dodge —
-      but the moment an enemy catches you the game freezes and makes you re-authenticate:
-      passkey, two-factor code, or password. Survival means proving who you are, over and over.
-    </p>
+        <p class="font-medium text-muted mt-5 max-w-[46ch]">
+          The security course every new hire has to clear before their accounts go live. Get up
+          to speed on how we protect logins here — passkeys, two-factor codes, passwords, and the
+          rest — then press play and work through it at your own pace.
+        </p>
 
-    <div class="flex flex-wrap items-center gap-3.5 mt-8">
-      <% if authenticated? %>
-        <%= link_to "Play now ▶", game_path, class: "ah-btn ah-btn--primary shadow-brut" %>
-      <% else %>
-        <%= link_to "Create account", new_registration_path, class: "ah-btn ah-btn--primary shadow-brut" %>
-        <%= link_to "Sign in", new_session_path, class: "ah-btn ah-btn--secondary shadow-brut" %>
+        <p class="font-mono text-xs text-muted mt-5">
+          <%= module_count %> modules · ~4 min total · Beginner · Self-paced
+        </p>
+
+        <div class="flex flex-wrap items-center gap-3 mt-6">
+          <% if authenticated? %>
+            <%= link_to "Start the course ▶", start_path, class: "ah-btn ah-btn--primary shadow-brut" %>
+          <% else %>
+            <%= link_to "Enroll for free", new_registration_path, class: "ah-btn ah-btn--primary shadow-brut" %>
+            <%= link_to "Sign in", new_session_path, class: "ah-btn ah-btn--secondary shadow-brut" %>
+          <% end %>
+        </div>
+      </div>
+
+      <%# Video-player preview — the "Onboarding Tape" poster; clicking it presses play. %>
+      <%= link_to start_path,
+            class: "group relative grid place-items-center min-h-[280px] bg-paper",
+            style: "background-image:radial-gradient(circle at 1px 1px,#1111110f 1px,transparent 0);background-size:22px 22px",
+            "aria-label": "Play Authentication 101" do %>
+        <div class="text-center px-6 pb-12">
+          <span class="inline-grid place-items-center size-20 rounded-full bg-passkey text-white border-[3px] border-ink shadow-brut text-3xl pl-1.5 transition-transform group-hover:scale-105">▶</span>
+          <p class="font-display text-lg uppercase tracking-tight mt-5">Authentication 101</p>
+          <p class="font-mono text-xs text-muted mt-1">Onboarding Tape · Lesson 1</p>
+        </div>
+
+        <%# Faux scrubber pinned to the bottom so the card reads as a video player. %>
+        <div class="absolute inset-x-0 bottom-0 bg-ink px-4 py-3 flex items-center gap-3">
+          <span class="text-white text-sm" aria-hidden="true">▶</span>
+          <div class="relative flex-1 h-1.5 rounded-full bg-white/25">
+            <div class="absolute inset-y-0 left-0 w-1/4 rounded-full bg-success"></div>
+            <div class="absolute top-1/2 left-1/4 size-3 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white border border-ink"></div>
+          </div>
+          <span class="font-mono text-[11px] text-white/80">0:48&nbsp;/&nbsp;3:20</span>
+        </div>
       <% end %>
     </div>
-  </div>
+  </section>
+
+  <%# === What you'll learn === %>
+  <section class="ah-card p-8 md:p-10">
+    <h2 class="font-display text-xl uppercase tracking-tight">What you’ll learn</h2>
+    <ul class="grid sm:grid-cols-2 gap-x-8 gap-y-3 mt-5">
+      <% [
+           "Sign in with a passkey instead of a password",
+           "Set up two-factor authentication that actually sticks",
+           "Pick a strong password — and recover it without the panic",
+           "Spot a suspicious sign-in before it becomes a problem"
+         ].each do |point| %>
+        <li class="flex gap-3">
+          <span class="flex-shrink-0 grid place-items-center size-5 mt-0.5 rounded-[2px] bg-success text-white border-2 border-ink text-xs">✓</span>
+          <span class="font-medium text-ink"><%= point %></span>
+        </li>
+      <% end %>
+    </ul>
+  </section>
+
+  <%# === Course content (curriculum) — mirrors the in-game "Authentication 101" playlist === %>
+  <section class="ah-card overflow-hidden">
+    <div class="flex items-baseline justify-between gap-4 px-6 md:px-8 py-5 border-b-[3px] border-ink bg-paper">
+      <h2 class="font-display text-xl uppercase tracking-tight">Course content</h2>
+      <p class="font-mono text-xs text-muted"><%= module_count %> modules · ~4 min</p>
+    </div>
+
+    <% levels.each do |level| %>
+      <div class="flex items-center gap-4 px-6 md:px-8 py-4 border-b-[3px] border-ink">
+        <div class="relative w-28 aspect-video flex-shrink-0 grid place-items-center border-[3px] border-ink rounded-[2px] bg-paper">
+          <span class="text-2xl" aria-hidden="true"><%= level.emoji %></span>
+          <span class="absolute bottom-0.5 right-0.5 font-mono text-[10px] bg-ink text-white px-1 rounded-[2px]"><%= durations[level.number] || "3:20" %></span>
+        </div>
+        <div class="min-w-0">
+          <p class="font-display text-sm uppercase tracking-tight">Module <%= level.number + 1 %> · <%= level.name %></p>
+          <p class="font-mono text-xs text-muted mt-1">Video lesson</p>
+        </div>
+      </div>
+    <% end %>
+
+    <% coming_soon.each do |title| %>
+      <div class="flex items-center gap-4 px-6 md:px-8 py-4 border-b-[3px] border-dashed border-locked-ink last:border-b-0 bg-locked">
+        <div class="w-28 aspect-video flex-shrink-0 grid place-items-center border-[3px] border-dashed border-locked-ink rounded-[2px] bg-locked">
+          <span class="text-xl opacity-60" aria-hidden="true">🔒</span>
+        </div>
+        <div class="min-w-0">
+          <p class="font-display text-sm uppercase tracking-tight text-locked-ink"><%= title %></p>
+          <p class="font-mono text-xs text-locked-ink mt-1">Coming soon</p>
+        </div>
+      </div>
+    <% end %>
+  </section>
 
   <%# RubyConf 2026 talk callout, fronted by the talk banner. %>
-  <div class="border-t-[3px] border-ink">
+  <section class="ah-card overflow-hidden">
     <%= image_tag "rubyconf-2026-banner.png",
           alt: "RubyConf 2026 — Welcome to Authentication Hell, a talk by Mike Dalton",
           class: "block w-full" %>
-    <div class="px-6 md:px-12 py-5 border-t-[3px] border-ink bg-card">
+    <div class="px-6 md:px-10 py-5 border-t-[3px] border-ink bg-card">
+      <p class="ah-label text-muted mb-2">Course notes</p>
       <p class="font-medium text-ink">
         This game is being built in the open as part of
         <span class="font-bold">“Welcome to Authentication Hell”</span>, a talk by Mike Dalton at
@@ -43,10 +133,10 @@
         Thursday, July 16, 2026 · 11:15&nbsp;am · Red Rock Casino Resort, Las Vegas, Nevada
       </p>
     </div>
-  </div>
-</section>
+  </section>
 
-<div class="mx-auto w-full max-w-4xl mt-4 text-center">
-  <%= link_to "Acknowledgements", acknowledgements_path,
-        class: "font-semibold text-sm text-muted underline underline-offset-2 hover:text-ink" %>
+  <p class="text-center">
+    <%= link_to "Course credits", acknowledgements_path,
+          class: "font-semibold text-sm text-muted underline underline-offset-2 hover:text-ink" %>
+  </p>
 </div>
