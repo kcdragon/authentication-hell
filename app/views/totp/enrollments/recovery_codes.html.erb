@@ -11,6 +11,6 @@
   </div>
 
   <div class="mt-6">
-    <%= link_to "Done", totp_settings_path, class: "ah-btn ah-btn--primary shadow-brut" %>
+    <%= link_to "Done", Current.user.onboarding_complete? ? totp_settings_path : onboarding_path, class: "ah-btn ah-btn--primary shadow-brut" %>
   </div>
 </div>

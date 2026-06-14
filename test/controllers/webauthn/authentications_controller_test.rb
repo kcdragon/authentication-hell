@@ -11,7 +11,8 @@ class Webauthn::AuthenticationsControllerTest < ActionDispatch::IntegrationTest
       user_handle: @user.webauthn_id)
 
     assert_response :success
-    assert_equal game_url, response.parsed_body["redirect"]
+    # A passkey-only account still lacks a password and TOTP, so it's nudged to finish setup.
+    assert_equal onboarding_url, response.parsed_body["redirect"]
     assert cookies[:session_id].present?
   end
 

@@ -1,4 +1,4 @@
-<div class="mx-auto max-w-xl w-full ah-card p-7">
+<div class="mx-auto max-w-2xl w-full ah-card p-7">
   <span class="ah-badge ah-badge--totp text-white">2FA Setup</span>
   <h1 class="text-[28px] mt-3">Set up two-factor authentication</h1>
 
@@ -11,10 +11,10 @@
     <%= totp_qr_code(@provisioning_uri) %>
   </div>
 
-  <p class="mt-4 font-medium text-sm text-muted">
-    Can't scan? Enter this secret manually:
-    <code class="font-mono font-bold border-2 border-ink rounded-[3px] bg-paper px-2 py-1 break-all"><%= @secret %></code>
-  </p>
+  <div class="mt-4">
+    <p class="font-medium text-sm text-muted">Can't scan? Enter this secret manually:</p>
+    <code class="inline-block mt-2 font-mono font-bold text-sm border-2 border-ink rounded-[3px] bg-paper px-2.5 py-1.5 tracking-wider whitespace-nowrap"><%= @secret %></code>
+  </div>
 
   <%# turbo: false — on success this submits to a full-page render of the one-time
       recovery codes (not a redirect), which Turbo rejects; a normal navigation also
@@ -27,7 +27,7 @@
 
     <div class="flex items-center gap-5 pt-1">
       <%= form.submit "Confirm and enable", class: "ah-btn ah-btn--primary shadow-brut cursor-pointer", style: "background: var(--color-totp)" %>
-      <%= link_to "Cancel", totp_settings_path, class: "font-semibold text-sm text-ink underline underline-offset-[3px] decoration-2 hover:no-underline" %>
+      <%= link_to "Cancel", Current.user.onboarding_complete? ? totp_settings_path : onboarding_path, class: "font-semibold text-sm text-ink underline underline-offset-[3px] decoration-2 hover:no-underline" %>
     </div>
   <% end %>
 </div>

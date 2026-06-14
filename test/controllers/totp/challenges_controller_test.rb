@@ -4,6 +4,8 @@ class Totp::ChallengesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:one)
     @secret = enable_2fa_for(@user)
+    # Complete the credential stack so passing the challenge lands in the game, not onboarding.
+    enable_passkey_for(@user)
   end
 
   def start_pending_login

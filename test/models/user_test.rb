@@ -89,6 +89,25 @@ class UserTest < ActiveSupport::TestCase
     assert user.second_factor?
   end
 
+  test "onboarding_complete? requires a password, TOTP, and a passkey" do
+    user = users(:one) # password fixture
+    assert_not user.onboarding_complete?
+
+    user.enable_totp!(ROTP::Base32.random)
+    assert_not user.onboarding_complete?
+
+    user.webauthn_credentials.create!(external_id: "ext", public_key: "key", nickname: "Phone")
+    assert user.onboarding_complete?
+  end
+
+  test "onboarding_complete? is false for a passwordless account with the other factors" do
+    user = users(:passwordless)
+    user.webauthn_credentials.create!(external_id: "ext", public_key: "key", nickname: "Phone")
+    user.enable_totp!(ROTP::Base32.random)
+
+    assert_not user.onboarding_complete?
+  end
+
   test "confirmed? reflects confirmed_at" do
     assert users(:one).confirmed?
     assert_not users(:unconfirmed).confirmed?

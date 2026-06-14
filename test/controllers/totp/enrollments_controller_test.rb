@@ -18,7 +18,7 @@ class Totp::EnrollmentsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@user)
 
     get new_totp_enrollment_path
-    secret = css_select("code.break-all").first.text.strip
+    secret = css_select("code").first.text.strip
     post totp_enrollment_path, params: { code: ROTP::TOTP.new(secret).now }
 
     assert_response :success
