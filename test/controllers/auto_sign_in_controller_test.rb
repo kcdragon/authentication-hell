@@ -6,7 +6,8 @@ class AutoSignInControllerTest < ActionDispatch::IntegrationTest
       in_environment("development") { get auto_sign_in_path }
     end
 
-    assert_redirected_to game_path
+    # No fixture user is fully set up, so the post-login nudge sends them to onboarding.
+    assert_redirected_to onboarding_path
     assert cookies[:session_id]
   end
 

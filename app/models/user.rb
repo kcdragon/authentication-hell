@@ -78,6 +78,10 @@ class User < ApplicationRecord
     totp_enabled? || webauthn_credentials.exists?
   end
 
+  def onboarding_complete?
+    password_digest.present? && totp_enabled? && webauthn_credentials.exists?
+  end
+
   def totp
     ROTP::TOTP.new(totp_secret, issuer: TOTP_ISSUER) if totp_secret.present?
   end

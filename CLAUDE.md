@@ -48,7 +48,7 @@ RuboCop and Brakeman are scoped to *our* code only: everything under `game/` is 
 - Tailwind compiles to `app/assets/builds/tailwind.css`; `bin/dev` runs `tailwindcss:watch` so edits to `app/assets/tailwind/` rebuild live. Don't hand-edit the built file.
 - The three `db/*_schema.rb` files (cable/cache/queue) are the Solid adapters' schemas — not the app schema. There is no `db/schema.rb` yet because no app migrations exist; one appears after the first `bin/rails generate model`.
 - For `has_secure_password`, uncomment `bcrypt` in the `Gemfile` first (it ships commented out).
-- Comments are fine where the code isn't self-explanatory — explain the *why*, not the *what*. Keep them short; don't restate the code or pad with detail.
+- Comments are sparse. Add one only where the code isn't self-explanatory, and explain the *why*, not the *what* — never restate the code. Put it on (or directly above) the line it describes, not at the top of a method describing something lower down. Keep it to a single sentence unless the issue is genuinely complicated.
 
 ### UI surface and visual conventions
 

@@ -7,6 +7,11 @@ Rails.application.routes.draw do
   resource :email_confirmation, only: %i[ new create show ], param: :token
   resources :passwords, param: :token
 
+  resource :onboarding, only: :show, controller: "onboarding"
+  namespace :onboarding do
+    resource :password, only: :create
+  end
+
   # Dev-only shortcut: signs in the first user. Returns 404 in every other environment.
   get "auto_sign_in" => "auto_sign_in#create", as: :auto_sign_in
 

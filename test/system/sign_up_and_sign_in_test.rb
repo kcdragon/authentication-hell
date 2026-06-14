@@ -30,12 +30,13 @@ class SignUpAndSignInTest < ApplicationSystemTestCase
     assert_text "Email confirmed"
     assert user.reload.confirmed?
 
-    # Now sign in succeeds and lands straight in the game.
+    # Now sign in succeeds and lands on the onboarding checklist (they only have a password).
     fill_in "Email", with: "newplayer@example.com"
     fill_in "Enter your password", with: "secretpassword"
     click_on "Sign in"
 
-    assert_current_path game_path
+    assert_current_path onboarding_path
+    assert_text "Secure your account"
 
     # The account menu is collapsed into a dropdown; open it to reach "Sign out".
     click_on "newplayer"

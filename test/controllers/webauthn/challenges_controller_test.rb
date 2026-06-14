@@ -4,6 +4,8 @@ class Webauthn::ChallengesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:two)
     @client = enable_passkey_for(@user)
+    # Complete the credential stack so passing the challenge lands in the game, not onboarding.
+    enable_2fa_for(@user)
   end
 
   def start_pending_login

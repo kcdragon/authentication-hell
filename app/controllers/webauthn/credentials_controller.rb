@@ -28,7 +28,7 @@ class Webauthn::CredentialsController < ApplicationController
 
     if Current.user
       store_credential(Current.user, webauthn_credential, params[:nickname])
-      render json: { redirect: webauthn_settings_path }
+      render json: { redirect: Current.user.onboarding_complete? ? webauthn_settings_path : onboarding_path }
     else
       complete_passwordless_registration(webauthn_credential)
     end

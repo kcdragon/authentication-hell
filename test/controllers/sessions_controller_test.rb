@@ -8,10 +8,11 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "create with valid credentials" do
+  # A no-2FA account skips the challenge but still lacks TOTP, so it lands on the checklist.
+  test "create with valid credentials nudges an incomplete account to onboarding" do
     post session_path, params: { email_address: @user.email_address, password: "password" }
 
-    assert_redirected_to game_path
+    assert_redirected_to onboarding_path
     assert cookies[:session_id]
   end
 

@@ -4,6 +4,7 @@ class Webauthn::CredentialsControllerTest < ActionDispatch::IntegrationTest
   setup { @user = users(:one) }
 
   test "a signed-in user can register a passkey" do
+    enable_2fa_for(@user) # already set up otherwise, so this completes onboarding → settings redirect
     sign_in_as @user
 
     assert_difference -> { @user.webauthn_credentials.count }, 1 do
@@ -13,6 +14,15 @@ class Webauthn::CredentialsControllerTest < ActionDispatch::IntegrationTest
     end
 
     assert_equal "My Laptop", @user.webauthn_credentials.last.nickname
+  end
+
+  test "registering a passkey mid-onboarding returns to the checklist" do
+    sign_in_as @user # password fixture, no TOTP yet — still incomplete after adding a passkey
+
+    response = register_passkey_over_http(nickname: "My Laptop")
+
+    assert_response :success
+    assert_equal onboarding_path, response.parsed_body["redirect"]
   end
 
   test "registration rejects a mismatched challenge" do
