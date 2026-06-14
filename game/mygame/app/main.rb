@@ -9,6 +9,7 @@ require "app/entities/enemies/password.rb"
 require "app/levels/level.rb"
 require "app/levels/00_tutorial.rb"
 require "app/levels/01_main.rb"
+require "app/levels/02_gauntlet.rb"
 
 module Main
   def tick(args)
