@@ -42,6 +42,10 @@ SCRUBBER_H     = 9
 CONTROLS_Y     = 16              # play/pause + timestamp row, within the bar band
 VIDEO_SECONDS  = 200             # fake runtime the timestamp counts toward (3:20)
 
+# The play/pause button hit box — the one wired transport control (clicking it
+# pauses/resumes). Geometry matches the glyph drawn in main.rb's draw_transport.
+PLAY_BUTTON = { x: SCRUBBER_X, y: CONTROLS_Y, w: 34, h: 34 }.freeze
+
 # Fonts (ttf, in mygame/fonts/ — converted from the site's self-hosted woff2).
 # Lowercase-kebab filenames (matching the site's woff2 names) so the case-
 # sensitive WASM asset lookup resolves cross-platform.
