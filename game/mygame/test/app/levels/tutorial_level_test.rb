@@ -73,6 +73,7 @@ class TutorialLevelTest < Minitest::Test
     assert_equal(-Enemy::WIDTH, enemy.x)     # enters just off the left edge
     assert_operator enemy.vx, :>, 0          # marching right
     assert_equal enemy.x, enemy.patrol_min_x # won't wander back past its entry
+    assert_equal SCREEN_W, enemy.patrol_max_x # bounded to the screen, can't escape right
   end
 
   def test_complete_once_the_combat_enemy_is_defeated
@@ -107,5 +108,9 @@ class TutorialLevelTest < Minitest::Test
 
   def test_number_is_zero
     assert_equal 0, @level.number
+  end
+
+  def test_world_fits_one_screen
+    assert_equal SCREEN_W, @level.world_w
   end
 end

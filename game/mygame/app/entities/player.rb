@@ -90,7 +90,7 @@ class Player
       @facing = :south
     end
 
-    @x = @x.clamp(0, WORLD_W - WIDTH)
+    @x = @x.clamp(0, args.state.level.world_w - WIDTH)
 
     # Left-click swings the keyboard; it points whichever way @swing_dir already
     # holds (the last side the player faced).

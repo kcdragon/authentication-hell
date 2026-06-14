@@ -87,7 +87,7 @@ module Main
     # Horizontal camera: keep the player centered, clamped to the world edges.
     args.state.camera_x =
       (args.state.player.x + args.state.player.w / 2 - SCREEN_W / 2)
-        .clamp(0, WORLD_W - SCREEN_W)
+        .clamp(0, args.state.level.world_w - SCREEN_W)
 
     # Per-tick level scripting (e.g. the tutorial spawns its enemy once the player
     # has jumped onto the platform). Reads the camera set just above.
@@ -216,15 +216,23 @@ module Main
     end
   end
 
-  # Fraction of the world the player has crossed (0..1) — drives the scrubber fill
-  # and the faux timestamp so "playback progress" tracks how far they've advanced.
+  # Fraction of the current level the player has crossed (0..1) — drives the
+  # scrubber fill and the faux timestamp, both measured against the active level's
+  # width so a short stage (the tutorial) fills its own short "video."
   def progress(args)
-    (args.state.player.x.to_f / (WORLD_W - Player::WIDTH)).clamp(0.0, 1.0)
+    (args.state.player.x.to_f / (args.state.level.world_w - Player::WIDTH)).clamp(0.0, 1.0)
   end
 
-  # m:ss for a 0..1 fraction of the faux VIDEO_SECONDS runtime.
-  def timecode(fraction)
-    total = (fraction * VIDEO_SECONDS).round
+  # The faux runtime (seconds) of the current level's "video": VIDEO_SECONDS is the
+  # full world's length, scaled by the level's width so the timestamp's total tracks
+  # how big the level is (the one-screen tutorial reads as a much shorter clip).
+  def video_seconds(args)
+    VIDEO_SECONDS * args.state.level.world_w / WORLD_W
+  end
+
+  # m:ss for a number of seconds.
+  def timecode(seconds)
+    total = seconds.round
     format("%d:%02d", total / 60, total % 60)
   end
 
@@ -291,8 +299,9 @@ module Main
     end
 
     frac = progress(args)
+    runtime = video_seconds(args)
     args.outputs.labels << { x: bx + 48, y: by + 26,
-                             text: "#{timecode(frac)} / #{timecode(1.0)}",
+                             text: "#{timecode(frac * runtime)} / #{timecode(runtime)}",
                              size_px: 22, font: FONT_MONO,
                              r: TS_INK[0], g: TS_INK[1], b: TS_INK[2],
                              anchor_x: 0, anchor_y: 1 }
