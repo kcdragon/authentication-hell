@@ -73,29 +73,45 @@ class TutorialLevel < Level
 
   def next_level = MainLevel.new
 
-  # Large centered prompt, staged by progress: move, then jump onto the ledge, then
-  # touch the enemy (which players would normally avoid — see the wording), then heal
-  # and fight back with the keyboard.
+  # Bold, card-backed prompt, staged by progress: move, then jump onto the ledge,
+  # then touch the enemy (which players would normally avoid), then heal and fight
+  # back with the keyboard. Short copy so it reads at a glance.
   # (Never shown while locked — tick renders the shared challenge prompt then.)
   def draw(args)
     player = args.state.player
     lines = if !player.moved
-      [ "Use A/D or the arrow keys to move" ]
+      [ "Move with A / D or arrow keys" ]
     elsif !player.reached_platform
-      [ "Press space to jump up onto the platform" ]
+      [ "Press Space to jump onto the ledge" ]
     elsif @healed
-      [ "Now fight back! Left-click to swing your keyboard",
-        "<- Defeat the password enemy charging in from the left" ]
+      [ "Fight back — left-click to swing",
+        "← Defeat the enemy on the left" ]
     elsif args.state.collectables.any?(&:alive)
-      [ "Re-authenticated! Grab the heart to heal." ]
+      [ "Grab the heart to heal" ]
     else
-      [ "The * is a password enemy — normally you'd avoid enemies.",
-        "Just this once, run into it to learn the re-auth challenge ->" ]
+      [ "Run into the * enemy",
+        "to learn the re-auth →" ]
     end
 
+    line_h = 40
+    card_w = 680
+    card_h = 56 + lines.length * line_h
+    cx = 640
+    cy = 420
+    left = cx - card_w / 2
+    bottom = cy - card_h / 2
+    # Neo-brutalist card: hard offset ink shadow, ink border, white face.
+    args.outputs.solids << { x: left + 8, y: bottom - 8, w: card_w, h: card_h,
+                             r: INK[0], g: INK[1], b: INK[2] }
+    args.outputs.solids << { x: left, y: bottom, w: card_w, h: card_h,
+                             r: INK[0], g: INK[1], b: INK[2] }
+    args.outputs.solids << { x: left + 4, y: bottom + 4, w: card_w - 8, h: card_h - 8,
+                             r: CARD[0], g: CARD[1], b: CARD[2] }
+
+    top_y = cy + (lines.length - 1) * line_h / 2.0
     lines.each_with_index do |line, i|
-      args.outputs.labels << { x: 640, y: 420 - i * 44, text: line, size_px: 26,
-                               font: FONT_MONO, r: INK[0], g: INK[1], b: INK[2],
+      args.outputs.labels << { x: cx, y: top_y - i * line_h, text: line, size_px: 28,
+                               font: FONT_MONO_B, r: INK[0], g: INK[1], b: INK[2],
                                anchor_x: 0.5, anchor_y: 0.5 }
     end
   end

@@ -203,15 +203,6 @@ module Main
     draw_control_bar(args)
     draw_hearts(args)
 
-    args.outputs.labels << { x: 640,
-                             y: 680,
-                             text: "Hello, #{args.state.username}!",
-                             size_px: 26,
-                             font: FONT_MONO_B,
-                             r: INK[0], g: INK[1], b: INK[2],
-                             anchor_x: 0.5,
-                             anchor_y: 0.5 }
-
     if !args.state.started
       draw_poster(args)
     elsif args.state.player.game_over
@@ -364,12 +355,13 @@ module Main
   end
 
   # Paused mid-run: a quiet paper scrim over the play area + a centered play glyph,
-  # the video "stopped." Resume with Escape or the play button.
+  # the video "stopped." Resume with Escape or the play button. The pause screen is
+  # also where the keyboard controls live (no always-on hint during play).
   def draw_paused(args)
     args.outputs.solids << { x: 0, y: BAR_TOP, w: SCREEN_W, h: SCREEN_H - BAR_TOP,
                              r: PAPER[0], g: PAPER[1], b: PAPER[2], a: 90 }
     cx = 640
-    cy = 408
+    cy = 440
     args.outputs.solids << { x: cx - 16, y: cy + 26, x2: cx - 16, y2: cy - 26,
                              x3: cx + 30, y3: cy,
                              r: INK[0], g: INK[1], b: INK[2] }
@@ -381,6 +373,16 @@ module Main
                              size_px: 16, font: FONT_MONO,
                              r: MUTED[0], g: MUTED[1], b: MUTED[2],
                              anchor_x: 0.5, anchor_y: 0.5 }
+
+    controls = [ "A / D  or  ← →    move",
+                 "Space    jump",
+                 "Click    swing" ]
+    controls.each_with_index do |line, i|
+      args.outputs.labels << { x: cx, y: cy - 148 - i * 30, text: line,
+                               size_px: 16, font: FONT_MONO,
+                               r: MUTED[0], g: MUTED[1], b: MUTED[2],
+                               anchor_x: 0.5, anchor_y: 0.5 }
+    end
   end
 
   # Collision → "the tape buffers." The loud brutalist challenge card lives in HTML
