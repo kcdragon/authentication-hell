@@ -11,23 +11,21 @@
   <%# Canvas (1280x720, 16:9) and the "Up Next" playlist rail side by side. The
       rail sits to the right on wide screens and stacks under the canvas below lg. %>
   <div class="w-full max-w-[1660px] flex flex-col lg:flex-row gap-4 items-start">
-    <%# DragonRuby canvas plus the status/progress elements its loader looks up by
-        id. The container background is paper (not black) so the engine's letterbox
-        around the 16:9 frame blends into the page. %>
+    <%# The game runs in a same-origin <iframe> (/game/frame). DragonRuby's HTML5
+        engine sizes its render to fill its *document*, so giving it a frame whose
+        viewport is exactly 16:9 makes the game fill the frame with no letterbox —
+        the bare canvas on a shared page can't do this (the engine would fill the
+        whole document and letterbox inside it). Same-origin, so the frame's loader
+        + the game's /games/* and /play/me fetches carry the session cookie as
+        before; the toast/playlist/nav chrome stays here on the parent. The 16:9
+        box scales with the column width via aspect-ratio. %>
     <div class="flex-1 min-w-0 w-full max-w-[1280px]">
-      <div class="emscripten_border bg-paper" id="borderdiv">
-        <canvas
-          class="emscripten block w-full"
-          style="aspect-ratio: 16 / 9;"
-          id="canvas"
-          oncontextmenu="event.preventDefault()"
-          tabindex="-1"></canvas>
-      </div>
-
-      <textarea style="display: none;" id="output" rows="8"></textarea>
-      <div class="emscripten text-center text-muted text-sm mt-2" id="status"></div>
-      <div class="emscripten text-center" id="progressdiv">
-        <progress value="0" max="100" id="progress"></progress>
+      <div class="w-full bg-black" style="aspect-ratio: 16 / 9;">
+        <iframe
+          src="<%= game_frame_path %>"
+          title="Authentication Hell"
+          class="block w-full h-full border-0"
+          allow="autoplay; fullscreen; gamepad"></iframe>
       </div>
     </div>
 
@@ -45,18 +43,12 @@
   <%= turbo_stream_from Current.user, :toasts %>
   <div id="toasts" class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2"></div>
 
-  <%# Resolved to <bundle path>/dragonruby-html5-loader.js via the layout's <base href>. %>
-  <script src="dragonruby-html5-loader.js"></script>
-
-  <%# This layout deliberately omits the app-wide importmap (so the bundle-path
-      <base href> can't rewrite the DragonRuby loader's bare asset paths), which
-      also means no Stimulus boot. So declare a page-scoped import map of the few
-      modules this page needs, pinned to absolute, digested asset URLs (absolute
-      so the base href leaves them alone): Turbo for the toast stream, plus
-      Stimulus and the passkey collision controller (which reuses the shared
-      lib/webauthn_ceremony_controller and @github/webauthn-json). Then start
-      Turbo and a minimal Stimulus app with just that one controller registered —
-      it auto-connects to the toast Turbo Streams appends after load. %>
+  <%# The game canvas + its loader live in the <iframe> above; this page only needs
+      the chrome's JS. The game_page layout omits the app-wide importmap, so declare
+      a page-scoped one (absolute, digested asset URLs): Turbo for the toast/playlist
+      streams, plus Stimulus and the passkey collision + dropdown controllers. Then
+      start Turbo and a minimal Stimulus app — the passkey controller auto-connects
+      to the challenge toast Turbo appends on collision. %>
   <script type="importmap">
     {
       "imports": {

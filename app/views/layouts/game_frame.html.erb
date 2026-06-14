@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Authentication Hell — Game</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%# Bare relative asset paths in the DragonRuby loader resolve against the
+        static bundle. No importmap here — nothing else runs in this frame. %>
+    <base href="<%= game_assets_path %>">
+
+    <%# This document IS the iframe contents: make it edge-to-edge and let the
+        engine fill it. The parent sizes the iframe to 16:9, so the engine's
+        FILL_DOCUMENT render matches the frame exactly with no letterbox. %>
+    <style>
+      html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; }
+      .emscripten_border { border: 0; }
+      canvas.emscripten { display: block; border: 0; background: #000; }
+    </style>
+  </head>
+
+  <%# DragonRuby's loader routes canvas clicks through getElementById("toplevel"). %>
+  <body id="toplevel">
+    <%= yield %>
+  </body>
+</html>

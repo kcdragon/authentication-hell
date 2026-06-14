@@ -1,0 +1,19 @@
+<%# Bare DragonRuby canvas + the status/progress elements its loader looks up by
+    id. Rendered inside the 16:9 <iframe> on /game so the engine fills the frame
+    with no letterbox. The toast/playlist/nav chrome all live on the parent page. %>
+<div class="emscripten_border" id="borderdiv">
+  <canvas
+    class="emscripten"
+    id="canvas"
+    oncontextmenu="event.preventDefault()"
+    tabindex="-1"></canvas>
+</div>
+
+<textarea style="display: none;" id="output" rows="8"></textarea>
+<div style="display: none;" id="status"></div>
+<div style="display: none;" id="progressdiv">
+  <progress value="0" max="100" id="progress"></progress>
+</div>
+
+<%# Resolved to <bundle path>/dragonruby-html5-loader.js via the layout's <base href>. %>
+<script src="dragonruby-html5-loader.js"></script>
