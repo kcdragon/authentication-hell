@@ -25,7 +25,9 @@
           src="<%= game_frame_path %>"
           title="Authentication Hell"
           class="block w-full h-full border-0"
-          allow="autoplay; fullscreen; gamepad"></iframe>
+          allow="autoplay; fullscreen; gamepad"
+          data-controller="game-frame"
+          data-game-frame-toasts-value="toasts"></iframe>
       </div>
     </div>
 
@@ -46,9 +48,10 @@
   <%# The game canvas + its loader live in the <iframe> above; this page only needs
       the chrome's JS. The game_page layout omits the app-wide importmap, so declare
       a page-scoped one (absolute, digested asset URLs): Turbo for the toast/playlist
-      streams, plus Stimulus and the passkey collision + dropdown controllers. Then
-      start Turbo and a minimal Stimulus app — the passkey controller auto-connects
-      to the challenge toast Turbo appends on collision. %>
+      streams, plus Stimulus and the passkey collision, dropdown, and game-frame
+      controllers. Then start Turbo and a minimal Stimulus app — the passkey
+      controller auto-connects to the challenge toast Turbo appends on collision,
+      and game-frame returns keyboard focus to the iframe once a toast is resolved. %>
   <script type="importmap">
     {
       "imports": {
@@ -57,7 +60,8 @@
         "@github/webauthn-json": "<%= asset_path("@github--webauthn-json.js") %>",
         "lib/webauthn_ceremony_controller": "<%= asset_path("lib/webauthn_ceremony_controller.js") %>",
         "controllers/games_passkey_challenge_controller": "<%= asset_path("controllers/games_passkey_challenge_controller.js") %>",
-        "controllers/dropdown_controller": "<%= asset_path("controllers/dropdown_controller.js") %>"
+        "controllers/dropdown_controller": "<%= asset_path("controllers/dropdown_controller.js") %>",
+        "controllers/game_frame_controller": "<%= asset_path("controllers/game_frame_controller.js") %>"
       }
     }
   </script>
@@ -66,9 +70,11 @@
     import { Application } from "@hotwired/stimulus"
     import GamesPasskeyChallengeController from "controllers/games_passkey_challenge_controller"
     import DropdownController from "controllers/dropdown_controller"
+    import GameFrameController from "controllers/game_frame_controller"
 
     const application = Application.start()
     application.register("games-passkey-challenge", GamesPasskeyChallengeController)
     application.register("dropdown", DropdownController)
+    application.register("game-frame", GameFrameController)
   </script>
 </div>
