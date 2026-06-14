@@ -1,13 +1,6 @@
 <% content_for :title, "Authentication Hell — Play" %>
 
 <div class="w-full flex flex-col items-center gap-4 mt-8 px-5">
-  <div class="w-full max-w-[1280px] flex items-center justify-end">
-    <%# turbo: false forces full navigations: this page sets a <base href> to the
-        game bundle path and only loads Turbo for the toast stream, so let the
-        browser handle the cross-layout link to the standard app pages. %>
-    <%= render "shared/navigation", turbo: false %>
-  </div>
-
   <%# Canvas (1280x720, 16:9) and the "Up Next" playlist rail side by side. The
       rail sits to the right on wide screens and stacks under the canvas below lg. %>
   <div class="w-full max-w-[1660px] flex flex-col lg:flex-row gap-4 items-start">
