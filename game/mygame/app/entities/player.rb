@@ -18,14 +18,27 @@ class Player
   KEYBOARD_SWING_REACH = 40  # extra outward thrust at the swing's apex
   SWING_TICKS = 12           # swing duration = cooldown
 
-  # The character art fills only a sub-rectangle of each 64x64 sprite frame (the
-  # rest is transparent padding); SPRITE_CROP_* bounds it (cols 24..39, rows
-  # ending at the feet, measured bottom-up) so the crop can stand on the ground
-  # instead of floating on its padding.
-  SPRITE_CROP_X = 24
-  SPRITE_CROP_Y = 17
-  SPRITE_CROP_W = 16
-  SPRITE_CROP_H = 31
+  # Brutalist "new-hire" figure, drawn from solid primitives inside the 64x96
+  # hitbox (feet at @y): INK legs, an INK-bordered INDIGO torso (the platform card
+  # treatment, so it sits in the same visual language), then a tan neck and head
+  # with a hair band and two eyes that slide toward @facing. Geometry tuned here so
+  # render stays readable; all dimensions are px within the hitbox, feet-up.
+  BORDER     = 3
+  LEG_H      = 14   # short INK leg blocks at the base
+  LEG_W      = 18
+  TORSO_H    = 46   # body card height, stacked above the legs
+  NECK_H     = 4    # skin strip between torso and head
+  NECK_W     = 12
+  HEAD_H     = 30   # head block, stacked above the neck
+  HEAD_INSET = 14   # head is narrower than the torso by this much each side
+  HAIR_H     = 8    # hair band across the top of the face
+  EYE        = 4    # small square eyes
+  EYE_GAP    = 8    # space between the eyes
+  FACE_SHIFT = 5    # how far the eyes slide toward @facing (0 when idle/:south)
+
+  # Figure colors beyond the shared palette: a warm tan face and dark-brown hair.
+  SKIN = [ 222, 184, 135 ]
+  HAIR = [ 74, 52, 36 ]
 
   attr_accessor :x, :y, :w, :h, :vy, :grounded, :facing,
                 :locked, :colliding, :lock_confirmed, :pending_challenge,
@@ -135,31 +148,60 @@ class Player
     end
   end
 
-  # Draw just the character (cropped from its padded frame) hitbox-tall and
-  # centered over the 64x96 hitbox, anchored at y so its feet meet the ground.
-  # Facing follows movement, south (facing the camera) when idle. World x is
-  # shifted by the camera offset to screen space.
+  # Draw the figure as stacked brutalist primitives within the 64x96 hitbox: two
+  # INK legs, an INK-bordered INDIGO torso (platform card treatment), a tan neck,
+  # then a tan head with a dark hair band and two eyes that slide toward @facing as
+  # the directional cue (centered when idle/:south). World x is shifted by the
+  # camera offset to screen space.
   def render(args, camera_x = 0)
-    sprite_h = @h
-    sprite_w = sprite_h * SPRITE_CROP_W / SPRITE_CROP_H
-    args.outputs.sprites << { x: @x - camera_x + (@w - sprite_w) / 2,
-                              y: @y,
-                              w: sprite_w,
-                              h: sprite_h,
-                              source_x: SPRITE_CROP_X,
-                              source_y: SPRITE_CROP_Y,
-                              source_w: SPRITE_CROP_W,
-                              source_h: SPRITE_CROP_H,
-                              path: "sprites/player/#{@facing}.png" }
+    sx = @x - camera_x
 
-    # The keyboard slab (solid primitives, matching the enemies' style): a dark
-    # body with a lighter top edge so it reads as a keyboard. Tucked in hand when
-    # idle, thrust out during a swing — keyboard_hitbox handles both.
+    leg_y   = @y
+    torso_y = leg_y + LEG_H
+    neck_y  = torso_y + TORSO_H
+    head_y  = neck_y + NECK_H
+    leg_gap = @w - 2 * LEG_W - 16
+    args.outputs.solids << { x: sx + 8, y: leg_y, w: LEG_W, h: LEG_H, r: INK[0], g: INK[1], b: INK[2] }
+    args.outputs.solids << { x: sx + 8 + LEG_W + leg_gap, y: leg_y, w: LEG_W, h: LEG_H,
+                             r: INK[0], g: INK[1], b: INK[2] }
+
+    card(args, sx, torso_y, @w, TORSO_H)
+    args.outputs.solids << { x: sx + (@w - NECK_W) / 2, y: neck_y, w: NECK_W, h: NECK_H,
+                             r: SKIN[0], g: SKIN[1], b: SKIN[2] }
+
+    head_x = sx + HEAD_INSET
+    head_w = @w - 2 * HEAD_INSET
+    card(args, head_x, head_y, head_w, HEAD_H, SKIN)
+
+    # Hair band across the top of the face, inside the ink border.
+    args.outputs.solids << { x: head_x + BORDER, y: head_y + HEAD_H - BORDER - HAIR_H,
+                             w: head_w - 2 * BORDER, h: HAIR_H, r: HAIR[0], g: HAIR[1], b: HAIR[2] }
+
+    # Two eyes that slide toward @facing (centered when idle), the directional cue.
+    shift = @facing == :west ? -FACE_SHIFT : (@facing == :east ? FACE_SHIFT : 0)
+    eye_cx = sx + @w / 2
+    [ eye_cx - EYE_GAP / 2 - EYE, eye_cx + EYE_GAP / 2 ].each do |ex|
+      args.outputs.solids << { x: ex + shift, y: head_y + 10, w: EYE, h: EYE,
+                               r: INK[0], g: INK[1], b: INK[2] }
+    end
+
+    # The keyboard slab (palette primitives): an INK body with a light CARD "keys"
+    # strip on top so it reads as a keyboard. Tucked in hand when idle, thrust out
+    # during a swing — keyboard_hitbox handles both.
     kb = keyboard_hitbox
     args.outputs.solids << { x: kb[:x] - camera_x, y: kb[:y], w: kb[:w], h: kb[:h],
-                             r: 60, g: 60, b: 70 }
+                             r: INK[0], g: INK[1], b: INK[2] }
     args.outputs.solids << { x: kb[:x] - camera_x, y: kb[:y] + kb[:h] - 4,
-                             w: kb[:w], h: 4, r: 150, g: 150, b: 160 }
+                             w: kb[:w], h: 4, r: CARD[0], g: CARD[1], b: CARD[2] }
+  end
+
+  # A brutalist card like the platforms (entities/platform.rb): an INK rect with a
+  # fill inset by BORDER (INDIGO by default; the head passes SKIN). Coords are
+  # already screen-space.
+  def card(args, x, y, w, h, fill = INDIGO)
+    args.outputs.solids << { x: x, y: y, w: w, h: h, r: INK[0], g: INK[1], b: INK[2] }
+    args.outputs.solids << { x: x + BORDER, y: y + BORDER, w: w - 2 * BORDER, h: h - 2 * BORDER,
+                             r: fill[0], g: fill[1], b: fill[2] }
   end
 
   # DragonRuby exports args.state for its dev tools; a plain object without a

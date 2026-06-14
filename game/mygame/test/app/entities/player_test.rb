@@ -202,11 +202,16 @@ class PlayerTest < Minitest::Test
 
   # --- rendering & serialization ---
 
-  def test_render_emits_the_player_sprite_and_keyboard_solids
+  def test_render_emits_the_figure_and_keyboard_as_palette_solids
     args = build_args
     @player.render(args, 0)
-    assert_equal 1, args.outputs.sprites.length
-    assert_equal 2, args.outputs.solids.length # keyboard body + lighter top edge
+    assert_equal 0, args.outputs.sprites.length # no PNG art — the figure is primitives
+    # 2 legs + torso card (ink + indigo) + neck + head card (ink + skin) + hair +
+    # 2 eyes + keyboard body + keyboard key strip.
+    assert_equal 12, args.outputs.solids.length
+    # The keyboard's top strip is the light CARD "keys" face.
+    keys = args.outputs.solids.last
+    assert_equal CARD, [ keys[:r], keys[:g], keys[:b] ]
   end
 
   def test_serialize_includes_swing_state_and_core_fields
