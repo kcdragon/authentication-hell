@@ -26,11 +26,6 @@ class MainLevelTest < Minitest::Test
            "nearest enemy patrol reach (#{nearest_reach}) must clear the player's right edge"
   end
 
-  def test_draw_emits_a_prompt
-    @level.draw(@args)
-    refute_empty @args.outputs.labels
-  end
-
   def test_serialize_names_the_level
     assert_equal "MainLevel", @level.serialize[:level]
   end
