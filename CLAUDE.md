@@ -40,7 +40,7 @@ bin/ci                 # run the full CI pipeline locally (config/ci.rb)
 ### CI
 `config/ci.rb` (run via `bin/ci`) is the source of truth for what must pass: setup, RuboCop, bundler-audit, importmap audit, Brakeman, `bin/rails test`, and seed replant. `.github/workflows/ci.yml` runs the same checks plus system tests.
 
-**Run `bin/ci` after implementing any change** — it's the fastest way to catch what the GitHub workflow will, and it must pass before pushing.
+**`bin/ci` is the fastest way to catch locally what the GitHub workflow checks**, so it's worth running after implementing a change — but you don't need to run the full suite before opening a PR. The GitHub Actions workflow runs the same pipeline on every PR and will catch any failures.
 
 RuboCop and Brakeman are scoped to *our* code only: everything under `game/` is excluded except `game/mygame/`, and within that, only `main.rb` is linted (`repl.rb` is DragonRuby's vendored console scratch file). See `.rubocop.yml` (`AllCops/Exclude`) and `config/brakeman.yml` (`skip_files`). If you add a new hand-written file under `game/mygame/`, it will be linted by default — that's intended.
 
