@@ -26,12 +26,11 @@ require_relative "../app/levels/03_gauntlet"
 # Minimal stand-ins for DragonRuby's `args`. The entities only read a handful of
 # input/state fields and append to output arrays, so plain Structs suffice. Use
 # Structs (not Hashes) because the engine's hashes quack like attr_accessor —
-# code reads `mouse.x`, not `mouse[:x]` — which plain Ruby hashes don't.
+# code reads `keyboard.left`, not `keyboard[:left]` — which plain Ruby hashes don't.
 module GameTest
-  Mouse = Struct.new(:click, :x)
   KeyDown = Struct.new(:space)
   Keyboard = Struct.new(:left, :right, :key_down)
-  Inputs = Struct.new(:mouse, :keyboard)
+  Inputs = Struct.new(:keyboard)
   # captions_on gates the closed caption a level draws (via Caption) in its #draw path.
   State = Struct.new(:camera_x, :platforms, :enemies, :collectables, :player, :level,
                      :tick_count, :captions_on)
@@ -42,12 +41,11 @@ module GameTest
   # defaults to MainLevel (the full-width world) so the player clamps to WORLD_W
   # like it does in the running game; pass a TutorialLevel to exercise the
   # one-screen bound.
-  def build_args(mouse_click: false, mouse_x: 0, left: false, right: false,
+  def build_args(left: false, right: false,
                  space: false, camera_x: 0, platforms: [], enemies: nil,
                  collectables: nil, player: nil, level: MainLevel.new, tick_count: 0)
     Args.new(
-      Inputs.new(Mouse.new(mouse_click, mouse_x),
-                 Keyboard.new(left, right, KeyDown.new(space))),
+      Inputs.new(Keyboard.new(left, right, KeyDown.new(space))),
       State.new(camera_x, platforms, enemies, collectables, player, level, tick_count),
       Outputs.new([], [], [])
     )

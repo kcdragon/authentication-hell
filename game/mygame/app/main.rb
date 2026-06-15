@@ -97,7 +97,7 @@ module Main
   # (the only wired transport control). Disallowed while the run is over or buffering
   # a re-auth: there's nothing to pause there, and pausing a lock would stall the
   # unlock poll. Returns whether it toggled this tick so the caller can skip the world
-  # update — the same click then won't also swing the keyboard.
+  # update on the frame the player clicks pause.
   def handle_pause_input(args)
     return false if args.state.player.game_over || args.state.player.locked
 
@@ -109,7 +109,7 @@ module Main
 
   # Toggle closed-captions on a click of the CC button. Wired in every state (it's
   # player chrome, not gameplay) and returns whether it consumed the click, so the
-  # same click won't also press play on the poster or swing the keyboard mid-run.
+  # same click won't also press play on the poster.
   def handle_caption_input(args)
     hit = args.inputs.mouse.click && args.inputs.mouse.point.inside_rect?(CC_BUTTON)
     args.state.captions_on = !args.state.captions_on if hit
@@ -135,25 +135,10 @@ module Main
     # locked mid re-auth — only the player freezes — and stops only on game-over.
     args.state.enemies.each { |enemy| enemy.update if enemy.alive } unless args.state.player.game_over
 
-    # Keyboard melee: while the player is mid-swing, any alive enemy overlapping
-    # the keyboard hitbox is defeated outright — no heart loss, no re-auth. Runs
-    # before the body-collision loop, so a defeated enemy (alive=false) is already
-    # skipped there and can't also trigger the lock flow this tick.
-    if args.state.level.melee? &&
-       args.state.player.swing_ticks_left.positive? &&
-       !args.state.player.locked && !args.state.player.game_over
-      hitbox = args.state.player.keyboard_hitbox
-      args.state.enemies.each do |enemy|
-        next unless enemy.alive
-
-        enemy.alive = false if args.geometry.intersect_rect?(hitbox, enemy.hitbox)
-      end
-    end
-
     # Fire once on contact (the transition, not every overlapping frame). Coming
     # down on top of an enemy stomps it — defeated outright, no heart loss, and
-    # the player bounces up (gated on melee?, like the keyboard, so the tutorial's
-    # re-auth lesson still forces the challenge). Otherwise it's a side/ground hit:
+    # the player bounces up (gated on melee?, so the tutorial's re-auth lesson
+    # still forces the challenge). Otherwise it's a side/ground hit:
     # dock a heart, retire the enemy, then either game-over (last heart) or kick
     # off that enemy's auth flow and freeze the player.
     args.state.enemies.each do |enemy|
@@ -495,8 +480,7 @@ module Main
                              anchor_x: 0.5, anchor_y: 0.5 }
 
     controls = [ "A / D  or  ← →    move",
-                 "Space    jump",
-                 "Click    swing" ]
+                 "Space    jump" ]
     controls.each_with_index do |line, i|
       args.outputs.labels << { x: cx, y: cy - 148 - i * 30, text: line,
                                size_px: 16, font: FONT_MONO,

@@ -80,7 +80,7 @@ class TutorialLevelTest < Minitest::Test
     @level.setup(@args)
     @level.on_collect(@args)
     @level.update(@args)                     # spawns the combat enemy
-    @args.state.enemies.first.alive = false  # player swung the keyboard at it
+    @args.state.enemies.first.alive = false  # player stomped it
     @level.update(@args)
 
     assert @level.complete?
