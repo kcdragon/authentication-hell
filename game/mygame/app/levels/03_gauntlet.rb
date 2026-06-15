@@ -46,8 +46,8 @@ class GauntletLevel < Level
 
   def next_level = GauntletLevel.new
 
-  # Prompt the platform route; HintCard fades it after a few seconds.
-  def draw(args) = HintCard.new(args, [ "Hop the platforms —", "the floor is crawling" ]).show
+  # Prompt the platform route as the top closed caption.
+  def draw(args) = Caption.new(args, [ "Hop the platforms —", "the floor is crawling" ]).draw
 
   private
 

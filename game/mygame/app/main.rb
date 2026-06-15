@@ -1,5 +1,5 @@
 require "app/constants.rb"
-require "app/hint_card.rb"
+require "app/caption.rb"
 require "app/entities/player.rb"
 require "app/entities/enemy.rb"
 require "app/entities/platform.rb"
@@ -27,7 +27,7 @@ module Main
     # real starting level arrives from /play/me below and swaps in before play
     # begins (the poster is gated on that response).
     args.state.start_level ||= 0
-    args.state.captions_on ||= false
+    args.state.captions_on = true if args.state.captions_on.nil?
     unless args.state.level
       args.state.level = TutorialLevel.new
       args.state.level.setup(args)
@@ -261,7 +261,8 @@ module Main
     elsif args.state.paused
       draw_paused(args)
     else
-      # Each level draws its own prompt (via the shared, self-fading HintCard).
+      # Each level draws its own prompt as the top closed caption (only here, during
+      # live play, where a prompt belongs).
       args.state.level.draw(args)
     end
   end
@@ -298,7 +299,6 @@ module Main
 
     draw_scrubber(args)
     draw_transport(args)
-    draw_captions(args)
   end
 
   # The scrubber: a track, a cosmetic "buffered" bar running ahead of progress (so
@@ -371,18 +371,6 @@ module Main
                              size_px: 20, font: FONT_MONO,
                              r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2],
                              anchor_x: 1, anchor_y: 1 }
-  end
-
-  # The closed-captions line, shown only when CC is toggled on: a single centered
-  # mono line in the control bar's free strip (above the scrubber, below the lip).
-  # Static placeholder copy for now — see CAPTION_TEXT.
-  def draw_captions(args)
-    return unless args.state.captions_on
-
-    args.outputs.labels << { x: SCREEN_W / 2, y: 84, text: CAPTION_TEXT,
-                             size_px: 16, font: FONT_MONO,
-                             r: TS_INK[0], g: TS_INK[1], b: TS_INK[2],
-                             anchor_x: 0.5, anchor_y: 0.5 }
   end
 
   # Three heart slots in the top-left: the full sprite for hearts the player still
@@ -634,7 +622,6 @@ module Main
     report_level_complete(args, args.state.level.number)
     args.state.level = args.state.level.next_level
     args.state.level.setup(args)
-    args.state.hint_key = nil # let the new level's hint show fresh
     report_now_playing(args, args.state.level.number)
   end
 
@@ -647,7 +634,6 @@ module Main
     args.state.level = Level.build(args.state.start_level || 0)
     args.state.level.setup(args)
     args.state.camera_x = 0
-    args.state.hint_key = nil # the replayed level's hint shows fresh
     report_now_playing(args, args.state.level.number)
   end
 

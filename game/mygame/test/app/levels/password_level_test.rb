@@ -95,7 +95,8 @@ class PasswordLevelTest < Minitest::Test
     assert_equal PasswordCharacter::CLASSES, @level.password_targets
   end
 
-  def test_draw_emits_a_prompt
+  def test_draw_emits_a_caption_prompt
+    @args.state.captions_on = true
     @level.draw(@args)
     refute_empty @args.outputs.labels
   end

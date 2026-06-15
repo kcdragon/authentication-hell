@@ -45,9 +45,9 @@ class Level
   # latch a flag on this in #update, since #complete? is called without args.
   def reached_end?(args) = args.state.player.x >= world_w - Player::WIDTH
 
-  # The level's on-canvas prompt, drawn while the player is free (not locked).
-  # Levels with a hint render it through the shared HintCard (which fades it a few
-  # seconds after the copy last changes); the default is no prompt.
+  # The level's prompt, drawn while the player is free (not locked) as the top closed
+  # caption (a level with a hint builds its copy and draws a Caption); the default is
+  # no prompt.
   def draw(_args) = nil
 
   # The password character classes this level wants collected, or nil if it isn't a

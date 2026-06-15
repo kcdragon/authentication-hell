@@ -49,15 +49,14 @@ class PasswordLevel < Level
   def password_targets = TARGETS
 
   # Prod the player to sweep up the characters, then flip to "head right" once the
-  # set is complete. HintCard fades the card; the count changing re-shows it on each
-  # pickup.
+  # set is complete — shown as the top closed caption, updating on each pickup.
   def draw(args)
     lines = if all_collected?(args)
       [ "Password complete —", "head right to finish →" ]
     else
       [ "Grab the padlocks", "#{args.state.player.collected_password_characters.size}/#{TARGETS.length} character types" ]
     end
-    HintCard.new(args, lines).show
+    Caption.new(args, lines).draw
   end
 
   private

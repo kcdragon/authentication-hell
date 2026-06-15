@@ -80,8 +80,7 @@ class TutorialLevel < Level
 
   # Bold prompt, staged by progress: move, then jump onto the ledge, then touch the
   # enemy (which players would normally avoid), then heal and fight back with the
-  # keyboard. Short so it reads at a glance; HintCard fades it and re-shows it each
-  # time the step — and so the copy — changes.
+  # keyboard. Short so it reads at a glance as a closed caption at the top.
   # (Never shown while locked — tick renders the shared challenge prompt then.)
   def draw(args)
     player = args.state.player
@@ -98,6 +97,6 @@ class TutorialLevel < Level
       [ "Run into the * enemy",
         "to learn the re-auth →" ]
     end
-    HintCard.new(args, lines).show
+    Caption.new(args, lines).draw
   end
 end
