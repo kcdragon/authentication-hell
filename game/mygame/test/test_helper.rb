@@ -8,7 +8,7 @@ require "minitest/autorun"
 # Scene constants the entities reference at runtime, extracted from main.rb (which
 # is engine-only and can't load here). Load them before the entity under test.
 require_relative "../app/constants"
-require_relative "../app/hint_card"
+require_relative "../app/caption"
 require_relative "../app/entities/player"
 require_relative "../app/entities/enemy"
 require_relative "../app/entities/platform"
@@ -32,10 +32,9 @@ module GameTest
   KeyDown = Struct.new(:space)
   Keyboard = Struct.new(:left, :right, :key_down)
   Inputs = Struct.new(:mouse, :keyboard)
-  # tick_count + the hint fade bookkeeping (hint_key / hint_shown_at) let the level
-  # #draw path exercise HintCard, which the real engine state carries.
+  # captions_on gates the closed caption a level draws (via Caption) in its #draw path.
   State = Struct.new(:camera_x, :platforms, :enemies, :collectables, :player, :level,
-                     :tick_count, :hint_key, :hint_shown_at)
+                     :tick_count, :captions_on)
   Outputs = Struct.new(:sprites, :solids, :labels)
   Args = Struct.new(:inputs, :state, :outputs)
 

@@ -50,9 +50,15 @@ PLAY_BUTTON = { x: SCRUBBER_X, y: CONTROLS_Y, w: 34, h: 34 }.freeze
 # The speed/fullscreen affordances stay static to its right; only CC is wired.
 CC_BUTTON = { x: SCREEN_W - SCRUBBER_X - 150, y: CONTROLS_Y, w: 38, h: 30 }.freeze
 
-# Placeholder caption copy (a controls hint). Static for now — this is the single
-# spot to change when captions become dynamic.
-CAPTION_TEXT = "Use A / D or arrows to move, Space to jump, click to swing"
+# The closed-caption card at the top of the screen (default on): a neo-brutalist white
+# card (ink shadow + border) holding the active level's prompt in dark INK. Centered
+# and kept narrow enough that its left edge (640 - W/2 = 360) clears the top-left HUD
+# (hearts + the password tray, which reaches ~x 344). Height scales to the line count;
+# MARGIN is the gap from the top screen edge (high y, bottom-left origin).
+CAPTION_W      = 560
+CAPTION_LINE_H = 34
+CAPTION_PAD    = 14   # vertical padding inside the box, top and bottom
+CAPTION_MARGIN = 26   # gap between the box's top edge and the top of the screen
 
 # Fonts (ttf, in mygame/fonts/ — converted from the site's self-hosted woff2).
 # Lowercase-kebab filenames (matching the site's woff2 names) so the case-
