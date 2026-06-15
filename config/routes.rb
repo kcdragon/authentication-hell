@@ -66,6 +66,7 @@ Rails.application.routes.draw do
     post "password/complete" => "password_challenge#complete", as: :password_complete
 
     post "levels/complete" => "levels#complete", as: :levels_complete
+    post "levels/playing"  => "levels#playing",  as: :levels_playing
   end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)

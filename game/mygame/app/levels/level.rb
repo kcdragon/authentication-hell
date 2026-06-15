@@ -2,6 +2,14 @@
 # (collision/re-auth, camera, hearts, the locked challenge prompt) stay in Main's
 # tick; levels do no engine I/O, so they load under plain MRI like the entities.
 class Level
+  def self.build(number)
+    case number
+    when 1 then MainLevel.new
+    when 2 then GauntletLevel.new
+    else TutorialLevel.new
+    end
+  end
+
   # Seed args.state.enemies / args.state.platforms for this stage.
   def setup(_args) = nil
 
