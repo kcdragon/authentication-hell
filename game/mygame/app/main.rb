@@ -1,15 +1,18 @@
 require "app/constants.rb"
+require "app/hint_card.rb"
 require "app/entities/player.rb"
 require "app/entities/enemy.rb"
 require "app/entities/platform.rb"
 require "app/entities/heart_pickup.rb"
+require "app/entities/password_character.rb"
 require "app/entities/enemies/totp.rb"
 require "app/entities/enemies/passkey.rb"
 require "app/entities/enemies/password.rb"
 require "app/levels/level.rb"
 require "app/levels/00_tutorial.rb"
-require "app/levels/01_main.rb"
-require "app/levels/02_gauntlet.rb"
+require "app/levels/01_password.rb"
+require "app/levels/02_main.rb"
+require "app/levels/03_gauntlet.rb"
 
 module Main
   def tick(args)
@@ -158,14 +161,15 @@ module Main
       enemy.colliding = colliding
     end unless args.state.player.game_over
 
-    # Walking into a heal heart restores one heart (capped) and retires the pickup;
-    # the level decides what that means (the tutorial counts it as cleared).
+    # Walking into a collectable retires the pickup and applies its own effect (a
+    # heart heals, a password character is recorded); the level then decides what
+    # that means (the tutorial counts the heal as cleared).
     args.state.collectables.each do |pickup|
       next unless pickup.alive
       next unless args.geometry.intersect_rect?(pickup.hitbox, args.state.player)
 
       pickup.alive = false
-      args.state.player.hearts = [ args.state.player.hearts + 1, Player::MAX_HEARTS ].min
+      pickup.collect(args)
       args.state.level.on_collect(args)
     end unless args.state.player.game_over
 
@@ -235,6 +239,7 @@ module Main
     # floor line), the scrubber driven by world progress, and the HUD hearts.
     draw_control_bar(args)
     draw_hearts(args)
+    draw_collected_password_characters(args) if args.state.level.password_targets
 
     if !args.state.started
       draw_poster(args)
@@ -245,6 +250,7 @@ module Main
     elsif args.state.paused
       draw_paused(args)
     else
+      # Each level draws its own prompt (via the shared, self-fading HintCard).
       args.state.level.draw(args)
     end
   end
@@ -357,6 +363,31 @@ module Main
                                 w: 36,
                                 h: 33,
                                 path: have ? "sprites/ui/heart_hardmode.png" : "sprites/ui/heart_empty.png" }
+    end
+  end
+
+  # The password level's tray, just right of the hearts: one slot per character
+  # class. A held class shows its collected glyph in a filled amber chip; a missing
+  # one shows a faint placeholder glyph of that class, so the player sees what's
+  # left to find. Drawn only on a level that declares password_targets.
+  PASSWORD_SLOT_HINTS = { upper: "A", lower: "a", digit: "0", symbol: "#" }.freeze
+  def draw_collected_password_characters(args)
+    held = args.state.player.collected_password_characters
+    x0 = 168
+    y = SCREEN_H - 61
+    w = 38
+    h = 34
+    args.state.level.password_targets.each_with_index do |klass, i|
+      x = x0 + i * 46
+      glyph = held[klass]
+      args.outputs.solids << { x: x, y: y, w: w, h: h, r: INK[0], g: INK[1], b: INK[2] }
+      face = glyph ? AMBER : PAPER
+      args.outputs.solids << { x: x + 3, y: y + 3, w: w - 6, h: h - 6,
+                               r: face[0], g: face[1], b: face[2] }
+      ink = glyph ? INK : FAINT_INK
+      args.outputs.labels << { x: x + w / 2, y: y + h / 2 + 1, text: glyph || PASSWORD_SLOT_HINTS[klass],
+                               size_px: 22, font: FONT_MONO_B, r: ink[0], g: ink[1], b: ink[2],
+                               anchor_x: 0.5, anchor_y: 0.5 }
     end
   end
 
@@ -570,6 +601,7 @@ module Main
     report_level_complete(args, args.state.level.number)
     args.state.level = args.state.level.next_level
     args.state.level.setup(args)
+    args.state.hint_key = nil # let the new level's hint show fresh
     report_now_playing(args, args.state.level.number)
   end
 
@@ -582,6 +614,7 @@ module Main
     args.state.level = Level.build(args.state.start_level || 0)
     args.state.level.setup(args)
     args.state.camera_x = 0
+    args.state.hint_key = nil # the replayed level's hint shows fresh
     report_now_playing(args, args.state.level.number)
   end
 

@@ -8,7 +8,7 @@
    frontier = user.current_level&.number
    watched_count = levels.count { |l| hlc && l.number <= hlc }
    # Cosmetic m:ss per level (the in-game scrubber fakes a 3:20 runtime).
-   durations = { 0 => "0:45", 1 => "3:20" }
+   durations = { 0 => "0:45", 1 => "1:30", 2 => "3:20" }
    # Decorative locked entries so the rail reads as a fuller course playlist.
    coming_soon = [ "OAuth & SSO", "Session Hygiene", "Spotting Phishing", "Recovery Codes 201" ]
    total = levels.size + coming_soon.size %>

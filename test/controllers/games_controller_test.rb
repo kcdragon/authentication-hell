@@ -49,9 +49,9 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     get play_me_url
     assert_equal 0, response.parsed_body["start_level"]
 
-    # One-shot: a subsequent boot falls back to progress (the last level).
+    # One-shot: a subsequent boot falls back to progress (the frontier level).
     get play_me_url
-    assert_equal 2, response.parsed_body["start_level"]
+    assert_equal 3, response.parsed_body["start_level"]
   end
 
   test "frame honors selecting the frontier (the next, not-yet-cleared level)" do

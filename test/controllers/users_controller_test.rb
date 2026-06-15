@@ -54,7 +54,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h2", text: "Current level"
-    assert_select "p", text: /Lv 1 · The Open World/
+    assert_select "p", text: /Lv 1 · Build a Password/
   end
 
   test "update attaches an avatar" do

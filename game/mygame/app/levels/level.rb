@@ -4,8 +4,9 @@
 class Level
   def self.build(number)
     case number
-    when 1 then MainLevel.new
-    when 2 then GauntletLevel.new
+    when 1 then PasswordLevel.new
+    when 2 then MainLevel.new
+    when 3 then GauntletLevel.new
     else TutorialLevel.new
     end
   end
@@ -44,8 +45,14 @@ class Level
   # latch a flag on this in #update, since #complete? is called without args.
   def reached_end?(args) = args.state.player.x >= world_w - Player::WIDTH
 
-  # The level's HUD overlay (drawn only while the player is free, not locked).
+  # The level's on-canvas prompt, drawn while the player is free (not locked).
+  # Levels with a hint render it through the shared HintCard (which fades it a few
+  # seconds after the copy last changes); the default is no prompt.
   def draw(_args) = nil
+
+  # The password character classes this level wants collected, or nil if it isn't a
+  # collection level. Non-nil makes the tick draw the collected-character HUD tray.
+  def password_targets = nil
 
   # args.state.level rides along in DragonRuby's state export; levels are
   # stateless, so the class name is all the export needs.

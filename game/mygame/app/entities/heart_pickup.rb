@@ -18,6 +18,13 @@ class HeartPickup
 
   def hitbox = { x: @x, y: @y, w: @w, h: @h }
 
+  # Walked into: restore one heart, capped at the max. The pickup-collision loop in
+  # Main's tick calls this; each collectable owns its own effect.
+  def collect(args)
+    player = args.state.player
+    player.hearts = [ player.hearts + 1, Player::MAX_HEARTS ].min
+  end
+
   def render(args, camera_x = 0)
     bob = Math.sin(args.state.tick_count / 15.0) * BOB
     # Draw the HUD heart sprite (120x110) at the pickup's width, keeping its aspect
