@@ -8,16 +8,20 @@ require "minitest/autorun"
 # Scene constants the entities reference at runtime, extracted from main.rb (which
 # is engine-only and can't load here). Load them before the entity under test.
 require_relative "../app/constants"
+require_relative "../app/hint_card"
 require_relative "../app/entities/player"
 require_relative "../app/entities/enemy"
 require_relative "../app/entities/platform"
+require_relative "../app/entities/heart_pickup"
+require_relative "../app/entities/password_character"
 require_relative "../app/entities/enemies/totp"
 require_relative "../app/entities/enemies/passkey"
 require_relative "../app/entities/enemies/password"
 require_relative "../app/levels/level"
 require_relative "../app/levels/00_tutorial"
-require_relative "../app/levels/01_main"
-require_relative "../app/levels/02_gauntlet"
+require_relative "../app/levels/01_password"
+require_relative "../app/levels/02_main"
+require_relative "../app/levels/03_gauntlet"
 
 # Minimal stand-ins for DragonRuby's `args`. The entities only read a handful of
 # input/state fields and append to output arrays, so plain Structs suffice. Use
@@ -28,7 +32,10 @@ module GameTest
   KeyDown = Struct.new(:space)
   Keyboard = Struct.new(:left, :right, :key_down)
   Inputs = Struct.new(:mouse, :keyboard)
-  State = Struct.new(:camera_x, :platforms, :enemies, :collectables, :player, :level)
+  # tick_count + the hint fade bookkeeping (hint_key / hint_shown_at) let the level
+  # #draw path exercise HintCard, which the real engine state carries.
+  State = Struct.new(:camera_x, :platforms, :enemies, :collectables, :player, :level,
+                     :tick_count, :hint_key, :hint_shown_at)
   Outputs = Struct.new(:sprites, :solids, :labels)
   Args = Struct.new(:inputs, :state, :outputs)
 
@@ -38,11 +45,11 @@ module GameTest
   # one-screen bound.
   def build_args(mouse_click: false, mouse_x: 0, left: false, right: false,
                  space: false, camera_x: 0, platforms: [], enemies: nil,
-                 collectables: nil, player: nil, level: MainLevel.new)
+                 collectables: nil, player: nil, level: MainLevel.new, tick_count: 0)
     Args.new(
       Inputs.new(Mouse.new(mouse_click, mouse_x),
                  Keyboard.new(left, right, KeyDown.new(space))),
-      State.new(camera_x, platforms, enemies, collectables, player, level),
+      State.new(camera_x, platforms, enemies, collectables, player, level, tick_count),
       Outputs.new([], [], [])
     )
   end

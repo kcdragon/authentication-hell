@@ -23,7 +23,7 @@ class GauntletLevel < Level
   ENEMY_END_X = 5400
   ENEMY_PITCH = 350
 
-  def number = 2
+  def number = 3
 
   # Pull the player back to the start (they carry the open world's right-edge x over,
   # which would otherwise read as already-finished) and lay out the hand-authored
@@ -46,30 +46,8 @@ class GauntletLevel < Level
 
   def next_level = GauntletLevel.new
 
-  # Brutalist card hint, matching the tutorial's prompt style.
-  def draw(args)
-    lines = [ "Hop the platforms —", "the floor is crawling" ]
-    line_h = 40
-    card_w = 560
-    card_h = 56 + lines.length * line_h
-    cx = 640
-    cy = 560
-    left = cx - card_w / 2
-    bottom = cy - card_h / 2
-    args.outputs.solids << { x: left + 8, y: bottom - 8, w: card_w, h: card_h,
-                             r: INK[0], g: INK[1], b: INK[2] }
-    args.outputs.solids << { x: left, y: bottom, w: card_w, h: card_h,
-                             r: INK[0], g: INK[1], b: INK[2] }
-    args.outputs.solids << { x: left + 4, y: bottom + 4, w: card_w - 8, h: card_h - 8,
-                             r: CARD[0], g: CARD[1], b: CARD[2] }
-
-    top_y = cy + (lines.length - 1) * line_h / 2.0
-    lines.each_with_index do |line, i|
-      args.outputs.labels << { x: cx, y: top_y - i * line_h, text: line, size_px: 28,
-                               font: FONT_MONO_B, r: INK[0], g: INK[1], b: INK[2],
-                               anchor_x: 0.5, anchor_y: 0.5 }
-    end
-  end
+  # Prompt the platform route; HintCard fades it after a few seconds.
+  def draw(args) = HintCard.new(args, [ "Hop the platforms —", "the floor is crawling" ]).show
 
   private
 

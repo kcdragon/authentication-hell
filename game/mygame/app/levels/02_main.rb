@@ -1,10 +1,10 @@
-# The open main world the tutorial hands off to. Owns its scene (random enemies +
+# The open main world the password level hands off to. Owns its scene (random enemies +
 # a scattered platform field, seeded in setup) and its level-level behavior — melee
 # is live (inherited). No on-canvas chrome of its own: controls now live on the
 # pause screen. Cleared by walking to the world's right wall, which hands off to the
 # gauntlet finale.
 class MainLevel < Level
-  def number = 1
+  def number = 2
 
   # Seed the world: random enemies and a scattered field of one-way ledges.
   def setup(args)
@@ -22,6 +22,4 @@ class MainLevel < Level
   def complete? = @cleared == true
 
   def next_level = GauntletLevel.new
-
-  def draw(args); end
 end

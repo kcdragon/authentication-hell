@@ -3,7 +3,7 @@
 # then bump the enemy marching in from the right (melee is off, so the only way past
 # is the password re-auth). Clearing it drops a heal heart; grabbing it turns melee
 # on and sends a second enemy in from the left for the player to defeat with the
-# keyboard swing, which finishes the tutorial and hands off to the endless main world.
+# keyboard swing, which finishes the tutorial and hands off to the password level.
 #
 # Sized to a single screen (world_w = SCREEN_W): the whole lesson plays in one view,
 # so the player can't wander off into the empty main world and the camera never scrolls.
@@ -76,11 +76,12 @@ class TutorialLevel < Level
 
   def complete? = @defeated
 
-  def next_level = MainLevel.new
+  def next_level = PasswordLevel.new
 
-  # Bold, card-backed prompt, staged by progress: move, then jump onto the ledge,
-  # then touch the enemy (which players would normally avoid), then heal and fight
-  # back with the keyboard. Short copy so it reads at a glance.
+  # Bold prompt, staged by progress: move, then jump onto the ledge, then touch the
+  # enemy (which players would normally avoid), then heal and fight back with the
+  # keyboard. Short so it reads at a glance; HintCard fades it and re-shows it each
+  # time the step — and so the copy — changes.
   # (Never shown while locked — tick renders the shared challenge prompt then.)
   def draw(args)
     player = args.state.player
@@ -97,27 +98,6 @@ class TutorialLevel < Level
       [ "Run into the * enemy",
         "to learn the re-auth →" ]
     end
-
-    line_h = 40
-    card_w = 680
-    card_h = 56 + lines.length * line_h
-    cx = 640
-    cy = 420
-    left = cx - card_w / 2
-    bottom = cy - card_h / 2
-    # Neo-brutalist card: hard offset ink shadow, ink border, white face.
-    args.outputs.solids << { x: left + 8, y: bottom - 8, w: card_w, h: card_h,
-                             r: INK[0], g: INK[1], b: INK[2] }
-    args.outputs.solids << { x: left, y: bottom, w: card_w, h: card_h,
-                             r: INK[0], g: INK[1], b: INK[2] }
-    args.outputs.solids << { x: left + 4, y: bottom + 4, w: card_w - 8, h: card_h - 8,
-                             r: CARD[0], g: CARD[1], b: CARD[2] }
-
-    top_y = cy + (lines.length - 1) * line_h / 2.0
-    lines.each_with_index do |line, i|
-      args.outputs.labels << { x: cx, y: top_y - i * line_h, text: line, size_px: 28,
-                               font: FONT_MONO_B, r: INK[0], g: INK[1], b: INK[2],
-                               anchor_x: 0.5, anchor_y: 0.5 }
-    end
+    HintCard.new(args, lines).show
   end
 end

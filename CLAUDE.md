@@ -49,6 +49,7 @@ RuboCop and Brakeman are scoped to *our* code only: everything under `game/` is 
 - The three `db/*_schema.rb` files (cable/cache/queue) are the Solid adapters' schemas — not the app schema. There is no `db/schema.rb` yet because no app migrations exist; one appears after the first `bin/rails generate model`.
 - For `has_secure_password`, uncomment `bcrypt` in the `Gemfile` first (it ships commented out).
 - Comments are sparse. Add one only where the code isn't self-explanatory, and explain the *why*, not the *what* — never restate the code. Put it on (or directly above) the line it describes, not at the top of a method describing something lower down. Keep it to a single sentence unless the issue is genuinely complicated.
+- Methods not called from outside their class should be `private` — keep the public surface to what callers actually use. (DragonRuby's mruby lacks `private_class_method`, so in `game/mygame/` prefer an instantiable class with instance methods over class methods when you need privacy — see `app/hint_card.rb`.)
 
 ### UI surface and visual conventions
 
