@@ -34,18 +34,19 @@ module Main
     # current user (start_level = where their progress resumes, or a level they
     # just clicked in the playlist).
     args.state.username ||= 'there'
-    if !args.state.name_request
-      args.state.name_request = DR.http_get(me_url(args))
+    if !args.state.me_request
+      args.state.me_request = DR.http_get(me_url(args))
     end
 
-    if args.state.name_request != :done && args.state.name_request[:complete]
-      request = args.state.name_request
+    if args.state.me_request != :done && args.state.me_request[:complete]
+      request = args.state.me_request
       if request[:http_response_code] == 200
         data = DR.parse_json(request[:response_data])
         if data
           args.state.username = data["username"] if data["username"]
-          # Swap to the resolved starting level before the run begins (the world is
-          # frozen on the poster, so this is invisible) and report it as now playing.
+          # Swap to the resolved starting level before the run begins (the loading
+          # screen covers the play area until now, so this is invisible) and report
+          # it as now playing.
           if data["start_level"] && !args.state.started
             args.state.start_level = data["start_level"]
             if args.state.level.number != args.state.start_level
@@ -58,7 +59,7 @@ module Main
       end
       # Replace the (non-serializable) response object with a plain marker so the
       # per-tick state export doesn't choke on it and we don't re-fetch.
-      args.state.name_request = :done
+      args.state.me_request = :done
     end
 
     # The "fake training video" frame: the game opens paused on a poster with a
@@ -80,7 +81,7 @@ module Main
   # — but only once /play/me has resolved, so we never start on the wrong level
   # while the starting level is still in flight (a fast, same-origin call).
   def handle_poster_input(args)
-    return unless args.state.name_request == :done
+    return unless args.state.me_request == :done
 
     if args.inputs.mouse.click || args.inputs.keyboard.key_down.space
       args.state.started = true
@@ -211,6 +212,15 @@ module Main
     # draw_control_bar below, so its top edge reads as the ground line.
     args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H,
                              r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+
+    # Until /play/me answers we don't yet know the starting level, so the world
+    # below is a placeholder that may swap. Draw the video chrome with a loading
+    # state instead of the (wrong) level, so the level never visibly switches.
+    if args.state.me_request != :done
+      draw_control_bar(args)
+      draw_loading(args)
+      return
+    end
 
     # World entities are in world coords; each subtracts the camera offset to draw.
     args.state.platforms.each { |plat| plat.render(args, cam) }
@@ -386,6 +396,24 @@ module Main
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
 
+  # Shown while /play/me is still in flight: the same "AUTHENTICATION 101" card as
+  # the poster, but with a spinner where the play button will land, so the poster
+  # appears already on the correct level instead of swapping the world in view.
+  def draw_loading(args)
+    cx = 640
+    cy = 392
+    draw_spinner(args, cx, cy, BLUE)
+
+    args.outputs.labels << { x: cx, y: cy - 104, text: "AUTHENTICATION 101",
+                             size_px: 30, font: FONT_DISPLAY,
+                             r: INK[0], g: INK[1], b: INK[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
+    args.outputs.labels << { x: cx, y: cy - 140, text: "loading…",
+                             size_px: 18, font: FONT_MONO,
+                             r: MUTED[0], g: MUTED[1], b: MUTED[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
+  end
+
   # Paused mid-run: a quiet paper scrim over the play area + a centered play glyph,
   # the video "stopped." Resume with Escape or the play button. The pause screen is
   # also where the keyboard controls live (no always-on hint during play).
@@ -420,19 +448,23 @@ module Main
   # Collision → "the tape buffers." The loud brutalist challenge card lives in HTML
   # over the canvas, so the in-canvas treatment stays quiet: a spinner and a single
   # mono line tinted to the enemy's color, pointing at the toast.
-  def draw_buffering(args)
-    color = challenge_color(args.state.player.pending_challenge)
-
-    # Spinner: a faint full ring with a colored arc that rotates over time.
+  # A faint full ring with a colored arc that rotates over time, centered on cx/cy.
+  def draw_spinner(args, cx, cy, color)
     spin = (args.state.tick_count % 60) * 6
     8.times do |i|
       ang = (spin + i * 45) * Math::PI / 180
-      bx = 640 + Math.cos(ang) * 26
-      by = 470 + Math.sin(ang) * 26
+      bx = cx + Math.cos(ang) * 26
+      by = cy + Math.sin(ang) * 26
       lead = i >= 6
       args.outputs.solids << { x: bx - 3, y: by - 3, w: 6, h: 6,
                                r: lead ? color[0] : 217, g: lead ? color[1] : 205, b: lead ? color[2] : 176 }
     end
+  end
+
+  def draw_buffering(args)
+    color = challenge_color(args.state.player.pending_challenge)
+
+    draw_spinner(args, 640, 470, color)
 
     label = case args.state.player.pending_challenge
     when :passkey then "BUFFERING — approve the passkey toast to resume →"
