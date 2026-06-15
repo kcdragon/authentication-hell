@@ -6,6 +6,10 @@
 class MainLevel < Level
   def number = 2
 
+  def title = "The Open Web"
+
+  def accent = GREEN
+
   # Seed the world: random enemies and a scattered field of one-way ledges.
   def setup(args)
     args.state.enemies = Enemy.spawn_random(args.state.player.x)

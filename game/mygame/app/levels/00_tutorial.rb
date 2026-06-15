@@ -13,6 +13,8 @@ class TutorialLevel < Level
 
   def number = 0
 
+  def title = "Getting Started"
+
   def world_w = SCREEN_W
 
   def initialize

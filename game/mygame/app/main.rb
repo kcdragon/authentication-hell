@@ -66,31 +66,26 @@ module Main
       args.state.me_request = :done
     end
 
-    # The "fake training video" frame: the game opens paused on a poster with a
-    # giant play button, as if a corporate-training clip hasn't started. The world
-    # stays frozen until the player presses play; everything below runs only once
-    # the run has begun (started), except rendering, which always draws so the
-    # poster is visible.
+    # The run begins automatically once /play/me has resolved (the player already
+    # pressed ▶ Play on the site to load the game, so there's no in-canvas poster).
+    # The loading spinner covers the brief wait; then the first level's intro card
+    # plays. Everything below runs only once the run has begun (started).
     cc_clicked = handle_caption_input(args)
-    if !args.state.started
-      handle_poster_input(args) unless cc_clicked
-    else
+    start_run(args) if !args.state.started && args.state.me_request == :done
+    if args.state.started
       toggled = handle_pause_input(args)
-      update_world(args) unless args.state.paused || toggled || cc_clicked
+      # The world stays frozen behind the intro card so a level start (and the
+      # player's reset to the new scene's left edge) lands while it's covered.
+      update_world(args) unless args.state.paused || toggled || cc_clicked || level_intro_active?(args)
     end
 
     render_world(args)
   end
 
-  # While paused on the poster, a click or space "presses play" and starts the run
-  # — but only once /play/me has resolved, so we never start on the wrong level
-  # while the starting level is still in flight (a fast, same-origin call).
-  def handle_poster_input(args)
-    return unless args.state.me_request == :done
-
-    if args.inputs.mouse.click || args.inputs.keyboard.key_down.space
-      args.state.started = true
-    end
+  # Kick off the run: the first level's intro card plays, then the world unfreezes.
+  def start_run(args)
+    args.state.started = true
+    begin_level_intro(args)
   end
 
   # Pause / resume mid-run via the Escape key or a click on the play/pause button
@@ -245,14 +240,19 @@ module Main
       return
     end
 
-    # World entities are in world coords; each subtracts the camera offset to draw.
-    args.state.platforms.each { |plat| plat.render(args, cam) }
+    # Keep the whole scene (platforms, enemies, collectables, player) hidden behind
+    # the intro card so the new level only appears once the card has finished fading
+    # out — no entities popping in at the scene's start.
+    unless level_intro_active?(args)
+      # World entities are in world coords; each subtracts the camera offset to draw.
+      args.state.platforms.each { |plat| plat.render(args, cam) }
 
-    args.state.enemies.each { |enemy| enemy.render(args, cam) if enemy.alive }
+      args.state.enemies.each { |enemy| enemy.render(args, cam) if enemy.alive }
 
-    args.state.collectables.each { |pickup| pickup.render(args, cam) if pickup.alive }
+      args.state.collectables.each { |pickup| pickup.render(args, cam) if pickup.alive }
 
-    args.state.player.render(args, cam)
+      args.state.player.render(args, cam)
+    end
 
     # Video-player chrome over the world: the dark control bar (its lip is the
     # floor line), the scrubber driven by world progress, and the HUD hearts.
@@ -260,14 +260,14 @@ module Main
     draw_hearts(args)
     draw_collected_password_characters(args) if args.state.level.password_targets
 
-    if !args.state.started
-      draw_poster(args)
-    elsif args.state.player.game_over
+    if args.state.player.game_over
       draw_video_ended(args)
     elsif args.state.player.locked
       draw_buffering(args)
     elsif args.state.paused
       draw_paused(args)
+    elsif level_intro_active?(args)
+      draw_level_intro(args)
     else
       # Each level draws its own prompt as the top closed caption (only here, during
       # live play, where a prompt belongs).
@@ -342,19 +342,22 @@ module Main
   # static (the buttons aren't wired; they only sell the video-player disguise).
   def draw_transport(args)
     # Play/pause button (blue, paper glyph). Shows the pause bars while playing and
-    # a play triangle when the run is paused, hasn't started, or has ended.
+    # a play triangle when the run is paused, hasn't started, or has ended. Hidden
+    # behind the intro card so the only play affordance before a level is the poster's.
     bx = PLAY_BUTTON[:x]
     by = PLAY_BUTTON[:y]
-    args.outputs.solids << { **PLAY_BUTTON, r: BLUE[0], g: BLUE[1], b: BLUE[2] }
-    playing = args.state.started && !args.state.player.game_over &&
-              !args.state.player.locked && !args.state.paused
-    if playing
-      args.outputs.solids << { x: bx + 11, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
-      args.outputs.solids << { x: bx + 19, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
-    else
-      args.outputs.solids << { x: bx + 12, y: by + 9, x2: bx + 12, y2: by + 25,
-                               x3: bx + 26, y3: by + 17,
-                               r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+    unless level_intro_active?(args)
+      args.outputs.solids << { **PLAY_BUTTON, r: BLUE[0], g: BLUE[1], b: BLUE[2] }
+      playing = args.state.started && !args.state.player.game_over &&
+                !args.state.player.locked && !args.state.paused
+      if playing
+        args.outputs.solids << { x: bx + 11, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+        args.outputs.solids << { x: bx + 19, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+      else
+        args.outputs.solids << { x: bx + 12, y: by + 9, x2: bx + 12, y2: by + 25,
+                                 x3: bx + 26, y3: by + 17,
+                                 r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+      end
     end
 
     frac = progress(args)
@@ -420,45 +423,54 @@ module Main
     end
   end
 
-  # The poster / paused start state: a scrim over the play area lifts a giant blue
-  # play button (the site's primary action) with a true-black ink border + hard
-  # offset shadow, plus the "AUTHENTICATION 101" title card. Clicking (or space)
-  # "presses play" and starts the run — see handle_poster_input.
-  def draw_poster(args)
-    # Scrim over the play area only (above the control bar), so the transport stays
-    # crisp underneath.
-    args.outputs.solids << { x: 0, y: BAR_TOP, w: SCREEN_W, h: SCREEN_H - BAR_TOP,
-                             r: PAPER[0], g: PAPER[1], b: PAPER[2], a: 90 }
+  # The level-intro "chapter card": a centered neo-brutalist card (ink shadow → ink
+  # border → white face, like the captions) with a CHAPTER N eyebrow over the level
+  # title, fading the whole card in then out over LEVEL_INTRO_TICKS while the world
+  # holds frozen behind it.
+  def draw_level_intro(args)
+    level = args.state.level
+    elapsed = args.state.tick_count - args.state.level_intro_at
+    alpha = if elapsed < LEVEL_INTRO_FADE_IN
+              255 * elapsed / LEVEL_INTRO_FADE_IN
+    elsif elapsed > LEVEL_INTRO_TICKS - LEVEL_INTRO_FADE_OUT
+              255 * (LEVEL_INTRO_TICKS - elapsed) / LEVEL_INTRO_FADE_OUT
+    else
+              255
+    end
+    alpha = alpha.clamp(0, 255)
 
     cx = 640
     cy = 392
-    size = 128
-    # Hard offset shadow, then the ink border, then the blue button face.
-    args.outputs.solids << { x: cx - size / 2 + 9, y: cy - size / 2 - 9, w: size, h: size,
-                             r: INK[0], g: INK[1], b: INK[2] }
-    args.outputs.solids << { x: cx - size / 2, y: cy - size / 2, w: size, h: size,
-                             r: INK[0], g: INK[1], b: INK[2] }
-    args.outputs.solids << { x: cx - size / 2 + 4, y: cy - size / 2 + 4, w: size - 8, h: size - 8,
-                             r: BLUE[0], g: BLUE[1], b: BLUE[2] }
-    # Play triangle (paper), nudged right to optically center. A solid-color
-    # triangle is a three-point entry on outputs.solids (x/y, x2/y2, x3/y3).
-    args.outputs.solids << { x: cx - 18, y: cy + 30, x2: cx - 18, y2: cy - 30,
-                             x3: cx + 32, y3: cy,
-                             r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+    w = 520
+    h = 152
+    left = cx - w / 2
+    bottom = cy - h / 2
+    accent = level.accent
 
-    args.outputs.labels << { x: cx, y: cy - 104, text: "AUTHENTICATION 101",
-                             size_px: 30, font: FONT_DISPLAY,
-                             r: INK[0], g: INK[1], b: INK[2],
+    # Hard offset ink shadow, then the ink border, then the white face.
+    args.outputs.solids << { x: left + 8, y: bottom - 8, w: w, h: h,
+                             r: INK[0], g: INK[1], b: INK[2], a: alpha }
+    args.outputs.solids << { x: left, y: bottom, w: w, h: h,
+                             r: INK[0], g: INK[1], b: INK[2], a: alpha }
+    args.outputs.solids << { x: left + 4, y: bottom + 4, w: w - 8, h: h - 8,
+                             r: CARD[0], g: CARD[1], b: CARD[2], a: alpha }
+
+    args.outputs.labels << { x: cx, y: cy + 44, text: "CHAPTER #{level.number + 1}",
+                             size_px: 18, font: FONT_MONO_B,
+                             r: accent[0], g: accent[1], b: accent[2], a: alpha,
                              anchor_x: 0.5, anchor_y: 0.5 }
-    args.outputs.labels << { x: cx, y: cy - 140, text: "click play to begin onboarding",
-                             size_px: 18, font: FONT_MONO,
-                             r: MUTED[0], g: MUTED[1], b: MUTED[2],
+    # Short accent rule between the eyebrow and the title.
+    args.outputs.solids << { x: cx - 28, y: cy + 26, w: 56, h: 4,
+                             r: accent[0], g: accent[1], b: accent[2], a: alpha }
+    args.outputs.labels << { x: cx, y: cy - 18, text: level.title,
+                             size_px: 40, font: FONT_DISPLAY,
+                             r: INK[0], g: INK[1], b: INK[2], a: alpha,
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
 
-  # Shown while /play/me is still in flight: the same "AUTHENTICATION 101" card as
-  # the poster, but with a spinner where the play button will land, so the poster
-  # appears already on the correct level instead of swapping the world in view.
+  # Shown while /play/me is still in flight: the "AUTHENTICATION 101" title card with
+  # a spinner, so the brief wait before the run auto-starts reads as the video
+  # buffering on the correct level instead of swapping the world in view.
   def draw_loading(args)
     cx = 640
     cy = 392
@@ -630,7 +642,17 @@ module Main
     report_level_complete(args, args.state.level.number)
     args.state.level = args.state.level.next_level
     args.state.level.setup(args)
+    begin_level_intro(args)
     report_now_playing(args, args.state.level.number)
+  end
+
+  # Stamp the tick a level begins, so the intro card shows (and the world freezes)
+  # for the next LEVEL_INTRO_TICKS frames.
+  def begin_level_intro(args) = args.state.level_intro_at = args.state.tick_count
+
+  def level_intro_active?(args)
+    args.state.started && args.state.level_intro_at &&
+      (args.state.tick_count - args.state.level_intro_at) < LEVEL_INTRO_TICKS
   end
 
   # Replay from the "Video Ended" card: reset the player and scene back to the
@@ -642,6 +664,7 @@ module Main
     args.state.level = Level.build(args.state.start_level || 0)
     args.state.level.setup(args)
     args.state.camera_x = 0
+    begin_level_intro(args)
     report_now_playing(args, args.state.level.number)
   end
 
