@@ -27,6 +27,7 @@ module Main
     # real starting level arrives from /play/me below and swaps in before play
     # begins (the poster is gated on that response).
     args.state.start_level ||= 0
+    args.state.captions_on ||= false
     unless args.state.level
       args.state.level = TutorialLevel.new
       args.state.level.setup(args)
@@ -70,11 +71,12 @@ module Main
     # stays frozen until the player presses play; everything below runs only once
     # the run has begun (started), except rendering, which always draws so the
     # poster is visible.
+    cc_clicked = handle_caption_input(args)
     if !args.state.started
-      handle_poster_input(args)
+      handle_poster_input(args) unless cc_clicked
     else
       toggled = handle_pause_input(args)
-      update_world(args) unless args.state.paused || toggled
+      update_world(args) unless args.state.paused || toggled || cc_clicked
     end
 
     render_world(args)
@@ -103,6 +105,15 @@ module Main
              (args.inputs.mouse.click && args.inputs.mouse.point.inside_rect?(PLAY_BUTTON))
     args.state.paused = !args.state.paused if toggle
     !!toggle
+  end
+
+  # Toggle closed-captions on a click of the CC button. Wired in every state (it's
+  # player chrome, not gameplay) and returns whether it consumed the click, so the
+  # same click won't also press play on the poster or swing the keyboard mid-run.
+  def handle_caption_input(args)
+    hit = args.inputs.mouse.click && args.inputs.mouse.point.inside_rect?(CC_BUTTON)
+    args.state.captions_on = !args.state.captions_on if hit
+    !!hit
   end
 
   # One tick of live gameplay (only while the run is started and not over).
@@ -287,6 +298,7 @@ module Main
 
     draw_scrubber(args)
     draw_transport(args)
+    draw_captions(args)
   end
 
   # The scrubber: a track, a cosmetic "buffered" bar running ahead of progress (so
@@ -345,11 +357,32 @@ module Main
                              r: TS_INK[0], g: TS_INK[1], b: TS_INK[2],
                              anchor_x: 0, anchor_y: 1 }
 
-    args.outputs.labels << { x: SCREEN_W - SCRUBBER_X, y: by + 26,
-                             text: "CC   1.0×   ⛶",
+    cc_ink = args.state.captions_on ? TS_INK : FAINT_INK
+    args.outputs.labels << { x: CC_BUTTON[:x], y: by + 26, text: "CC",
+                             size_px: 20, font: FONT_MONO,
+                             r: cc_ink[0], g: cc_ink[1], b: cc_ink[2],
+                             anchor_x: 0, anchor_y: 1 }
+    if args.state.captions_on
+      args.outputs.solids << { x: CC_BUTTON[:x], y: by + 6, w: 20, h: 2,
+                               r: BLUE[0], g: BLUE[1], b: BLUE[2] }
+    end
+
+    args.outputs.labels << { x: SCREEN_W - SCRUBBER_X, y: by + 26, text: "1.0×   ⛶",
                              size_px: 20, font: FONT_MONO,
                              r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2],
                              anchor_x: 1, anchor_y: 1 }
+  end
+
+  # The closed-captions line, shown only when CC is toggled on: a single centered
+  # mono line in the control bar's free strip (above the scrubber, below the lip).
+  # Static placeholder copy for now — see CAPTION_TEXT.
+  def draw_captions(args)
+    return unless args.state.captions_on
+
+    args.outputs.labels << { x: SCREEN_W / 2, y: 84, text: CAPTION_TEXT,
+                             size_px: 16, font: FONT_MONO,
+                             r: TS_INK[0], g: TS_INK[1], b: TS_INK[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
   end
 
   # Three heart slots in the top-left: the full sprite for hearts the player still

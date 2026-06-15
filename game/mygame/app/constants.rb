@@ -46,6 +46,14 @@ VIDEO_SECONDS  = 200             # fake full-world runtime (3:20); scaled per le
 # pauses/resumes). Geometry matches the glyph drawn in main.rb's draw_transport.
 PLAY_BUTTON = { x: SCRUBBER_X, y: CONTROLS_Y, w: 34, h: 34 }.freeze
 
+# The CC (closed-captions) toggle hit box, on the right of the transport row.
+# The speed/fullscreen affordances stay static to its right; only CC is wired.
+CC_BUTTON = { x: SCREEN_W - SCRUBBER_X - 150, y: CONTROLS_Y, w: 38, h: 30 }.freeze
+
+# Placeholder caption copy (a controls hint). Static for now — this is the single
+# spot to change when captions become dynamic.
+CAPTION_TEXT = "Use A / D or arrows to move, Space to jump, click to swing"
+
 # Fonts (ttf, in mygame/fonts/ — converted from the site's self-hosted woff2).
 # Lowercase-kebab filenames (matching the site's woff2 names) so the case-
 # sensitive WASM asset lookup resolves cross-platform.
