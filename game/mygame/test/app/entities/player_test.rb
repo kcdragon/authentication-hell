@@ -17,11 +17,6 @@ class PlayerTest < Minitest::Test
     refute @player.game_over
   end
 
-  def test_starts_not_swinging_with_keyboard_on_the_right
-    assert_equal 0, @player.swing_ticks_left
-    assert_equal :east, @player.swing_dir
-  end
-
   def test_starts_having_not_moved
     refute @player.moved
   end
@@ -152,118 +147,35 @@ class PlayerTest < Minitest::Test
     refute @player.grounded
   end
 
-  # --- keyboard swing ---
-
-  def test_click_starts_a_full_length_swing
-    @player.update(build_args(mouse_click: true))
-    assert_equal Player::SWING_TICKS, @player.swing_ticks_left
-  end
-
-  def test_swing_aims_the_way_the_player_faces
-    @player.update(build_args(mouse_click: true, right: true))
-    assert_equal :east, @player.swing_dir
-
-    other = Player.new
-    other.update(build_args(mouse_click: true, left: true))
-    assert_equal :west, other.swing_dir
-  end
-
-  def test_swing_direction_follows_movement_without_swinging
-    @player.update(build_args(left: true))
-    assert_equal :west, @player.swing_dir
-    @player.update(build_args(right: true))
-    assert_equal :east, @player.swing_dir
-  end
-
-  def test_idle_swing_keeps_the_last_swing_direction
-    @player.update(build_args(mouse_click: true, left: true)) # swing west
-    assert_equal :west, @player.swing_dir
-    Player::SWING_TICKS.times { @player.update(build_args) } # let it finish; now idle
-    @player.update(build_args(mouse_click: true)) # idle (south) when clicking
-    assert_equal :west, @player.swing_dir
-  end
-
-  def test_swing_counts_down_each_tick
-    @player.update(build_args(mouse_click: true))
-    assert_equal Player::SWING_TICKS, @player.swing_ticks_left
-    @player.update(build_args)
-    assert_equal Player::SWING_TICKS - 1, @player.swing_ticks_left
-  end
-
-  def test_cannot_restart_a_swing_until_the_current_one_finishes
-    @player.update(build_args(mouse_click: true))
-    @player.update(build_args(mouse_click: true)) # click ignored mid-swing
-    assert_equal Player::SWING_TICKS - 1, @player.swing_ticks_left
-  end
-
   # --- frozen states ---
 
-  def test_locked_player_ignores_movement_and_swings
+  def test_locked_player_ignores_movement
     @player.locked = true
     start_x = @player.x
-    @player.update(build_args(right: true, mouse_click: true, mouse_x: 1000))
+    @player.update(build_args(right: true))
     assert_equal start_x, @player.x
-    assert_equal 0, @player.swing_ticks_left
   end
 
-  def test_game_over_player_ignores_movement_and_swings
+  def test_game_over_player_ignores_movement
     @player.game_over = true
     start_x = @player.x
-    @player.update(build_args(left: true, mouse_click: true, mouse_x: 1000))
+    @player.update(build_args(left: true))
     assert_equal start_x, @player.x
-    assert_equal 0, @player.swing_ticks_left
-  end
-
-  # --- keyboard hitbox geometry ---
-
-  def test_idle_keyboard_sticks_out_to_the_right_at_hand_height
-    @player.swing_dir = :east
-    @player.swing_ticks_left = 0
-    kb = @player.keyboard_hitbox
-    assert_equal @player.x + Player::WIDTH - Player::KEYBOARD_GRIP, kb[:x]
-    assert_equal Player::KEYBOARD_W, kb[:w]
-    assert_equal Player::KEYBOARD_H, kb[:h]
-    assert_equal @player.y + Player::KEYBOARD_HAND_Y, kb[:y]
-    assert_operator kb[:x] + kb[:w], :>, @player.x + Player::WIDTH
-  end
-
-  def test_idle_keyboard_sticks_out_to_the_left_when_facing_west
-    @player.swing_dir = :west
-    @player.swing_ticks_left = 0
-    kb = @player.keyboard_hitbox
-    assert_equal @player.x + Player::KEYBOARD_GRIP - Player::KEYBOARD_W, kb[:x]
-    assert_operator kb[:x], :<, @player.x
-  end
-
-  def test_swing_thrusts_the_keyboard_farther_out_at_its_apex
-    @player.swing_dir = :east
-    @player.swing_ticks_left = 0
-    held_x = @player.keyboard_hitbox[:x]
-
-    @player.swing_ticks_left = Player::SWING_TICKS / 2 # mid-swing: sin(pi/2) = 1
-    apex_x = @player.keyboard_hitbox[:x]
-    assert_operator apex_x, :>, held_x
-    assert_in_delta held_x + Player::KEYBOARD_SWING_REACH, apex_x, 0.0001
   end
 
   # --- rendering & serialization ---
 
-  def test_render_emits_the_figure_and_keyboard_as_palette_solids
+  def test_render_emits_the_figure_as_palette_solids
     args = build_args
     @player.render(args, 0)
     assert_equal 0, args.outputs.sprites.length # no PNG art — the figure is primitives
     # 2 legs + torso card (ink + indigo) + neck + head card (ink + skin) + hair +
-    # 2 eyes + keyboard body + keyboard key strip.
-    assert_equal 12, args.outputs.solids.length
-    # The keyboard's top strip is the light CARD "keys" face.
-    keys = args.outputs.solids.last
-    assert_equal CARD, [ keys[:r], keys[:g], keys[:b] ]
+    # 2 eyes.
+    assert_equal 10, args.outputs.solids.length
   end
 
-  def test_serialize_includes_swing_state_and_core_fields
+  def test_serialize_includes_core_fields
     data = @player.serialize
-    assert_equal 0, data[:swing_ticks_left]
-    assert_equal :east, data[:swing_dir]
     assert_equal Player::MAX_HEARTS, data[:hearts]
     assert_equal @player.x, data[:x]
     assert_equal false, data[:moved]

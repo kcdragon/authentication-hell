@@ -9,16 +9,6 @@ class Player
   GRAVITY = 1
   MAX_HEARTS = 3
 
-  # Keyboard melee weapon: a wide flat slab held at hand height in front of the
-  # player. A click swings it for SWING_TICKS frames (which is also the cooldown —
-  # no new swing until the current one finishes); REACH eases from held to apex.
-  KEYBOARD_W = 76
-  KEYBOARD_H = 28
-  KEYBOARD_HAND_Y = 36       # px above @y (feet) — hand height
-  KEYBOARD_GRIP = 8          # px the inner edge overlaps the hand (the rest sticks out)
-  KEYBOARD_SWING_REACH = 40  # extra outward thrust at the swing's apex
-  SWING_TICKS = 12           # swing duration = cooldown
-
   # Brutalist "new-hire" figure, drawn from solid primitives inside the 64x96
   # hitbox (feet at @y): INK legs, an INK-bordered INDIGO torso (the platform card
   # treatment, so it sits in the same visual language), then a tan neck and head
@@ -43,7 +33,7 @@ class Player
 
   attr_accessor :x, :y, :w, :h, :vy, :grounded, :facing,
                 :locked, :colliding, :lock_confirmed, :pending_challenge,
-                :hearts, :game_over, :swing_ticks_left, :swing_dir, :moved,
+                :hearts, :game_over, :moved,
                 :reached_platform, :collected_password_characters
 
   def initialize
@@ -60,8 +50,6 @@ class Player
     @pending_challenge = nil
     @hearts = MAX_HEARTS
     @game_over = false
-    @swing_ticks_left = 0
-    @swing_dir = :east
     @moved = false
     @reached_platform = false
     # class symbol → glyph for each password character collected (the password
@@ -74,33 +62,19 @@ class Player
   def update(args)
     return if @locked || @game_over
 
-    # Tick down any in-progress swing; the keyboard is "live" while > 0, and a new
-    # swing can't start until it reaches 0 (the duration is the cooldown).
-    @swing_ticks_left -= 1 if @swing_ticks_left.positive?
-
-    # @swing_dir tracks movement so the held keyboard flips the instant the player
-    # turns, not only when they swing. Idle (:south) leaves it on the last side.
     if args.inputs.keyboard.left
       @x -= MOVE_SPEED
       @facing = :west
-      @swing_dir = :west
       @moved = true
     elsif args.inputs.keyboard.right
       @x += MOVE_SPEED
       @facing = :east
-      @swing_dir = :east
       @moved = true
     else
       @facing = :south
     end
 
     @x = @x.clamp(0, args.state.level.world_w - WIDTH)
-
-    # Left-click swings the keyboard; it points whichever way @swing_dir already
-    # holds (the last side the player faced).
-    if args.inputs.mouse.click && @swing_ticks_left.zero?
-      @swing_ticks_left = SWING_TICKS
-    end
 
     # Jump on the press edge so holding space doesn't re-launch every frame.
     if args.inputs.keyboard.key_down.space && @grounded
@@ -131,24 +105,6 @@ class Player
           break
         end
       end
-    end
-  end
-
-  # World-space rect for the keyboard, sticking out from the hand on @swing_dir
-  # side: its inner edge grips the player's side (overlapping by GRIP) and the slab
-  # extends outward, away from the body. A swing thrusts it further out, eased
-  # out-and-back (sin peaks mid-swing); at rest thrust is 0, so the same rect
-  # serves both the idle render and the swing hitbox.
-  def keyboard_hitbox
-    progress = @swing_ticks_left.to_f / SWING_TICKS
-    thrust = KEYBOARD_SWING_REACH * Math.sin(progress * Math::PI)
-    hand_y = @y + KEYBOARD_HAND_Y
-    if @swing_dir == :west
-      inner = @x + KEYBOARD_GRIP - thrust          # right edge near the left hand
-      { x: inner - KEYBOARD_W, y: hand_y, w: KEYBOARD_W, h: KEYBOARD_H }
-    else
-      inner = @x + @w - KEYBOARD_GRIP + thrust      # left edge near the right hand
-      { x: inner, y: hand_y, w: KEYBOARD_W, h: KEYBOARD_H }
     end
   end
 
@@ -202,15 +158,6 @@ class Player
       args.outputs.solids << { x: ex + shift, y: head_y + 10, w: EYE, h: EYE,
                                r: INK[0], g: INK[1], b: INK[2] }
     end
-
-    # The keyboard slab (palette primitives): an INK body with a light CARD "keys"
-    # strip on top so it reads as a keyboard. Tucked in hand when idle, thrust out
-    # during a swing — keyboard_hitbox handles both.
-    kb = keyboard_hitbox
-    args.outputs.solids << { x: kb[:x] - camera_x, y: kb[:y], w: kb[:w], h: kb[:h],
-                             r: INK[0], g: INK[1], b: INK[2] }
-    args.outputs.solids << { x: kb[:x] - camera_x, y: kb[:y] + kb[:h] - 4,
-                             w: kb[:w], h: 4, r: CARD[0], g: CARD[1], b: CARD[2] }
   end
 
   # A brutalist card like the platforms (entities/platform.rb): an INK rect with a
@@ -228,8 +175,8 @@ class Player
     { x: @x, y: @y, w: @w, h: @h, vy: @vy, grounded: @grounded, facing: @facing,
       locked: @locked, colliding: @colliding, lock_confirmed: @lock_confirmed,
       pending_challenge: @pending_challenge, hearts: @hearts, game_over: @game_over,
-      swing_ticks_left: @swing_ticks_left, swing_dir: @swing_dir, moved: @moved,
-      reached_platform: @reached_platform, collected_password_characters: @collected_password_characters }
+      moved: @moved, reached_platform: @reached_platform,
+      collected_password_characters: @collected_password_characters }
   end
 
   def inspect = serialize.to_s

@@ -2,9 +2,8 @@
 # password enemies, so the lesson stays predictable — move, jump onto the platform,
 # then bump the enemy marching in from the right (melee is off, so the only way past
 # is the password re-auth). Clearing it drops a heal heart; grabbing it turns melee
-# on and sends a second enemy in from the left for the player to defeat with the
-# keyboard swing or a stomp, which finishes the tutorial and hands off to the
-# password level.
+# on and sends a second enemy in from the left for the player to defeat with a
+# stomp, which finishes the tutorial and hands off to the password level.
 #
 # Sized to a single screen (world_w = SCREEN_W): the whole lesson plays in one view,
 # so the player can't wander off into the empty main world and the camera never scrolls.
@@ -37,7 +36,7 @@ class TutorialLevel < Level
   # or a hop back onto the ledge can't re-trigger it): once the player is on the
   # platform, send the password enemy in from the right edge, marching left — bump
   # it to learn the re-auth. Then, after the heal, send a second one in from the
-  # left edge, marching right, for the player to defeat with the keyboard swing.
+  # left edge, marching right, for the player to defeat with a stomp.
   def update(args)
     if args.state.player.reached_platform && args.state.enemies.empty? && !@combat_spawned
       enemy = PasswordEnemy.new(x: args.state.camera_x + SCREEN_W)
@@ -52,8 +51,7 @@ class TutorialLevel < Level
 
     # Cleared once the combat enemy is dead — but only while the player is free, so
     # a body bump (which kills the enemy but locks the player for a re-auth) doesn't
-    # hand off mid-challenge. The keyboard swing kills with no lock, so it completes
-    # at once.
+    # hand off mid-challenge. A stomp kills with no lock, so it completes at once.
     if @combat_spawned && args.state.enemies.none?(&:alive) &&
        !args.state.player.locked && !args.state.player.game_over
       @defeated = true
@@ -61,13 +59,13 @@ class TutorialLevel < Level
   end
 
   # Melee is off during the re-auth lesson (so the only way past the first enemy is
-  # the password challenge) and turns on once the heart is grabbed, so the keyboard
-  # swing can defeat the second enemy.
+  # the password challenge) and turns on once the heart is grabbed, so a stomp can
+  # defeat the second enemy.
   def melee? = @healed
 
   # Re-auth cleared: drop a heal heart on the ground a short walk ahead of the
   # player (clamped to the world so it stays reachable). Collecting it heals the
-  # heart the enemy cost and triggers the keyboard-combat beat (see #update).
+  # heart the enemy cost and triggers the stomp-combat beat (see #update).
   def on_unlock(args)
     x = (args.state.player.x + 220).clamp(0, world_w - HeartPickup::SIZE)
     args.state.collectables << HeartPickup.new(x: x, y: GROUND_Y + HeartPickup::LIFT)
@@ -80,8 +78,8 @@ class TutorialLevel < Level
   def next_level = PasswordLevel.new
 
   # Bold prompt, staged by progress: move, then jump onto the ledge, then touch the
-  # enemy (which players would normally avoid), then heal and fight back with the
-  # keyboard. Short so it reads at a glance as a closed caption at the top.
+  # enemy (which players would normally avoid), then heal and fight back with a
+  # stomp. Short so it reads at a glance as a closed caption at the top.
   # (Never shown while locked — tick renders the shared challenge prompt then.)
   def draw(args)
     player = args.state.player
@@ -90,8 +88,8 @@ class TutorialLevel < Level
     elsif !player.reached_platform
       [ "Press Space to jump onto the ledge" ]
     elsif @healed
-      [ "Fight back — left-click to swing",
-        "or jump on its head to stomp it",
+      [ "Fight back — jump on its head",
+        "to stomp it",
         "← Defeat the enemy on the left" ]
     elsif args.state.collectables.any?(&:alive)
       [ "Grab the heart to heal" ]
