@@ -122,6 +122,36 @@ class PlayerTest < Minitest::Test
     assert @player.reached_platform
   end
 
+  # --- stomping enemies ---
+
+  def test_stomping_when_descending_onto_an_enemys_head
+    enemy = PasswordEnemy.new(x: @player.x) # top at GROUND_Y + HEIGHT
+    @player.y = enemy.y + enemy.h - 6 # feet just below the head, well above the midpoint
+    @player.vy = -5 # descending
+    assert @player.stomping?(enemy)
+  end
+
+  def test_not_stomping_while_rising_into_an_enemy
+    enemy = PasswordEnemy.new(x: @player.x)
+    @player.y = enemy.y + enemy.h - 6
+    @player.vy = 5 # moving up
+    refute @player.stomping?(enemy)
+  end
+
+  def test_not_stomping_on_a_side_or_ground_hit
+    enemy = PasswordEnemy.new(x: @player.x)
+    @player.y = GROUND_Y # feet on the ground, low on the enemy's body
+    @player.vy = 0
+    refute @player.stomping?(enemy)
+  end
+
+  def test_bounce_hops_up_and_leaves_the_ground
+    @player.grounded = true
+    @player.bounce
+    assert_equal Player::STOMP_BOUNCE, @player.vy
+    refute @player.grounded
+  end
+
   # --- keyboard swing ---
 
   def test_click_starts_a_full_length_swing
