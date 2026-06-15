@@ -5,6 +5,7 @@ class Player
   HEIGHT = 96
   MOVE_SPEED = 8
   JUMP_SPEED = 20
+  STOMP_BOUNCE = 12  # small hop after stomping an enemy (less than a full jump)
   GRAVITY = 1
   MAX_HEARTS = 3
 
@@ -149,6 +150,20 @@ class Player
       inner = @x + @w - KEYBOARD_GRIP + thrust      # left edge near the right hand
       { x: inner, y: hand_y, w: KEYBOARD_W, h: KEYBOARD_H }
     end
+  end
+
+  # A Mario-style stomp: the player is descending (@vy < 0) and their feet are
+  # above the enemy's vertical midpoint — i.e. they came down onto its head, not
+  # into its side. A side/ground hit (@vy >= 0, or feet low on the body) is not a
+  # stomp and still triggers the re-auth flow.
+  def stomping?(enemy)
+    @vy < 0 && @y > enemy.y + enemy.h / 2
+  end
+
+  # Hop up off a stomped enemy and leave the ground.
+  def bounce
+    @vy = STOMP_BOUNCE
+    @grounded = false
   end
 
   # Draw the figure as stacked brutalist primitives within the 64x96 hitbox: two

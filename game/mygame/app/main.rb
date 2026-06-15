@@ -150,23 +150,31 @@ module Main
       end
     end
 
-    # Fire once on contact (the transition, not every overlapping frame): dock a
-    # heart, retire the enemy for good, then either game-over (last heart) or kick
+    # Fire once on contact (the transition, not every overlapping frame). Coming
+    # down on top of an enemy stomps it — defeated outright, no heart loss, and
+    # the player bounces up (gated on melee?, like the keyboard, so the tutorial's
+    # re-auth lesson still forces the challenge). Otherwise it's a side/ground hit:
+    # dock a heart, retire the enemy, then either game-over (last heart) or kick
     # off that enemy's auth flow and freeze the player.
     args.state.enemies.each do |enemy|
       next unless enemy.alive
 
       colliding = args.geometry.intersect_rect?(enemy.hitbox, args.state.player)
       if colliding && !enemy.colliding
-        args.state.player.hearts -= 1
-        enemy.alive = false
-        if args.state.player.hearts <= 0
-          # Losing the last heart ends the run; skip the re-auth (nothing to unlock).
-          args.state.player.game_over = true
+        if args.state.level.melee? && args.state.player.stomping?(enemy)
+          enemy.alive = false
+          args.state.player.bounce
         else
-          report_collision(args, enemy.auth)
-          args.state.player.locked = true
-          args.state.player.pending_challenge = enemy.auth
+          args.state.player.hearts -= 1
+          enemy.alive = false
+          if args.state.player.hearts <= 0
+            # Losing the last heart ends the run; skip the re-auth (nothing to unlock).
+            args.state.player.game_over = true
+          else
+            report_collision(args, enemy.auth)
+            args.state.player.locked = true
+            args.state.player.pending_challenge = enemy.auth
+          end
         end
       end
       enemy.colliding = colliding

@@ -3,7 +3,8 @@
 # then bump the enemy marching in from the right (melee is off, so the only way past
 # is the password re-auth). Clearing it drops a heal heart; grabbing it turns melee
 # on and sends a second enemy in from the left for the player to defeat with the
-# keyboard swing, which finishes the tutorial and hands off to the password level.
+# keyboard swing or a stomp, which finishes the tutorial and hands off to the
+# password level.
 #
 # Sized to a single screen (world_w = SCREEN_W): the whole lesson plays in one view,
 # so the player can't wander off into the empty main world and the camera never scrolls.
@@ -90,6 +91,7 @@ class TutorialLevel < Level
       [ "Press Space to jump onto the ledge" ]
     elsif @healed
       [ "Fight back — left-click to swing",
+        "or jump on its head to stomp it",
         "← Defeat the enemy on the left" ]
     elsif args.state.collectables.any?(&:alive)
       [ "Grab the heart to heal" ]
