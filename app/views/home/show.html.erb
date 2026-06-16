@@ -135,8 +135,11 @@
     </div>
   </section>
 
-  <p class="text-center">
-    <%= link_to "Course credits", acknowledgements_path,
+  <p class="flex items-center justify-center gap-4">
+    <%= link_to "Acknowledgements", acknowledgements_path,
+          class: "font-semibold text-sm text-muted underline underline-offset-2 hover:text-ink" %>
+    <span class="text-muted" aria-hidden="true">·</span>
+    <%= link_to "Source on GitHub", "https://github.com/kcdragon/authentication-hell",
           class: "font-semibold text-sm text-muted underline underline-offset-2 hover:text-ink" %>
   </p>
 </div>
