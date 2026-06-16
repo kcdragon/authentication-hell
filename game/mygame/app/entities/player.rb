@@ -87,7 +87,10 @@ class Player
     @y += @vy
 
     @grounded = false
-    if @y <= GROUND_Y && !over_hole?(args)
+    # Re-ground only while crossing the floor line from above (prev_y >= GROUND_Y),
+    # like the one-way platform check below — otherwise a player already sunk into a
+    # pit would snap back the instant their center cleared the gap horizontally.
+    if @y <= GROUND_Y && prev_y >= GROUND_Y && !over_hole?(args)
       @y = GROUND_Y
       @vy = 0
       @grounded = true

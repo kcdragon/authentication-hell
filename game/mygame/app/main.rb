@@ -215,7 +215,10 @@ module Main
       player.game_over = true
     else
       cx = player.x + player.w / 2
-      hole = (args.state.holes || []).find { |h| cx >= h.x && cx <= h.x + h.w }
+      # The nearest gap at or left of the center: they may have drifted past its
+      # right edge while falling, so a containment check could miss the pit they
+      # actually fell through.
+      hole = (args.state.holes || []).select { |h| h.x <= cx }.max_by(&:x)
       back = (hole ? hole.x : player.x) - HOLE_RESPAWN_BACK
       player.x = back.clamp(0, args.state.level.world_w - Player::WIDTH)
       player.y = GROUND_Y
