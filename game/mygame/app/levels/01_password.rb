@@ -59,7 +59,10 @@ class PasswordLevel < Level
     lines = if all_collected?(args)
       [ "Password complete —", "head right to finish →" ]
     else
-      [ "Grab the padlocks", "#{args.state.player.collected_password_characters.size}/#{TARGETS.length} character types" ]
+      [ "Create a password using an upper case",
+        "letter, lower case letter, number",
+        "and symbol",
+        "#{args.state.player.collected_password_characters.size}/#{TARGETS.length} character types" ]
     end
     Caption.new(args, lines).draw
   end
