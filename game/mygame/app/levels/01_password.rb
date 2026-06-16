@@ -24,6 +24,10 @@ class PasswordLevel < Level
 
   def number = 1
 
+  def title = "Build a Password"
+
+  def accent = AMBER
+
   def setup(args)
     args.state.player.x = 0
     args.state.player.collected_password_characters = {}

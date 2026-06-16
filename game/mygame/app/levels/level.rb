@@ -35,6 +35,14 @@ class Level
   # Whether the keyboard melee can defeat enemies on this level.
   def melee? = true
 
+  # The level's human-readable name, shown on the intro "chapter card" (the chapter
+  # number itself is derived from #number, so each level only supplies a title).
+  def title = "Authentication 101"
+
+  # The accent color for the intro card's eyebrow + rule, [r, g, b]. Mirrors the
+  # site's semantic palette; defaults to the primary blue.
+  def accent = BLUE
+
   # The level's playable world width (the player + camera are bounded by it). The
   # main world is many screens wide; a short scripted stage can shrink it (the
   # tutorial fits one screen).

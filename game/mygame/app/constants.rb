@@ -60,6 +60,13 @@ CAPTION_LINE_H = 34
 CAPTION_PAD    = 14   # vertical padding inside the box, top and bottom
 CAPTION_MARGIN = 26   # gap between the box's top edge and the top of the screen
 
+# The level-intro "chapter card": a centered neo-brutalist card (CHAPTER N over the
+# level title) that briefly freezes the world and fades in/out whenever a level
+# begins, so a level→level cut isn't jarring. Tick-counted at 60fps.
+LEVEL_INTRO_TICKS    = 110  # ~1.8s total on screen
+LEVEL_INTRO_FADE_IN  = 18
+LEVEL_INTRO_FADE_OUT = 24
+
 # Fonts (ttf, in mygame/fonts/ — converted from the site's self-hosted woff2).
 # Lowercase-kebab filenames (matching the site's woff2 names) so the case-
 # sensitive WASM asset lookup resolves cross-platform.

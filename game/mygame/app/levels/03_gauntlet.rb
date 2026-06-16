@@ -25,6 +25,10 @@ class GauntletLevel < Level
 
   def number = 3
 
+  def title = "The Gauntlet"
+
+  def accent = RED
+
   # Pull the player back to the start (they carry the open world's right-edge x over,
   # which would otherwise read as already-finished) and lay out the hand-authored
   # scene.
