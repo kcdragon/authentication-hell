@@ -66,6 +66,15 @@ class PasswordLevelTest < Minitest::Test
     refute_empty @args.state.platforms
   end
 
+  def test_setup_scatters_pits_within_the_world
+    @level.setup(@args)
+    refute_empty @args.state.holes
+    @args.state.holes.each do |hole|
+      assert_operator hole.x, :>=, 0
+      assert_operator hole.x + hole.w, :<=, @level.world_w
+    end
+  end
+
   def test_does_not_complete_at_the_wall_without_every_character
     @level.setup(@args)
     @args.state.player.x = WORLD_W - Player::WIDTH # at the exit, but empty-handed

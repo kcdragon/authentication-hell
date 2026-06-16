@@ -26,6 +26,15 @@ class MainLevelTest < Minitest::Test
            "nearest enemy patrol reach (#{nearest_reach}) must clear the player's right edge"
   end
 
+  def test_setup_scatters_pits_within_the_world
+    @level.setup(@args)
+    refute_empty @args.state.holes
+    @args.state.holes.each do |hole|
+      assert_operator hole.x, :>=, 0
+      assert_operator hole.x + hole.w, :<=, @level.world_w
+    end
+  end
+
   def test_serialize_names_the_level
     assert_equal "MainLevel", @level.serialize[:level]
   end

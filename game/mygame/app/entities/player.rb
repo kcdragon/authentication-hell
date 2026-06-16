@@ -87,7 +87,7 @@ class Player
     @y += @vy
 
     @grounded = false
-    if @y <= GROUND_Y
+    if @y <= GROUND_Y && !over_hole?(args)
       @y = GROUND_Y
       @vy = 0
       @grounded = true
@@ -106,6 +106,16 @@ class Player
         end
       end
     end
+  end
+
+  # True when the player's center is over a gap in the ground (a hole), so the ground
+  # check above lets them fall through instead of landing. Standing on the edge is
+  # fine — they only drop once their center clears it. Holes live in args.state.holes
+  # (empty on levels without pits).
+  def over_hole?(args)
+    return false unless args.state.holes
+    cx = @x + @w / 2
+    args.state.holes.any? { |hole| cx > hole.x && cx < hole.x + hole.w }
   end
 
   # A Mario-style stomp: the player is descending (@vy < 0) and their feet are

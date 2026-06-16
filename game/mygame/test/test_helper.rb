@@ -12,6 +12,7 @@ require_relative "../app/caption"
 require_relative "../app/entities/player"
 require_relative "../app/entities/enemy"
 require_relative "../app/entities/platform"
+require_relative "../app/entities/hole"
 require_relative "../app/entities/heart_pickup"
 require_relative "../app/entities/password_character"
 require_relative "../app/entities/enemies/totp"
@@ -33,7 +34,7 @@ module GameTest
   Inputs = Struct.new(:keyboard)
   # captions_on gates the closed caption a level draws (via Caption) in its #draw path.
   State = Struct.new(:camera_x, :platforms, :enemies, :collectables, :player, :level,
-                     :tick_count, :captions_on)
+                     :tick_count, :captions_on, :holes)
   Outputs = Struct.new(:sprites, :solids, :labels)
   Args = Struct.new(:inputs, :state, :outputs)
 
@@ -43,10 +44,11 @@ module GameTest
   # one-screen bound.
   def build_args(left: false, right: false,
                  space: false, camera_x: 0, platforms: [], enemies: nil,
-                 collectables: nil, player: nil, level: MainLevel.new, tick_count: 0)
+                 collectables: nil, player: nil, level: MainLevel.new, tick_count: 0,
+                 holes: [])
     Args.new(
       Inputs.new(Keyboard.new(left, right, KeyDown.new(space))),
-      State.new(camera_x, platforms, enemies, collectables, player, level, tick_count),
+      State.new(camera_x, platforms, enemies, collectables, player, level, tick_count, nil, holes),
       Outputs.new([], [], [])
     )
   end

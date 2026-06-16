@@ -3,6 +3,7 @@ require "app/caption.rb"
 require "app/entities/player.rb"
 require "app/entities/enemy.rb"
 require "app/entities/platform.rb"
+require "app/entities/hole.rb"
 require "app/entities/heart_pickup.rb"
 require "app/entities/password_character.rb"
 require "app/entities/enemies/totp.rb"
@@ -117,6 +118,9 @@ module Main
     # locked) — all owned by the player.
     args.state.player.update(args)
 
+    # A pit-fall: the player walked off a gap in the ground and dropped through.
+    handle_hole_fall(args) unless args.state.player.game_over
+
     # Horizontal camera: keep the player centered, clamped to the world edges.
     args.state.camera_x =
       (args.state.player.x + args.state.player.w / 2 - SCREEN_W / 2)
@@ -195,6 +199,29 @@ module Main
 
     # On game over the run can be restarted from the "Video Ended" card.
     restart_run(args) if args.state.player.game_over && args.inputs.keyboard.key_down.r
+  end
+
+  # Once the player has sunk fully past the floor — only possible over a hole, since
+  # jumps go up and the ground/platform checks otherwise pin them to GROUND_Y — dock a
+  # heart and, unless that was the last one, drop them back onto solid ground just left
+  # of the gap. No re-auth (that's reserved for enemy collisions); the last heart ends
+  # the run like any other death.
+  def handle_hole_fall(args)
+    player = args.state.player
+    return if player.y > HOLE_FALL_LIMIT
+
+    player.hearts -= 1
+    if player.hearts <= 0
+      player.game_over = true
+    else
+      cx = player.x + player.w / 2
+      hole = (args.state.holes || []).find { |h| cx >= h.x && cx <= h.x + h.w }
+      back = (hole ? hole.x : player.x) - HOLE_RESPAWN_BACK
+      player.x = back.clamp(0, args.state.level.world_w - Player::WIDTH)
+      player.y = GROUND_Y
+      player.vy = 0
+      player.grounded = true
+    end
   end
 
   # Draw the whole frame: the warm-paper playfield, the world entities, then the
@@ -290,6 +317,11 @@ module Main
     args.outputs.solids << { x: 0, y: BAR_TOP - 3, w: SCREEN_W, h: 3,
                              r: INDIGO_LIP[0], g: INDIGO_LIP[1], b: INDIGO_LIP[2] }
 
+    # Pits cut through the dark band here — after it's laid down, but before the
+    # scrubber/transport, so the controls still draw legibly over a gap. Hidden behind
+    # the intro card like the rest of the scene.
+    draw_holes(args) unless level_intro_active?(args)
+
     draw_scrubber(args)
     draw_transport(args)
   end
@@ -367,6 +399,13 @@ module Main
                              size_px: 20, font: FONT_MONO,
                              r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2],
                              anchor_x: 1, anchor_y: 1 }
+  end
+
+  # Each pit breaks the floor in world space; drawn after the control bar so the
+  # cutout sits over its lip (entities/hole.rb owns the look).
+  def draw_holes(args)
+    cam = args.state.camera_x || 0
+    (args.state.holes || []).each { |hole| hole.render(args, cam) }
   end
 
   # Three heart slots in the top-left: the full sprite for hearts the player still

@@ -26,6 +26,11 @@ class TutorialLevelTest < Minitest::Test
     assert_includes Platform::TIERS, platform.y + platform.h
   end
 
+  def test_setup_leaves_the_ground_flat_with_no_pits
+    @level.setup(@args)
+    assert_empty @args.state.holes
+  end
+
   def test_update_holds_the_enemy_until_the_player_reaches_the_platform
     @level.setup(@args)
     @args.state.player.reached_platform = false
