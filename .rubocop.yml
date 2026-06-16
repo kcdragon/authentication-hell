@@ -18,6 +18,9 @@ AllCops:
     # repl.rb is DragonRuby's vendored console scratch file, shipped with the
     # sample game. main.rb is the only hand-written source in game/mygame/.
     - "game/mygame/app/repl.rb"
+    # Slidev talk decks — not application code; any .rb here is a code snippet
+    # transcluded into slides, not meant to follow the app's house style.
+    - "talks/**/*"
 
 # Overwrite or add rules to create your own house style
 #

@@ -11,3 +11,5 @@
 - game/.dragonruby/
 # DragonRuby's vendored console scratch file, shipped with the sample game.
 - game/mygame/app/repl.rb
+# Slidev talk decks — not application code (see talks/README.md).
+- talks/
