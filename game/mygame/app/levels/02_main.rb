@@ -14,6 +14,7 @@ class MainLevel < Level
   def setup(args)
     args.state.enemies = Enemy.spawn_random(args.state.player.x)
     args.state.platforms = Platform.scatter
+    args.state.holes = Hole.scatter
     args.state.collectables = []
   end
 

@@ -8,6 +8,13 @@ GROUND_Y = 100  # y of the ground line the player and enemies stand on
 SCREEN_W = 1280
 SCREEN_H = 720
 
+# Mario-style pits (entities/hole.rb): a gap in the ground the player falls through.
+# HOLE_FALL_LIMIT is how far below the floor line they must sink (fully behind the
+# control bar — Player::HEIGHT is 96) before it counts as a fall; HOLE_RESPAWN_BACK is
+# how far left of the gap they respawn on solid ground.
+HOLE_FALL_LIMIT   = -120
+HOLE_RESPAWN_BACK = 170
+
 # ── HARD MODE visual system ─────────────────────────────────────────────────
 # The game is re-skinned to read as an embedded corporate-training *video player*
 # (see game/README-video-player.md). Palette + chrome layout live here so the

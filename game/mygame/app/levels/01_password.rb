@@ -33,6 +33,7 @@ class PasswordLevel < Level
     args.state.player.collected_password_characters = {}
     args.state.camera_x = 0
     args.state.platforms = Platform.scatter
+    args.state.holes = Hole.scatter
     args.state.collectables = scatter_chars(args.state.platforms)
     args.state.enemies = hazard_enemies(args.state.player.x)
   end

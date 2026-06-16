@@ -27,6 +27,7 @@ class TutorialLevel < Level
     # heal heart is dropped later, on re-auth (#on_unlock).
     args.state.enemies = []
     args.state.collectables = []
+    args.state.holes = [] # flat ground — the lesson stays predictable
     # One reachable ledge near the player's start (x:200) so the jump lesson has
     # something to land on.
     args.state.platforms = [

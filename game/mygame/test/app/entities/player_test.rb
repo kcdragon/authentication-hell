@@ -117,6 +117,41 @@ class PlayerTest < Minitest::Test
     assert @player.reached_platform
   end
 
+  # --- falling through holes ---
+
+  def test_falls_through_a_hole_under_its_center_instead_of_landing
+    hole = Hole.new(x: 200, w: 150) # player center (x 200 + 32) sits inside it
+    @player.x = 200
+    @player.y = GROUND_Y + 5
+    @player.vy = -10
+    @player.grounded = false
+    @player.update(build_args(holes: [ hole ]))
+    refute @player.grounded, "no ground over a gap"
+    assert_operator @player.y, :<, GROUND_Y, "keeps falling past the floor line"
+  end
+
+  def test_lands_normally_when_the_hole_is_elsewhere
+    hole = Hole.new(x: 2000, w: 150) # nowhere near the player
+    @player.x = 200
+    @player.y = GROUND_Y + 5
+    @player.vy = -10
+    @player.grounded = false
+    @player.update(build_args(holes: [ hole ]))
+    assert_equal GROUND_Y, @player.y
+    assert @player.grounded
+  end
+
+  def test_stands_on_the_edge_until_the_center_clears_the_gap
+    # Hole starts just past the player's center, so the center is still on solid ground.
+    hole = Hole.new(x: @player.x + @player.w / 2 + 1, w: 150)
+    @player.y = GROUND_Y + 5
+    @player.vy = -10
+    @player.grounded = false
+    @player.update(build_args(holes: [ hole ]))
+    assert @player.grounded, "edge is still supported while the center is on solid ground"
+    assert_equal GROUND_Y, @player.y
+  end
+
   # --- stomping enemies ---
 
   def test_stomping_when_descending_onto_an_enemys_head

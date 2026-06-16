@@ -70,6 +70,17 @@ class GauntletLevelTest < Minitest::Test
     assert_operator ledges.last.x + ledges.last.w, :>=, safe_right
   end
 
+  def test_setup_cuts_pits_only_in_the_central_floor
+    @level.setup(@args)
+    refute_empty @args.state.holes
+    @args.state.holes.each do |hole|
+      # Clear of the enemy-free start patch (so the climb-on stays solid) and short of
+      # the end patch / right wall (so the drop-off to the exit stays solid).
+      assert_operator hole.x, :>=, GauntletLevel::ENEMY_START_X
+      assert_operator hole.x + hole.w, :<=, @level.world_w - 1000
+    end
+  end
+
   def test_completes_at_the_right_wall_and_loops_a_fresh_lap
     @level.setup(@args)
     refute @level.complete?

@@ -37,6 +37,9 @@ class GauntletLevel < Level
     args.state.camera_x = 0
     args.state.enemies = ground_enemies
     args.state.platforms = platform_path
+    # Pits in the central crawling floor only (the start/end patches stay solid so the
+    # climb-on and drop-off are safe) — another reason to stay on the platforms.
+    args.state.holes = Hole.scatter(start_x: 1000, end_margin: 1200)
     args.state.collectables = []
   end
 
