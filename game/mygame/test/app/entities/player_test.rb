@@ -141,6 +141,17 @@ class PlayerTest < Minitest::Test
     assert @player.grounded
   end
 
+  def test_keeps_falling_after_clearing_a_hole_while_descending
+    hole = Hole.new(x: 200, w: 150)            # center already past its right edge
+    @player.x = 360                            # center 392 > 350 (hole right edge)
+    @player.y = -50                            # already sunk below the floor line
+    @player.vy = -12
+    @player.grounded = false
+    @player.update(build_args(holes: [ hole ], right: true))
+    refute @player.grounded, "a player mid-fall isn't re-grounded by clearing the gap"
+    assert_operator @player.y, :<, GROUND_Y
+  end
+
   def test_stands_on_the_edge_until_the_center_clears_the_gap
     # Hole starts just past the player's center, so the center is still on solid ground.
     hole = Hole.new(x: @player.x + @player.w / 2 + 1, w: 150)
