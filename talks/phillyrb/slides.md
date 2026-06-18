@@ -78,6 +78,27 @@ layout: two-cols
 layoutClass: gap-8
 ---
 
+## DragonRuby Game Toolkit
+
+- Cross-platform 2D Game Engine
+  - Mac, Linux, Windows
+  - Steam Deck
+  - PS5, Xbox, Nintendo Switch
+  - iOS, Android
+  - Web (WASM)
+- Write your games in Ruby
+
+::right::
+
+<div class="flex items-center justify-center h-full">
+  <img src="./images/dragonruby-logo.png" class="max-w-full max-h-80" alt="DragonRuby logo" />
+</div>
+
+---
+layout: two-cols
+layoutClass: gap-8
+---
+
 ## DragonRuby
 
 - Custom Ruby runtime
@@ -89,27 +110,6 @@ layoutClass: gap-8
 
 <div class="flex items-center justify-center h-full">
   <img src="./images/mruby-logo.png" class="max-w-full max-h-72" alt="mruby logo" />
-</div>
-
----
-layout: two-cols
-layoutClass: gap-8
----
-
-## DragonRuby Game Toolkit
-
-- Cross-platform 2D Game Engine
-  - Mac, Linux, Windows
-  - Steam Deck
-  - PS5, Xbox, Nintendo Switch
-  - iOS, Android
-  - Web (WASM)
-- Uses [SDL](https://www.libsdl.org/)
-
-::right::
-
-<div class="flex items-center justify-center h-full">
-  <img src="./images/dragonruby-logo.png" class="max-w-full max-h-80" alt="DragonRuby logo" />
 </div>
 
 ---
