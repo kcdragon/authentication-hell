@@ -27,31 +27,31 @@ matching the app's brutalist headings.
 
 ---
 layout: image
-image: ./images/create-password-rules.png
+image: /images/create-password-rules.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
-image: ./images/okta-verify-push.png
+image: /images/okta-verify-push.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
-image: ./images/authy-totp-codes.png
+image: /images/authy-totp-codes.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
-image: ./images/email-otp-code.png
+image: /images/email-otp-code.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
-image: ./images/security-key-webauthn.png
+image: /images/security-key-webauthn.png
 backgroundSize: cover
 ---
 
@@ -199,7 +199,10 @@ Live demo slot. Either:
 
 ## Embedding a screenshot
 
-Put images in `./images/` next to this file, then reference them. Once you
+Put images in `./images/` and reference them relatively (`![](./images/x.png)`
+or `<img src="./images/x.png">`) — Vite imports them. Full-slide backgrounds
+(`layout: image`) instead need the file in `./public/images/` and a
+root-absolute `/images/...` path so they resolve in presenter mode. Once you
 drop a real screenshot in, uncomment the line below:
 
 <!-- ![game level one](./images/level-one.png) -->
