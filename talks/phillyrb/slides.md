@@ -60,6 +60,24 @@ layout: two-cols
 layoutClass: gap-8
 ---
 
+## DragonRuby
+
+- Custom Ruby runtime
+- Based on [mruby](https://mruby.org/)
+- Subset of Ruby language specification
+- No Gem support
+
+::right::
+
+<div class="flex items-center justify-center h-full">
+  <img src="./images/mruby-logo.png" class="max-w-full max-h-72" alt="mruby logo" />
+</div>
+
+---
+layout: two-cols
+layoutClass: gap-8
+---
+
 ## DragonRuby Game Toolkit
 
 - Cross-platform 2D Game Engine
