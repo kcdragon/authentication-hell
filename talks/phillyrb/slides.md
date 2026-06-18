@@ -86,8 +86,7 @@ layoutClass: gap-8
   - PS5, Xbox, Nintendo Switch
   - iOS, Android
   - Web (WASM)
-- Uses [SDL](https://www.libsdl.org/) and [mruby](https://mruby.org/)
-- Write your games in Ruby
+- Uses [SDL](https://www.libsdl.org/)
 
 ::right::
 
