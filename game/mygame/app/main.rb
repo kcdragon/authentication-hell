@@ -183,7 +183,6 @@ module Main
     # Only poll once the collision POST has landed, so a status check can't beat
     # the server flag. Drop the (non-serializable) handle so state export works.
     if args.state.collision_request &&
-       args.state.collision_request != :pending &&
        args.state.collision_request[:complete]
       args.state.collision_request = nil
       args.state.player.lock_confirmed = true
