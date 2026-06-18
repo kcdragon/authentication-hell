@@ -19,9 +19,11 @@ class PasswordCharacterTest < Minitest::Test
     assert_equal "Q", char.glyph
   end
 
-  def test_sits_on_the_ground_with_a_full_body_hitbox
+  def test_floats_a_chip_hitbox_above_its_surface
     char = PasswordCharacter.new(x: 320, klass: :digit)
-    assert_equal({ x: 320, y: GROUND_Y, w: PasswordCharacter::SIZE, h: PasswordCharacter::SIZE }, char.hitbox)
+    inset = (PasswordCharacter::SIZE - PasswordCharacter::CHIP) / 2
+    assert_equal({ x: 320 + inset, y: GROUND_Y + PasswordCharacter::FLOAT_GAP,
+                   w: PasswordCharacter::CHIP, h: PasswordCharacter::CHIP }, char.hitbox)
   end
 
   def test_collect_records_the_class_and_glyph_on_the_player
