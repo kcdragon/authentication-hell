@@ -97,6 +97,71 @@ layoutClass: gap-8
 
 ---
 
+## A simple app
+
+````md magic-move
+```ruby
+def tick(args)
+  args.state.player ||= { x: 100,
+                          y: 100,
+                          w: 50,
+                          h: 50,
+                          path: 'sprites/square/green.png' }
+end
+```
+```ruby
+def tick(args)
+  args.state.player ||= { x: 100,
+                          y: 100,
+                          w: 50,
+                          h: 50,
+                          path: 'sprites/square/green.png' }
+
+  args.outputs.sprites << args.state.player
+end
+```
+```ruby
+def tick(args)
+  args.state.player ||= { x: 100,
+                          y: 100,
+                          w: 50,
+                          h: 50,
+                          path: 'sprites/square/green.png' }
+
+  if args.inputs.up
+    args.state.player.y += 10
+  elsif args.inputs.down
+    args.state.player.y -= 10
+  end
+
+  if args.inputs.left
+    args.state.player.x -= 10
+  elsif args.inputs.right
+    args.state.player.x += 10
+  end
+
+  args.outputs.sprites << args.state.player
+end
+```
+````
+
+---
+
+## A simple app
+
+<div class="absolute inset-0 flex items-center justify-center">
+  <a
+    href="https://samples.dragonruby.org/samples/02_input_basics/01_moving_a_sprite/index.html"
+    target="_blank"
+    rel="noopener"
+    class="ah-card bg-white px-6 py-4 text-xl font-bold no-underline !text-ink"
+  >
+    ▶ Demo ↗
+  </a>
+</div>
+
+---
+
 <Placeholder />
 
 ## Why this talk exists
