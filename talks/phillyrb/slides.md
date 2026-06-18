@@ -48,6 +48,8 @@ layout: section
 
 # "Authentication Hell"
 
+<!-- What do I mean by authentication hell... -->
+
 ---
 layout: image
 hideInToc: true
@@ -87,7 +89,7 @@ backgroundSize: cover
 layout: section
 ---
 
-# Why a game?
+# A game?
 
 ---
 layout: image
@@ -230,151 +232,199 @@ hideInToc: true
 layout: section
 ---
 
-# The game & live demo
+# The game
 
 ---
 hideInToc: true
 ---
 
-## Claude Design
+## Tech Stack
+
+- DragonRuby game compiled to WASM
+- Embedded inside a Rails 8 app
+- Built-in Rails Authentication generator
+- rotp and webauthn gems
 
 ---
 hideInToc: true
 ---
 
-<Placeholder />
+## Game Demo
 
-## Why this talk exists
-
-- Technology keeps getting better, yet we still juggle passwords, push notifications, codes…
-- What if authentication was *literally* never ending?
-- So I built a game about it — in Ruby, in the browser.
-
-<div class="mt-8 flex gap-2">
-  <span class="ah-badge ah-badge--password">Password</span>
-  <span class="ah-badge ah-badge--totp">TOTP</span>
-  <span class="ah-badge ah-badge--passkey">Passkey</span>
+<div class="absolute inset-0 flex items-center justify-center">
+  <a
+    href="http://localhost:3000/game"
+    target="_blank"
+    rel="noopener"
+    class="ah-card bg-white px-6 py-4 text-xl font-bold no-underline !text-ink"
+  >
+    ▶ Demo ↗
+  </a>
 </div>
 
-<!-- The badges are the app's real role colors: amber/purple/blue. -->
-
----
-layout: section
-hideInToc: true
----
-
-<Placeholder />
-
-# Demo
-
-<div class="ah-tagline">authenticationhell.com</div>
-
-<!--
-Live demo slot. Either:
-  - Alt-tab to the running app, or
-  - Drop a screenshot/gif below (see the next slide for how to embed).
--->
-
 ---
 hideInToc: true
 ---
 
-<Placeholder />
+## Authenticate in game
 
-## Embedding a screenshot
-
-Put images in `./images/` and reference them relatively (`![](./images/x.png)`
-or `<img src="./images/x.png">`) — Vite imports them. Full-slide backgrounds
-(`layout: image`) instead need the file in `./public/images/` and a
-root-absolute `/images/...` path so they resolve in presenter mode. Once you
-drop a real screenshot in, uncomment the line below:
-
-<!-- ![game level one](./images/level-one.png) -->
-
-<div class="ah-card mt-6 text-muted">
-  Screenshot goes here — the <code>.ah-card</code> frame matches the app's raised cards.
+<div class="flex justify-center mt-6">
+  <div class="ah-card bg-white p-2 leading-none">
+    <SlidevVideo autoplay loop muted class="block max-h-[42vh] w-auto">
+      <source :src="'/videos/authenticate-in-game.mp4'" type="video/mp4" />
+    </SlidevVideo>
+  </div>
 </div>
 
-<!--
-Card placeholder kept so the scaffold builds before any image exists.
-Replace with a real screenshot from the game and uncomment the image line.
--->
-
 ---
 hideInToc: true
 ---
 
-<Placeholder />
+## Trigger authentication (game)
 
-## Pulling in real code from the repo
-
-Slidev can import line ranges from a source file, so the slide always matches
-what's actually in the game. Once a real auth model exists, add a
-transclusion here, e.g.:
-
-```
-<<< ../../../app/models/user.rb#login {1-12}
-```
-
-<!--
-Path is relative to this slides.md; `../../../` climbs
-talks/phillyrb -> talks -> repo root. Shown fenced (not live) so the
-scaffold builds before app/models/user.rb exists — drop the fences to
-make it a real import.
--->
-
----
-hideInToc: true
----
-
-<Placeholder />
-
-## A fenced code block
-
+````md magic-move
 ```ruby
-class SessionsController < ApplicationController
-  def create
-    user = User.find_by(email: params[:email])
-    if user&.authenticate(params[:password])
-      start_new_session_for user
-      redirect_to after_authentication_url
-    else
-      redirect_to new_session_path, alert: "Try again."
+def tick(args)
+  args.state.collision_request = DR.http_post(
+    "http://localhost:3000/games/password/start"
+  )
+end
+```
+```ruby
+def tick(args)
+  if args.state.collision_request && args.state.collision_request[:complete]
+    args.state.collision_request = nil
+    args.state.player.frozen = true
+  end
+  
+  args.state.collision_request = DR.http_post(
+    "http://localhost:3000/games/password/start"
+  )
+end
+```
+```ruby
+def tick(args)
+  if args.state.collision_request && args.state.collision_request[:complete]
+    args.state.collision_request = nil
+    args.state.player.frozen = true
+  end
+  
+  args.state.collision_request = DR.http_post(
+    "http://localhost:3000/games/password/start"
+  )
+  
+  if args.state.player.frozen
+    if !args.state.status_request
+      args.state.status_request = DR.http_get("http://localhost:3000/games/password/status")
     end
   end
 end
 ```
+```ruby
+def tick(args)
+  if args.state.collision_request && args.state.collision_request[:complete]
+    args.state.collision_request = nil
+    args.state.player.frozen = true
+  end
+  
+  args.state.collision_request = DR.http_post(
+    "http://localhost:3000/games/password/start"
+  )
+  
+  if args.state.player.frozen
+    if !args.state.status_request
+      args.state.status_request = DR.http_get("http://localhost:3000/games/password/status")
+    elsif args.state.status_request[:complete]
+      data = DR.parse_json(args.state.status_request[:response_data])
+      if data && data["frozen"] == false
+        args.state.player.frozen = false
+      end
+      args.state.status_request = nil
+    end
+  end
+end
+```
+````
 
 ---
-layout: two-cols
 hideInToc: true
-layoutClass: gap-8
 ---
 
-<Placeholder />
+## Trigger authentication (web)
 
-## The auth gauntlet
+````md magic-move
+```ruby
+class Games::PasswordChallengeController < ApplicationController
+  skip_forgery_protection only: :start
 
-- <span class="ah-password">Passwords</span>
-- Email confirmation
-- Password reset
-- <span class="ah-totp">TOTP 2FA</span>
-- Recovery codes
-- <span class="ah-passkey">WebAuthn passkeys</span>
+  def start
+    Current.session.game_challenges.find_or_create_by!(kind: "password")
+    Turbo::StreamsChannel.broadcast_append_to(
+      Current.user, :toasts,
+      target: "toasts",
+      partial: "games/password_challenge",
+      locals: { user: Current.user }
+    )
+    head :no_content
+  end
+end
+```
+```ruby
+class Games::PasswordChallengeController < ApplicationController
+  skip_forgery_protection only: :start
 
-::right::
+  def start
+    Current.session.game_challenges.find_or_create_by!(kind: "password")
+    Turbo::StreamsChannel.broadcast_append_to(
+      Current.user, :toasts,
+      target: "toasts",
+      partial: "games/password_challenge",
+      locals: { user: Current.user }
+    )
+    head :no_content
+  end
+  
+  def status
+    render json: { locked: Current.session.game_challenges.exists?(kind: "password") }
+  end
+end
+```
+````
 
-## In the game
+---
+hideInToc: true
+---
 
-Each enemy collision forces you to re-authenticate mid-play — with a
-progressively more annoying method.
+## Resolve authentication (web)
 
-<div class="ah-card mt-4">
-  Collide → a challenge toast pops in the app's role color, and the run
-  freezes until you answer it.
-</div>
+````md magic-move
+```ruby
+class Games::PasswordChallengeController < ApplicationController
+  def complete
+    if Current.session.game_challenges.exists?(kind: "password") && Current.user.authenticate(params[:password])
+      Current.session.game_challenges.where(kind: "password").delete_all
+      Achievement::Awarder.call(Current.user, :password_survivor)
+      render turbo_stream: turbo_stream.remove("toast")
+    else
+      render turbo_stream: turbo_stream.replace(
+        "toast",
+        partial: "games/password_challenge",
+        locals: { user: Current.user, error: "Invalid password. Try again." }
+      )
+    end
+  end
+end
+```
+````
 
-<!-- Tie the real auth stack to the game mechanic; colors match the app. -->
+---
+
+# What's next?
+
+- Improved communication between game and web app
+  - Client-side communication instead of HTTP
+- More authentication enemies
+- Make the game fun
 
 ---
 layout: cover
