@@ -56,6 +56,24 @@ backgroundSize: cover
 ---
 
 ---
+layout: image
+image: /images/rubyconf-cfp.png
+backgroundSize: cover
+---
+
+<!--
+Earlier this year...
+-->
+
+---
+
+## "Weird Ruby" Track
+
+<blockquote class="mt-8 border-l-4 border-ink pl-6 italic" style="font-size: 3rem; line-height: 1.3;">
+  ...A program which absolutely should not exist, yet, defying all reason and good taste, does....And we want you to do it in Ruby.
+</blockquote>
+
+---
 layout: two-cols
 layoutClass: gap-8
 ---
