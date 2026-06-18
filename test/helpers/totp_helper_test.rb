@@ -1,6 +1,8 @@
 require "test_helper"
 
 class TotpHelperTest < ActionView::TestCase
+  include ApplicationHelper # dev_totp_prefill delegates to dev_prefills_enabled?
+
   setup { @user = users(:one) }
 
   test "dev_totp_prefill returns the user's current code in development" do

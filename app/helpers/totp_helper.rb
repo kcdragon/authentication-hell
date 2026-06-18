@@ -14,8 +14,8 @@ module TotpHelper
 
   # In development, the user's current TOTP code (they're enrolled via db/seeds
   # with a known secret) so a code-entry form can prefill it and verifying is one
-  # click. Returns nil outside development or when the user isn't enrolled.
+  # click. Returns nil when prefills are disabled or the user isn't enrolled.
   def dev_totp_prefill(user)
-    user.totp&.now if Rails.env.development?
+    user.totp&.now if dev_prefills_enabled?
   end
 end
