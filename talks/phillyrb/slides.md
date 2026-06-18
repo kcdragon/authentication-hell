@@ -56,6 +56,28 @@ backgroundSize: cover
 ---
 
 ---
+layout: two-cols
+layoutClass: gap-8
+---
+
+## DragonRuby Game Toolkit
+
+- Cross-platform 2D Game Engine
+  - Mac, Linux, Windows
+  - Steam Deck
+  - PS5, Xbox, Nintendo Switch
+  - iOS, Android
+  - Web (WASM)
+- Uses [SDL](https://www.libsdl.org/) and [mruby](https://mruby.org/)
+- Write your games in Ruby
+
+::right::
+
+<div class="flex items-center justify-center h-full">
+  <img src="./images/dragonruby-logo.png" class="max-w-full max-h-80" alt="DragonRuby logo" />
+</div>
+
+---
 
 <Placeholder />
 
