@@ -228,17 +228,28 @@ layout: cover
 
 <div class="flex items-start justify-center gap-16 mt-10">
   <div class="flex flex-col items-center">
-    <div class="ah-tagline !mt-0 mb-3 text-xl !text-ink">authenticationhell.com</div>
+    <a href="https://authenticationhell.com" target="_blank" rel="noopener" class="ah-tagline !mt-0 mb-3 text-xl !text-ink no-underline">authenticationhell.com</a>
     <div class="ah-card bg-white p-4 leading-none">
       <img src="./images/qr-authenticationhell.svg" class="w-44 h-44" alt="QR code to authenticationhell.com" />
     </div>
   </div>
   <div class="flex flex-col items-center">
-    <div class="ah-tagline !mt-0 mb-3 text-xl !text-ink flex items-center gap-2">
+    <a href="https://github.com/kcdragon/authentication-hell" target="_blank" rel="noopener" class="ah-tagline !mt-0 mb-3 text-xl !text-ink no-underline flex items-center gap-2">
       <ph-github-logo-fill class="text-2xl" /> kcdragon/authentication-hell
-    </div>
+    </a>
     <div class="ah-card bg-white p-4 leading-none">
       <img src="./images/qr-github.svg" class="w-44 h-44" alt="QR code to the source on GitHub" />
     </div>
   </div>
+</div>
+
+<div class="absolute bottom-4 left-0 right-0 text-center text-xs text-muted">
+  Built with
+  <a href="https://www.ruby-lang.org/en/" target="_blank" rel="noopener">Ruby</a>
+  ·
+  <a href="https://rubyonrails.org/" target="_blank" rel="noopener">Ruby on Rails</a>
+  ·
+  <a href="https://dragonruby.org/" target="_blank" rel="noopener">DragonRuby</a>
+  ·
+  <a href="https://sli.dev/" target="_blank" rel="noopener">Slidev</a>
 </div>
