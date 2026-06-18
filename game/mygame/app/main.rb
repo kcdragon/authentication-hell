@@ -608,7 +608,6 @@ module Main
   # so the session cookie identifies the player; the body is empty but the API
   # wants form-encoded content.
   def report_collision(args, kind)
-    args.state.collision_request = :pending
     args.state.collision_request = DR.http_post(
       start_url(args, kind),
       {},
