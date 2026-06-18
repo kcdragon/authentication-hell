@@ -9,4 +9,8 @@ module ApplicationHelper
         class: "grid #{size_classes} place-items-center rounded-[3px] border-2 border-ink bg-password font-display text-sm text-ink"
     end
   end
+
+  def dev_prefills_enabled?
+    Rails.env.development? && ENV["DISABLE_DEV_PREFILLS"].blank?
+  end
 end
