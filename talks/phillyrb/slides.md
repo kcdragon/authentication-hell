@@ -12,6 +12,7 @@ drawings:
 transition: slide-left
 mdc: true
 layout: cover
+hideInToc: true
 ---
 
 # Authentication Hell
@@ -26,37 +27,71 @@ matching the app's brutalist headings.
 -->
 
 ---
+layout: section
+---
+
+## Agenda
+
+<Toc minDepth="1" maxDepth="1" columns="2" class="ah-toc mt-6" />
+
+<!--
+The agenda is auto-generated from the `# Section` headings on the
+`layout: section` divider slides below. Every other slide sets
+`hideInToc: true`, so only those four dividers appear here. Reorder or
+rename a section and this list follows automatically. Entries are
+clickable and the current section highlights while presenting.
+-->
+
+---
+layout: section
+---
+
+# "Authentication Hell"
+
+---
 layout: image
+hideInToc: true
 image: /images/create-password-rules.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
+hideInToc: true
 image: /images/okta-verify-push.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
+hideInToc: true
 image: /images/authy-totp-codes.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
+hideInToc: true
 image: /images/email-otp-code.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
+hideInToc: true
 image: /images/security-key-webauthn.png
 backgroundSize: cover
 ---
 
 ---
+layout: section
+---
+
+# Why a game?
+
+---
 layout: image
+hideInToc: true
 image: /images/rubyconf-cfp.png
 backgroundSize: cover
 ---
@@ -66,6 +101,8 @@ Earlier this year...
 -->
 
 ---
+hideInToc: true
+---
 
 ## "Weird Ruby" Track
 
@@ -74,7 +111,14 @@ Earlier this year...
 </blockquote>
 
 ---
+layout: section
+---
+
+# DragonRuby & mruby
+
+---
 layout: two-cols
+hideInToc: true
 layoutClass: gap-8
 ---
 
@@ -96,6 +140,7 @@ layoutClass: gap-8
 
 ---
 layout: two-cols
+hideInToc: true
 layoutClass: gap-8
 ---
 
@@ -112,6 +157,8 @@ layoutClass: gap-8
   <img src="./images/mruby-logo.png" class="max-w-full max-h-72" alt="mruby logo" />
 </div>
 
+---
+hideInToc: true
 ---
 
 ## A simple app
@@ -163,6 +210,8 @@ end
 ````
 
 ---
+hideInToc: true
+---
 
 ## A simple app
 
@@ -177,6 +226,20 @@ end
   </a>
 </div>
 
+---
+layout: section
+---
+
+# The game & live demo
+
+---
+hideInToc: true
+---
+
+## Claude Design
+
+---
+hideInToc: true
 ---
 
 <Placeholder />
@@ -197,6 +260,7 @@ end
 
 ---
 layout: section
+hideInToc: true
 ---
 
 <Placeholder />
@@ -211,6 +275,8 @@ Live demo slot. Either:
   - Drop a screenshot/gif below (see the next slide for how to embed).
 -->
 
+---
+hideInToc: true
 ---
 
 <Placeholder />
@@ -235,6 +301,8 @@ Replace with a real screenshot from the game and uncomment the image line.
 -->
 
 ---
+hideInToc: true
+---
 
 <Placeholder />
 
@@ -255,6 +323,8 @@ scaffold builds before app/models/user.rb exists — drop the fences to
 make it a real import.
 -->
 
+---
+hideInToc: true
 ---
 
 <Placeholder />
@@ -277,6 +347,7 @@ end
 
 ---
 layout: two-cols
+hideInToc: true
 layoutClass: gap-8
 ---
 
@@ -307,6 +378,7 @@ progressively more annoying method.
 
 ---
 layout: cover
+hideInToc: true
 ---
 
 # Let's Authenticate!

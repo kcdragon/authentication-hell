@@ -212,3 +212,45 @@
   font-size: 1.05rem;
   color: var(--color-muted);
 }
+
+/* ---- AGENDA (<Toc> on the section divider) --------------------------- */
+/* `<Toc>` emits nested <ol>/<li>; we counter-number the top level and
+   render each entry as a brutalist card. The active section (Slidev adds
+   `.active`/`.active-parent` as you present) inverts to ink-on-paper. */
+.ah-toc {
+  counter-reset: ah-toc;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.ah-toc :deep(.slidev-toc-item),
+.ah-toc .slidev-toc-item {
+  counter-increment: ah-toc;
+  list-style: none;
+  margin: 0 0 0.9rem;
+}
+.ah-toc :deep(.slidev-toc-item a),
+.ah-toc .slidev-toc-item a {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.55rem 0.9rem;
+  border: 3px solid var(--color-ink);
+  box-shadow: var(--shadow-brut-sm);
+  background: var(--color-card);
+  color: var(--color-ink);
+  font-size: 1.15rem;
+}
+.ah-toc :deep(.slidev-toc-item a)::before,
+.ah-toc .slidev-toc-item a::before {
+  content: counter(ah-toc, decimal-leading-zero);
+  color: var(--color-muted);
+}
+.ah-toc :deep(.slidev-toc-item.active a),
+.ah-toc .slidev-toc-item.active a {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+.ah-toc :deep(.slidev-toc-item.active a)::before,
+.ah-toc .slidev-toc-item.active a::before {
+  color: var(--color-paper);
+}
