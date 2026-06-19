@@ -24,7 +24,7 @@ export default class extends Controller {
 
   rebrand(div) {
     const ps = div.querySelectorAll("p")
-    if (ps[0]) ps[0].textContent = "Authentication 101"
+    if (ps[0]) ps[0].textContent = "Authentication Hell"
     if (ps[1]) ps[1].textContent = "click or tap to begin onboarding"
   }
 }
