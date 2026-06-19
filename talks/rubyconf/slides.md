@@ -160,6 +160,38 @@ layoutClass: gap-8
 </div>
 
 ---
+layout: two-cols
+layoutClass: gap-8
+---
+
+## SDL
+
+- [Simple DirectMedia Layer](https://www.libsdl.org/)
+- Cross-platform C library underneath DragonRuby
+- Low-level access to graphics, audio, and input
+- OpenGL / Direct3D, keyboard, mouse, joystick
+- Windows, macOS, Linux, iOS, Android
+- Powers emulators, video players, and games (Valve, indies)
+
+::right::
+
+<div class="flex items-center justify-center h-full">
+  <a
+    href="https://www.libsdl.org/"
+    target="_blank"
+    rel="noopener"
+    class="ah-card bg-white px-8 py-6 text-3xl font-bold no-underline !text-ink"
+  >
+    libsdl.org ↗
+  </a>
+</div>
+
+<!--
+DragonRuby sits on top of SDL — it's what gives us hardware-accelerated
+graphics, audio, and input across every platform, including the WASM build.
+-->
+
+---
 ---
 
 ## tick method
