@@ -266,6 +266,57 @@ hideInToc: true
 hideInToc: true
 ---
 
+## Proof of concept
+
+<div class="flex justify-center mt-6">
+  <div class="ah-card bg-white p-2 leading-none">
+    <SlidevVideo autoplay loop muted class="block max-h-[42vh] w-auto">
+      <source :src="'/videos/proof-of-concept.mp4'" type="video/mp4" />
+    </SlidevVideo>
+  </div>
+</div>
+
+---
+hideInToc: true
+---
+
+## Discord to the rescue
+
+<div class="flex flex-col items-center gap-3 mt-3">
+  <div class="ah-card bg-white p-2 leading-none">
+    <img src="./images/discord-heapu8.png" class="block max-h-[28vh] w-auto" alt="Discord message diagnosing the Module.HEAPU8 undefined error in the DragonRuby WASM build" />
+  </div>
+  <div class="ah-card bg-white p-2 leading-none">
+    <img src="./images/discord-reply.png" class="block h-auto" alt="Discord reply: this is a bug introduced in DragonRuby 7+ it seems" />
+  </div>
+</div>
+
+---
+hideInToc: true
+---
+
+## Game Theme
+
+- Player stuck in a training video
+- Each level is a playlist
+- Enemies are authentication
+
+---
+hideInToc: true
+---
+
+## Claude Design
+
+<div class="flex justify-center mt-6">
+  <div class="ah-card bg-white p-2 leading-none">
+    <img src="./images/claude-design.png" class="block max-h-[42vh] w-auto" alt="Claude Design canvas redesigning the game screens" />
+  </div>
+</div>
+
+---
+hideInToc: true
+---
+
 ## Authenticate in game
 
 <div class="flex justify-center mt-6">
@@ -403,7 +454,6 @@ class Games::PasswordChallengeController < ApplicationController
   def complete
     if Current.session.game_challenges.exists?(kind: "password") && Current.user.authenticate(params[:password])
       Current.session.game_challenges.where(kind: "password").delete_all
-      Achievement::Awarder.call(Current.user, :password_survivor)
       render turbo_stream: turbo_stream.remove("toast")
     else
       render turbo_stream: turbo_stream.replace(
@@ -431,7 +481,7 @@ layout: cover
 hideInToc: true
 ---
 
-# Let's Authenticate!
+# Questions or feedback?
 
 <div class="flex items-start justify-center gap-16 mt-10">
   <div class="flex flex-col items-center">
