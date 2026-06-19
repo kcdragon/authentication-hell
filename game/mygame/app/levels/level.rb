@@ -90,10 +90,9 @@ class Level
 
   def dialogue_hides_scene? = true
 
-  # The password character classes this level wants collected, or nil if it isn't a
-  # collection level. Non-nil makes the tick draw the collected-character HUD tray
-  # (which then reads #password_required_per_class off the collection level).
-  def password_targets = nil
+  # A persistent HUD overlay the level paints by the hearts every tick (the password
+  # level's collected-character tray). Most levels have none.
+  def draw_hud(_args) = nil
 
   # args.state.level rides along in DragonRuby's state export; levels are
   # stateless, so the class name is all the export needs.

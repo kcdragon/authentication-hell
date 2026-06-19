@@ -288,7 +288,7 @@ module Main
     # floor line), the scrubber driven by world progress, and the HUD hearts.
     draw_control_bar(args)
     draw_hearts(args)
-    draw_collected_password_characters(args) if args.state.level.password_targets
+    args.state.level.draw_hud(args)
 
     if args.state.player.game_over
       draw_video_ended(args)
@@ -439,38 +439,6 @@ module Main
                                 w: 36,
                                 h: 33,
                                 path: have ? "sprites/ui/heart_hardmode.png" : "sprites/ui/heart_empty.png" }
-    end
-  end
-
-  # The password level's tray, just right of the hearts: one slot per character the
-  # level wants, laid out as a grid — a column per character class, a row per copy
-  # the class needs (password_required_per_class). A filled slot shows its collected
-  # glyph in an amber chip; an empty one shows a faint placeholder glyph of its class,
-  # so the player sees what's left to find. Stacking the extra copies into rows keeps
-  # the slots full size and the tray's right edge clear of the top caption (x 360).
-  PASSWORD_SLOT_HINTS = { upper: "A", lower: "a", digit: "0", symbol: "#" }.freeze
-  def draw_collected_password_characters(args)
-    held = args.state.player.collected_password_characters
-    required = args.state.level.password_required_per_class
-    w = 38
-    h = 34
-    x0 = 168
-    y0 = SCREEN_H - 61 # top row, aligned with the hearts
-    args.state.level.password_targets.each_with_index do |klass, col|
-      glyphs = held[klass] || []
-      x = x0 + col * 46
-      required.times do |row|
-        glyph = glyphs[row]
-        y = y0 - row * (h + 6) # each additional required copy stacks in a row below
-        args.outputs.solids << { x: x, y: y, w: w, h: h, r: INK[0], g: INK[1], b: INK[2] }
-        face = glyph ? AMBER : PAPER
-        args.outputs.solids << { x: x + 3, y: y + 3, w: w - 6, h: h - 6,
-                                 r: face[0], g: face[1], b: face[2] }
-        ink = glyph ? INK : FAINT_INK
-        args.outputs.labels << { x: x + w / 2, y: y + h / 2 + 1, text: glyph || PASSWORD_SLOT_HINTS[klass],
-                                 size_px: 22, font: FONT_MONO_B, r: ink[0], g: ink[1], b: ink[2],
-                                 anchor_x: 0.5, anchor_y: 0.5 }
-      end
     end
   end
 

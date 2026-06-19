@@ -68,10 +68,32 @@ class PasswordLevel < Level
 
   def next_level = MainLevel.new
 
-  # Non-nil tells the tick to draw the collected-character HUD tray by the hearts.
-  def password_targets = TARGETS
-
-  def password_required_per_class = REQUIRED_PER_CLASS
+  # The collected-character tray by the hearts: a grid of slots, a column per class and a
+  # row per required copy. Filled slots show the collected glyph; empty ones a faint hint.
+  SLOT_HINTS = { upper: "A", lower: "a", digit: "0", symbol: "#" }.freeze
+  def draw_hud(args)
+    held = args.state.player.collected_password_characters
+    w = 38
+    h = 34
+    x0 = 168
+    y0 = SCREEN_H - 61 # top row, aligned with the hearts
+    TARGETS.each_with_index do |klass, col|
+      glyphs = held[klass] || []
+      x = x0 + col * 46
+      REQUIRED_PER_CLASS.times do |row|
+        glyph = glyphs[row]
+        y = y0 - row * (h + 6) # each additional required copy stacks in a row below
+        args.outputs.solids << { x: x, y: y, w: w, h: h, r: INK[0], g: INK[1], b: INK[2] }
+        face = glyph ? PasswordCharacter::CLASS_FACE.fetch(klass) : PAPER
+        args.outputs.solids << { x: x + 3, y: y + 3, w: w - 6, h: h - 6,
+                                 r: face[0], g: face[1], b: face[2] }
+        ink = glyph ? PasswordCharacter::CLASS_INK.fetch(klass) : FAINT_INK
+        args.outputs.labels << { x: x + w / 2, y: y + h / 2 + 1, text: glyph || SLOT_HINTS[klass],
+                                 size_px: 22, font: FONT_MONO_B, r: ink[0], g: ink[1], b: ink[2],
+                                 anchor_x: 0.5, anchor_y: 0.5 }
+      end
+    end
+  end
 
   # Prod the player to sweep up the characters, then flip to "head right" once the
   # set is complete — shown as the top closed caption, updating on each pickup.
