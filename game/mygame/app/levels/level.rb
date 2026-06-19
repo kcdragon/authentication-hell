@@ -48,6 +48,9 @@ class Level
   # tutorial fits one screen).
   def world_w = WORLD_W
 
+  # Where Main#setup_level drops the player on entry; the tutorial overrides this default.
+  def start_x = 0
+
   # px inset from the right wall where #certificate_at_exit places the goal — clear of
   # the holes (which stop ≥700px from the wall) and within the player's reach.
   CERTIFICATE_INSET = 280

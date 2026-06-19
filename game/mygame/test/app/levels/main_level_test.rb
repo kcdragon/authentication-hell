@@ -25,12 +25,8 @@ class MainLevelTest < Minitest::Test
     assert_operator certs.first.x, :>, WORLD_W - 400, "certificate sits at the right exit"
   end
 
-  def test_enemies_never_spawn_on_top_of_a_carried_over_player
-    @args.state.player.x = 1200 # as if the player roamed right during the tutorial
-    @level.setup(@args)
-    nearest_reach = @args.state.enemies.map { |e| e.x - Enemy::PATROL_RANGE }.min
-    assert nearest_reach > @args.state.player.x + Player::WIDTH,
-           "nearest enemy patrol reach (#{nearest_reach}) must clear the player's right edge"
+  def test_starts_at_the_left_edge
+    assert_equal 0, @level.start_x
   end
 
   def test_setup_scatters_pits_within_the_world

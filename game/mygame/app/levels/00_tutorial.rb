@@ -17,6 +17,9 @@ class TutorialLevel < Level
 
   def world_w = SCREEN_W
 
+  # Single-screen lesson: start mid-left so the ledge (x:360) is a short hop ahead.
+  def start_x = 200
+
   def initialize
     @healed = false
     @combat_spawned = false

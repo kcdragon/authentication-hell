@@ -32,7 +32,7 @@ module Main
     args.state.captions_on = true if args.state.captions_on.nil?
     unless args.state.level
       args.state.level = TutorialLevel.new
-      args.state.level.setup(args)
+      setup_level(args)
     end
 
     # Fetch the logged-in user's name and starting level once from the Rails app.
@@ -57,7 +57,7 @@ module Main
             args.state.start_level = data["start_level"]
             if args.state.level.number != args.state.start_level
               args.state.level = Level.build(args.state.start_level)
-              args.state.level.setup(args)
+              setup_level(args)
             end
             report_now_playing(args, args.state.start_level)
           end
@@ -661,12 +661,20 @@ module Main
     args.state.level.on_unlock(args)
   end
 
+  # Reset the player/camera to the level's start, so it doesn't inherit the previous
+  # level's right-edge x and load already-cleared.
+  def setup_level(args)
+    args.state.player.x = args.state.level.start_x
+    args.state.camera_x = 0
+    args.state.level.setup(args)
+  end
+
   # The active stage is cleared: report it to the server, then swap in the level it
-  # hands off to and seed that scene. The player keeps its position and hearts.
+  # hands off to and seed that scene. The player keeps its hearts.
   def advance_level(args)
     report_level_complete(args, args.state.level.number)
     args.state.level = args.state.level.next_level
-    args.state.level.setup(args)
+    setup_level(args)
     begin_level_intro(args)
     report_now_playing(args, args.state.level.number)
   end
@@ -687,8 +695,7 @@ module Main
   def restart_run(args)
     args.state.player = Player.new
     args.state.level = Level.build(args.state.start_level || 0)
-    args.state.level.setup(args)
-    args.state.camera_x = 0
+    setup_level(args)
     begin_level_intro(args)
     report_now_playing(args, args.state.level.number)
   end

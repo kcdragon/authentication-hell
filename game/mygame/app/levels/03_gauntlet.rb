@@ -29,12 +29,7 @@ class GauntletLevel < Level
 
   def accent = RED
 
-  # Pull the player back to the start (they carry the open world's right-edge x over,
-  # which would otherwise read as already-finished) and lay out the hand-authored
-  # scene.
   def setup(args)
-    args.state.player.x = 0
-    args.state.camera_x = 0
     args.state.enemies = ground_enemies
     args.state.platforms = platform_path
     # Pits in the central crawling floor only (the start/end patches stay solid so the

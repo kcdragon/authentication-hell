@@ -8,6 +8,10 @@ class TutorialLevelTest < Minitest::Test
     @args = build_args(player: Player.new)
   end
 
+  def test_starts_mid_screen_not_at_the_world_edge
+    assert_equal 200, @level.start_x
+  end
+
   def test_melee_is_off_during_the_reauth_lesson
     refute @level.melee?
   end
