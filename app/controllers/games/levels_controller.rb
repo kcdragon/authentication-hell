@@ -1,4 +1,6 @@
 class Games::LevelsController < ApplicationController
+  include NowPlaying
+
   # WASM can't send a CSRF token.
   skip_forgery_protection only: %i[ complete playing ]
 
@@ -16,8 +18,7 @@ class Games::LevelsController < ApplicationController
     level = GameLevel.find(params[:level].to_i)
     return head(:no_content) unless level
 
-    Current.user.update!(now_playing_level: level.number)
-    Game::PlaylistBroadcaster.call(Current.user)
+    mark_now_playing(level)
     head :no_content
   end
 end

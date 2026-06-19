@@ -88,13 +88,61 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_empty streams
   end
 
-  test "frame ignores a selection past the frontier" do
+  test "frame honors an out-of-frontier jump in development" do
     @user.update!(highest_level_completed: 0)
     sign_in_as(@user)
 
-    get game_frame_url(level: 2) # frontier is 1, so 2 is out of reach
+    in_env("development") { get game_frame_url(level: 2) } # frontier is 1, but dev jumps anywhere
     get play_me_url
-    # Selection rejected → resumes at progress (level after the tutorial).
+    assert_equal 2, response.parsed_body["start_level"]
+  end
+
+  test "frame ignores an unknown level and leaves progress untouched" do
+    @user.update!(highest_level_completed: 0, now_playing_level: 0)
+    sign_in_as(@user)
+
+    get game_frame_url(level: 99)
+    assert_equal 0, @user.reload.now_playing_level
+    get play_me_url
+    # No valid selection → resumes at progress (level after the tutorial).
     assert_equal 1, response.parsed_body["start_level"]
+  end
+
+  test "frame still honors an in-frontier selection in production" do
+    @user.update!(highest_level_completed: 2) # frontier is 3
+    sign_in_as(@user)
+
+    in_env("production") { get game_frame_url(level: 1) } # 1 <= frontier
+    assert_equal 1, @user.reload.now_playing_level
+    get play_me_url
+    assert_equal 1, response.parsed_body["start_level"]
+  end
+
+  test "frame blocks an out-of-frontier jump in production" do
+    @user.update!(highest_level_completed: 0, now_playing_level: 0) # frontier is 1
+    sign_in_as(@user)
+
+    in_env("production") { get game_frame_url(level: 2) } # past the frontier
+    assert_equal 0, @user.reload.now_playing_level
+    get play_me_url
+    assert_equal 1, response.parsed_body["start_level"]
+  end
+
+  test "show forwards the level param into the iframe src" do
+    sign_in_as(@user)
+
+    get game_url(level: 3)
+    assert_response :success
+    assert_match %r{/game/frame\?level=3}, response.body
+  end
+
+  private
+
+  def in_env(name)
+    original = Rails.env
+    Rails.env = name
+    yield
+  ensure
+    Rails.env = original
   end
 end

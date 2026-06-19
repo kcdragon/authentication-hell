@@ -1,4 +1,6 @@
 class GamesController < ApplicationController
+  include NowPlaying
+
   layout "game_page"
 
   # Served path of the static game bundle, namespaced per environment so a dev
@@ -21,13 +23,11 @@ class GamesController < ApplicationController
   # frame whose viewport is exactly 16:9 makes its render fill the frame with no
   # letterbox. Uses the "game_frame" layout (just <base href> + the canvas shell).
   def frame
-    if params[:level].present?
-      n = params[:level].to_i
+    if params[:level].present? && (level = GameLevel.find(params[:level].to_i))
       frontier = Current.user.current_level&.number
-      if frontier && n.between?(0, frontier)
-        session[:selected_level] = n
-        Current.user.update!(now_playing_level: n)
-        Game::PlaylistBroadcaster.call(Current.user)
+      if (frontier && level.number <= frontier) || Rails.env.development?
+        session[:selected_level] = level.number
+        mark_now_playing(level)
       end
     end
     render layout: "game_frame"
