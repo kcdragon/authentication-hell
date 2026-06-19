@@ -3,8 +3,8 @@
 # lowercase, digit, symbol); walking into one is friendly — it collects that
 # character (no heart loss, no re-auth). The danger is the *other* auth enemies
 # (TOTP, passkey) still patrolling the floor, which cost a heart and a re-auth as
-# usual. The right wall only finishes the level once all four classes are held, so
-# the player has to sweep the world before heading for the exit.
+# usual. The completion certificate only appears at the right exit once all four classes
+# are held, so the player has to sweep the world before heading there to finish.
 class PasswordLevel < Level
   TARGETS = PasswordCharacter::CLASSES
 
@@ -38,10 +38,15 @@ class PasswordLevel < Level
     args.state.enemies = hazard_enemies(args.state.player.x)
   end
 
-  # Latch completion only once every class is collected *and* the player has reached
-  # the far wall (#complete? runs without args, so the check lives here).
+  # Once every class is collected, drop the certificate at the right exit (so the player
+  # can't finish empty-handed — grabbing it early can't soft-lock since it isn't there
+  # yet). Latch completion when they pick it up (#complete? runs without args).
   def update(args)
-    @cleared = true if all_collected?(args) && reached_end?(args)
+    if all_collected?(args) && !@certificate_spawned
+      args.state.collectables << certificate_at_exit
+      @certificate_spawned = true
+    end
+    @cleared = true if certificate_collected?(args)
   end
 
   def all_collected?(args) = TARGETS.all? { |klass| args.state.player.collected_password_characters.key?(klass) }

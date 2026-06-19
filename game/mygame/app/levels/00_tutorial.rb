@@ -3,7 +3,8 @@
 # then bump the enemy marching in from the right (melee is off, so the only way past
 # is the password re-auth). Clearing it drops a heal heart; grabbing it turns melee
 # on and sends a second enemy in from the left for the player to defeat with a
-# stomp, which finishes the tutorial and hands off to the password level.
+# stomp, which drops the completion certificate; grabbing it finishes the tutorial
+# and hands off to the password level.
 #
 # Sized to a single screen (world_w = SCREEN_W): the whole lesson plays in one view,
 # so the player can't wander off into the empty main world and the camera never scrolls.
@@ -19,7 +20,7 @@ class TutorialLevel < Level
   def initialize
     @healed = false
     @combat_spawned = false
-    @defeated = false
+    @certificate_dropped = false
   end
 
   def setup(args)
@@ -52,13 +53,17 @@ class TutorialLevel < Level
       @combat_spawned = true
     end
 
-    # Cleared once the combat enemy is dead — but only while the player is free, so
-    # a body bump (which kills the enemy but locks the player for a re-auth) doesn't
-    # hand off mid-challenge. A stomp kills with no lock, so it completes at once.
+    # Combat enemy dead and the player is free (a body bump kills it but locks the
+    # player for a re-auth — wait until that clears, not mid-challenge): drop the
+    # completion certificate a short walk ahead, once. Grabbing it finishes the lesson.
     if @combat_spawned && args.state.enemies.none?(&:alive) &&
-       !args.state.player.locked && !args.state.player.game_over
-      @defeated = true
+       !args.state.player.locked && !args.state.player.game_over && !@certificate_dropped
+      x = (args.state.player.x + 180).clamp(0, world_w - Certificate::SIZE)
+      args.state.collectables << Certificate.new(x: x)
+      @certificate_dropped = true
     end
+
+    @cleared = true if certificate_collected?(args)
   end
 
   # Melee is off during the re-auth lesson (so the only way past the first enemy is
@@ -76,7 +81,7 @@ class TutorialLevel < Level
 
   def on_collect(_args) = @healed = true
 
-  def complete? = @defeated
+  def complete? = @cleared == true
 
   def next_level = PasswordLevel.new
 
@@ -90,6 +95,9 @@ class TutorialLevel < Level
       [ "Move with A / D or arrow keys" ]
     elsif !player.reached_platform
       [ "Press Space to jump onto the ledge" ]
+    elsif @certificate_dropped
+      [ "Grab your certificate",
+        "to finish →" ]
     elsif @healed
       [ "Fight back — jump on its head",
         "to stomp it",

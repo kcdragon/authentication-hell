@@ -47,7 +47,7 @@ class GauntletLevelTest < Minitest::Test
     @level.setup(@args)
     ledges = @args.state.platforms.sort_by(&:x)
     refute_empty ledges
-    assert_empty @args.state.collectables
+    assert(@args.state.collectables.all? { |c| c.is_a?(Certificate) }, "only the certificate, no path clutter")
 
     # The first ledge is reachable from the ground and sits in the enemy-free start
     # patch (clear of the leftmost enemy's patrol) so the player can climb on safely.
@@ -81,18 +81,26 @@ class GauntletLevelTest < Minitest::Test
     end
   end
 
-  def test_completes_at_the_right_wall_and_loops_a_fresh_lap
+  def test_setup_seeds_a_certificate_near_the_exit
+    @level.setup(@args)
+    certs = @args.state.collectables.select { |c| c.is_a?(Certificate) }
+    assert_equal 1, certs.length
+    assert_operator certs.first.x, :>, WORLD_W - 400, "certificate sits at the end patch"
+  end
+
+  def test_completes_when_the_certificate_is_collected_and_loops_a_fresh_lap
     @level.setup(@args)
     refute @level.complete?
 
-    @args.state.player.x = WORLD_W - Player::WIDTH
+    @args.state.collectables.first.alive = false # the pickup loop retired it
     @level.update(@args)
 
     assert @level.complete?
     assert_instance_of GauntletLevel, @level.next_level
   end
 
-  def test_does_not_complete_mid_world
+  def test_does_not_complete_while_the_certificate_is_uncollected
+    @level.setup(@args)
     @args.state.player.x = 3000
     @level.update(@args)
     refute @level.complete?

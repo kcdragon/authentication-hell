@@ -18,6 +18,13 @@ class MainLevelTest < Minitest::Test
     assert_equal Platform::COUNT, @args.state.platforms.length
   end
 
+  def test_setup_seeds_a_certificate_near_the_exit
+    @level.setup(@args)
+    certs = @args.state.collectables.select { |c| c.is_a?(Certificate) }
+    assert_equal 1, certs.length
+    assert_operator certs.first.x, :>, WORLD_W - 400, "certificate sits at the right exit"
+  end
+
   def test_enemies_never_spawn_on_top_of_a_carried_over_player
     @args.state.player.x = 1200 # as if the player roamed right during the tutorial
     @level.setup(@args)
@@ -47,18 +54,19 @@ class MainLevelTest < Minitest::Test
     assert_equal WORLD_W, @level.world_w
   end
 
-  def test_completes_at_the_right_wall_and_hands_off_to_the_gauntlet
+  def test_completes_when_the_certificate_is_collected_and_hands_off_to_the_gauntlet
     @level.setup(@args)
-    refute @level.complete?, "shouldn't be clear before reaching the wall"
+    refute @level.complete?, "shouldn't be clear before the certificate is grabbed"
 
-    @args.state.player.x = WORLD_W - Player::WIDTH
+    @args.state.collectables.first.alive = false # the pickup loop retired it
     @level.update(@args)
 
     assert @level.complete?
     assert_instance_of GauntletLevel, @level.next_level
   end
 
-  def test_does_not_complete_mid_world
+  def test_does_not_complete_while_the_certificate_is_uncollected
+    @level.setup(@args)
     @args.state.player.x = 3000
     @level.update(@args)
     refute @level.complete?
