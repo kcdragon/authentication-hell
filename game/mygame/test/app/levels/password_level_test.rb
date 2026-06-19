@@ -38,13 +38,13 @@ class PasswordLevelTest < Minitest::Test
     assert_equal PasswordCharacter::CLASSES.sort, classes.sort, "every character class must appear"
   end
 
-  def test_setup_perches_a_padlock_on_every_platform_and_keeps_a_floor_row
+  def test_setup_perches_a_padlock_on_each_staircase_top_and_keeps_a_floor_row
     @level.setup(@args)
-    tops = @args.state.platforms.map { |p| p.y + p.h }
-    perched = @args.state.collectables.select { |c| tops.include?(c.y) }
+    padlock_tops = @args.state.platforms.select(&:holds_password).map { |p| p.y + p.h }
+    perched = @args.state.collectables.select { |c| padlock_tops.include?(c.y) }
     grounded = @args.state.collectables.select { |c| c.y == GROUND_Y }
 
-    assert_equal @args.state.platforms.length, perched.length, "one padlock per platform top"
+    assert_equal @args.state.platforms.count(&:holds_password), perched.length, "one padlock per staircase top"
     refute_empty grounded, "a row still sits on the floor"
   end
 

@@ -15,7 +15,7 @@ class MainLevelTest < Minitest::Test
   def test_setup_seeds_enemies_and_platforms
     @level.setup(@args)
     assert_equal 6, @args.state.enemies.length
-    assert_equal Platform::COUNT, @args.state.platforms.length
+    assert_equal Platform::COUNT, @args.state.platforms.count(&:holds_password)
   end
 
   def test_setup_seeds_a_certificate_near_the_exit
