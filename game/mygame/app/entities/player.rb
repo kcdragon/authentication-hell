@@ -8,6 +8,8 @@ class Player
   STOMP_BOUNCE = 12  # small hop after stomping an enemy (less than a full jump)
   GRAVITY = 1
   MAX_HEARTS = 3
+  BLINK_TICKS = 60     # how long the figure flickers after a hit (~1s at 60fps)
+  BLINK_INTERVAL = 4   # toggle visibility every 4 ticks (~7-8 Hz flicker)
 
   # Brutalist "new-hire" figure, drawn from solid primitives inside the 64x96
   # hitbox (feet at @y): INK legs, an INK-bordered INDIGO torso (the platform card
@@ -33,7 +35,7 @@ class Player
 
   attr_accessor :x, :y, :w, :h, :vy, :grounded, :facing,
                 :locked, :colliding, :lock_confirmed, :pending_challenge,
-                :hearts, :game_over, :moved,
+                :hearts, :game_over, :moved, :blink_until_tick,
                 :reached_platform, :collected_password_characters
 
   def initialize
@@ -51,6 +53,7 @@ class Player
     @hearts = MAX_HEARTS
     @game_over = false
     @moved = false
+    @blink_until_tick = 0
     @reached_platform = false
     # class symbol → glyph for each password character collected (the password
     # level's goal); empty everywhere else.
@@ -135,6 +138,11 @@ class Player
     @grounded = false
   end
 
+  # Start the post-hit damage flicker; the figure blinks for BLINK_TICKS frames.
+  def hurt(args)
+    @blink_until_tick = args.state.tick_count + BLINK_TICKS
+  end
+
   # Draw the figure as stacked brutalist primitives within the 64x96 hitbox: two
   # INK legs, an INK-bordered INDIGO torso (platform card treatment), a tan neck,
   # then a tan head with a dark hair band and two eyes that slide toward @facing as
@@ -142,6 +150,10 @@ class Player
   # camera offset to screen space.
   def render(args, camera_x = 0)
     sx = @x - camera_x
+
+    # Damage flicker: skip the whole figure on the "off" half of the blink.
+    return if args.state.tick_count < @blink_until_tick &&
+              args.state.tick_count % (BLINK_INTERVAL * 2) >= BLINK_INTERVAL
 
     leg_y   = @y
     torso_y = leg_y + LEG_H
@@ -188,7 +200,7 @@ class Player
     { x: @x, y: @y, w: @w, h: @h, vy: @vy, grounded: @grounded, facing: @facing,
       locked: @locked, colliding: @colliding, lock_confirmed: @lock_confirmed,
       pending_challenge: @pending_challenge, hearts: @hearts, game_over: @game_over,
-      moved: @moved, reached_platform: @reached_platform,
+      moved: @moved, blink_until_tick: @blink_until_tick, reached_platform: @reached_platform,
       collected_password_characters: @collected_password_characters }
   end
 
