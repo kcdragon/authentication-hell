@@ -29,13 +29,13 @@ class PasswordCharacterTest < Minitest::Test
   def test_collect_records_the_class_and_glyph_on_the_player
     char = PasswordCharacter.new(x: 100, klass: :symbol, glyph: "#")
     char.collect(@args)
-    assert_equal "#", @args.state.player.collected_password_characters[:symbol]
+    assert_equal [ "#" ], @args.state.player.collected_password_characters[:symbol]
   end
 
-  def test_collect_keeps_the_first_glyph_of_a_class
+  def test_collect_accumulates_each_glyph_of_a_class
     PasswordCharacter.new(x: 100, klass: :upper, glyph: "A").collect(@args)
     PasswordCharacter.new(x: 200, klass: :upper, glyph: "Z").collect(@args)
-    assert_equal "A", @args.state.player.collected_password_characters[:upper]
+    assert_equal [ "A", "Z" ], @args.state.player.collected_password_characters[:upper]
   end
 
   def test_serialize_describes_the_pickup

@@ -9,6 +9,7 @@ require "minitest/autorun"
 # is engine-only and can't load here). Load them before the entity under test.
 require_relative "../app/constants"
 require_relative "../app/caption"
+require_relative "../app/labels/dialogue"
 require_relative "../app/entities/player"
 require_relative "../app/entities/enemy"
 require_relative "../app/entities/platform"

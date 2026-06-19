@@ -83,6 +83,16 @@ class PasswordLevelTest < Minitest::Test
     refute @level.complete?
   end
 
+  def test_one_of_each_class_is_not_enough_to_finish
+    @level.setup(@args)
+    PasswordCharacter::CLASSES.each { |klass| @args.state.player.collected_password_characters[klass] = [ "x" ] }
+    @level.update(@args)
+
+    refute(@args.state.collectables.any? { |c| c.is_a?(Certificate) },
+           "the complexity rule wants #{PasswordLevel::REQUIRED_PER_CLASS} of each, not one")
+    refute @level.complete?
+  end
+
   def test_spawns_the_certificate_once_every_character_is_held
     @level.setup(@args)
     collect_all
@@ -124,6 +134,8 @@ class PasswordLevelTest < Minitest::Test
   private
 
   def collect_all
-    PasswordCharacter::CLASSES.each { |klass| @args.state.player.collected_password_characters[klass] = "x" }
+    PasswordCharacter::CLASSES.each do |klass|
+      @args.state.player.collected_password_characters[klass] = Array.new(PasswordLevel::REQUIRED_PER_CLASS, "x")
+    end
   end
 end

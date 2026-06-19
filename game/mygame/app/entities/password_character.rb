@@ -35,10 +35,11 @@ class PasswordCharacter
 
   def hitbox = chip_rect
 
-  # Walked into: record this class's glyph on the player (first one of a class wins;
-  # extra padlocks of an already-held class are consumed but add nothing).
+  # Walked into: append this class's glyph to the player's tally for that class. The
+  # level wants several of each class (see PasswordLevel::REQUIRED_PER_CLASS), so each
+  # padlock of a class counts; over-collecting past the goal is harmless.
   def collect(args)
-    args.state.player.collected_password_characters[@klass] ||= @glyph
+    (args.state.player.collected_password_characters[@klass] ||= []) << @glyph
   end
 
   # The carried glyph in an amber, ink-bordered chip, hovering above its surface.
