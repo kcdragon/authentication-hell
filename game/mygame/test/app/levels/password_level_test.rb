@@ -20,13 +20,14 @@ class PasswordLevelTest < Minitest::Test
     assert @level.melee?
   end
 
-  def test_setup_pulls_the_player_back_and_clears_any_carried_progress
-    @args.state.player.x = 1100 # roamed right during the tutorial
+  def test_starts_at_the_left_edge
+    assert_equal 0, @level.start_x
+  end
+
+  def test_setup_clears_any_carried_password_progress
     @args.state.player.collected_password_characters = { upper: "A" } # stale, from a prior run
     @level.setup(@args)
 
-    assert_equal 0, @args.state.player.x
-    assert_equal 0, @args.state.camera_x
     assert_empty @args.state.player.collected_password_characters
   end
 

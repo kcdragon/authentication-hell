@@ -29,9 +29,7 @@ class PasswordLevel < Level
   def accent = AMBER
 
   def setup(args)
-    args.state.player.x = 0
     args.state.player.collected_password_characters = {}
-    args.state.camera_x = 0
     args.state.platforms = Platform.scatter
     args.state.holes = Hole.scatter
     args.state.collectables = scatter_chars(args.state.platforms)

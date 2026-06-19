@@ -25,13 +25,8 @@ class GauntletLevelTest < Minitest::Test
     assert @level.melee?
   end
 
-  def test_setup_pulls_the_player_back_to_the_start
-    @args.state.player.x = 5000 # carried over from the open world's right edge
-    @args.state.camera_x = 4000
-    @level.setup(@args)
-
-    assert_equal 0, @args.state.player.x
-    assert_equal 0, @args.state.camera_x
+  def test_starts_at_the_left_edge
+    assert_equal 0, @level.start_x
   end
 
   def test_setup_packs_the_floor_with_patrolling_enemies
