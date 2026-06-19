@@ -117,8 +117,17 @@ class PasswordLevelTest < Minitest::Test
     assert_instance_of MainLevel, @level.next_level
   end
 
-  def test_password_targets_drives_the_hud_tray
-    assert_equal PasswordCharacter::CLASSES, @level.password_targets
+  def test_draw_hud_paints_a_slot_for_every_required_character
+    @level.draw_hud(@args)
+    slots = @args.outputs.solids.count / 2 # each slot is an ink border + a face
+    assert_equal PasswordCharacter::CLASSES.length * PasswordLevel::REQUIRED_PER_CLASS, slots
+  end
+
+  def test_draw_hud_colors_a_filled_slot_by_its_class
+    @args.state.player.collected_password_characters[:upper] = [ "A" ]
+    @level.draw_hud(@args)
+    faces = @args.outputs.solids.map { |s| [ s[:r], s[:g], s[:b] ] }
+    assert_includes faces, PasswordCharacter::CLASS_FACE.fetch(:upper)
   end
 
   def test_draw_emits_a_caption_prompt

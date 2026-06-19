@@ -14,6 +14,13 @@ class PasswordCharacterTest < Minitest::Test
     end
   end
 
+  def test_every_class_has_a_face_and_text_color
+    PasswordCharacter::CLASSES.each do |klass|
+      assert PasswordCharacter::CLASS_FACE.key?(klass), "no face color for #{klass}"
+      assert PasswordCharacter::CLASS_INK.key?(klass), "no text color for #{klass}"
+    end
+  end
+
   def test_an_explicit_glyph_overrides_the_random_one
     char = PasswordCharacter.new(x: 100, klass: :upper, glyph: "Q")
     assert_equal "Q", char.glyph

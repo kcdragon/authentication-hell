@@ -14,6 +14,10 @@ class PasswordCharacter
     digit: "23456789",
     symbol: "!@#$%&*?"
   }.freeze
+  # Face + text colors per class, so the four password classes read apart at a glance
+  # (reuses the site's semantic palette). Dark faces take cream text; amber keeps ink.
+  CLASS_FACE = { upper: BLUE, lower: GREEN, digit: AMBER, symbol: PURPLE }.freeze
+  CLASS_INK  = { upper: PAPER, lower: PAPER, digit: INK, symbol: PAPER }.freeze
   SIZE = Enemy::HEIGHT # the layout cell the glyph chip centers within
   CHIP = 50 # the glyph chip's drawn size
   FLOAT_GAP = 16 # how far the chip hovers above its surface
@@ -42,16 +46,18 @@ class PasswordCharacter
     (args.state.player.collected_password_characters[@klass] ||= []) << @glyph
   end
 
-  # The carried glyph in an amber, ink-bordered chip, hovering above its surface.
+  # The carried glyph in a class-colored, ink-bordered chip, hovering above its surface.
   def render(args, camera_x = 0)
     c = chip_rect
     cx = c[:x] - camera_x
     cy = c[:y]
+    face = CLASS_FACE.fetch(@klass)
+    ink = CLASS_INK.fetch(@klass)
     args.outputs.solids << { x: cx, y: cy, w: CHIP, h: CHIP, r: INK[0], g: INK[1], b: INK[2] }
     args.outputs.solids << { x: cx + 3, y: cy + 3, w: CHIP - 6, h: CHIP - 6,
-                             r: AMBER[0], g: AMBER[1], b: AMBER[2] }
+                             r: face[0], g: face[1], b: face[2] }
     args.outputs.labels << { x: cx + CHIP / 2, y: cy + CHIP / 2 + 1, text: @glyph,
-                             size_px: 32, font: FONT_MONO_B, r: INK[0], g: INK[1], b: INK[2],
+                             size_px: 32, font: FONT_MONO_B, r: ink[0], g: ink[1], b: ink[2],
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
 
