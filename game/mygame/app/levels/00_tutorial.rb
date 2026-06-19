@@ -88,29 +88,48 @@ class TutorialLevel < Level
 
   def next_level = PasswordLevel.new
 
-  # Bold prompt, staged by progress: move, then jump onto the ledge, then touch the
-  # enemy (which players would normally avoid), then heal and fight back with a
-  # stomp. Short so it reads at a glance as a closed caption at the top.
-  # (Never shown while locked — tick renders the shared challenge prompt then.)
-  def draw(args)
+  # Ticks to wait after a beat's milestone is reached before its card freezes the
+  # world. Without it, dismissing one hint and immediately hitting the next milestone
+  # pops the following card in the same instant, which reads as jarring.
+  DIALOGUE_DELAY = 36
+
+  # The tutorial's coaching, staged: each beat pairs a hint with the milestone that
+  # surfaces it. Main freezes the world on the pending beat until the player presses
+  # E, then plays on until the next milestone — so a hint only appears the moment it's
+  # relevant (move, then jump, bump the enemy, heal, fight back, finish).
+  def dialogue(args) = beats(args).map { |_ready, lines| lines }
+
+  # The hints surface mid-play, so the frozen scene stays visible behind the card
+  # (hiding it would read as the level vanishing each time a hint pops).
+  def dialogue_hides_scene? = false
+
+  # A beat surfaces a short delay after its milestone is met: stamp the tick the
+  # pending beat first becomes eligible, then hold its card back until DIALOGUE_DELAY
+  # passes. The opening card is exempt — it follows the intro fade, not a dismissal.
+  def dialogue_ready?(args)
+    i = @dialogue_index.to_i
+    return false unless beats(args)[i]&.first == true
+    return true if i.zero?
+
+    (@beat_ready_at ||= {})[i] ||= args.state.tick_count
+    args.state.tick_count - @beat_ready_at[i] >= DIALOGUE_DELAY
+  end
+
+  private
+
+  def beats(args)
     player = args.state.player
-    lines = if !player.moved
-      [ "Move with A / D or arrow keys" ]
-    elsif !player.reached_platform
-      [ "Press Space to jump onto the ledge" ]
-    elsif @certificate_dropped
-      [ "Grab your certificate",
-        "to finish →" ]
-    elsif @healed
-      [ "Fight back — jump on its head",
-        "to stomp it",
-        "← Defeat the enemy on the left" ]
-    elsif args.state.collectables.any?(&:alive)
-      [ "Grab the heart to heal" ]
-    else
-      [ "Run into the * enemy",
-        "to learn the re-auth →" ]
-    end
-    Caption.new(args, lines).draw
+    [
+      [ true,                                          [ "Move with A / D or arrow keys" ] ],
+      [ player.moved,                                  [ "Press Space to jump onto the ledge" ] ],
+      [ player.reached_platform,                       [ "Run into the * enemy",
+                                                         "to learn the re-auth →" ] ],
+      [ (args.state.collectables || []).any?(&:alive), [ "Grab the heart to heal" ] ],
+      [ @healed,                                       [ "Fight back — jump on its head",
+                                                         "to stomp it",
+                                                         "← Defeat the enemy on the left" ] ],
+      [ @certificate_dropped,                          [ "Grab your certificate",
+                                                         "to finish →" ] ]
+    ]
   end
 end

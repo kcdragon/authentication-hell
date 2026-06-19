@@ -121,10 +121,45 @@ class TutorialLevelTest < Minitest::Test
     refute @level.complete?
   end
 
-  def test_draw_emits_a_caption_prompt
-    @args.state.captions_on = true
-    @level.draw(@args)
-    refute_empty @args.outputs.labels
+  def test_opening_beat_prompts_movement_and_is_ready_immediately
+    @level.setup(@args)
+    assert @level.dialogue_ready?(@args)
+    assert_equal [ "Move with A / D or arrow keys" ], @level.current_dialogue(@args)
+  end
+
+  def test_jump_hint_waits_until_the_player_has_moved
+    @level.setup(@args)
+    @level.advance_dialogue                  # dismiss the move hint
+    refute @level.dialogue_ready?(@args)     # hasn't moved yet — the world plays on
+    assert_nil @level.current_dialogue(@args)
+
+    @args.state.player.moved = true
+    @level.dialogue_ready?(@args)            # eligible now — stamps the delay start
+    @args.state.tick_count += TutorialLevel::DIALOGUE_DELAY
+    assert @level.dialogue_ready?(@args)
+    assert_equal [ "Press Space to jump onto the ledge" ], @level.current_dialogue(@args)
+  end
+
+  def test_a_reached_beat_waits_a_short_delay_before_its_card_shows
+    @level.setup(@args)
+    @level.advance_dialogue                  # dismiss the move hint
+    @args.state.player.moved = true          # milestone reached this tick...
+    refute @level.dialogue_ready?(@args)     # ...but the card holds back briefly
+    assert_nil @level.current_dialogue(@args)
+
+    @args.state.tick_count += TutorialLevel::DIALOGUE_DELAY
+    assert @level.dialogue_ready?(@args)
+  end
+
+  def test_dialogue_leaves_the_scene_visible
+    refute @level.dialogue_hides_scene?
+  end
+
+  def test_no_dialogue_once_every_beat_is_dismissed
+    @level.setup(@args)
+    6.times { @level.advance_dialogue }
+    refute @level.dialogue_remaining?(@args)
+    assert_nil @level.current_dialogue(@args)
   end
 
   def test_serialize_names_the_level
