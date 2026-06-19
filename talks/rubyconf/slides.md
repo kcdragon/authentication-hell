@@ -163,6 +163,14 @@ layoutClass: gap-8
 hideInToc: true
 ---
 
+## tick method
+
+- Runs 60 times per second (60 frames per second)
+
+---
+hideInToc: true
+---
+
 ## A simple app
 
 ````md magic-move
