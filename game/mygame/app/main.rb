@@ -170,6 +170,7 @@ module Main
             report_collision(args, enemy.auth)
             args.state.player.locked = true
             args.state.player.pending_challenge = enemy.auth
+            args.state.player.hurt(args)
           end
         end
       end
@@ -235,6 +236,7 @@ module Main
       player.y = GROUND_Y
       player.vy = 0
       player.grounded = true
+      player.hurt(args)
     end
   end
 
