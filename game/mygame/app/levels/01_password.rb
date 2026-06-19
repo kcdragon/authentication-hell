@@ -1,4 +1,4 @@
-# The collection level the tutorial hands off to: build a password. The world is
+# The collection level the welcome level hands off to: build a password. The world is
 # strewn with password padlocks, each carrying one character class (uppercase,
 # lowercase, digit, symbol); walking into one is friendly — it collects that
 # character (no heart loss, no re-auth). The danger is the *other* auth enemies

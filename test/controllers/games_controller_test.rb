@@ -26,7 +26,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     get play_me_url
     assert_response :success
     assert_equal @user.username, response.parsed_body["username"]
-    # No progress yet → starts on the tutorial (level 0).
+    # No progress yet → starts on the welcome level (level 0).
     assert_equal 0, response.parsed_body["start_level"]
   end
 
@@ -104,7 +104,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     get game_frame_url(level: 99)
     assert_equal 0, @user.reload.now_playing_level
     get play_me_url
-    # No valid selection → resumes at progress (level after the tutorial).
+    # No valid selection → resumes at progress (level after the welcome level).
     assert_equal 1, response.parsed_body["start_level"]
   end
 

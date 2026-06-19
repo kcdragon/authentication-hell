@@ -72,9 +72,9 @@ class PlayerTest < Minitest::Test
     assert_equal WORLD_W - Player::WIDTH, @player.x
   end
 
-  def test_clamps_to_the_one_screen_tutorial_world
-    @player.x = SCREEN_W # past the tutorial's single-screen bound
-    @player.update(build_args(right: true, level: TutorialLevel.new))
+  def test_clamps_to_the_one_screen_welcome_world
+    @player.x = SCREEN_W # past the welcome level's single-screen bound
+    @player.update(build_args(right: true, level: WelcomeLevel.new))
     assert_equal SCREEN_W - Player::WIDTH, @player.x
   end
 

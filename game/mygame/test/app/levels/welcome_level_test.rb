@@ -1,10 +1,10 @@
 require_relative "../../test_helper"
 
-class TutorialLevelTest < Minitest::Test
+class WelcomeLevelTest < Minitest::Test
   include GameTest
 
   def setup
-    @level = TutorialLevel.new
+    @level = WelcomeLevel.new
     @args = build_args(player: Player.new)
   end
 
@@ -94,7 +94,7 @@ class TutorialLevelTest < Minitest::Test
 
     certs = @args.state.collectables.select { |c| c.is_a?(Certificate) }
     assert_equal 1, certs.length, "a certificate drops once the enemy is down"
-    refute @level.complete?, "but the tutorial isn't done until it's picked up"
+    refute @level.complete?, "but the welcome level isn't done until it's picked up"
   end
 
   def test_completes_once_the_certificate_is_collected
@@ -135,7 +135,7 @@ class TutorialLevelTest < Minitest::Test
 
     @args.state.player.moved = true
     @level.dialogue_ready?(@args)            # eligible now — stamps the delay start
-    @args.state.tick_count += TutorialLevel::DIALOGUE_DELAY
+    @args.state.tick_count += WelcomeLevel::DIALOGUE_DELAY
     assert @level.dialogue_ready?(@args)
     assert_equal [ "Press Space to jump onto the ledge" ], @level.current_dialogue(@args)
   end
@@ -147,7 +147,7 @@ class TutorialLevelTest < Minitest::Test
     refute @level.dialogue_ready?(@args)     # ...but the card holds back briefly
     assert_nil @level.current_dialogue(@args)
 
-    @args.state.tick_count += TutorialLevel::DIALOGUE_DELAY
+    @args.state.tick_count += WelcomeLevel::DIALOGUE_DELAY
     assert @level.dialogue_ready?(@args)
   end
 
@@ -163,7 +163,7 @@ class TutorialLevelTest < Minitest::Test
   end
 
   def test_serialize_names_the_level
-    assert_equal "TutorialLevel", @level.serialize[:level]
+    assert_equal "WelcomeLevel", @level.serialize[:level]
   end
 
   def test_number_is_zero

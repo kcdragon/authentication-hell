@@ -7,7 +7,7 @@ class Level
     when 1 then PasswordLevel.new
     when 2 then MainLevel.new
     when 3 then GauntletLevel.new
-    else TutorialLevel.new
+    else WelcomeLevel.new
     end
   end
 
@@ -19,7 +19,7 @@ class Level
   def update(_args) = nil
 
   # Called once a re-auth clears (the player just unlocked). Lets a level script
-  # what happens next, e.g. the tutorial dropping a heal heart.
+  # what happens next, e.g. the welcome level dropping a heal heart.
   def on_unlock(_args) = nil
 
   # Called when the player picks up a collectable. The heal itself is generic (in
@@ -37,7 +37,7 @@ class Level
 
   # The level's human-readable name, shown on the intro "chapter card" (the chapter
   # number itself is derived from #number, so each level only supplies a title).
-  def title = "Authentication 101"
+  def title = "Authentication Hell"
 
   # The accent color for the intro card's eyebrow + rule, [r, g, b]. Mirrors the
   # site's semantic palette; defaults to the primary blue.
@@ -45,10 +45,10 @@ class Level
 
   # The level's playable world width (the player + camera are bounded by it). The
   # main world is many screens wide; a short scripted stage can shrink it (the
-  # tutorial fits one screen).
+  # welcome level fits one screen).
   def world_w = WORLD_W
 
-  # Where Main#setup_level drops the player on entry; the tutorial overrides this default.
+  # Where Main#setup_level drops the player on entry; the welcome level overrides this default.
   def start_x = 0
 
   # px inset from the right wall where #certificate_at_exit places the goal — clear of
@@ -74,7 +74,7 @@ class Level
   # In-level dialogue cards (after the chapter card): an array of messages, each an
   # array of pre-wrapped lines, dismissed one per E-press while the world freezes.
   # Empty by default. Override #dialogue_ready? to hold a message back until its
-  # gameplay beat is reached (the tutorial surfaces each hint at its moment); leaving
+  # gameplay beat is reached (the welcome level surfaces each hint at its moment); leaving
   # it always-ready front-loads every message at the level's start (the password level).
   def dialogue(_args) = []
 

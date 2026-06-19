@@ -17,7 +17,7 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, @user.reload.highest_level_completed
   end
 
-  test "completing the tutorial (level 0) records progress and awards its achievement" do
+  test "completing the welcome level (level 0) records progress and awards its achievement" do
     sign_in_as(@user)
 
     assert_difference -> { @user.earned_achievements.count }, 1 do
