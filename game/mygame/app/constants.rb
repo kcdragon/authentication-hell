@@ -47,7 +47,7 @@ SCRUBBER_W     = SCREEN_W - 2 * SCRUBBER_X
 SCRUBBER_Y     = 56              # scrubber track baseline, within the bar band
 SCRUBBER_H     = 9
 CONTROLS_Y     = 16              # play/pause + timestamp row, within the bar band
-VIDEO_SECONDS  = 200             # fake full-world runtime (3:20); scaled per level by width
+LEVEL_TIME_LIMIT = 120
 
 # The play/pause button hit box — the one wired transport control (clicking it
 # pauses/resumes). Geometry matches the glyph drawn in main.rb's draw_transport.

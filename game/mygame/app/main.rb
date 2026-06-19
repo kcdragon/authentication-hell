@@ -193,6 +193,8 @@ module Main
     # the heal). Endless stages never complete, so this is a no-op there.
     advance_level(args) if args.state.level.complete?
 
+    args.state.player.game_over = true if out_of_time?(args)
+
     # Only poll once the collision POST has landed, so a status check can't beat
     # the server flag. Drop the (non-serializable) handle so state export works.
     if args.state.collision_request &&
@@ -307,18 +309,16 @@ module Main
     end
   end
 
-  # Fraction of the current level the player has crossed (0..1) — drives the
-  # scrubber fill and the faux timestamp, both measured against the active level's
-  # width so a short stage (the welcome level) fills its own short "video."
+  # Fraction of the current level's runtime elapsed (0..1) — drives the scrubber
+  # fill and the timestamp. The playhead now counts real time, not distance: the
+  # level must be cleared before this reaches 1 (LEVEL_TIME_LIMIT seconds in).
   def progress(args)
-    (args.state.player.x.to_f / (args.state.level.world_w - Player::WIDTH)).clamp(0.0, 1.0)
+    started_at = args.state.level_started_at || args.state.tick_count
+    ((args.state.tick_count - started_at) / (LEVEL_TIME_LIMIT * 60).to_f).clamp(0.0, 1.0)
   end
 
-  # The faux runtime (seconds) of the current level's "video": VIDEO_SECONDS is the
-  # full world's length, scaled by the level's width so the timestamp's total tracks
-  # how big the level is (the one-screen welcome level reads as a much shorter clip).
-  def video_seconds(args)
-    VIDEO_SECONDS * args.state.level.world_w / WORLD_W
+  def out_of_time?(args)
+    !args.state.player.game_over && progress(args) >= 1.0
   end
 
   # m:ss for a number of seconds.
@@ -397,10 +397,9 @@ module Main
       end
     end
 
-    frac = progress(args)
-    runtime = video_seconds(args)
+    elapsed = progress(args) * LEVEL_TIME_LIMIT
     args.outputs.labels << { x: bx + 48, y: by + 26,
-                             text: "#{timecode(frac * runtime)} / #{timecode(runtime)}",
+                             text: "#{timecode(elapsed)} / #{timecode(LEVEL_TIME_LIMIT)}",
                              size_px: 22, font: FONT_MONO,
                              r: TS_INK[0], g: TS_INK[1], b: TS_INK[2],
                              anchor_x: 0, anchor_y: 1 }
@@ -671,9 +670,12 @@ module Main
     report_now_playing(args, args.state.level.number)
   end
 
-  # Stamp the tick a level begins, so the intro card shows (and the world freezes)
-  # for the next LEVEL_INTRO_TICKS frames.
-  def begin_level_intro(args) = args.state.level_intro_at = args.state.tick_count
+  # Stamp the tick a level begins: the intro card shows (and the world freezes) for
+  # the next LEVEL_INTRO_TICKS frames, and the level's countdown runtime starts here.
+  def begin_level_intro(args)
+    args.state.level_intro_at = args.state.tick_count
+    args.state.level_started_at = args.state.tick_count
+  end
 
   def level_intro_active?(args)
     args.state.started && args.state.level_intro_at &&
