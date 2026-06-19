@@ -92,9 +92,8 @@ class PasswordLevel < Level
 
   def collected_total(args) = TARGETS.sum { |klass| [ held_count(args, klass), REQUIRED_PER_CLASS ].min }
 
-  # A ground row plus one padlock perched on every platform top, classes cycled
-  # across the lot (sorted by x) so each appears several times and is spread between
-  # the floor and the ledges — completing the set means climbing, not just strolling.
+  # A ground row plus one padlock on each staircase top, classes cycled (sorted by x) so
+  # each appears several times — completing the set means climbing, not just strolling.
   def scatter_chars(platforms)
     spots = ground_spots + platform_spots(platforms)
     spots.sort_by { |x, _y| x }.map.with_index do |(x, y), i|
@@ -108,7 +107,7 @@ class PasswordLevel < Level
   end
 
   def platform_spots(platforms)
-    platforms.map { |plat| [ plat.x + (plat.w - PasswordCharacter::SIZE) / 2, plat.y + plat.h ] }
+    platforms.select(&:holds_password).map { |plat| [ plat.x + (plat.w - PasswordCharacter::SIZE) / 2, plat.y + plat.h ] }
   end
 
   def hazard_enemies(player_x)

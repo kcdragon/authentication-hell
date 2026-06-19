@@ -31,6 +31,7 @@ bin/rails test         # run all tests (Minitest)
 bin/rails test test/models/user_test.rb            # single file
 bin/rails test test/models/user_test.rb:42         # single test by line number
 bin/rails test:system  # Capybara + Selenium system tests (not run in bin/ci by default)
+bin/test-game          # run the DragonRuby game's plain-Ruby unit tests (no engine needed)
 bin/rubocop            # lint (rubocop-rails-omakase house style)
 bin/brakeman           # static security scan
 bin/bundler-audit      # gem vulnerability audit
@@ -85,6 +86,7 @@ Any future game art must ship as bare PNGs (IHDR/IDAT/IEND, no ancillary chunks)
 - `game/dragonruby` is a Mach-O binary (the engine). Game code lives in `game/mygame/app/main.rb` — the entry point is a `tick` method called every frame. `game/samples/` has 150+ example apps and `game/docs/` has the offline docs.
 - The engine binaries and `game/{samples,docs,builds,logs,.dragonruby}` are vendored/gitignored upstream artifacts (see `game/.gitignore`). Avoid reformatting, linting, or "cleaning up" anything outside `game/mygame/` — it's not ours.
 - **Editable source is `game/mygame/`.** Edit it freely; it's what ships to `/game`.
+- **Always run `bin/test-game` after changing any game code under `game/mygame/`, and before returning to the user.** The entities/levels are plain-Ruby Minitest (no engine needed); if a change alters their behavior, update the matching tests under `game/mygame/test/` and confirm the suite is green before reporting back.
 - Run the game natively (without Rails): `cd game && ./dragonruby mygame`. Hot-reloads `main.rb` on save while running.
 - Current engine version is in `game/VERSION.txt` (a date + git hash, no semver — the version number lives in the top heading of `game/CHANGELOG-CURR.txt`).
 

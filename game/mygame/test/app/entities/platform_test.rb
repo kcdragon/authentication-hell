@@ -3,9 +3,10 @@ require_relative "../../test_helper"
 class PlatformTest < Minitest::Test
   include GameTest
 
-  def test_scatter_builds_one_ledge_per_slot_at_a_reachable_tier
+  def test_scatter_builds_a_reachable_staircase_per_slot
     platforms = Platform.scatter
-    assert_equal Platform::COUNT, platforms.length
+    # One staircase per slot, each topped by a single padlock-bearing ledge.
+    assert_equal Platform::COUNT, platforms.count(&:holds_password)
     platforms.each do |plat|
       assert_includes Platform::TIERS, plat.y + plat.h
       assert_equal Platform::H, plat.h
@@ -14,8 +15,8 @@ class PlatformTest < Minitest::Test
     end
   end
 
-  def test_scatter_count_is_overridable
-    assert_equal 3, Platform.scatter(count: 3).length
+  def test_scatter_count_sets_the_number_of_staircases
+    assert_equal 3, Platform.scatter(count: 3).count(&:holds_password)
   end
 
   def test_render_emits_camera_offset_solids

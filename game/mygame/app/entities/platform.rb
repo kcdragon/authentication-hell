@@ -5,30 +5,36 @@
 class Platform
   H = 30
 
-  # Reachable one-way ledge tops: ~290px apex from the ground reaches the low
-  # tier; the higher tiers are reachable by hopping up off a lower ledge.
+  # One-way ledge tops: only the low tier is reachable from the ground; higher tiers
+  # need a hop up off a lower ledge (see #scatter).
   TIERS = [ 250, 330, 410 ]
   COUNT = 9
+  STEP_DX = 180 # horizontal stagger between stacked steps (inside a one-tier hop's reach)
 
   attr_accessor :x, :y, :w, :h
+  attr_reader :holds_password
 
-  # Scatter `count` one-way ledges across the world, one per evenly spaced slot (so
-  # they spread out instead of clumping) with a random width and a random reachable
-  # tier height. Generated once per level.
+  # One staircase per evenly spaced slot, climbing from the low tier to a random target
+  # tier — each step a single hop above the one below, so every ledge is reachable. Only
+  # the top step holds a padlock; the rest are bare footholds.
   def self.scatter(count: COUNT)
     slot = (WORLD_W - 400) / count
-    count.times.map do |i|
-      w = 180 + rand(100)
-      x = 200 + i * slot + rand([ slot - w, 0 ].max)
-      new(x: x, y: TIERS.sample - H, w: w, h: H)
+    count.times.flat_map do |i|
+      base_x = 200 + i * slot
+      top = rand(TIERS.length)
+      (0..top).map do |t|
+        w = 180 + rand(100)
+        new(x: base_x + t * STEP_DX, y: TIERS[t] - H, w: w, h: H, holds_password: t == top)
+      end
     end
   end
 
-  def initialize(x:, y:, w:, h:)
+  def initialize(x:, y:, w:, h:, holds_password: true)
     @x = x
     @y = y
     @w = w
     @h = h
+    @holds_password = holds_password
   end
 
   # A "desk/shelf" ledge drawn as a brutalist white card: an ink border, a white
