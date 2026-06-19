@@ -15,7 +15,7 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
     get onboarding_path
 
     assert_response :success
-    assert_select "h1", /Secure your account/
+    assert_select "h1", /Security/
     # Password and TOTP are done; the passkey step still offers to register one.
     assert_select "[data-controller=webauthn-registration]"
     assert_select "a[href=?]", new_totp_enrollment_path, false
@@ -31,13 +31,17 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
     assert_select "form[action=?]", onboarding_password_path
   end
 
-  test "redirects to the game once fully set up" do
+  test "stays accessible as a settings hub once fully set up" do
     enable_2fa_for(@user)
     enable_passkey_for(@user)
     sign_in_as(@user)
 
     get onboarding_path
 
-    assert_redirected_to game_path
+    assert_response :success
+    # Every method is configured, so each card links out to manage it.
+    assert_select "a[href=?]", password_change_path
+    assert_select "a[href=?]", webauthn_settings_path
+    assert_select "a[href=?]", totp_settings_path
   end
 end

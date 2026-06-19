@@ -1,4 +1,5 @@
 <div class="mx-auto max-w-2xl w-full ah-card p-7">
+  <%= link_to "← Security", onboarding_path, class: "inline-block mb-4 font-semibold text-sm text-ink underline underline-offset-[3px] decoration-2 hover:no-underline" %>
   <h1 class="text-[28px]">Two-factor authentication</h1>
 
   <% if Current.user.totp_enabled? %>

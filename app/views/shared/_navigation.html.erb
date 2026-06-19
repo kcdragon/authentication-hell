@@ -18,25 +18,19 @@
     <%= link_to "▶ Play", game_path, data: { turbo: turbo },
           class: "block px-4 py-3 bg-passkey text-white border-b-[3px] border-ink" %>
 
-    <% unless Current.user.onboarding_complete? %>
-      <%= link_to "⚠ Finish setup", onboarding_path, data: { turbo: turbo },
-            class: "block px-4 py-3 bg-password text-ink font-bold border-b-[3px] border-ink hover:bg-password/80" %>
-    <% end %>
-
     <%= link_to "Profile", user_path, data: { turbo: turbo },
           class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
 
     <%= link_to "Leaderboard", leaderboard_path, data: { turbo: turbo },
           class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
 
-    <%= link_to "Passkeys", webauthn_settings_path, data: { turbo: turbo },
-          class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
-
-    <%= link_to "Two-factor authentication", totp_settings_path, data: { turbo: turbo },
-          class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
-
-    <%= link_to "Change password", password_change_path, data: { turbo: turbo },
-          class: "block px-4 py-3 text-ink border-b-[3px] border-ink hover:bg-paper" %>
+    <% if Current.user.onboarding_complete? %>
+      <%= link_to "Security", onboarding_path, data: { turbo: turbo },
+            class: "block px-4 py-3 text-ink border-b-[3px] border-ink hover:bg-paper" %>
+    <% else %>
+      <%= link_to "⚠ Security", onboarding_path, data: { turbo: turbo },
+            class: "block px-4 py-3 bg-password text-ink font-bold border-b-[3px] border-ink hover:bg-password/80" %>
+    <% end %>
 
     <%= button_to "Sign out", session_path, method: :delete,
           class: "block w-full text-left px-4 py-3 text-error hover:bg-error/10 cursor-pointer" %>
