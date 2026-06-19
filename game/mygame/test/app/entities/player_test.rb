@@ -119,8 +119,8 @@ class PlayerTest < Minitest::Test
 
   # --- falling through holes ---
 
-  def test_falls_through_a_hole_under_its_center_instead_of_landing
-    hole = Hole.new(x: 200, w: 150) # player center (x 200 + 32) sits inside it
+  def test_falls_through_a_hole_when_most_of_the_body_overhangs
+    hole = Hole.new(x: 200, w: 150) # player sits fully over the gap's left side
     @player.x = 200
     @player.y = GROUND_Y + 5
     @player.vy = -10
@@ -152,14 +152,28 @@ class PlayerTest < Minitest::Test
     assert_operator @player.y, :<, GROUND_Y
   end
 
-  def test_stands_on_the_edge_until_the_center_clears_the_gap
-    # Hole starts just past the player's center, so the center is still on solid ground.
+  def test_stands_on_the_edge_until_three_quarters_of_the_body_overhangs
+    # Hole starts just past the player's center, so the center overhangs but only
+    # about half the body does — under the forgiving 3/4 threshold, so they stand.
     hole = Hole.new(x: @player.x + @player.w / 2 + 1, w: 150)
     @player.y = GROUND_Y + 5
     @player.vy = -10
     @player.grounded = false
     @player.update(build_args(holes: [ hole ]))
-    assert @player.grounded, "edge is still supported while the center is on solid ground"
+    assert @player.grounded, "still supported until 3/4 of the body overhangs the gap"
+    assert_equal GROUND_Y, @player.y
+  end
+
+  def test_stands_when_the_center_overhangs_but_less_than_three_quarters_does
+    # Body [200,264], hole [220,...] → 44px (~69%) overhangs. The center (232) is
+    # over the gap, so the old center rule would drop them; the 3/4 rule holds.
+    hole = Hole.new(x: 220, w: 150)
+    @player.x = 200
+    @player.y = GROUND_Y + 5
+    @player.vy = -10
+    @player.grounded = false
+    @player.update(build_args(holes: [ hole ]))
+    assert @player.grounded, "a quarter of the body still has ground under it"
     assert_equal GROUND_Y, @player.y
   end
 
