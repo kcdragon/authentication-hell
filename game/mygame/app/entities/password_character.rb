@@ -18,6 +18,8 @@ class PasswordCharacter
   # (reuses the site's semantic palette). Dark faces take cream text; amber keeps ink.
   CLASS_FACE = { upper: BLUE, lower: GREEN, digit: AMBER, symbol: PURPLE }.freeze
   CLASS_INK  = { upper: PAPER, lower: PAPER, digit: INK, symbol: PAPER }.freeze
+
+  def self.klass_of(glyph) = CLASSES.find { |k| GLYPHS.fetch(k).include?(glyph) }
   SIZE = Enemy::HEIGHT # the layout cell the glyph chip centers within
   CHIP = 50 # the glyph chip's drawn size
   FLOAT_GAP = 16 # how far the chip hovers above its surface
@@ -39,11 +41,8 @@ class PasswordCharacter
 
   def hitbox = chip_rect
 
-  # Walked into: append this class's glyph to the player's tally for that class. The
-  # level wants several of each class (see PasswordLevel::REQUIRED_PER_CLASS), so each
-  # padlock of a class counts; over-collecting past the goal is harmless.
   def collect(args)
-    (args.state.player.collected_password_characters[@klass] ||= []) << @glyph
+    args.state.player.collected_password_characters << @glyph
   end
 
   # The carried glyph in a class-colored, ink-bordered chip, hovering above its surface.
