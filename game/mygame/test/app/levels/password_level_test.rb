@@ -25,10 +25,10 @@ class PasswordLevelTest < Minitest::Test
   end
 
   def test_setup_clears_any_carried_password_progress
-    @args.state.player.collected_password_characters = { upper: "A" } # stale, from a prior run
+    @args.state.player.collected_password_characters = [ "A" ] # stale, from a prior run
     @level.setup(@args)
 
-    assert_empty @args.state.player.collected_password_characters
+    assert_equal [], @args.state.player.collected_password_characters
   end
 
   def test_setup_scatters_at_least_one_padlock_of_every_class
@@ -85,12 +85,44 @@ class PasswordLevelTest < Minitest::Test
 
   def test_one_of_each_class_is_not_enough_to_finish
     @level.setup(@args)
-    PasswordCharacter::CLASSES.each { |klass| @args.state.player.collected_password_characters[klass] = [ "x" ] }
+    @args.state.player.collected_password_characters = PasswordCharacter::CLASSES.map { |klass| glyph_for(klass) }
     @level.update(@args)
 
     refute(@args.state.collectables.any? { |c| c.is_a?(Certificate) },
            "the complexity rule wants #{PasswordLevel::REQUIRED_PER_CLASS} of each, not one")
     refute @level.complete?
+  end
+
+  def test_a_full_but_unbalanced_password_is_rejected_and_reset
+    @level.setup(@args)
+    # Eight characters, but 3 upper / 2 lower / 2 digit / only 1 symbol — invalid.
+    @args.state.player.collected_password_characters = %w[A B C a b 2 3 !]
+    @args.state.collectables.each { |c| c.alive = false } # pretend the field was picked clean
+    @level.update(@args)
+
+    refute(@args.state.collectables.any? { |c| c.is_a?(Certificate) }, "an invalid password doesn't finish")
+    assert_empty @args.state.player.collected_password_characters, "the rejected password is cleared"
+    assert(@args.state.collectables.all?(&:alive), "every padlock respawns at its spot")
+    assert @level.validation_error_active?(@args), "the invalid-password banner is showing"
+  end
+
+  def test_a_valid_password_does_not_trigger_a_validation_error
+    @level.setup(@args)
+    collect_all
+    @level.update(@args)
+
+    refute @level.validation_error_active?(@args)
+  end
+
+  def test_validation_error_banner_expires_after_its_window
+    @level.setup(@args)
+    @args.state.player.collected_password_characters = Array.new(PasswordLevel::PASSWORD_LENGTH, "A") # all one class
+    @level.update(@args) # fails at tick 0
+    assert @level.validation_error_active?(@args)
+
+    later = build_args(player: @args.state.player, level: @level,
+                       tick_count: PasswordLevel::VALIDATION_ERROR_TICKS + 1)
+    refute @level.validation_error_active?(later)
   end
 
   def test_spawns_the_certificate_once_every_character_is_held
@@ -124,7 +156,7 @@ class PasswordLevelTest < Minitest::Test
   end
 
   def test_draw_hud_colors_a_filled_slot_by_its_class
-    @args.state.player.collected_password_characters[:upper] = [ "A" ]
+    @args.state.player.collected_password_characters = [ "A" ]
     @level.draw_hud(@args)
     faces = @args.outputs.solids.map { |s| [ s[:r], s[:g], s[:b] ] }
     assert_includes faces, PasswordCharacter::CLASS_FACE.fetch(:upper)
@@ -136,6 +168,15 @@ class PasswordLevelTest < Minitest::Test
     refute_empty @args.outputs.labels
   end
 
+  def test_draw_shows_the_invalid_password_banner_while_the_error_is_active
+    @level.setup(@args)
+    @args.state.player.collected_password_characters = Array.new(PasswordLevel::PASSWORD_LENGTH, "A") # all one class
+    @level.update(@args) # rejected → banner active
+    @level.draw(@args)
+
+    assert(@args.outputs.labels.any? { |l| l[:text] == "INVALID PASSWORD" })
+  end
+
   def test_serialize_names_the_level
     assert_equal "PasswordLevel", @level.serialize[:level]
   end
@@ -143,8 +184,9 @@ class PasswordLevelTest < Minitest::Test
   private
 
   def collect_all
-    PasswordCharacter::CLASSES.each do |klass|
-      @args.state.player.collected_password_characters[klass] = Array.new(PasswordLevel::REQUIRED_PER_CLASS, "x")
-    end
+    @args.state.player.collected_password_characters =
+      PasswordCharacter::CLASSES.flat_map { |klass| Array.new(PasswordLevel::REQUIRED_PER_CLASS, glyph_for(klass)) }
   end
+
+  def glyph_for(klass) = PasswordCharacter::GLYPHS.fetch(klass).chars.first
 end

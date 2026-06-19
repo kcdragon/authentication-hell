@@ -8,9 +8,10 @@
 class PasswordLevel < Level
   TARGETS = PasswordCharacter::CLASSES
 
-  # The company's "complexity" rule: at least this many of each character class, so
-  # finishing means collecting REQUIRED_PER_CLASS * TARGETS.length padlocks in all.
   REQUIRED_PER_CLASS = 2
+  PASSWORD_LENGTH = REQUIRED_PER_CLASS * TARGETS.length
+
+  VALIDATION_ERROR_TICKS = 240
 
   # Padlocks spread across the world, cycling the four classes so each appears
   # several times ("full of password enemies"). A row sits on the ground; the rest
@@ -44,83 +45,125 @@ class PasswordLevel < Level
   end
 
   def setup(args)
-    args.state.player.collected_password_characters = {}
+    args.state.player.collected_password_characters = []
     args.state.platforms = Platform.scatter
     args.state.holes = Hole.scatter
     args.state.collectables = scatter_chars(args.state.platforms)
     args.state.enemies = hazard_enemies(args.state.player.x)
   end
 
-  # Once every class is collected, drop the certificate at the right exit (so the player
-  # can't finish empty-handed — grabbing it early can't soft-lock since it isn't there
-  # yet). Latch completion when they pick it up (#complete? runs without args).
   def update(args)
-    if all_collected?(args) && !@certificate_spawned
-      args.state.collectables << certificate_at_exit
-      @certificate_spawned = true
-    end
+    validate_password(args) if password_full?(args) && !@certificate_spawned
     @cleared = true if certificate_collected?(args)
   end
 
   def all_collected?(args) = TARGETS.all? { |klass| held_count(args, klass) >= REQUIRED_PER_CLASS }
 
+  def validation_error_active?(args)
+    @validation_error_at && (args.state.tick_count - @validation_error_at) < VALIDATION_ERROR_TICKS
+  end
+
   def complete? = @cleared == true
 
   def next_level = MainLevel.new
 
-  # The collected-character tray by the hearts: a grid of slots, a column per class and a
-  # row per required copy. Filled slots show the collected glyph; empty ones a faint hint.
-  SLOT_HINTS = { upper: "A", lower: "a", digit: "0", symbol: "#" }.freeze
   def draw_hud(args)
-    held = args.state.player.collected_password_characters
-    w = 38
-    h = 34
-    x0 = 168
-    y0 = SCREEN_H - 61 # top row, aligned with the hearts
-    TARGETS.each_with_index do |klass, col|
-      glyphs = held[klass] || []
-      x = x0 + col * 46
-      REQUIRED_PER_CLASS.times do |row|
-        glyph = glyphs[row]
-        y = y0 - row * (h + 6) # each additional required copy stacks in a row below
-        args.outputs.solids << { x: x, y: y, w: w, h: h, r: INK[0], g: INK[1], b: INK[2] }
-        face = glyph ? PasswordCharacter::CLASS_FACE.fetch(klass) : PAPER
-        args.outputs.solids << { x: x + 3, y: y + 3, w: w - 6, h: h - 6,
-                                 r: face[0], g: face[1], b: face[2] }
-        ink = glyph ? PasswordCharacter::CLASS_INK.fetch(klass) : FAINT_INK
-        args.outputs.labels << { x: x + w / 2, y: y + h / 2 + 1, text: glyph || SLOT_HINTS[klass],
-                                 size_px: 22, font: FONT_MONO_B, r: ink[0], g: ink[1], b: ink[2],
-                                 anchor_x: 0.5, anchor_y: 0.5 }
-      end
-    end
+    glyphs = args.state.player.collected_password_characters
+    PASSWORD_LENGTH.times { |slot| draw_password_slot(args, slot, glyphs[slot]) }
   end
 
   # Prod the player to sweep up the characters, then flip to "head right" once the
-  # set is complete — shown as the top closed caption, updating on each pickup.
+  # set is complete — shown as the top closed caption, updating on each pickup. While a
+  # rejected password is still fading, the validation banner rides over the play area.
   def draw(args)
     lines = if all_collected?(args)
       [ "Password complete —", "head right to finish →" ]
     else
-      [ "#{collected_total(args)}/#{TARGETS.length * REQUIRED_PER_CLASS} characters" ]
+      [ "#{collected_count(args)}/#{PASSWORD_LENGTH} characters" ]
     end
     Caption.new(args, lines).draw
+    draw_validation_error(args) if validation_error_active?(args)
   end
 
   private
 
-  # How many of a class the player holds, and the running total toward the goal
-  # (each class capped at REQUIRED_PER_CLASS so over-collecting doesn't read as >8).
-  def held_count(args, klass) = (args.state.player.collected_password_characters[klass] || []).size
+  # The tray row, aligned under the hearts (their x/pitch) and narrow enough to clear
+  # the centered caption card.
+  SLOT_W = 36
+  SLOT_H = 34
+  SLOT_X = 24
+  SLOT_PITCH = 42
+  SLOT_Y = SCREEN_H - 114
 
-  def collected_total(args) = TARGETS.sum { |klass| [ held_count(args, klass), REQUIRED_PER_CLASS ].min }
+  # One tray slot: ink border, class-colored (or empty) face, and the collected glyph.
+  def draw_password_slot(args, index, glyph)
+    klass = glyph && PasswordCharacter.klass_of(glyph)
+    face = klass ? PasswordCharacter::CLASS_FACE.fetch(klass) : PAPER
+    ink = klass ? PasswordCharacter::CLASS_INK.fetch(klass) : FAINT_INK
+    x = SLOT_X + index * SLOT_PITCH
+    args.outputs.solids << { x: x, y: SLOT_Y, w: SLOT_W, h: SLOT_H, r: INK[0], g: INK[1], b: INK[2] }
+    args.outputs.solids << { x: x + 3, y: SLOT_Y + 3, w: SLOT_W - 6, h: SLOT_H - 6,
+                             r: face[0], g: face[1], b: face[2] }
+    args.outputs.labels << { x: x + SLOT_W / 2, y: SLOT_Y + SLOT_H / 2 + 1, text: glyph || "·",
+                             size_px: 22, font: FONT_MONO_B, r: ink[0], g: ink[1], b: ink[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
+  end
 
-  # A ground row plus one padlock on each staircase top, classes cycled (sorted by x) so
-  # each appears several times — completing the set means climbing, not just strolling.
+  # The just-rejected password's banner: a transient red headline + hint that fades out
+  # over VALIDATION_ERROR_TICKS (the run keeps playing underneath — this isn't game
+  # over), reusing the level-intro fade-out curve.
+  def draw_validation_error(args)
+    elapsed = args.state.tick_count - @validation_error_at
+    fade_out = VALIDATION_ERROR_TICKS - LEVEL_INTRO_FADE_OUT
+    alpha = (elapsed > fade_out ? 255 * (VALIDATION_ERROR_TICKS - elapsed) / LEVEL_INTRO_FADE_OUT : 255).clamp(0, 255)
+
+    cx = 640
+    args.outputs.labels << { x: cx, y: 470, text: "INVALID PASSWORD",
+                             size_px: 30, font: FONT_MONO_B,
+                             r: RED[0], g: RED[1], b: RED[2], a: alpha,
+                             anchor_x: 0.5, anchor_y: 0.5 }
+    args.outputs.solids << { x: cx - 150, y: 448, w: 300, h: 4,
+                             r: RED[0], g: RED[1], b: RED[2], a: alpha }
+    args.outputs.labels << { x: cx, y: 426, text: "need 2 upper · 2 lower · 2 number · 2 symbol — try again",
+                             size_px: 16, font: FONT_MONO,
+                             r: MUTED[0], g: MUTED[1], b: MUTED[2], a: alpha,
+                             anchor_x: 0.5, anchor_y: 0.5 }
+  end
+
+  def password_full?(args) = collected_count(args) >= PASSWORD_LENGTH
+
+  def validate_password(args)
+    all_collected?(args) ? spawn_exit_certificate(args) : fail_validation(args)
+  end
+
+  # Dropped only once the password is valid, so the player can't finish empty-handed.
+  def spawn_exit_certificate(args)
+    args.state.collectables << certificate_at_exit
+    @certificate_spawned = true
+  end
+
+  def fail_validation(args)
+    args.state.player.collected_password_characters = []
+    args.state.collectables.each { |c| c.alive = true if c.is_a?(PasswordCharacter) }
+    @validation_error_at = args.state.tick_count
+  end
+
+  def held_count(args, klass) = args.state.player.collected_password_characters.count { |g| PasswordCharacter.klass_of(g) == klass }
+
+  def collected_count(args) = args.state.player.collected_password_characters.size
+
   def scatter_chars(platforms)
     spots = ground_spots + platform_spots(platforms)
-    spots.sort_by { |x, _y| x }.map.with_index do |(x, y), i|
-      PasswordCharacter.new(x: x, y: y, klass: TARGETS[i % TARGETS.length])
+    classes = shuffled_classes(spots.length)
+    spots.map.with_index do |(x, y), i|
+      PasswordCharacter.new(x: x, y: y, klass: classes[i])
     end
+  end
+
+  def shuffled_classes(count)
+    seeded = TARGETS.flat_map { |klass| [ klass ] * REQUIRED_PER_CLASS }
+    extra = [ count - seeded.length, 0 ].max.times.map { TARGETS.sample }
+    (seeded + extra).shuffle
   end
 
   def ground_spots

@@ -55,9 +55,7 @@ class Player
     @moved = false
     @blink_until_tick = 0
     @reached_platform = false
-    # class symbol → array of collected glyphs for that class (the password level's
-    # goal needs several of each); empty everywhere else.
-    @collected_password_characters = {}
+    @collected_password_characters = []
   end
 
   # Move left/right with the arrow keys (no wrapping — clamp to screen); space
