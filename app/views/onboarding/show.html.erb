@@ -5,11 +5,15 @@
    done_count    = [ password_done, passkey_done, totp_done ].count(true) %>
 
 <div class="mx-auto max-w-2xl w-full">
-  <span class="ah-badge ah-badge--password text-ink">Setup · <%= done_count %>/3</span>
-  <h1 class="text-[32px] leading-[.95] mt-3">Secure your account</h1>
+  <span class="ah-badge ah-badge--password text-ink"><%= done_count %>/3 set up</span>
+  <h1 class="text-[32px] leading-[.95] mt-3">Security</h1>
   <p class="mt-4 font-medium text-muted">
-    This is Authentication Hell — so naturally you'll set up every way in. Add a password,
-    a passkey, and an authenticator app. You can do them in any order.
+    <% if done_count == 3 %>
+      Manage the ways you sign in to Authentication Hell — your password, passkey, and authenticator app.
+    <% else %>
+      This is Authentication Hell — so naturally you'll set up every way in. Add a password,
+      a passkey, and an authenticator app. You can do them in any order.
+    <% end %>
   </p>
 
   <div class="mt-7 space-y-5">
@@ -21,7 +25,10 @@
           <h2 class="text-xl">Set a password</h2>
         </div>
         <% if password_done %>
-          <span class="ah-badge ah-badge--success">✓ Done</span>
+          <div class="flex items-center gap-3">
+            <span class="ah-badge ah-badge--success">✓ Done</span>
+            <%= link_to "Manage", password_change_path, class: "ah-btn ah-btn--ghost" %>
+          </div>
         <% end %>
       </div>
 
@@ -54,7 +61,10 @@
           <h2 class="text-xl">Register a passkey</h2>
         </div>
         <% if passkey_done %>
-          <span class="ah-badge ah-badge--success">✓ Done</span>
+          <div class="flex items-center gap-3">
+            <span class="ah-badge ah-badge--success">✓ Done</span>
+            <%= link_to "Manage", webauthn_settings_path, class: "ah-btn ah-btn--ghost" %>
+          </div>
         <% end %>
       </div>
 
@@ -87,7 +97,10 @@
           <h2 class="text-xl">Set up an authenticator app</h2>
         </div>
         <% if totp_done %>
-          <span class="ah-badge ah-badge--success">✓ Done</span>
+          <div class="flex items-center gap-3">
+            <span class="ah-badge ah-badge--success">✓ Done</span>
+            <%= link_to "Manage", totp_settings_path, class: "ah-btn ah-btn--ghost" %>
+          </div>
         <% else %>
           <%= link_to "Set up", new_totp_enrollment_path,
                 class: "ah-btn ah-btn--primary shadow-brut", style: "background: var(--color-totp)" %>
@@ -99,8 +112,7 @@
     </div>
   </div>
 
-  <div class="mt-7 flex items-center gap-5">
-    <%= link_to "Skip for now", game_path, class: "ah-btn ah-btn--ghost" %>
-    <span class="ah-hint">You can finish this later from the account menu.</span>
+  <div class="mt-7">
+    <%= link_to "▶ Back to game", game_path, class: "ah-btn ah-btn--ghost" %>
   </div>
 </div>

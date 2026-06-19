@@ -1,4 +1,5 @@
 <div class="mx-auto max-w-md w-full ah-card p-6">
+  <%= link_to "← Security", onboarding_path, class: "inline-block mb-4 font-semibold text-sm text-ink underline underline-offset-[3px] decoration-2 hover:no-underline" %>
   <h1 class="text-[28px]"><%= Current.user.passwordless? ? "Set a password" : "Change password" %></h1>
 
   <%= form_with model: Current.user, url: password_change_path, method: :patch, class: "mt-4 space-y-3.5" do |form| %>
