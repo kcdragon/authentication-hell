@@ -114,14 +114,14 @@ class Player
     end
   end
 
-  # True when the player's center is over a gap in the ground (a hole), so the ground
-  # check above lets them fall through instead of landing. Standing on the edge is
-  # fine — they only drop once their center clears it. Holes live in args.state.holes
-  # (empty on levels without pits).
+  # True once more than 3/4 of the player's body overhangs a gap, so they fall
+  # instead of landing. Holes live in args.state.holes (empty on pit-less levels).
   def over_hole?(args)
     return false unless args.state.holes
-    cx = @x + @w / 2
-    args.state.holes.any? { |hole| cx > hole.x && cx < hole.x + hole.w }
+    args.state.holes.any? do |hole|
+      overlap = [ @x + @w, hole.x + hole.w ].min - [ @x, hole.x ].max
+      overlap > @w * 3 / 4
+    end
   end
 
   # A Mario-style stomp: the player is descending (@vy < 0) and their feet are
