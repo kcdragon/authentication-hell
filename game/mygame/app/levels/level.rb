@@ -68,8 +68,20 @@ class Level
   # no prompt.
   def draw(_args) = nil
 
+  # Start-of-level dialogue (after the chapter card, before play): an array of
+  # messages, each an array of pre-wrapped lines, dismissed one per E-press. Empty
+  # by default — the level starts straight into play.
+  def dialogue = []
+
+  def dialogue_remaining? = @dialogue_index.to_i < dialogue.length
+
+  def current_dialogue = dialogue[@dialogue_index.to_i]
+
+  def advance_dialogue = @dialogue_index = @dialogue_index.to_i + 1
+
   # The password character classes this level wants collected, or nil if it isn't a
-  # collection level. Non-nil makes the tick draw the collected-character HUD tray.
+  # collection level. Non-nil makes the tick draw the collected-character HUD tray
+  # (which then reads #password_required_per_class off the collection level).
   def password_targets = nil
 
   # args.state.level rides along in DragonRuby's state export; levels are

@@ -52,8 +52,8 @@ class Player
     @game_over = false
     @moved = false
     @reached_platform = false
-    # class symbol → glyph for each password character collected (the password
-    # level's goal); empty everywhere else.
+    # class symbol → array of collected glyphs for that class (the password level's
+    # goal needs several of each); empty everywhere else.
     @collected_password_characters = {}
   end
 

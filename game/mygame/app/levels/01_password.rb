@@ -8,6 +8,10 @@
 class PasswordLevel < Level
   TARGETS = PasswordCharacter::CLASSES
 
+  # The company's "complexity" rule: at least this many of each character class, so
+  # finishing means collecting REQUIRED_PER_CLASS * TARGETS.length padlocks in all.
+  REQUIRED_PER_CLASS = 2
+
   # Padlocks spread across the world, cycling the four classes so each appears
   # several times ("full of password enemies"). A row sits on the ground; the rest
   # perch on the platforms, so the player has to climb to finish the set. The ground
@@ -24,9 +28,20 @@ class PasswordLevel < Level
 
   def number = 1
 
-  def title = "Build a Password"
+  def title = "Password Complexity"
 
   def accent = AMBER
+
+  # The HR onboarding spiel the player dismisses (press E) before the level begins.
+  def dialogue
+    [
+      [ "Your company requires passwords with",
+        "many different kinds of characters" ],
+      [ "Create a password using at least 2 upper case",
+        "characters, 2 lower case characters, 2 numbers",
+        "and 2 special characters" ]
+    ]
+  end
 
   def setup(args)
     args.state.player.x = 0
@@ -49,7 +64,7 @@ class PasswordLevel < Level
     @cleared = true if certificate_collected?(args)
   end
 
-  def all_collected?(args) = TARGETS.all? { |klass| args.state.player.collected_password_characters.key?(klass) }
+  def all_collected?(args) = TARGETS.all? { |klass| held_count(args, klass) >= REQUIRED_PER_CLASS }
 
   def complete? = @cleared == true
 
@@ -58,21 +73,26 @@ class PasswordLevel < Level
   # Non-nil tells the tick to draw the collected-character HUD tray by the hearts.
   def password_targets = TARGETS
 
+  def password_required_per_class = REQUIRED_PER_CLASS
+
   # Prod the player to sweep up the characters, then flip to "head right" once the
   # set is complete — shown as the top closed caption, updating on each pickup.
   def draw(args)
     lines = if all_collected?(args)
       [ "Password complete —", "head right to finish →" ]
     else
-      [ "Create a password using an upper case",
-        "letter, lower case letter, number",
-        "and symbol",
-        "#{args.state.player.collected_password_characters.size}/#{TARGETS.length} character types" ]
+      [ "#{collected_total(args)}/#{TARGETS.length * REQUIRED_PER_CLASS} characters" ]
     end
     Caption.new(args, lines).draw
   end
 
   private
+
+  # How many of a class the player holds, and the running total toward the goal
+  # (each class capped at REQUIRED_PER_CLASS so over-collecting doesn't read as >8).
+  def held_count(args, klass) = (args.state.player.collected_password_characters[klass] || []).size
+
+  def collected_total(args) = TARGETS.sum { |klass| [ held_count(args, klass), REQUIRED_PER_CLASS ].min }
 
   # A ground row plus one padlock perched on every platform top, classes cycled
   # across the lot (sorted by x) so each appears several times and is spread between

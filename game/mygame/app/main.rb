@@ -1,5 +1,6 @@
 require "app/constants.rb"
 require "app/caption.rb"
+require "app/labels/dialogue.rb"
 require "app/entities/player.rb"
 require "app/entities/enemy.rb"
 require "app/entities/platform.rb"
@@ -76,9 +77,12 @@ module Main
     start_run(args) if !args.state.started && args.state.me_request == :done
     if args.state.started
       toggled = handle_pause_input(args)
-      # The world stays frozen behind the intro card so a level start (and the
-      # player's reset to the new scene's left edge) lands while it's covered.
-      update_world(args) unless args.state.paused || toggled || cc_clicked || level_intro_active?(args)
+      handle_dialogue_input(args)
+      # The world stays frozen behind the intro card (and any start-of-level
+      # dialogue) so a level start, and the player's reset to the new scene's left
+      # edge, lands while it's covered.
+      update_world(args) unless args.state.paused || toggled || cc_clicked ||
+                                level_intro_active?(args) || dialogue_active?(args)
     end
 
     render_world(args)
@@ -96,12 +100,19 @@ module Main
   # unlock poll. Returns whether it toggled this tick so the caller can skip the world
   # update on the frame the player clicks pause.
   def handle_pause_input(args)
-    return false if args.state.player.game_over || args.state.player.locked
+    return false if args.state.player.game_over || args.state.player.locked || dialogue_active?(args)
 
     toggle = args.inputs.keyboard.key_down.escape ||
              (args.inputs.mouse.click && args.inputs.mouse.point.inside_rect?(PLAY_BUTTON))
     args.state.paused = !args.state.paused if toggle
     !!toggle
+  end
+
+  # Advance the start-of-level dialogue one message per E-press.
+  def handle_dialogue_input(args)
+    return unless dialogue_active?(args)
+
+    args.state.level.advance_dialogue if args.inputs.keyboard.key_down.e
   end
 
   # Toggle closed-captions on a click of the CC button. Wired in every state (it's
@@ -256,9 +267,10 @@ module Main
     end
 
     # Keep the whole scene (platforms, enemies, collectables, player) hidden behind
-    # the intro card so the new level only appears once the card has finished fading
-    # out — no entities popping in at the scene's start.
-    unless level_intro_active?(args)
+    # the intro card and any start-of-level dialogue, so the scene only appears once
+    # the player has read through and the world unfreezes — no entities popping in
+    # behind the cards.
+    unless level_intro_active?(args) || dialogue_active?(args)
       # World entities are in world coords; each subtracts the camera offset to draw.
       args.state.platforms.each { |plat| plat.render(args, cam) }
 
@@ -283,6 +295,8 @@ module Main
       draw_paused(args)
     elsif level_intro_active?(args)
       draw_level_intro(args)
+    elsif dialogue_active?(args)
+      Dialogue.new(args, args.state.level.current_dialogue, args.state.level.accent).draw
     else
       # Each level draws its own prompt as the top closed caption (only here, during
       # live play, where a prompt belongs).
@@ -425,28 +439,35 @@ module Main
     end
   end
 
-  # The password level's tray, just right of the hearts: one slot per character
-  # class. A held class shows its collected glyph in a filled amber chip; a missing
-  # one shows a faint placeholder glyph of that class, so the player sees what's
-  # left to find. Drawn only on a level that declares password_targets.
+  # The password level's tray, just right of the hearts: one slot per character the
+  # level wants, laid out as a grid — a column per character class, a row per copy
+  # the class needs (password_required_per_class). A filled slot shows its collected
+  # glyph in an amber chip; an empty one shows a faint placeholder glyph of its class,
+  # so the player sees what's left to find. Stacking the extra copies into rows keeps
+  # the slots full size and the tray's right edge clear of the top caption (x 360).
   PASSWORD_SLOT_HINTS = { upper: "A", lower: "a", digit: "0", symbol: "#" }.freeze
   def draw_collected_password_characters(args)
     held = args.state.player.collected_password_characters
-    x0 = 168
-    y = SCREEN_H - 61
+    required = args.state.level.password_required_per_class
     w = 38
     h = 34
-    args.state.level.password_targets.each_with_index do |klass, i|
-      x = x0 + i * 46
-      glyph = held[klass]
-      args.outputs.solids << { x: x, y: y, w: w, h: h, r: INK[0], g: INK[1], b: INK[2] }
-      face = glyph ? AMBER : PAPER
-      args.outputs.solids << { x: x + 3, y: y + 3, w: w - 6, h: h - 6,
-                               r: face[0], g: face[1], b: face[2] }
-      ink = glyph ? INK : FAINT_INK
-      args.outputs.labels << { x: x + w / 2, y: y + h / 2 + 1, text: glyph || PASSWORD_SLOT_HINTS[klass],
-                               size_px: 22, font: FONT_MONO_B, r: ink[0], g: ink[1], b: ink[2],
-                               anchor_x: 0.5, anchor_y: 0.5 }
+    x0 = 168
+    y0 = SCREEN_H - 61 # top row, aligned with the hearts
+    args.state.level.password_targets.each_with_index do |klass, col|
+      glyphs = held[klass] || []
+      x = x0 + col * 46
+      required.times do |row|
+        glyph = glyphs[row]
+        y = y0 - row * (h + 6) # each additional required copy stacks in a row below
+        args.outputs.solids << { x: x, y: y, w: w, h: h, r: INK[0], g: INK[1], b: INK[2] }
+        face = glyph ? AMBER : PAPER
+        args.outputs.solids << { x: x + 3, y: y + 3, w: w - 6, h: h - 6,
+                                 r: face[0], g: face[1], b: face[2] }
+        ink = glyph ? INK : FAINT_INK
+        args.outputs.labels << { x: x + w / 2, y: y + h / 2 + 1, text: glyph || PASSWORD_SLOT_HINTS[klass],
+                                 size_px: 22, font: FONT_MONO_B, r: ink[0], g: ink[1], b: ink[2],
+                                 anchor_x: 0.5, anchor_y: 0.5 }
+      end
     end
   end
 
@@ -678,6 +699,13 @@ module Main
   def level_intro_active?(args)
     args.state.started && args.state.level_intro_at &&
       (args.state.tick_count - args.state.level_intro_at) < LEVEL_INTRO_TICKS
+  end
+
+  # The start-of-level dialogue holds the world frozen after the intro card fades,
+  # until the player has pressed E through every message the level scripted.
+  def dialogue_active?(args)
+    args.state.started && !level_intro_active?(args) &&
+      !args.state.player.game_over && args.state.level.dialogue_remaining?
   end
 
   # Replay from the "Video Ended" card: reset the player and scene back to the
