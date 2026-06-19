@@ -12,7 +12,7 @@ require "app/entities/enemies/totp.rb"
 require "app/entities/enemies/passkey.rb"
 require "app/entities/enemies/password.rb"
 require "app/levels/level.rb"
-require "app/levels/00_tutorial.rb"
+require "app/levels/00_welcome.rb"
 require "app/levels/01_password.rb"
 require "app/levels/02_main.rb"
 require "app/levels/03_gauntlet.rb"
@@ -21,9 +21,9 @@ module Main
   def tick(args)
     args.state.player ||= Player.new
 
-    # The game opens on the tutorial level (one password enemy on flat ground) and
+    # The game opens on the welcome level (one password enemy on flat ground) and
     # hands off to the main world once the player clears it. args.state.level always
-    # holds the active level (a TutorialLevel, then a MainLevel) — unset only on the
+    # holds the active level (a WelcomeLevel, then a MainLevel) — unset only on the
     # very first tick. Each enemy carries its own auth kind (which re-auth flow it
     # triggers) and its own colliding flag so contact fires once per enemy.
     # A default scene so rendering has something to draw behind the poster; the
@@ -32,7 +32,7 @@ module Main
     args.state.start_level ||= 0
     args.state.captions_on = true if args.state.captions_on.nil?
     unless args.state.level
-      args.state.level = TutorialLevel.new
+      args.state.level = WelcomeLevel.new
       setup_level(args)
     end
 
@@ -138,7 +138,7 @@ module Main
       (args.state.player.x + args.state.player.w / 2 - SCREEN_W / 2)
         .clamp(0, args.state.level.world_w - SCREEN_W)
 
-    # Per-tick level scripting (e.g. the tutorial spawns its enemy once the player
+    # Per-tick level scripting (e.g. the welcome level spawns its enemy once the player
     # has jumped onto the platform). Reads the camera set just above.
     args.state.level.update(args)
 
@@ -148,7 +148,7 @@ module Main
 
     # Fire once on contact (the transition, not every overlapping frame). Coming
     # down on top of an enemy stomps it — defeated outright, no heart loss, and
-    # the player bounces up (gated on melee?, so the tutorial's re-auth lesson
+    # the player bounces up (gated on melee?, so the welcome level's re-auth lesson
     # still forces the challenge). Otherwise it's a side/ground hit:
     # dock a heart, retire the enemy, then either game-over (last heart) or kick
     # off that enemy's auth flow and freeze the player.
@@ -179,7 +179,7 @@ module Main
 
     # Walking into a collectable retires the pickup and applies its own effect (a
     # heart heals, a password character is recorded); the level then decides what
-    # that means (the tutorial counts the heal as cleared).
+    # that means (the welcome level counts the heal as cleared).
     args.state.collectables.each do |pickup|
       next unless pickup.alive
       next unless args.geometry.intersect_rect?(pickup.hitbox, args.state.player)
@@ -189,7 +189,7 @@ module Main
       args.state.level.on_collect(args)
     end unless args.state.player.game_over
 
-    # Hand off once the active stage reports its goal met (e.g. the tutorial after
+    # Hand off once the active stage reports its goal met (e.g. the welcome level after
     # the heal). Endless stages never complete, so this is a no-op there.
     advance_level(args) if args.state.level.complete?
 
@@ -271,7 +271,7 @@ module Main
     # Keep the whole scene (platforms, enemies, collectables, player) hidden behind
     # the intro card, and behind a front-loaded dialogue (the password level) so a
     # level start doesn't pop entities in behind the card. A level whose dialogue
-    # surfaces mid-play (the tutorial) leaves the frozen scene visible behind it.
+    # surfaces mid-play (the welcome level) leaves the frozen scene visible behind it.
     hidden_for_dialogue = dialogue_active?(args) && args.state.level.dialogue_hides_scene?
     unless level_intro_active?(args) || hidden_for_dialogue
       # World entities are in world coords; each subtracts the camera offset to draw.
@@ -309,14 +309,14 @@ module Main
 
   # Fraction of the current level the player has crossed (0..1) — drives the
   # scrubber fill and the faux timestamp, both measured against the active level's
-  # width so a short stage (the tutorial) fills its own short "video."
+  # width so a short stage (the welcome level) fills its own short "video."
   def progress(args)
     (args.state.player.x.to_f / (args.state.level.world_w - Player::WIDTH)).clamp(0.0, 1.0)
   end
 
   # The faux runtime (seconds) of the current level's "video": VIDEO_SECONDS is the
   # full world's length, scaled by the level's width so the timestamp's total tracks
-  # how big the level is (the one-screen tutorial reads as a much shorter clip).
+  # how big the level is (the one-screen welcome level reads as a much shorter clip).
   def video_seconds(args)
     VIDEO_SECONDS * args.state.level.world_w / WORLD_W
   end
@@ -519,7 +519,7 @@ module Main
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
 
-  # Shown while /play/me is still in flight: the "AUTHENTICATION 101" title card with
+  # Shown while /play/me is still in flight: the "AUTHENTICATION HELL" title card with
   # a spinner, so the brief wait before the run auto-starts reads as the video
   # buffering on the correct level instead of swapping the world in view.
   def draw_loading(args)
@@ -527,7 +527,7 @@ module Main
     cy = 392
     draw_spinner(args, cx, cy, BLUE)
 
-    args.outputs.labels << { x: cx, y: cy - 104, text: "AUTHENTICATION 101",
+    args.outputs.labels << { x: cx, y: cy - 104, text: "AUTHENTICATION HELL",
                              size_px: 30, font: FONT_DISPLAY,
                              r: INK[0], g: INK[1], b: INK[2],
                              anchor_x: 0.5, anchor_y: 0.5 }
@@ -714,7 +714,7 @@ module Main
 
   # An in-level dialogue holds the world frozen after the intro card fades, while a
   # message is pending — front-loaded at the level's start, or surfaced at a gameplay
-  # beat (the tutorial). #current_dialogue is nil when nothing is pending.
+  # beat (the welcome level). #current_dialogue is nil when nothing is pending.
   def dialogue_active?(args)
     args.state.started && !level_intro_active?(args) &&
       !args.state.player.game_over && !args.state.level.current_dialogue(args).nil?

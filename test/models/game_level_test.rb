@@ -7,11 +7,11 @@ class GameLevelTest < ActiveSupport::TestCase
   end
 
   test "find looks up by number and returns nil for an unknown level" do
-    assert_equal "Tutorial", GameLevel.find(0).name
+    assert_equal "Welcome", GameLevel.find(0).name
     assert_nil GameLevel.find(999)
   end
 
-  test "the password level sits right after the tutorial, ahead of the open world" do
+  test "the password level sits right after the welcome level, ahead of the open world" do
     assert_equal "Password Complexity", GameLevel.find(1).name
     assert_equal "level_1_complete", GameLevel.find(1).achievement_key
     assert_equal "The Open World", GameLevel.find(2).name

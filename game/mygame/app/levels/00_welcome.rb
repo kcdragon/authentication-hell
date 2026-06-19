@@ -1,19 +1,19 @@
-# The opening tutorial: one reachable ledge on flat ground and a scripted pair of
+# The opening welcome level: one reachable ledge on flat ground and a scripted pair of
 # password enemies, so the lesson stays predictable — move, jump onto the platform,
 # then bump the enemy marching in from the right (melee is off, so the only way past
 # is the password re-auth). Clearing it drops a heal heart; grabbing it turns melee
 # on and sends a second enemy in from the left for the player to defeat with a
-# stomp, which drops the completion certificate; grabbing it finishes the tutorial
+# stomp, which drops the completion certificate; grabbing it finishes the welcome level
 # and hands off to the password level.
 #
 # Sized to a single screen (world_w = SCREEN_W): the whole lesson plays in one view,
 # so the player can't wander off into the empty main world and the camera never scrolls.
-class TutorialLevel < Level
+class WelcomeLevel < Level
   ENEMY_SPEED = 3 # px/frame the password enemies advance toward the player
 
   def number = 0
 
-  def title = "Getting Started"
+  def title = "Welcome"
 
   def world_w = SCREEN_W
 
@@ -93,7 +93,7 @@ class TutorialLevel < Level
   # pops the following card in the same instant, which reads as jarring.
   DIALOGUE_DELAY = 36
 
-  # The tutorial's coaching, staged: each beat pairs a hint with the milestone that
+  # The welcome level's coaching, staged: each beat pairs a hint with the milestone that
   # surfaces it. Main freezes the world on the pending beat until the player presses
   # E, then plays on until the next milestone — so a hint only appears the moment it's
   # relevant (move, then jump, bump the enemy, heal, fight back, finish).

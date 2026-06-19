@@ -15,7 +15,7 @@ class Enemy
 
   # Two of each kind, scattered across the world: one per evenly spaced slot (so
   # they spread out) starting a safe gap to the right of the player (who carries
-  # their position over from the tutorial) so none can collide on load, each at a
+  # their position over from the welcome level) so none can collide on load, each at a
   # random x within its slot. Listed here (not a constant) so the subclasses —
   # required after this file — are already defined when spawn runs.
   def self.spawn_random(player_x)
@@ -46,7 +46,7 @@ class Enemy
   end
 
   # Reconfigure this enemy to march left from its current x, patrolling the full
-  # width to its left (the tutorial uses this to walk it in from the right screen
+  # width to its left (the welcome level uses this to walk it in from the right screen
   # edge). It still patrols, so if it's never touched it turns around at the far
   # left and comes back.
   def march_left(speed)
@@ -56,7 +56,7 @@ class Enemy
   end
 
   # Mirror of #march_left: march right from the current x, patrolling to `max` on
-  # its right (the tutorial uses this to walk it in from the left screen edge, and
+  # its right (the welcome level uses this to walk it in from the left screen edge, and
   # caps max at the one-screen world so it can't escape). It still patrols, turning
   # around at the far edge if never touched.
   def march_right(speed, max: WORLD_W)

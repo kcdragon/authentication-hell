@@ -21,7 +21,7 @@ require_relative "../app/entities/enemies/totp"
 require_relative "../app/entities/enemies/passkey"
 require_relative "../app/entities/enemies/password"
 require_relative "../app/levels/level"
-require_relative "../app/levels/00_tutorial"
+require_relative "../app/levels/00_welcome"
 require_relative "../app/levels/01_password"
 require_relative "../app/levels/02_main"
 require_relative "../app/levels/03_gauntlet"
@@ -42,7 +42,7 @@ module GameTest
 
   # Build an `args` double for a single tick. Defaults mean "no input". The level
   # defaults to MainLevel (the full-width world) so the player clamps to WORLD_W
-  # like it does in the running game; pass a TutorialLevel to exercise the
+  # like it does in the running game; pass a WelcomeLevel to exercise the
   # one-screen bound.
   def build_args(left: false, right: false,
                  space: false, camera_x: 0, platforms: [], enemies: nil,
