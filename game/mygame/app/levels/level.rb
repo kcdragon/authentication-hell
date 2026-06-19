@@ -48,10 +48,20 @@ class Level
   # tutorial fits one screen).
   def world_w = WORLD_W
 
-  # Whether the player has walked to the world's right wall (the player's x clamps
-  # to world_w - WIDTH, so this is exact). Levels that finish by reaching the end
-  # latch a flag on this in #update, since #complete? is called without args.
-  def reached_end?(args) = args.state.player.x >= world_w - Player::WIDTH
+  # px inset from the right wall where #certificate_at_exit places the goal — clear of
+  # the holes (which stop ≥700px from the wall) and within the player's reach.
+  CERTIFICATE_INSET = 280
+
+  # The completion certificate at the level's right exit, on the ground. The full-width
+  # levels finish by walking into it (was: reaching the wall).
+  def certificate_at_exit = Certificate.new(x: world_w - CERTIFICATE_INSET)
+
+  # Whether the level's certificate has been picked up. The pickup loop retires it
+  # (alive → false) but leaves it in the collectables list; #complete? runs without
+  # args, so levels latch a flag on this in #update.
+  def certificate_collected?(args)
+    (args.state.collectables || []).any? { |c| c.is_a?(Certificate) && !c.alive }
+  end
 
   # The level's prompt, drawn while the player is free (not locked) as the top closed
   # caption (a level with a hint builds its copy and draws a Caption); the default is

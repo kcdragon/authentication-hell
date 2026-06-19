@@ -2,9 +2,9 @@
 # so the way across is a continuous run of one-way ledges overhead — hop them from
 # the start (an enemy-free patch on the left) to the far wall (an enemy-free patch on
 # the right). Melee is live (inherited), so a brave player can swing through the
-# floor, but with only three hearts the platforms are the safe route. Reaching the
-# wall clears it and loops a fresh lap (the chain's last level can't hand off to nil
-# without crashing the setup that follows).
+# floor, but with only three hearts the platforms are the safe route. Collecting the
+# certificate at the end patch clears it and loops a fresh lap (the chain's last level
+# can't hand off to nil without crashing the setup that follows).
 class GauntletLevel < Level
   # Ledge path: tier-1 ledges marching right, ~190px edge-to-edge gaps (a jump
   # carries ~300px, and from one ledge the next is a flat hop), kept above the
@@ -40,13 +40,13 @@ class GauntletLevel < Level
     # Pits in the central crawling floor only (the start/end patches stay solid so the
     # climb-on and drop-off are safe) — another reason to stay on the platforms.
     args.state.holes = Hole.scatter(start_x: 1000, end_margin: 1200)
-    args.state.collectables = []
+    args.state.collectables = [ certificate_at_exit ]
   end
 
-  # Latch completion at the far wall (#complete? runs without args, so it can't do the
-  # check itself).
+  # Latch completion once the certificate is collected (#complete? runs without args, so
+  # it can't do the check itself).
   def update(args)
-    @cleared = true if reached_end?(args)
+    @cleared = true if certificate_collected?(args)
   end
 
   def complete? = @cleared == true

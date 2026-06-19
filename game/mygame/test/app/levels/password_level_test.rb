@@ -75,25 +75,31 @@ class PasswordLevelTest < Minitest::Test
     end
   end
 
-  def test_does_not_complete_at_the_wall_without_every_character
+  def test_no_certificate_and_no_completion_without_every_character
     @level.setup(@args)
-    @args.state.player.x = WORLD_W - Player::WIDTH # at the exit, but empty-handed
     @level.update(@args)
+    refute(@args.state.collectables.any? { |c| c.is_a?(Certificate) }, "no exit certificate yet")
     refute @level.complete?
   end
 
-  def test_does_not_complete_with_every_character_but_short_of_the_wall
+  def test_spawns_the_certificate_once_every_character_is_held
     @level.setup(@args)
     collect_all
-    @args.state.player.x = 3000 # holds the set, but hasn't reached the exit
     @level.update(@args)
-    refute @level.complete?
+
+    certs = @args.state.collectables.select { |c| c.is_a?(Certificate) }
+    assert_equal 1, certs.length, "the exit certificate appears once the set is complete"
+    refute @level.complete?, "but not finished until it's picked up"
+
+    @level.update(@args) # idempotent: doesn't spawn a second one
+    assert_equal 1, @args.state.collectables.count { |c| c.is_a?(Certificate) }
   end
 
-  def test_completes_with_every_character_at_the_wall_and_hands_off_to_main
+  def test_completes_when_the_certificate_is_collected_and_hands_off_to_main
     @level.setup(@args)
     collect_all
-    @args.state.player.x = WORLD_W - Player::WIDTH
+    @level.update(@args) # spawns the certificate
+    @args.state.collectables.find { |c| c.is_a?(Certificate) }.alive = false
     @level.update(@args)
 
     assert @level.complete?

@@ -81,11 +81,26 @@ class TutorialLevelTest < Minitest::Test
     assert_equal SCREEN_W, enemy.patrol_max_x # bounded to the screen, can't escape right
   end
 
-  def test_complete_once_the_combat_enemy_is_defeated
+  def test_defeating_the_combat_enemy_drops_a_certificate_but_does_not_complete
     @level.setup(@args)
     @level.on_collect(@args)
     @level.update(@args)                     # spawns the combat enemy
     @args.state.enemies.first.alive = false  # player stomped it
+    @level.update(@args)
+
+    certs = @args.state.collectables.select { |c| c.is_a?(Certificate) }
+    assert_equal 1, certs.length, "a certificate drops once the enemy is down"
+    refute @level.complete?, "but the tutorial isn't done until it's picked up"
+  end
+
+  def test_completes_once_the_certificate_is_collected
+    @level.setup(@args)
+    @level.on_collect(@args)
+    @level.update(@args)
+    @args.state.enemies.first.alive = false
+    @level.update(@args)                     # drops the certificate
+
+    @args.state.collectables.find { |c| c.is_a?(Certificate) }.alive = false
     @level.update(@args)
 
     assert @level.complete?
