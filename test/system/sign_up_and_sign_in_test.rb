@@ -37,7 +37,7 @@ class SignUpAndSignInTest < ApplicationSystemTestCase
 
     assert_current_path onboarding_path
     # The h1 is uppercased by CSS (text-transform), so match case-insensitively.
-    assert_text(/Secure your account/i)
+    assert_text(/Security/i)
 
     # The account menu is collapsed into a dropdown; open it to reach "Sign out".
     click_on "newplayer"
