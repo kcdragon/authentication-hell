@@ -15,7 +15,7 @@ class PasswordCharacter
     symbol: "!@#$%&*?"
   }.freeze
   SIZE = Enemy::HEIGHT # the layout cell the glyph chip centers within
-  CHIP = 34 # the glyph chip's drawn size
+  CHIP = 50 # the glyph chip's drawn size
   FLOAT_GAP = 16 # how far the chip hovers above its surface
 
   attr_accessor :x, :y, :w, :h, :alive, :klass, :glyph
@@ -51,7 +51,7 @@ class PasswordCharacter
     args.outputs.solids << { x: cx + 3, y: cy + 3, w: CHIP - 6, h: CHIP - 6,
                              r: AMBER[0], g: AMBER[1], b: AMBER[2] }
     args.outputs.labels << { x: cx + CHIP / 2, y: cy + CHIP / 2 + 1, text: @glyph,
-                             size_px: 22, font: FONT_MONO_B, r: INK[0], g: INK[1], b: INK[2],
+                             size_px: 32, font: FONT_MONO_B, r: INK[0], g: INK[1], b: INK[2],
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
 
