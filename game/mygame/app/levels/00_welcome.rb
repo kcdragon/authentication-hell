@@ -122,7 +122,7 @@ class WelcomeLevel < Level
     [
       [ true,                                          [ "Move with A / D or arrow keys" ] ],
       [ player.moved,                                  [ "Press Space to jump onto the ledge" ] ],
-      [ player.reached_platform,                       [ "Run into the * enemy",
+      [ player.reached_platform,                       [ "Run into the enemy",
                                                          "to learn the re-auth →" ] ],
       [ (args.state.collectables || []).any?(&:alive), [ "Grab the heart to heal" ] ],
       [ @healed,                                       [ "Fight back — jump on its head",
