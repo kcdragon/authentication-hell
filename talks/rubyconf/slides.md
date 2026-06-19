@@ -12,7 +12,10 @@ drawings:
 transition: slide-left
 mdc: true
 layout: cover
-hideInToc: true
+# Most slides are excluded from the Toc; flip this default to false per-slide
+# to surface a slide (the section dividers do this).
+defaults:
+  hideInToc: true
 ---
 
 # Authentication Hell
@@ -28,6 +31,7 @@ matching the app's brutalist headings.
 
 ---
 layout: section
+hideInToc: false
 ---
 
 ## Agenda
@@ -36,14 +40,17 @@ layout: section
 
 <!--
 The agenda is auto-generated from the `# Section` headings on the
-`layout: section` divider slides below. Every other slide sets
-`hideInToc: true`, so only those four dividers appear here. Reorder or
-rename a section and this list follows automatically. Entries are
-clickable and the current section highlights while presenting.
+`layout: section` divider slides below. The headmatter sets
+`defaults: { hideInToc: true }`, so slides are excluded unless they
+override it with `hideInToc: false` — only those dividers do, so only
+they appear here. Reorder or rename a section and this list follows
+automatically. Entries are clickable and the current section
+highlights while presenting.
 -->
 
 ---
 layout: section
+hideInToc: false
 ---
 
 # "Authentication Hell"
@@ -52,48 +59,43 @@ layout: section
 
 ---
 layout: image
-hideInToc: true
 image: /images/create-password-rules.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
-hideInToc: true
 image: /images/okta-verify-push.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
-hideInToc: true
 image: /images/authy-totp-codes.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
-hideInToc: true
 image: /images/email-otp-code.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
-hideInToc: true
 image: /images/security-key-webauthn.png
 backgroundSize: cover
 ---
 
 ---
 layout: section
+hideInToc: false
 ---
 
 # A game?
 
 ---
 layout: image
-hideInToc: true
 image: /images/rubyconf-cfp.png
 backgroundSize: cover
 ---
@@ -103,7 +105,6 @@ Earlier this year...
 -->
 
 ---
-hideInToc: true
 ---
 
 ## "Weird Ruby" Track
@@ -114,13 +115,13 @@ hideInToc: true
 
 ---
 layout: section
+hideInToc: false
 ---
 
 # DragonRuby & mruby
 
 ---
 layout: two-cols
-hideInToc: true
 layoutClass: gap-8
 ---
 
@@ -142,7 +143,6 @@ layoutClass: gap-8
 
 ---
 layout: two-cols
-hideInToc: true
 layoutClass: gap-8
 ---
 
@@ -160,7 +160,6 @@ layoutClass: gap-8
 </div>
 
 ---
-hideInToc: true
 ---
 
 ## tick method
@@ -168,7 +167,6 @@ hideInToc: true
 - Runs 60 times per second (60 frames per second)
 
 ---
-hideInToc: true
 ---
 
 ## A simple app
@@ -220,7 +218,6 @@ end
 ````
 
 ---
-hideInToc: true
 ---
 
 ## A simple app
@@ -238,12 +235,12 @@ hideInToc: true
 
 ---
 layout: section
+hideInToc: false
 ---
 
 # The game
 
 ---
-hideInToc: true
 ---
 
 ## Tech Stack
@@ -254,7 +251,6 @@ hideInToc: true
 - rotp and webauthn gems
 
 ---
-hideInToc: true
 ---
 
 ## Game Demo
@@ -271,7 +267,6 @@ hideInToc: true
 </div>
 
 ---
-hideInToc: true
 ---
 
 ## Proof of concept
@@ -285,7 +280,6 @@ hideInToc: true
 </div>
 
 ---
-hideInToc: true
 ---
 
 ## Discord to the rescue
@@ -300,7 +294,6 @@ hideInToc: true
 </div>
 
 ---
-hideInToc: true
 ---
 
 ## Game Theme
@@ -310,7 +303,6 @@ hideInToc: true
 - Enemies are authentication
 
 ---
-hideInToc: true
 ---
 
 ## Claude Design
@@ -322,7 +314,6 @@ hideInToc: true
 </div>
 
 ---
-hideInToc: true
 ---
 
 ## Authenticate in game
@@ -336,7 +327,6 @@ hideInToc: true
 </div>
 
 ---
-hideInToc: true
 ---
 
 ## Trigger authentication (game)
@@ -406,7 +396,6 @@ end
 ````
 
 ---
-hideInToc: true
 ---
 
 ## Trigger authentication (web)
@@ -451,7 +440,6 @@ end
 ````
 
 ---
-hideInToc: true
 ---
 
 ## Resolve authentication (web)
@@ -476,6 +464,8 @@ end
 ````
 
 ---
+hideInToc: false
+---
 
 # What's next?
 
@@ -486,7 +476,6 @@ end
 
 ---
 layout: cover
-hideInToc: true
 ---
 
 # Questions or feedback?
