@@ -5,9 +5,10 @@ class GamesController < ApplicationController
 
   # Served path of the static game bundle, namespaced per environment so a dev
   # build (baked for localhost) and a production build (baked for the live
-  # domain) never overwrite each other. bin/build-game writes the matching
-  # public/<env>_game_assets/ directory.
-  helper_method def game_assets_path = "/#{Rails.env}_game_assets/"
+  # domain) never overwrite each other, then by a content digest so each build
+  # is served under a fresh, immutable URL — busting stale browser/CDN caches on
+  # deploy. bin/build-game writes public/<env>_game_assets/<digest>/.
+  helper_method def game_assets_path = "/#{Rails.env}_game_assets/#{game_assets_version}/"
 
   # The DragonRuby game runs WASM with worker threads, which needs
   # SharedArrayBuffer and therefore a cross-origin-isolated page. Set COOP/COEP
@@ -39,6 +40,16 @@ class GamesController < ApplicationController
   end
 
   private
+
+  # The single content-digest subdir bin/build-game leaves under the bundle root.
+  # Not memoized in development since bin/watch-game rebuilds (new digest) under a
+  # running server; cached elsewhere because the dir is immutable within a deploy.
+  def game_assets_version
+    return @game_assets_version if defined?(@game_assets_version) && !Rails.env.development?
+
+    dir = Rails.root.join("public", "#{Rails.env}_game_assets")
+    @game_assets_version = (Dir.children(dir).first if File.directory?(dir))
+  end
 
   def set_cross_origin_isolation_headers
     response.set_header("Cross-Origin-Opener-Policy", "same-origin")

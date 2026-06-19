@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 require "fileutils"
+require "digest"
 
 APP_ROOT  = File.expand_path("..", __dir__)
 GAME_DIR  = File.join(APP_ROOT, "game")
@@ -43,18 +44,26 @@ end
 
 abort "Build zip not found at #{ZIP}" unless File.exist?(ZIP)
 
+# Unzip into a content-digested subdir so each build is served under a fresh,
+# immutable URL. The loader fetches its sibling files (manifest.json, gamedata/,
+# dragonruby-wasm.js, ...) by bare relative name, so versioning the whole bundle
+# dir — and pointing the iframe's <base href> at it (GamesController#game_assets_path)
+# — busts stale browser/CDN caches on deploy without editing the vendored loader.
+version = Digest::SHA256.file(ZIP).hexdigest[0, 12]
+dest    = File.join(PUBLIC, version)
+
 puts "== Refreshing #{PUBLIC} =="
 FileUtils.rm_rf(PUBLIC)
-FileUtils.mkdir_p(PUBLIC)
+FileUtils.mkdir_p(dest)
 
-puts "== Unzipping into public/#{RAILS_ENV}_game_assets =="
-system! "unzip", "-o", "-q", ZIP, "-d", PUBLIC
+puts "== Unzipping into public/#{RAILS_ENV}_game_assets/#{version} =="
+system! "unzip", "-o", "-q", ZIP, "-d", dest
 
 # Sanity-check the layout, then drop the bundle's standalone index.html: the game
 # is rendered inline by GamesController (app/views/games/show.html.erb loads the
 # loader directly), so DragonRuby's own HTML page is unused.
-index = File.join(PUBLIC, "index.html")
+index = File.join(dest, "index.html")
 abort "index.html missing — check zip layout!" unless File.exist?(index)
 FileUtils.rm_f(index)
 
-puts "== Done. Game assets in public/#{RAILS_ENV}_game_assets/, Rails page at /play =="
+puts "== Done. Game assets in public/#{RAILS_ENV}_game_assets/#{version}/, Rails page at /play =="
