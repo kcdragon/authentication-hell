@@ -78,9 +78,9 @@ module Main
     if args.state.started
       toggled = handle_pause_input(args)
       handle_dialogue_input(args)
-      # The world stays frozen behind the intro card (and any start-of-level
-      # dialogue) so a level start, and the player's reset to the new scene's left
-      # edge, lands while it's covered.
+      # The world stays frozen behind the intro card (and any in-level dialogue) so a
+      # level start, and the player's reset to the new scene's left edge, lands while
+      # it's covered.
       update_world(args) unless args.state.paused || toggled || cc_clicked ||
                                 level_intro_active?(args) || dialogue_active?(args)
     end
@@ -108,7 +108,7 @@ module Main
     !!toggle
   end
 
-  # Advance the start-of-level dialogue one message per E-press.
+  # Advance the in-level dialogue one message per E-press.
   def handle_dialogue_input(args)
     return unless dialogue_active?(args)
 
@@ -269,10 +269,11 @@ module Main
     end
 
     # Keep the whole scene (platforms, enemies, collectables, player) hidden behind
-    # the intro card and any start-of-level dialogue, so the scene only appears once
-    # the player has read through and the world unfreezes — no entities popping in
-    # behind the cards.
-    unless level_intro_active?(args) || dialogue_active?(args)
+    # the intro card, and behind a front-loaded dialogue (the password level) so a
+    # level start doesn't pop entities in behind the card. A level whose dialogue
+    # surfaces mid-play (the tutorial) leaves the frozen scene visible behind it.
+    hidden_for_dialogue = dialogue_active?(args) && args.state.level.dialogue_hides_scene?
+    unless level_intro_active?(args) || hidden_for_dialogue
       # World entities are in world coords; each subtracts the camera offset to draw.
       args.state.platforms.each { |plat| plat.render(args, cam) }
 
@@ -298,7 +299,7 @@ module Main
     elsif level_intro_active?(args)
       draw_level_intro(args)
     elsif dialogue_active?(args)
-      Dialogue.new(args, args.state.level.current_dialogue, args.state.level.accent).draw
+      Dialogue.new(args, args.state.level.current_dialogue(args), args.state.level.accent).draw
     else
       # Each level draws its own prompt as the top closed caption (only here, during
       # live play, where a prompt belongs).
@@ -711,11 +712,12 @@ module Main
       (args.state.tick_count - args.state.level_intro_at) < LEVEL_INTRO_TICKS
   end
 
-  # The start-of-level dialogue holds the world frozen after the intro card fades,
-  # until the player has pressed E through every message the level scripted.
+  # An in-level dialogue holds the world frozen after the intro card fades, while a
+  # message is pending — front-loaded at the level's start, or surfaced at a gameplay
+  # beat (the tutorial). #current_dialogue is nil when nothing is pending.
   def dialogue_active?(args)
     args.state.started && !level_intro_active?(args) &&
-      !args.state.player.game_over && args.state.level.dialogue_remaining?
+      !args.state.player.game_over && !args.state.level.current_dialogue(args).nil?
   end
 
   # Replay from the "Video Ended" card: reset the player and scene back to the

@@ -71,16 +71,24 @@ class Level
   # no prompt.
   def draw(_args) = nil
 
-  # Start-of-level dialogue (after the chapter card, before play): an array of
-  # messages, each an array of pre-wrapped lines, dismissed one per E-press. Empty
-  # by default — the level starts straight into play.
-  def dialogue = []
+  # In-level dialogue cards (after the chapter card): an array of messages, each an
+  # array of pre-wrapped lines, dismissed one per E-press while the world freezes.
+  # Empty by default. Override #dialogue_ready? to hold a message back until its
+  # gameplay beat is reached (the tutorial surfaces each hint at its moment); leaving
+  # it always-ready front-loads every message at the level's start (the password level).
+  def dialogue(_args) = []
 
-  def dialogue_remaining? = @dialogue_index.to_i < dialogue.length
+  def dialogue_ready?(_args) = true
 
-  def current_dialogue = dialogue[@dialogue_index.to_i]
+  def dialogue_remaining?(args) = @dialogue_index.to_i < dialogue(args).length
+
+  def current_dialogue(args)
+    dialogue(args)[@dialogue_index.to_i] if dialogue_remaining?(args) && dialogue_ready?(args)
+  end
 
   def advance_dialogue = @dialogue_index = @dialogue_index.to_i + 1
+
+  def dialogue_hides_scene? = true
 
   # The password character classes this level wants collected, or nil if it isn't a
   # collection level. Non-nil makes the tick draw the collected-character HUD tray

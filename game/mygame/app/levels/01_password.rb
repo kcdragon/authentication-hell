@@ -33,7 +33,7 @@ class PasswordLevel < Level
   def accent = AMBER
 
   # The HR onboarding spiel the player dismisses (press E) before the level begins.
-  def dialogue
+  def dialogue(_args)
     [
       [ "Your company requires passwords with",
         "many different kinds of characters" ],
