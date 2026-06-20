@@ -14,6 +14,7 @@
         few modules the toast/nav chrome needs. No <base href> here — that belongs
         to the iframe document, which owns the game bundle's relative asset paths. %>
     <%= yield :head %>
+    <%= render "shared/analytics" if Rails.env.production? %>
   </head>
 
   <body>
