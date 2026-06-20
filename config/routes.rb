@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  mount_avo
+
   resource :session
   resource :user, only: %i[ show update ]
   resource :avatar, only: :destroy

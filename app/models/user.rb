@@ -155,6 +155,13 @@ class User < ApplicationRecord
     record if record.persisted?
   end
 
+  def reset_progress!
+    transaction do
+      update!(highest_level_completed: nil, now_playing_level: nil)
+      earned_achievements.delete_all
+    end
+  end
+
   def record_level_completed(level)
     return false if highest_level_completed && level <= highest_level_completed
 

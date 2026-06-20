@@ -241,6 +241,18 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 3, user.reload.highest_level_completed
   end
 
+  test "reset_progress! clears levels and earned achievements" do
+    user = users(:one)
+    user.update!(highest_level_completed: 3, now_playing_level: 2)
+    user.grant_achievement(:password_survivor)
+
+    user.reset_progress!
+
+    assert_nil user.reload.highest_level_completed
+    assert_nil user.now_playing_level
+    assert_equal 0, user.earned_achievements.count
+  end
+
   test "current_level is the first level before any are cleared" do
     user = users(:one)
     assert_nil user.highest_level_completed
