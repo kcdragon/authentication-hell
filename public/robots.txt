@@ -1,1 +1,13 @@
 # See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+User-agent: *
+Disallow: /game
+Disallow: /play
+Disallow: /leaderboard
+Disallow: /user
+Disallow: /onboarding
+Disallow: /totp
+Disallow: /webauthn
+Disallow: /games
+Disallow: /auto_sign_in
+
+Sitemap: https://authenticationhell.com/sitemap.xml
