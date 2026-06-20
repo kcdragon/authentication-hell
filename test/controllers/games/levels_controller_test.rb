@@ -76,6 +76,29 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
     assert_not(streams.any? { |s| s.to_html.include?("Achievement unlocked") })
   end
 
+  test "completing a level marks the next level as now playing" do
+    sign_in_as(@user)
+
+    streams = capture_turbo_stream_broadcasts([ @user, :playlist ]) do
+      post games_levels_complete_url, params: { level: 1 }
+    end
+
+    assert_equal 2, @user.reload.now_playing_level
+    assert_equal 1, streams.size
+  end
+
+  test "completing the final level records progress without a next level" do
+    last = GameLevel.all.last
+    @user.update!(highest_level_completed: last.number - 1)
+    sign_in_as(@user)
+
+    post games_levels_complete_url, params: { level: last.number }
+
+    assert_response :no_content
+    assert_equal last.number, @user.reload.highest_level_completed
+    assert_nil @user.now_playing_level
+  end
+
   test "playing requires authentication" do
     post games_levels_playing_url, params: { level: 1 }
     assert_redirected_to new_session_path

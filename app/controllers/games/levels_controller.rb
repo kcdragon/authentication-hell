@@ -10,7 +10,7 @@ class Games::LevelsController < ApplicationController
 
     Current.user.record_level_completed(level.number)
     Achievement::Awarder.call(Current.user, level.achievement_key)
-    Game::PlaylistBroadcaster.call(Current.user)
+    advance_now_playing_past(level)
     head :no_content
   end
 
@@ -20,5 +20,16 @@ class Games::LevelsController < ApplicationController
 
     mark_now_playing(level)
     head :no_content
+  end
+
+  private
+
+  def advance_now_playing_past(level)
+    next_level = GameLevel.find(level.number + 1)
+    if next_level
+      mark_now_playing(next_level)
+    else
+      Game::PlaylistBroadcaster.call(Current.user)
+    end
   end
 end
