@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_06_14_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_06_20_140234) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -96,6 +96,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_06_14_000000) do
     t.string "webauthn_id"
     t.integer "highest_level_completed"
     t.integer "now_playing_level"
+    t.boolean "super_admin", default: false, null: false
     t.index "lower(username)", name: "index_users_on_lower_username", unique: true
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
     t.index ["webauthn_id"], name: "index_users_on_webauthn_id", unique: true

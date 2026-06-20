@@ -24,6 +24,7 @@ user.username = "mike"
 user.password = User::DEV_PASSWORD
 user.webauthn_id = dev_passkey[:webauthn_id] if dev_passkey
 user.confirmed_at ||= Time.current
+user.super_admin = true
 user.save!
 
 if dev_passkey

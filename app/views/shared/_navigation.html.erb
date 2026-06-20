@@ -24,6 +24,11 @@
     <%= link_to "Leaderboard", leaderboard_path, data: { turbo: turbo },
           class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
 
+    <% if Current.user.super_admin? %>
+      <%= link_to "Admin", avo.root_path, data: { turbo: false },
+            class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
+    <% end %>
+
     <% if Current.user.onboarding_complete? %>
       <%= link_to "Security", onboarding_path, data: { turbo: turbo },
             class: "block px-4 py-3 text-ink border-b-[3px] border-ink hover:bg-paper" %>
