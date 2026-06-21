@@ -10,7 +10,7 @@ module Main
     # site, so there's no in-canvas poster — and play takes over.
     return LoadingScene.new(args).tick unless args.state.start_request == :done
 
-    cc_clicked = VideoChrome.new(args).handle_caption_input
+    cc_clicked = Handlers.caption_input(args)
     start_run(args) unless args.state.started
     if args.state.started
       toggled = handle_pause_input(args)
@@ -19,7 +19,7 @@ module Main
       # level start, and the player's reset to the new scene's left edge, lands while
       # it's covered.
       update_world(args) unless args.state.paused || toggled || cc_clicked ||
-                                level_intro_active?(args) || dialogue_active?(args)
+                                State.intro_active?(args) || dialogue_active?(args)
     end
 
     render_world(args)
@@ -184,15 +184,14 @@ module Main
     # always has a numeric camera.
     cam = args.state.camera_x ||= 0
 
-    chrome = VideoChrome.new(args)
-    chrome.draw_background
+    Ui::Background.new(args).draw
 
     # Keep the whole scene (platforms, enemies, collectables, player) hidden behind
     # the intro card, and behind a front-loaded dialogue (the password level) so a
     # level start doesn't pop entities in behind the card. A level whose dialogue
     # surfaces mid-play (the welcome level) leaves the frozen scene visible behind it.
     hidden_for_dialogue = dialogue_active?(args) && args.state.level.dialogue_hides_scene?
-    unless level_intro_active?(args) || hidden_for_dialogue
+    unless State.intro_active?(args) || hidden_for_dialogue
       # World entities are in world coords; each subtracts the camera offset to draw.
       args.state.platforms.each { |plat| plat.render(args, cam) }
 
@@ -205,7 +204,7 @@ module Main
 
     # Video-player chrome over the world: the dark control bar (its lip is the
     # floor line), the scrubber driven by world progress, and the HUD hearts.
-    chrome.draw_bar
+    Ui::ControlBar.new(args).draw
     draw_hearts(args)
     args.state.level.draw_hud(args)
 
@@ -215,7 +214,7 @@ module Main
       draw_buffering(args)
     elsif args.state.paused
       draw_paused(args)
-    elsif level_intro_active?(args)
+    elsif State.intro_active?(args)
       draw_level_intro(args)
     elsif dialogue_active?(args)
       Dialogue.new(args, args.state.level.current_dialogue(args), args.state.level.accent).draw
@@ -235,16 +234,8 @@ module Main
                              r: MUTED[0], g: MUTED[1], b: MUTED[2] }
   end
 
-  # Fraction of the current level's runtime elapsed (0..1); the level must be cleared
-  # before it reaches 1 (LEVEL_TIME_LIMIT seconds in). VideoChrome computes its own
-  # for the scrubber — this copy drives the out-of-time game-over.
-  def progress(args)
-    started_at = args.state.level_started_at || args.state.tick_count
-    ((args.state.tick_count - started_at) / (LEVEL_TIME_LIMIT * 60).to_f).clamp(0.0, 1.0)
-  end
-
   def out_of_time?(args)
-    !args.state.player.game_over && progress(args) >= 1.0
+    !args.state.player.game_over && State.progress(args) >= 1.0
   end
 
   # Three heart slots in the top-left: the full sprite for hearts the player still
@@ -342,7 +333,7 @@ module Main
   def draw_buffering(args)
     color = challenge_color(args.state.player.pending_challenge)
 
-    VideoChrome.new(args).draw_spinner(640, 470, color)
+    Ui::Spinner.new(args).draw(640, 470, color)
 
     label = case args.state.player.pending_challenge
     when :passkey then "BUFFERING — approve the passkey toast to resume →"
@@ -466,16 +457,11 @@ module Main
     args.state.level_started_at = args.state.tick_count
   end
 
-  def level_intro_active?(args)
-    args.state.started && args.state.level_intro_at &&
-      (args.state.tick_count - args.state.level_intro_at) < LEVEL_INTRO_TICKS
-  end
-
   # An in-level dialogue holds the world frozen after the intro card fades, while a
   # message is pending — front-loaded at the level's start, or surfaced at a gameplay
   # beat (the welcome level). #current_dialogue is nil when nothing is pending.
   def dialogue_active?(args)
-    args.state.started && !level_intro_active?(args) &&
+    args.state.started && !State.intro_active?(args) &&
       !args.state.player.game_over && !args.state.level.current_dialogue(args).nil?
   end
 
