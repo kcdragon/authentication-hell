@@ -11,6 +11,7 @@ require "app/entities/certificate.rb"
 require "app/entities/enemies/totp.rb"
 require "app/entities/enemies/passkey.rb"
 require "app/entities/enemies/password.rb"
+require "app/entities/enemies/buffering.rb"
 require "app/levels/level.rb"
 require "app/levels/00_welcome.rb"
 require "app/levels/01_password.rb"
@@ -160,6 +161,9 @@ module Main
         if args.state.level.melee? && args.state.player.stomping?(enemy)
           enemy.alive = false
           args.state.player.bounce
+        elsif enemy.slows?
+          enemy.alive = false
+          args.state.player.slow(args)
         elsif !args.state.player.invincible?(args)
           args.state.player.hearts -= 1
           enemy.alive = false
@@ -305,8 +309,17 @@ module Main
     else
       # Each level draws its own prompt as the top closed caption (only here, during
       # live play, where a prompt belongs).
+      draw_lag_indicator(args) if args.state.player.slowed?(args.state.tick_count)
       args.state.level.draw(args)
     end
+  end
+
+  def draw_lag_indicator(args)
+    player = args.state.player
+    args.outputs.labels << { x: player.x - args.state.camera_x + player.w / 2,
+                             y: player.y + player.h + 26, text: "buffering...",
+                             size_enum: -1, alignment_enum: 1, font: FONT_MONO,
+                             r: MUTED[0], g: MUTED[1], b: MUTED[2] }
   end
 
   # Fraction of the current level's runtime elapsed (0..1) — drives the scrubber

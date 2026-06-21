@@ -14,7 +14,9 @@ class MainLevelTest < Minitest::Test
 
   def test_setup_seeds_enemies_and_platforms
     @level.setup(@args)
-    assert_equal 6, @args.state.enemies.length
+    # 6 random auth enemies + 2 buffering spinners.
+    assert_equal 8, @args.state.enemies.length
+    assert_equal 2, @args.state.enemies.count { |e| e.is_a?(BufferingEnemy) }
     assert_equal Platform::COUNT, @args.state.platforms.count(&:holds_password)
   end
 

@@ -10,10 +10,11 @@ class MainLevel < Level
 
   def accent = GREEN
 
-  # Seed the world: random enemies, a scattered field of one-way ledges, and the
-  # completion certificate at the right exit.
+  # Seed the world: random enemies (plus a couple of buffering spinners), a scattered
+  # field of one-way ledges, and the completion certificate at the right exit.
   def setup(args)
-    args.state.enemies = Enemy.spawn_random(args.state.player.x)
+    px = args.state.player.x
+    args.state.enemies = Enemy.spawn_random(px) + BufferingEnemy.scatter(px)
     args.state.platforms = Platform.scatter
     args.state.holes = Hole.scatter
     args.state.collectables = [ certificate_at_exit ]

@@ -23,8 +23,9 @@ class PlatformTest < Minitest::Test
     platform = Platform.new(x: 500, y: 220, w: 200, h: 30)
     args = build_args
     platform.render(args, 100)
-    # Two solids: the ink border/underside, then the inset white face. Both are
-    # camera-offset; the face sits at the ledge top (inset 3px).
+    # First two solids: the ink border/underside, then the inset dark caption face
+    # (the "CC" tab + subtitle ticks follow). Both are camera-offset; the face sits
+    # at the ledge top (inset 3px).
     border, face = args.outputs.solids
     assert_equal 400, border[:x]                    # world x minus camera
     assert_equal 220 - Platform::UNDERSIDE_H, border[:y]

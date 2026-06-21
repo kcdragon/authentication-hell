@@ -78,11 +78,11 @@ class Enemy
     end
   end
 
-  # Collision rect. Defaults to the full body; subclasses with a visual smaller
-  # than their footprint (see PasswordEnemy) inset this to match what's drawn.
   def hitbox
     { x: @x, y: @y, w: @w, h: @h }
   end
+
+  def slows? = false
 
   def render(args, camera_x = 0)
     args.outputs.solids << { x: @x - camera_x, y: @y, w: @w, h: @h, r: @r, g: @g, b: @b }
