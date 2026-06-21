@@ -45,6 +45,17 @@ class PlayerTest < Minitest::Test
     assert_equal :west, @player.facing
   end
 
+  def test_crawls_while_buffering_then_recovers
+    @player.slow(build_args(tick_count: 0))
+    start_x = @player.x
+    @player.update(build_args(right: true, tick_count: 0))
+    assert_equal start_x + Player::SLOW_MOVE_SPEED, @player.x, "moves at crawl speed while lagged"
+
+    after = @player.x
+    @player.update(build_args(right: true, tick_count: Player::SLOW_TICKS))
+    assert_equal after + Player::MOVE_SPEED, @player.x, "back to full speed once the lag expires"
+  end
+
   def test_idle_faces_south
     @player.update(build_args)
     assert_equal :south, @player.facing

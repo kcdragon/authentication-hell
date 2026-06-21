@@ -4,6 +4,8 @@ class Player
   WIDTH = 64
   HEIGHT = 96
   MOVE_SPEED = 8
+  SLOW_MOVE_SPEED = 3  # crawl speed while a buffering enemy is lagging the player
+  SLOW_TICKS = 180     # how long that lag lasts (~3s at 60fps)
   JUMP_SPEED = 20
   STOMP_BOUNCE = 12  # small hop after stomping an enemy (less than a full jump)
   GRAVITY = 1
@@ -35,7 +37,7 @@ class Player
 
   attr_accessor :x, :y, :w, :h, :vy, :grounded, :facing,
                 :locked, :colliding, :lock_confirmed, :pending_challenge,
-                :hearts, :game_over, :moved, :blink_until_tick,
+                :hearts, :game_over, :moved, :blink_until_tick, :slow_until_tick,
                 :reached_platform, :collected_password_characters
 
   def initialize
@@ -54,6 +56,7 @@ class Player
     @game_over = false
     @moved = false
     @blink_until_tick = 0
+    @slow_until_tick = 0
     @reached_platform = false
     @collected_password_characters = []
   end
@@ -63,12 +66,13 @@ class Player
   def update(args)
     return if @locked || @game_over
 
+    speed = slowed?(args.state.tick_count) ? SLOW_MOVE_SPEED : MOVE_SPEED
     if args.inputs.keyboard.left
-      @x -= MOVE_SPEED
+      @x -= speed
       @facing = :west
       @moved = true
     elsif args.inputs.keyboard.right
-      @x += MOVE_SPEED
+      @x += speed
       @facing = :east
       @moved = true
     else
@@ -141,6 +145,15 @@ class Player
     @blink_until_tick = args.state.tick_count + BLINK_TICKS
   end
 
+  # A buffering enemy lagged the player: crawl their move speed for SLOW_TICKS frames.
+  def slow(args)
+    @slow_until_tick = args.state.tick_count + SLOW_TICKS
+  end
+
+  def slowed?(tick)
+    tick < @slow_until_tick
+  end
+
   # Draw the figure as stacked brutalist primitives within the 64x96 hitbox: two
   # INK legs, an INK-bordered INDIGO torso (platform card treatment), a tan neck,
   # then a tan head with a dark hair band and two eyes that slide toward @facing as
@@ -198,7 +211,8 @@ class Player
     { x: @x, y: @y, w: @w, h: @h, vy: @vy, grounded: @grounded, facing: @facing,
       locked: @locked, colliding: @colliding, lock_confirmed: @lock_confirmed,
       pending_challenge: @pending_challenge, hearts: @hearts, game_over: @game_over,
-      moved: @moved, blink_until_tick: @blink_until_tick, reached_platform: @reached_platform,
+      moved: @moved, blink_until_tick: @blink_until_tick, slow_until_tick: @slow_until_tick,
+      reached_platform: @reached_platform,
       collected_password_characters: @collected_password_characters }
   end
 

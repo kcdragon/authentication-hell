@@ -37,21 +37,40 @@ class Platform
     @holds_password = holds_password
   end
 
-  # A "desk/shelf" ledge drawn as a brutalist white card: an ink border, a white
-  # face inset 3px, and an ink "underside" band flush below the face for built-in
-  # thickness. The band is part of the object, so it scrolls with the platform —
-  # no offset drop-shadow (which would crawl against the parallax). Border + band
-  # use INDIGO to match the video chrome; the face stays neutral so the semantic
-  # colors stay reserved for enemies/HUD.
+  # A ledge drawn as the video's closed-caption bar: an ink border with an ink
+  # "underside" band flush below for built-in thickness (part of the object, so it
+  # scrolls with the platform — no offset drop-shadow that would crawl against the
+  # parallax), a dark INDIGO caption face inset 3px, a BLUE "CC" indicator tab, and
+  # light "subtitle word" ticks across the face. The dark face keeps the semantic
+  # colors reserved for enemies/HUD.
   UNDERSIDE_H = 7
+  WORD_TICKS = [ 40, 24, 52, 30, 18 ].freeze # subtitle "word" widths, drawn until the face runs out
 
   def render(args, camera_x = 0)
     sx = @x - camera_x
     args.outputs.solids << { x: sx, y: @y - UNDERSIDE_H, w: @w, h: @h + UNDERSIDE_H,
-                             r: INDIGO[0], g: INDIGO[1], b: INDIGO[2] }
+                             r: INK[0], g: INK[1], b: INK[2] }
     args.outputs.solids << { x: sx + 3, y: @y + 3, w: @w - 6, h: @h - 6,
-                             r: CARD[0], g: CARD[1], b: CARD[2] }
+                             r: INDIGO[0], g: INDIGO[1], b: INDIGO[2] }
+    draw_caption(args, sx)
   end
+
+  private
+
+  def draw_caption(args, sx)
+    args.outputs.solids << { x: sx + 8, y: @y + 6, w: 14, h: @h - 12,
+                             r: BLUE[0], g: BLUE[1], b: BLUE[2] }
+    cx = sx + 30
+    word_y = @y + @h / 2 - 2
+    WORD_TICKS.each do |ww|
+      break if cx + ww > sx + @w - 10
+      args.outputs.solids << { x: cx, y: word_y, w: ww, h: 5,
+                               r: TS_INK[0], g: TS_INK[1], b: TS_INK[2] }
+      cx += ww + 10
+    end
+  end
+
+  public
 
   # DragonRuby exports args.state for its dev tools; give it a plain-hash view (see
   # the same pattern on Enemy).
