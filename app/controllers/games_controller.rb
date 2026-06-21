@@ -34,9 +34,11 @@ class GamesController < ApplicationController
     render layout: "game_frame"
   end
 
-  def me
-    start = session.delete(:selected_level) || Current.user.current_level&.number || 0
-    render json: { username: Current.user.username, start_level: start }
+  def start
+    number = session.delete(:selected_level) || Current.user.current_level&.number || 0
+    level = GameLevel.find(number)
+    mark_now_playing(level) if level
+    render json: { start_level: number }
   end
 
   private

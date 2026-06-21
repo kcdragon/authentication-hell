@@ -5,27 +5,12 @@
 # is — including CI on Linux.
 require "minitest/autorun"
 
-# Scene constants the entities reference at runtime, extracted from main.rb (which
-# is engine-only and can't load here). Load them before the entity under test.
-require_relative "../app/constants"
-require_relative "../app/caption"
-require_relative "../app/labels/dialogue"
-require_relative "../app/entities/player"
-require_relative "../app/entities/enemy"
-require_relative "../app/entities/platform"
-require_relative "../app/entities/hole"
-require_relative "../app/entities/heart_pickup"
-require_relative "../app/entities/password_character"
-require_relative "../app/entities/certificate"
-require_relative "../app/entities/enemies/totp"
-require_relative "../app/entities/enemies/passkey"
-require_relative "../app/entities/enemies/password"
-require_relative "../app/entities/enemies/buffering"
-require_relative "../app/levels/level"
-require_relative "../app/levels/00_welcome"
-require_relative "../app/levels/01_password"
-require_relative "../app/levels/02_main"
-require_relative "../app/levels/03_gauntlet"
+# Load the game's files exactly as main.rb does — through app/requires.rb. The
+# engine resolves "app/..." against the mygame/ root; here we put that root on the
+# load path first so the same requires resolve under plain MRI. main.rb is itself
+# engine-only and never loaded.
+$LOAD_PATH.unshift(File.expand_path("..", __dir__))
+require "app/requires.rb"
 
 # Minimal stand-ins for DragonRuby's `args`. The entities only read a handful of
 # input/state fields and append to output arrays, so plain Structs suffice. Use
