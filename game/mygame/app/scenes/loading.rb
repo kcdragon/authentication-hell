@@ -1,14 +1,13 @@
 class LoadingScene
   def initialize(args)
     @args = args
-    @chrome = VideoChrome.new(args)
   end
 
   def tick
     poll_start_request
-    @chrome.handle_caption_input
-    @chrome.draw_background
-    @chrome.draw_bar
+    Handlers.caption_input(@args)
+    Ui::Background.new(@args).draw
+    Ui::ControlBar.new(@args).draw
     draw_loading
   end
 
@@ -42,7 +41,7 @@ class LoadingScene
     args = @args
     cx = 640
     cy = 392
-    @chrome.draw_spinner(cx, cy, BLUE)
+    Ui::Spinner.new(args).draw(cx, cy, BLUE)
 
     args.outputs.labels << { x: cx, y: cy - 104, text: "AUTHENTICATION HELL",
                              size_px: 30, font: FONT_DISPLAY,
