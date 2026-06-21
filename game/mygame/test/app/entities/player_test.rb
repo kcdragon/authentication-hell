@@ -223,6 +223,23 @@ class PlayerTest < Minitest::Test
     assert_equal start_x, @player.x
   end
 
+  # --- post-hit invincibility ---
+
+  def test_not_invincible_before_being_hit
+    refute @player.invincible?(build_args(tick_count: 0))
+  end
+
+  def test_invincible_during_the_blink_window
+    @player.hurt(build_args(tick_count: 0))
+    assert @player.invincible?(build_args(tick_count: 30))
+    assert @player.invincible?(build_args(tick_count: Player::BLINK_TICKS - 1))
+  end
+
+  def test_invincibility_ends_with_the_blink
+    @player.hurt(build_args(tick_count: 0))
+    refute @player.invincible?(build_args(tick_count: Player::BLINK_TICKS))
+  end
+
   # --- rendering & serialization ---
 
   def test_render_emits_the_figure_as_palette_solids
