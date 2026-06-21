@@ -164,7 +164,7 @@ module Main
         elsif enemy.slows?
           enemy.alive = false
           args.state.player.slow(args)
-        else
+        elsif !args.state.player.invincible?(args)
           args.state.player.hearts -= 1
           enemy.alive = false
           if args.state.player.hearts <= 0

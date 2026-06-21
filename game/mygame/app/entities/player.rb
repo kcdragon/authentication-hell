@@ -140,7 +140,6 @@ class Player
     @grounded = false
   end
 
-  # Start the post-hit damage flicker; the figure blinks for BLINK_TICKS frames.
   def hurt(args)
     @blink_until_tick = args.state.tick_count + BLINK_TICKS
   end
@@ -154,6 +153,10 @@ class Player
     tick < @slow_until_tick
   end
 
+  def invincible?(args)
+    args.state.tick_count < @blink_until_tick
+  end
+
   # Draw the figure as stacked brutalist primitives within the 64x96 hitbox: two
   # INK legs, an INK-bordered INDIGO torso (platform card treatment), a tan neck,
   # then a tan head with a dark hair band and two eyes that slide toward @facing as
@@ -163,7 +166,7 @@ class Player
     sx = @x - camera_x
 
     # Damage flicker: skip the whole figure on the "off" half of the blink.
-    return if args.state.tick_count < @blink_until_tick &&
+    return if invincible?(args) &&
               args.state.tick_count % (BLINK_INTERVAL * 2) >= BLINK_INTERVAL
 
     leg_y   = @y
@@ -205,8 +208,6 @@ class Player
                              r: fill[0], g: fill[1], b: fill[2] }
   end
 
-  # DragonRuby exports args.state for its dev tools; a plain object without a
-  # serialize method can choke that export (see the http-handle nils in main.rb).
   def serialize
     { x: @x, y: @y, w: @w, h: @h, vy: @vy, grounded: @grounded, facing: @facing,
       locked: @locked, colliding: @colliding, lock_confirmed: @lock_confirmed,
