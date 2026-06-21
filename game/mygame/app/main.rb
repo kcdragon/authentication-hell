@@ -160,7 +160,7 @@ module Main
         if args.state.level.melee? && args.state.player.stomping?(enemy)
           enemy.alive = false
           args.state.player.bounce
-        else
+        elsif !args.state.player.invincible?(args)
           args.state.player.hearts -= 1
           enemy.alive = false
           if args.state.player.hearts <= 0
