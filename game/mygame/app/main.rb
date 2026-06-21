@@ -1,81 +1,17 @@
-require "app/constants.rb"
-require "app/caption.rb"
-require "app/labels/dialogue.rb"
-require "app/entities/player.rb"
-require "app/entities/enemy.rb"
-require "app/entities/platform.rb"
-require "app/entities/hole.rb"
-require "app/entities/heart_pickup.rb"
-require "app/entities/password_character.rb"
-require "app/entities/certificate.rb"
-require "app/entities/enemies/totp.rb"
-require "app/entities/enemies/passkey.rb"
-require "app/entities/enemies/password.rb"
-require "app/entities/enemies/buffering.rb"
-require "app/levels/level.rb"
-require "app/levels/00_welcome.rb"
-require "app/levels/01_password.rb"
-require "app/levels/02_main.rb"
-require "app/levels/03_gauntlet.rb"
+require "app/requires.rb"
 
 module Main
   def tick(args)
     args.state.player ||= Player.new
-
-    # The game opens on the welcome level (one password enemy on flat ground) and
-    # hands off to the main world once the player clears it. args.state.level always
-    # holds the active level (a WelcomeLevel, then a MainLevel) — unset only on the
-    # very first tick. Each enemy carries its own auth kind (which re-auth flow it
-    # triggers) and its own colliding flag so contact fires once per enemy.
-    # A default scene so rendering has something to draw behind the poster; the
-    # real starting level arrives from /play/me below and swaps in before play
-    # begins (the poster is gated on that response).
-    args.state.start_level ||= 0
     args.state.captions_on = true if args.state.captions_on.nil?
-    unless args.state.level
-      args.state.level = WelcomeLevel.new
-      setup_level(args)
-    end
 
-    # Fetch the logged-in user's name and starting level once from the Rails app.
-    # Same-origin, so the session cookie rides along and /play/me answers as the
-    # current user (start_level = where their progress resumes, or a level they
-    # just clicked in the playlist).
-    args.state.username ||= 'there'
-    if !args.state.me_request
-      args.state.me_request = DR.http_get(me_url(args))
-    end
+    # The loading scene owns the frame until /game/start resolves the starting level;
+    # the run then begins automatically — the player already pressed ▶ Play on the
+    # site, so there's no in-canvas poster — and play takes over.
+    return LoadingScene.new(args).tick unless args.state.start_request == :done
 
-    if args.state.me_request != :done && args.state.me_request[:complete]
-      request = args.state.me_request
-      if request[:http_response_code] == 200
-        data = DR.parse_json(request[:response_data])
-        if data
-          args.state.username = data["username"] if data["username"]
-          # Swap to the resolved starting level before the run begins (the loading
-          # screen covers the play area until now, so this is invisible) and report
-          # it as now playing.
-          if data["start_level"] && !args.state.started
-            args.state.start_level = data["start_level"]
-            if args.state.level.number != args.state.start_level
-              args.state.level = Level.build(args.state.start_level)
-              setup_level(args)
-            end
-            report_now_playing(args, args.state.start_level)
-          end
-        end
-      end
-      # Replace the (non-serializable) response object with a plain marker so the
-      # per-tick state export doesn't choke on it and we don't re-fetch.
-      args.state.me_request = :done
-    end
-
-    # The run begins automatically once /play/me has resolved (the player already
-    # pressed ▶ Play on the site to load the game, so there's no in-canvas poster).
-    # The loading spinner covers the brief wait; then the first level's intro card
-    # plays. Everything below runs only once the run has begun (started).
-    cc_clicked = handle_caption_input(args)
-    start_run(args) if !args.state.started && args.state.me_request == :done
+    cc_clicked = VideoChrome.new(args).handle_caption_input
+    start_run(args) unless args.state.started
     if args.state.started
       toggled = handle_pause_input(args)
       handle_dialogue_input(args)
@@ -89,9 +25,11 @@ module Main
     render_world(args)
   end
 
-  # Kick off the run: the first level's intro card plays, then the world unfreezes.
+  # Kick off the run: seed the resolved starting level, play its intro card, then the
+  # world unfreezes once the card fades.
   def start_run(args)
     args.state.started = true
+    setup_level(args)
     begin_level_intro(args)
   end
 
@@ -114,15 +52,6 @@ module Main
     return unless dialogue_active?(args)
 
     args.state.level.advance_dialogue if args.inputs.keyboard.key_down.e
-  end
-
-  # Toggle closed-captions on a click of the CC button. Wired in every state (it's
-  # player chrome, not gameplay) and returns whether it consumed the click, so the
-  # same click won't also press play on the poster.
-  def handle_caption_input(args)
-    hit = args.inputs.mouse.click && args.inputs.mouse.point.inside_rect?(CC_BUTTON)
-    args.state.captions_on = !args.state.captions_on if hit
-    !!hit
   end
 
   # One tick of live gameplay (only while the run is started and not over).
@@ -255,24 +184,8 @@ module Main
     # always has a numeric camera.
     cam = args.state.camera_x ||= 0
 
-    # Clear the whole window — including the letterbox outside the 1280x720 safe
-    # area — to the paper color, so the bars blend into the surrounding page
-    # instead of reading as black.
-    args.outputs.background_color = PAPER
-
-    # Warm paper wall fills the viewport; the control bar (= floor) is drawn by
-    # draw_control_bar below, so its top edge reads as the ground line.
-    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H,
-                             r: PAPER[0], g: PAPER[1], b: PAPER[2] }
-
-    # Until /play/me answers we don't yet know the starting level, so the world
-    # below is a placeholder that may swap. Draw the video chrome with a loading
-    # state instead of the (wrong) level, so the level never visibly switches.
-    if args.state.me_request != :done
-      draw_control_bar(args)
-      draw_loading(args)
-      return
-    end
+    chrome = VideoChrome.new(args)
+    chrome.draw_background
 
     # Keep the whole scene (platforms, enemies, collectables, player) hidden behind
     # the intro card, and behind a front-loaded dialogue (the password level) so a
@@ -292,7 +205,7 @@ module Main
 
     # Video-player chrome over the world: the dark control bar (its lip is the
     # floor line), the scrubber driven by world progress, and the HUD hearts.
-    draw_control_bar(args)
+    chrome.draw_bar
     draw_hearts(args)
     args.state.level.draw_hud(args)
 
@@ -322,9 +235,9 @@ module Main
                              r: MUTED[0], g: MUTED[1], b: MUTED[2] }
   end
 
-  # Fraction of the current level's runtime elapsed (0..1) — drives the scrubber
-  # fill and the timestamp. The playhead now counts real time, not distance: the
-  # level must be cleared before this reaches 1 (LEVEL_TIME_LIMIT seconds in).
+  # Fraction of the current level's runtime elapsed (0..1); the level must be cleared
+  # before it reaches 1 (LEVEL_TIME_LIMIT seconds in). VideoChrome computes its own
+  # for the scrubber — this copy drives the out-of-time game-over.
   def progress(args)
     started_at = args.state.level_started_at || args.state.tick_count
     ((args.state.tick_count - started_at) / (LEVEL_TIME_LIMIT * 60).to_f).clamp(0.0, 1.0)
@@ -332,112 +245,6 @@ module Main
 
   def out_of_time?(args)
     !args.state.player.game_over && progress(args) >= 1.0
-  end
-
-  # m:ss for a number of seconds.
-  def timecode(seconds)
-    total = seconds.round
-    format("%d:%02d", total / 60, total % 60)
-  end
-
-  # The bottom control bar doubles as the floor: a dark indigo band filling
-  # everything below the floor line (GROUND_Y), with a lighter lip on top that the
-  # player visibly stands on. Holds the scrubber and the playback controls so the
-  # whole thing reads as a video player's transport.
-  def draw_control_bar(args)
-    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: BAR_TOP,
-                             r: INDIGO[0], g: INDIGO[1], b: INDIGO[2] }
-    args.outputs.solids << { x: 0, y: BAR_TOP - 3, w: SCREEN_W, h: 3,
-                             r: INDIGO_LIP[0], g: INDIGO_LIP[1], b: INDIGO_LIP[2] }
-
-    # Pits cut through the dark band here — after it's laid down, but before the
-    # scrubber/transport, so the controls still draw legibly over a gap. Hidden behind
-    # the intro card like the rest of the scene.
-    draw_holes(args) unless level_intro_active?(args)
-
-    draw_scrubber(args)
-    draw_transport(args)
-  end
-
-  # The scrubber: a track, a cosmetic "buffered" bar running ahead of progress (so
-  # it always looks like a video pre-loading), the green progress fill, and a
-  # playhead handle. The handle goes red and stops advancing on game over; on a
-  # collision it stalls and rings in the enemy's color (handled by the caller's
-  # state — here it just reflects progress).
-  def draw_scrubber(args)
-    frac = progress(args)
-    track_y = SCRUBBER_Y
-
-    args.outputs.solids << { x: SCRUBBER_X, y: track_y, w: SCRUBBER_W, h: SCRUBBER_H,
-                             r: INDIGO_LIP[0], g: INDIGO_LIP[1], b: INDIGO_LIP[2] }
-
-    buffered = (frac + 0.22).clamp(0.0, 1.0)
-    args.outputs.solids << { x: SCRUBBER_X, y: track_y, w: SCRUBBER_W * buffered, h: SCRUBBER_H,
-                             r: MUTED[0], g: MUTED[1], b: MUTED[2] }
-
-    args.outputs.solids << { x: SCRUBBER_X, y: track_y, w: SCRUBBER_W * frac, h: SCRUBBER_H,
-                             r: GREEN[0], g: GREEN[1], b: GREEN[2] }
-
-    # Playhead: paper-white normally, red once the "video" has ended.
-    handle_color = args.state.player.game_over ? RED : CARD
-    hx = SCRUBBER_X + SCRUBBER_W * frac
-    args.outputs.solids << { x: hx - 8, y: track_y + SCRUBBER_H / 2 - 8, w: 16, h: 16,
-                             r: INDIGO[0], g: INDIGO[1], b: INDIGO[2] }
-    args.outputs.solids << { x: hx - 6, y: track_y + SCRUBBER_H / 2 - 6, w: 12, h: 12,
-                             r: handle_color[0], g: handle_color[1], b: handle_color[2] }
-  end
-
-  # The transport row: a play/pause button on the left and the faux timestamp next
-  # to it, plus the usual CC / speed / fullscreen affordances on the right — all
-  # static (the buttons aren't wired; they only sell the video-player disguise).
-  def draw_transport(args)
-    # Play/pause button (blue, paper glyph). Shows the pause bars while playing and
-    # a play triangle when the run is paused, hasn't started, or has ended. Hidden
-    # behind the intro card so the only play affordance before a level is the poster's.
-    bx = PLAY_BUTTON[:x]
-    by = PLAY_BUTTON[:y]
-    unless level_intro_active?(args)
-      args.outputs.solids << { **PLAY_BUTTON, r: BLUE[0], g: BLUE[1], b: BLUE[2] }
-      playing = args.state.started && !args.state.player.game_over &&
-                !args.state.player.locked && !args.state.paused
-      if playing
-        args.outputs.solids << { x: bx + 11, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
-        args.outputs.solids << { x: bx + 19, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
-      else
-        args.outputs.solids << { x: bx + 12, y: by + 9, x2: bx + 12, y2: by + 25,
-                                 x3: bx + 26, y3: by + 17,
-                                 r: PAPER[0], g: PAPER[1], b: PAPER[2] }
-      end
-    end
-
-    elapsed = progress(args) * LEVEL_TIME_LIMIT
-    args.outputs.labels << { x: bx + 48, y: by + 26,
-                             text: "#{timecode(elapsed)} / #{timecode(LEVEL_TIME_LIMIT)}",
-                             size_px: 22, font: FONT_MONO,
-                             r: TS_INK[0], g: TS_INK[1], b: TS_INK[2],
-                             anchor_x: 0, anchor_y: 1 }
-
-    cc_ink = args.state.captions_on ? TS_INK : FAINT_INK
-    args.outputs.labels << { x: CC_BUTTON[:x], y: by + 26, text: "CC",
-                             size_px: 20, font: FONT_MONO,
-                             r: cc_ink[0], g: cc_ink[1], b: cc_ink[2],
-                             anchor_x: 0, anchor_y: 1 }
-    if args.state.captions_on
-      args.outputs.solids << { x: CC_BUTTON[:x], y: by + 6, w: 20, h: 2,
-                               r: BLUE[0], g: BLUE[1], b: BLUE[2] }
-    end
-
-    args.outputs.labels << { x: SCREEN_W - SCRUBBER_X, y: by + 26, text: "1.0×   ⛶",
-                             size_px: 20, font: FONT_MONO,
-                             r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2],
-                             anchor_x: 1, anchor_y: 1 }
-  end
-
-  # Each pit breaks the floor in world space; drawn after the control bar so the
-  # cutout sits over its lip (entities/hole.rb owns the look).
-  def draw_holes(args)
-    cam = args.state.camera_x || 0
-    (args.state.holes || []).each { |hole| hole.render(args, cam) }
   end
 
   # Three heart slots in the top-left: the full sprite for hearts the player still
@@ -499,24 +306,6 @@ module Main
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
 
-  # Shown while /play/me is still in flight: the "AUTHENTICATION HELL" title card with
-  # a spinner, so the brief wait before the run auto-starts reads as the video
-  # buffering on the correct level instead of swapping the world in view.
-  def draw_loading(args)
-    cx = 640
-    cy = 392
-    draw_spinner(args, cx, cy, BLUE)
-
-    args.outputs.labels << { x: cx, y: cy - 104, text: "AUTHENTICATION HELL",
-                             size_px: 30, font: FONT_DISPLAY,
-                             r: INK[0], g: INK[1], b: INK[2],
-                             anchor_x: 0.5, anchor_y: 0.5 }
-    args.outputs.labels << { x: cx, y: cy - 140, text: "loading…",
-                             size_px: 18, font: FONT_MONO,
-                             r: MUTED[0], g: MUTED[1], b: MUTED[2],
-                             anchor_x: 0.5, anchor_y: 0.5 }
-  end
-
   # Paused mid-run: a quiet paper scrim over the play area + a centered play glyph,
   # the video "stopped." Resume with Escape or the play button. The pause screen is
   # also where the keyboard controls live (no always-on hint during play).
@@ -550,23 +339,10 @@ module Main
   # Collision → "the tape buffers." The loud brutalist challenge card lives in HTML
   # over the canvas, so the in-canvas treatment stays quiet: a spinner and a single
   # mono line tinted to the enemy's color, pointing at the toast.
-  # A faint full ring with a colored arc that rotates over time, centered on cx/cy.
-  def draw_spinner(args, cx, cy, color)
-    spin = (args.state.tick_count % 60) * 6
-    8.times do |i|
-      ang = (spin + i * 45) * Math::PI / 180
-      bx = cx + Math.cos(ang) * 26
-      by = cy + Math.sin(ang) * 26
-      lead = i >= 6
-      args.outputs.solids << { x: bx - 3, y: by - 3, w: 6, h: 6,
-                               r: lead ? color[0] : 217, g: lead ? color[1] : 205, b: lead ? color[2] : 176 }
-    end
-  end
-
   def draw_buffering(args)
     color = challenge_color(args.state.player.pending_challenge)
 
-    draw_spinner(args, 640, 470, color)
+    VideoChrome.new(args).draw_spinner(640, 470, color)
 
     label = case args.state.player.pending_challenge
     when :passkey then "BUFFERING — approve the passkey toast to resume →"
@@ -715,18 +491,8 @@ module Main
     report_now_playing(args, args.state.level.number)
   end
 
-  # The Rails server's origin (scheme + host[:port]), baked into the bundle by
-  # bin/build-game — the production domain in a deploy build, else the local dev
-  # server. Falls back to http://localhost:3000 when the file is absent, e.g. a
-  # native `./dragonruby mygame` run that never went through build-game. Read
-  # once, then memoized for the rest of the session.
-  def server_base(args)
-    args.state.server_base ||= (args.gtk.read_file("app/server_config.txt") || "http://localhost:3000").strip
-  end
-
-  def me_url(args) = "#{server_base(args)}/play/me"
-  def start_url(args, kind) = "#{server_base(args)}/games/#{kind}/start"
-  def status_url(args, kind) = "#{server_base(args)}/games/#{kind}/status"
-  def levels_complete_url(args) = "#{server_base(args)}/games/levels/complete"
-  def levels_playing_url(args) = "#{server_base(args)}/games/levels/playing"
+  def start_url(args, kind) = "#{Network.base_url(args)}/games/#{kind}/start"
+  def status_url(args, kind) = "#{Network.base_url(args)}/games/#{kind}/status"
+  def levels_complete_url(args) = "#{Network.base_url(args)}/games/levels/complete"
+  def levels_playing_url(args) = "#{Network.base_url(args)}/games/levels/playing"
 end

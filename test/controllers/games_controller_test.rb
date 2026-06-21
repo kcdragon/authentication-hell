@@ -15,30 +15,42 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
-  test "me requires authentication" do
-    get play_me_url
+  test "start requires authentication" do
+    get game_start_url
     assert_redirected_to new_session_path
   end
 
-  test "me returns the current user's username and starting level as JSON" do
+  test "start returns the starting level as JSON" do
     sign_in_as(@user)
 
-    get play_me_url
+    get game_start_url
     assert_response :success
-    assert_equal @user.username, response.parsed_body["username"]
     # No progress yet → starts on the welcome level (level 0).
     assert_equal 0, response.parsed_body["start_level"]
   end
 
-  test "me's start_level resumes after the highest completed level" do
+  test "start marks the resolved level now playing and broadcasts" do
     @user.update!(highest_level_completed: 1)
     sign_in_as(@user)
 
-    get play_me_url
+    streams = capture_turbo_stream_broadcasts([ @user, :playlist ]) do
+      get game_start_url
+    end
+
+    assert_equal 2, response.parsed_body["start_level"]
+    assert_equal 2, @user.reload.now_playing_level
+    assert_equal 1, streams.size
+  end
+
+  test "start's start_level resumes after the highest completed level" do
+    @user.update!(highest_level_completed: 1)
+    sign_in_as(@user)
+
+    get game_start_url
     assert_equal 2, response.parsed_body["start_level"]
   end
 
-  test "me's start_level honors a one-shot playlist selection, then clears it" do
+  test "start's start_level honors a one-shot playlist selection, then clears it" do
     @user.update!(highest_level_completed: 2)
     sign_in_as(@user)
 
@@ -46,11 +58,11 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     get game_frame_url(level: 0)
     assert_response :success
 
-    get play_me_url
+    get game_start_url
     assert_equal 0, response.parsed_body["start_level"]
 
     # One-shot: a subsequent boot falls back to progress (the frontier level).
-    get play_me_url
+    get game_start_url
     assert_equal 3, response.parsed_body["start_level"]
   end
 
@@ -60,7 +72,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
 
     # current_level (frontier) is 1; the player can jump to it even un-cleared.
     get game_frame_url(level: 1)
-    get play_me_url
+    get game_start_url
     assert_equal 1, response.parsed_body["start_level"]
   end
 
@@ -93,7 +105,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@user)
 
     in_env("development") { get game_frame_url(level: 2) } # frontier is 1, but dev jumps anywhere
-    get play_me_url
+    get game_start_url
     assert_equal 2, response.parsed_body["start_level"]
   end
 
@@ -103,7 +115,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
 
     get game_frame_url(level: 99)
     assert_equal 0, @user.reload.now_playing_level
-    get play_me_url
+    get game_start_url
     # No valid selection → resumes at progress (level after the welcome level).
     assert_equal 1, response.parsed_body["start_level"]
   end
@@ -114,7 +126,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
 
     in_env("production") { get game_frame_url(level: 1) } # 1 <= frontier
     assert_equal 1, @user.reload.now_playing_level
-    get play_me_url
+    get game_start_url
     assert_equal 1, response.parsed_body["start_level"]
   end
 
@@ -124,7 +136,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
 
     in_env("production") { get game_frame_url(level: 2) } # past the frontier
     assert_equal 0, @user.reload.now_playing_level
-    get play_me_url
+    get game_start_url
     assert_equal 1, response.parsed_body["start_level"]
   end
 

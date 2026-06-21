@@ -43,13 +43,9 @@ Rails.application.routes.draw do
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # The DragonRuby game lives at /game (games#show). /game/frame is the bare
-  # canvas+loader, embedded by /game in an <iframe> so the engine fills the frame
-  # exactly (its HTML5 build only sizes correctly full-window or inside a frame).
-  # /play/me is a small JSON endpoint the running game fetches to greet the user.
   get "game" => "games#show", as: :game
   get "game/frame" => "games#frame", as: :game_frame
-  get "play/me" => "games#me", as: :play_me
+  get "game/start" => "games#start", as: :game_start
 
   get "leaderboard" => "leaderboard#index", as: :leaderboard
 
