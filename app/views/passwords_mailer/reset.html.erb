@@ -1,6 +1,7 @@
-<p>
-  You can reset your password on
-  <%= link_to "this password reset page", edit_password_url(@user.password_reset_token) %>.
-
-  This link will expire in <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.
-</p>
+<% url = edit_password_url(@user.password_reset_token) %>
+<% content_for :preheader, "Use this link to reset your password. It expires soon." %>
+<h1 style="margin-top: 0; color: #333333; font-size: 22px; font-weight: bold; text-align: left; font-family: &quot;Archivo Black&quot;, system-ui, sans-serif;" align="left">Hi <%= @user.username %>,</h1>
+<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">You recently requested to reset the password for your Authentication Hell account. Use the button below to reset it. <strong>This link is only valid for the next <%= distance_of_time_in_words(0, @user.password_reset_token_expires_in) %>.</strong></p>
+<%= render "shared/mailer/button", url: url, label: "Reset your password" %>
+<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">If you did not request a password reset, you can safely ignore this email — your password will stay the same.</p>
+<%= render "shared/mailer/sub_copy", url: url %>
