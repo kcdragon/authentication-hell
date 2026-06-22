@@ -1,6 +1,8 @@
 require "test_helper"
 
 class GamesControllerTest < ActionDispatch::IntegrationTest
+  include ActiveJob::TestHelper
+
   setup { @user = users(:one) }
 
   test "show requires authentication" do
@@ -146,6 +148,57 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     get game_url(level: 3)
     assert_response :success
     assert_match %r{/game/frame\?level=3}, response.body
+  end
+
+  test "start enqueues the achievement-awarding job with the current time" do
+    sign_in_as(@user)
+
+    travel_to Time.utc(2026, 7, 15, 12, 0) do
+      assert_enqueued_with(job: AwardActiveAchievementsJob, args: [ @user, Time.current ]) do
+        get game_start_url
+      end
+    end
+  end
+
+  # End-to-end through the job: 11:30 PDT on the talk day = 18:30 UTC; 12:00 UTC
+  # mid-conference is still July 15 Pacific — both land inside their windows.
+  test "playing before RubyConf awards the beta_tester achievement" do
+    sign_in_as(@user)
+
+    travel_to Time.utc(2026, 6, 21) do
+      perform_enqueued_jobs { get game_start_url }
+    end
+    assert @user.earned?(:beta_tester)
+  end
+
+  test "playing during RubyConf awards only the attendee achievement" do
+    sign_in_as(@user)
+
+    travel_to Time.utc(2026, 7, 15, 12, 0) do
+      perform_enqueued_jobs { get game_start_url }
+    end
+    assert @user.earned?(:rubyconf_attendee)
+    assert_not @user.earned?(:rubyconf_talk)
+  end
+
+  test "playing during the talk awards both attendee and talk" do
+    sign_in_as(@user)
+
+    travel_to Time.utc(2026, 7, 16, 18, 30) do
+      perform_enqueued_jobs { get game_start_url }
+    end
+    assert @user.earned?(:rubyconf_attendee)
+    assert @user.earned?(:rubyconf_talk)
+  end
+
+  test "playing outside every window awards no event achievement" do
+    sign_in_as(@user)
+
+    travel_to Time.utc(2026, 8, 1) do
+      assert_no_difference -> { @user.earned_achievements.count } do
+        perform_enqueued_jobs { get game_start_url }
+      end
+    end
   end
 
   private

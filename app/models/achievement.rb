@@ -1,15 +1,21 @@
 # The catalog of every achievement a player can unlock. Plain value objects (not
 # ActiveRecord) — which ones a user has earned lives in EarnedAchievement, keyed
-# by `key`. Each is granted the first time a player clears the matching collision
-# re-auth challenge (see AwardsAchievements).
+# by `key`. Grants come from a few places: clearing a collision re-auth challenge,
+# completing a level, or — for the EVENTS below — playing while the clock falls
+# inside a fixed `window` (see GamesController#start).
 class Achievement
-  attr_reader :key, :name, :description, :emoji
+  attr_reader :key, :name, :description, :emoji, :window
 
-  def initialize(key:, name:, description:, emoji:)
+  def initialize(key:, name:, description:, emoji:, window: nil)
     @key = key
     @name = name
     @description = description
     @emoji = emoji
+    @window = window
+  end
+
+  def active_at?(time)
+    window&.cover?(time)
   end
 
   SURVIVOR = [
@@ -21,7 +27,21 @@ class Achievement
       description: "Survive a collision with your passkey.")
   ].freeze
 
-  ALL = (SURVIVOR + GameLevel.all.map(&:achievement)).freeze
+  PACIFIC = ActiveSupport::TimeZone["America/Los_Angeles"]
+
+  EVENTS = [
+    new(key: "beta_tester", name: "Beta Tester", emoji: "🧪",
+      description: "Play the game before RubyConf.",
+      window: ...PACIFIC.parse("2026-07-14 00:00:00")),
+    new(key: "rubyconf_attendee", name: "RubyConf Attendee", emoji: "💎",
+      description: "Play the game during RubyConf.",
+      window: PACIFIC.parse("2026-07-14 00:00:00")..PACIFIC.parse("2026-07-16 23:59:59")),
+    new(key: "rubyconf_talk", name: "Live Demo", emoji: "🎤",
+      description: "Play the game during the RubyConf talk.",
+      window: PACIFIC.parse("2026-07-16 11:15:00")..PACIFIC.parse("2026-07-16 11:45:00"))
+  ].freeze
+
+  ALL = (SURVIVOR + EVENTS + GameLevel.all.map(&:achievement)).freeze
 
   def self.all
     ALL
@@ -33,5 +53,9 @@ class Achievement
 
   def self.find(key)
     ALL.find { |achievement| achievement.key == key.to_s }
+  end
+
+  def self.active_at(time)
+    ALL.select { |achievement| achievement.active_at?(time) }
   end
 end
