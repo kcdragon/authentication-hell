@@ -24,17 +24,29 @@
     <%= link_to "Leaderboard", leaderboard_path, data: { turbo: turbo },
           class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
 
-    <% if Current.user.super_admin? %>
-      <%= link_to "Admin", avo.root_path, data: { turbo: false },
-            class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
-    <% end %>
-
     <% if Current.user.onboarding_complete? %>
       <%= link_to "Security", onboarding_path, data: { turbo: turbo },
-            class: "block px-4 py-3 text-ink border-b-[3px] border-ink hover:bg-paper" %>
+            class: "block px-4 py-3 text-ink border-b border-faint hover:bg-paper" %>
     <% else %>
       <%= link_to "⚠ Security", onboarding_path, data: { turbo: turbo },
-            class: "block px-4 py-3 bg-password text-ink font-bold border-b-[3px] border-ink hover:bg-password/80" %>
+            class: "block px-4 py-3 bg-password text-ink font-bold border-b border-faint hover:bg-password/80" %>
+    <% end %>
+
+    <%# Gated tooling — each tagged with the gate that reveals it. %>
+    <% if Current.user.super_admin? %>
+      <%= link_to avo.root_path, data: { turbo: false },
+            class: "flex items-center justify-between px-4 py-3 text-ink border-b border-faint hover:bg-paper" do %>
+        <span>Admin</span>
+        <span class="font-mono text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-[2px] border border-ink/40 text-muted">super admin</span>
+      <% end %>
+    <% end %>
+
+    <% if Rails.env.development? %>
+      <%= link_to "/rails/mailers", data: { turbo: false },
+            class: "flex items-center justify-between px-4 py-3 text-ink border-b border-faint hover:bg-paper" do %>
+        <span>Mailers</span>
+        <span class="font-mono text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-[2px] border border-ink/40 text-muted">dev</span>
+      <% end %>
     <% end %>
 
     <%= button_to "Sign out", session_path, method: :delete,

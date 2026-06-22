@@ -1,6 +1,7 @@
-<p>
-  Welcome, <%= @user.username %>! Please confirm your email on
-  <%= link_to "this confirmation page", email_confirmation_url(token: @token) %>.
-
-  This link will expire in 1 day.
-</p>
+<% url = email_confirmation_url(token: @token) %>
+<% content_for :preheader, "Confirm your email to finish setting up your Authentication Hell account." %>
+<h1 style="margin-top: 0; color: #333333; font-size: 22px; font-weight: bold; text-align: left; font-family: &quot;Archivo Black&quot;, system-ui, sans-serif;" align="left">Welcome, <%= @user.username %>!</h1>
+<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">Thanks for signing up for Authentication Hell. Confirm your email address with the button below to activate your account and start playing.</p>
+<%= render "shared/mailer/button", url: url, label: "Confirm your email", variant: "green" %>
+<p style="font-size: 16px; line-height: 1.625; color: #51545E; margin: .4em 0 1.1875em;">This link will expire in 1 day.</p>
+<%= render "shared/mailer/sub_copy", url: url %>
