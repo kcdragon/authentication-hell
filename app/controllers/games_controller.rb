@@ -38,10 +38,15 @@ class GamesController < ApplicationController
     number = session.delete(:selected_level) || Current.user.current_level&.number || 0
     level = GameLevel.find(number)
     mark_now_playing(level) if level
+    award_active_achievements
     render json: { start_level: number }
   end
 
   private
+
+  def award_active_achievements
+    AwardActiveAchievementsJob.perform_later(Current.user, Time.current)
+  end
 
   # The single content-digest subdir bin/build-game leaves under the bundle root.
   # Not memoized in development since bin/watch-game rebuilds (new digest) under a
