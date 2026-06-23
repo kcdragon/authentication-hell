@@ -1,5 +1,4 @@
 class User < ApplicationRecord
-  TOTP_ISSUER = "Authentication Hell".freeze
   RECOVERY_CODE_COUNT = 10
 
   AVATAR_CONTENT_TYPES = %w[ image/png image/jpeg image/gif image/webp ].freeze
@@ -81,19 +80,17 @@ class User < ApplicationRecord
   end
 
   def totp
-    ROTP::TOTP.new(totp_secret, issuer: TOTP_ISSUER) if totp_secret.present?
+    Totp.new(totp_secret) if totp_secret.present?
   end
 
-  def provisioning_uri
-    totp&.provisioning_uri(email_address)
-  end
+  def provisioning_uri = totp&.provisioning_uri(email_address)
 
-  # Verifies a TOTP code, allowing one step of clock drift behind. Persists the
-  # matched timestamp so a code (or any earlier one) cannot be replayed.
+  # Verifies a TOTP code and persists the matched timestamp so a code (or any
+  # earlier one) cannot be replayed.
   def verify_totp(code)
-    return false unless totp && code.present?
+    return false unless totp
 
-    timestamp = totp.verify(code.to_s.strip, drift_behind: 15, after: last_totp_at)
+    timestamp = totp.verify(code, after: last_totp_at)
     return false unless timestamp
 
     update!(last_totp_at: timestamp)
