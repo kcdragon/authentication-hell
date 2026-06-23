@@ -8,4 +8,8 @@ module State
     args.state.started && args.state.level_intro_at &&
       (args.state.tick_count - args.state.level_intro_at) < LEVEL_INTRO_TICKS
   end
+
+  def self.summary_active?(args)
+    !args.state.level_summary.nil?
+  end
 end

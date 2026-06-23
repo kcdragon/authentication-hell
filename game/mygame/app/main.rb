@@ -15,11 +15,13 @@ module Main
     if args.state.started
       toggled = handle_pause_input(args)
       handle_dialogue_input(args)
-      # The world stays frozen behind the intro card (and any in-level dialogue) so a
-      # level start, and the player's reset to the new scene's left edge, lands while
-      # it's covered.
+      handle_summary_input(args)
+      # The world stays frozen behind the intro card (and any in-level dialogue, or
+      # the end-of-level results card) so a level start, and the player's reset to
+      # the new scene's left edge, lands while it's covered.
       update_world(args) unless args.state.paused || toggled || cc_clicked ||
-                                State.intro_active?(args) || dialogue_active?(args)
+                                State.intro_active?(args) || dialogue_active?(args) ||
+                                State.summary_active?(args)
     end
 
     render_world(args)
@@ -47,11 +49,23 @@ module Main
     !!toggle
   end
 
-  # Advance the in-level dialogue one message per E-press.
   def handle_dialogue_input(args)
     return unless dialogue_active?(args)
 
-    args.state.level.advance_dialogue if args.inputs.keyboard.key_down.e
+    args.state.level.advance_dialogue if advance_pressed?(args)
+  end
+
+  def handle_summary_input(args)
+    return unless State.summary_active?(args)
+
+    if advance_pressed?(args)
+      advance_level(args)
+      args.state.level_summary = nil
+    end
+  end
+
+  def advance_pressed?(args)
+    args.inputs.keyboard.key_down.space || args.inputs.keyboard.key_down.e
   end
 
   # One tick of live gameplay (only while the run is started and not over).
@@ -90,6 +104,7 @@ module Main
         if args.state.level.melee? && args.state.player.stomping?(enemy)
           enemy.alive = false
           args.state.player.bounce
+          args.state.level_kills += 1
         elsif enemy.slows?
           enemy.alive = false
           args.state.player.slow(args)
@@ -122,9 +137,9 @@ module Main
       args.state.level.on_collect(args)
     end unless args.state.player.game_over
 
-    # Hand off once the active stage reports its goal met (e.g. the welcome level after
-    # the heal). Endless stages never complete, so this is a no-op there.
-    advance_level(args) if args.state.level.complete?
+    # Goal met (e.g. the welcome level after the heal): freeze the world and raise
+    # the summary card; the player presses Space/E to hand off (handle_summary_input).
+    begin_level_summary(args) if args.state.level.complete? && !args.state.level_summary
 
     args.state.player.game_over = true if out_of_time?(args)
 
@@ -210,6 +225,8 @@ module Main
 
     if args.state.player.game_over
       draw_video_ended(args)
+    elsif args.state.level_summary
+      Ui::LevelSummary.new(args).draw
     elsif args.state.player.locked
       draw_buffering(args)
     elsif args.state.paused
@@ -455,6 +472,18 @@ module Main
   def begin_level_intro(args)
     args.state.level_intro_at = args.state.tick_count
     args.state.level_started_at = args.state.tick_count
+    args.state.level_kills = 0
+  end
+
+  # Score the cleared level and stash it (with the level's title/number and the
+  # finish time) for the results card, which the world freezes behind until Space.
+  def begin_level_summary(args)
+    ticks = args.state.tick_count - args.state.level_started_at
+    args.state.level_summary = Score.for(kills: args.state.level_kills, ticks: ticks,
+                                        hearts: args.state.player.hearts)
+                                   .merge(title: args.state.level.title,
+                                          number: args.state.level.number,
+                                          ticks: ticks)
   end
 
   # An in-level dialogue holds the world frozen after the intro card fades, while a
