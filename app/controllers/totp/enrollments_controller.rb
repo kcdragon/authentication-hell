@@ -2,8 +2,8 @@ class Totp::EnrollmentsController < ApplicationController
   before_action :redirect_if_already_enabled
 
   def new
-    @secret = session[:totp_setup_secret] ||= ROTP::Base32.random
-    @provisioning_uri = ROTP::TOTP.new(@secret, issuer: User::TOTP_ISSUER).provisioning_uri(Current.user.email_address)
+    @secret = session[:totp_setup_secret] ||= Totp.generate_random_secret
+    @provisioning_uri = Totp.new(@secret).provisioning_uri(Current.user.email_address)
   end
 
   # Confirm enrollment by verifying a code against the candidate secret held in the
@@ -11,7 +11,7 @@ class Totp::EnrollmentsController < ApplicationController
   def create
     secret = session[:totp_setup_secret]
 
-    if secret.present? && ROTP::TOTP.new(secret).verify(params[:code].to_s.strip, drift_behind: 15)
+    if secret.present? && Totp.new(secret).verify(params[:code])
       Current.user.enable_totp!(secret)
       @recovery_codes = Current.user.generate_recovery_codes!
       session.delete(:totp_setup_secret)
