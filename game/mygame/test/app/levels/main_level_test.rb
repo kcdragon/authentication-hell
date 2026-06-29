@@ -14,10 +14,21 @@ class MainLevelTest < Minitest::Test
 
   def test_setup_seeds_enemies_and_platforms
     @level.setup(@args)
-    # 6 random auth enemies + 2 buffering spinners.
-    assert_equal 8, @args.state.enemies.length
+    # 6 random auth enemies + 2 buffering spinners + a 3-enemy stomp cluster.
+    assert_equal 11, @args.state.enemies.length
     assert_equal 2, @args.state.enemies.count { |e| e.is_a?(BufferingEnemy) }
     assert_equal Platform::COUNT, @args.state.platforms.count(&:holds_password)
+  end
+
+  def test_setup_seeds_an_overlapping_cluster_for_multi_stomp
+    @level.setup(@args)
+    clustered = @args.state.enemies.select { |e| e.x == MainLevel::STOMP_CLUSTER_X }
+    assert_operator clustered.length, :>=, 2, "a knot of enemies shares the cluster spawn"
+    assert_equal [ GROUND_Y ], clustered.map(&:y).uniq, "all stand at the same height"
+    # Same spawn x and identical width means the hitboxes overlap horizontally,
+    # so one fall can land on two heads at once.
+    a, b = clustered.first(2)
+    assert_operator a.x + a.w, :>, b.x
   end
 
   def test_setup_seeds_a_certificate_near_the_exit

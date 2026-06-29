@@ -125,8 +125,7 @@ module Main
       end
       enemy.colliding = colliding
     end unless args.state.player.game_over
-    # Bounce once, after the loop — bouncing mid-loop flips @vy positive and makes a
-    # second head stomped in the same fall read as a side hit.
+
     args.state.player.bounce if stomped
 
     # Walking into a collectable retires the pickup and applies its own effect (a
