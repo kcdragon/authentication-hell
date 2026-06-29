@@ -96,6 +96,7 @@ module Main
     # still forces the challenge). Otherwise it's a side/ground hit:
     # dock a heart, retire the enemy, then either game-over (last heart) or kick
     # off that enemy's auth flow and freeze the player.
+    stomped = false
     args.state.enemies.each do |enemy|
       next unless enemy.alive
 
@@ -103,7 +104,7 @@ module Main
       if colliding && !enemy.colliding
         if args.state.level.melee? && args.state.player.stomping?(enemy)
           enemy.alive = false
-          args.state.player.bounce
+          stomped = true
           args.state.level_kills += 1
         elsif enemy.slows?
           enemy.alive = false
@@ -124,6 +125,9 @@ module Main
       end
       enemy.colliding = colliding
     end unless args.state.player.game_over
+    # Bounce once, after the loop — bouncing mid-loop flips @vy positive and makes a
+    # second head stomped in the same fall read as a side hit.
+    args.state.player.bounce if stomped
 
     # Walking into a collectable retires the pickup and applies its own effect (a
     # heart heals, a password character is recorded); the level then decides what
