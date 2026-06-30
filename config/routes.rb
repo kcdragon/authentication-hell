@@ -70,6 +70,8 @@ Rails.application.routes.draw do
 
     post "levels/complete" => "levels#complete", as: :levels_complete
     post "levels/playing"  => "levels#playing",  as: :levels_playing
+
+    post "death" => "deaths#create", as: :death
   end
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)

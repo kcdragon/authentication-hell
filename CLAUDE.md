@@ -39,9 +39,11 @@ bin/ci                 # run the full CI pipeline locally (config/ci.rb)
 ```
 
 ### CI
-`config/ci.rb` (run via `bin/ci`) is the source of truth for what must pass: setup, RuboCop, bundler-audit, importmap audit, Brakeman, `bin/rails test`, and seed replant. `.github/workflows/ci.yml` runs the same checks plus system tests.
+`config/ci.rb` (run via `bin/ci`) is the source of truth for what must pass: setup, RuboCop, bundler-audit, importmap audit, Brakeman, `bin/rails test`, and seed replant. **There is no cloud CI** — we use [basecamp/gh-signoff](https://github.com/basecamp/gh-signoff) instead. On a green run `bin/ci`'s final step calls `gh signoff`, which sets the `signoff` commit status; that status is the only required check that unblocks a PR merge.
 
-**`bin/ci` is the fastest way to catch locally what the GitHub workflow checks**, so it's worth running after implementing a change — but you don't need to run the full suite before opening a PR. The GitHub Actions workflow runs the same pipeline on every PR and will catch any failures.
+**`bin/ci` must pass locally before merging** — it's what records the signoff. It needs the gh extension installed once per developer (`gh extension install basecamp/gh-signoff`); without it the final signoff step errors. Branch protection requiring the `signoff` status is configured once with `gh signoff install` (repo admin).
+
+**Always run `bin/ci` when opening a PR** — it records the signoff that unblocks the merge, so make it part of the PR flow, not an afterthought.
 
 RuboCop and Brakeman are scoped to *our* code only: everything under `game/` is excluded except `game/mygame/`, and within that, only `main.rb` is linted (`repl.rb` is DragonRuby's vendored console scratch file). See `.rubocop.yml` (`AllCops/Exclude`) and `config/brakeman.yml` (`skip_files`). If you add a new hand-written file under `game/mygame/`, it will be linted by default — that's intended.
 

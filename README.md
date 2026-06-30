@@ -59,7 +59,12 @@ bin/bundler-audit      # gem vulnerability audit
 bin/ci                 # the full local CI pipeline (config/ci.rb)
 ```
 
-Run `bin/ci` before pushing — it mirrors what `.github/workflows/ci.yml` checks.
+There is no cloud CI. `bin/ci` is the full pipeline, and on a green run it calls
+`gh signoff` to set the green `signoff` commit status — the only required check that
+unblocks a PR merge. Run `bin/ci` before pushing, and once it passes the signoff is
+recorded automatically.
+
+One-time setup (per developer): `gh extension install basecamp/gh-signoff`.
 
 ## Deployment
 

@@ -4,6 +4,8 @@
 # pause screen. Cleared by collecting the certificate at the world's right exit, which
 # hands off to the gauntlet finale.
 class MainLevel < Level
+  STOMP_CLUSTER_X = 2400
+
   def number = 3
 
   def title = "The Open Web"
@@ -14,7 +16,7 @@ class MainLevel < Level
   # field of one-way ledges, and the completion certificate at the right exit.
   def setup(args)
     px = args.state.player.x
-    args.state.enemies = Enemy.spawn_random(px) + BufferingEnemy.scatter(px)
+    args.state.enemies = Enemy.spawn_random(px) + BufferingEnemy.scatter(px) + stomp_cluster
     args.state.platforms = Platform.scatter
     args.state.holes = Hole.scatter
     args.state.collectables = [ certificate_at_exit ]
@@ -29,4 +31,10 @@ class MainLevel < Level
   def complete? = @cleared == true
 
   def next_level = GauntletLevel.new
+
+  private
+
+  def stomp_cluster
+    [ TotpEnemy, PasskeyEnemy, PasswordEnemy ].map { |kind| kind.new(x: STOMP_CLUSTER_X) }
+  end
 end
