@@ -6,7 +6,7 @@
 class MainLevel < Level
   STOMP_CLUSTER_X = 2400
 
-  def number = 2
+  def number = 3
 
   def title = "The Open Web"
 

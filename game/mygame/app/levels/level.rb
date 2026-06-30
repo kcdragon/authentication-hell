@@ -1,12 +1,14 @@
 # Base class for the game's levels — discrete scripted stages. Shared concerns
 # (collision/re-auth, camera, hearts, the locked challenge prompt) stay in Main's
-# tick; levels do no engine I/O, so they load under plain MRI like the entities.
+# tick; levels do no engine I/O directly (a level that talks to the server overrides
+# #poll_network to delegate to the Network layer), so they load under plain MRI.
 class Level
   def self.build(number)
     case number
     when 1 then PasswordLevel.new
-    when 2 then MainLevel.new
-    when 3 then GauntletLevel.new
+    when 2 then TotpLevel.new
+    when 3 then MainLevel.new
+    when 4 then GauntletLevel.new
     else WelcomeLevel.new
     end
   end
@@ -17,6 +19,10 @@ class Level
   # Per-tick hook for scripted stages (e.g. spawning an enemy mid-level once the
   # player does something). Runs every tick after the player + camera update.
   def update(_args) = nil
+
+  # Per-tick server sync, run unless the run is over. The one sanctioned engine
+  # touchpoint: a level overrides this to drive its Network conversation. No-op by default.
+  def poll_network(_args) = nil
 
   # Called once a re-auth clears (the player just unlocked). Lets a level script
   # what happens next, e.g. the welcome level dropping a heal heart.
@@ -50,6 +56,8 @@ class Level
 
   # Where Main#setup_level drops the player on entry; the welcome level overrides this default.
   def start_x = 0
+
+  def time_limit = LEVEL_TIME_LIMIT
 
   # px inset from the right wall where #certificate_at_exit places the goal — clear of
   # the holes (which stop ≥700px from the wall) and within the player's reach.

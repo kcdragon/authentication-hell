@@ -65,7 +65,7 @@ class PasswordLevel < Level
 
   def complete? = @cleared == true
 
-  def next_level = MainLevel.new
+  def next_level = TotpLevel.new
 
   def draw_hud(args)
     glyphs = args.state.player.collected_password_characters

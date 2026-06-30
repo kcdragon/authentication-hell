@@ -1,0 +1,5 @@
+<%# locals: (result:) %>
+<div id="<%= result.fetch(:id) %>"
+     class="game-toast w-max max-w-[90vw] border-[3px] border-ink rounded-[3px] <%= result[:ok] ? "bg-success" : "bg-error" %> text-white px-3.5 py-3 font-bold shadow-brut pointer-events-none">
+  <%= result[:ok] ? "✓" : "✗" %> <%= result.fetch(:message) %>
+</div>

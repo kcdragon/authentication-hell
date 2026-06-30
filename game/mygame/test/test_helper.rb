@@ -17,12 +17,12 @@ require "app/requires.rb"
 # Structs (not Hashes) because the engine's hashes quack like attr_accessor —
 # code reads `keyboard.left`, not `keyboard[:left]` — which plain Ruby hashes don't.
 module GameTest
-  KeyDown = Struct.new(:space)
+  KeyDown = Struct.new(:space, :e)
   Keyboard = Struct.new(:left, :right, :key_down)
   Inputs = Struct.new(:keyboard)
   # captions_on gates the closed caption a level draws (via Caption) in its #draw path.
   State = Struct.new(:camera_x, :platforms, :enemies, :collectables, :player, :level,
-                     :tick_count, :captions_on, :holes)
+                     :tick_count, :captions_on, :holes, :keypad, :level_totp)
   Outputs = Struct.new(:sprites, :solids, :labels)
   Args = Struct.new(:inputs, :state, :outputs)
 
@@ -30,13 +30,14 @@ module GameTest
   # defaults to MainLevel (the full-width world) so the player clamps to WORLD_W
   # like it does in the running game; pass a WelcomeLevel to exercise the
   # one-screen bound.
-  def build_args(left: false, right: false,
+  def build_args(left: false, right: false, e: false,
                  space: false, camera_x: 0, platforms: [], enemies: nil,
                  collectables: nil, player: nil, level: MainLevel.new, tick_count: 0,
-                 holes: [])
+                 holes: [], keypad: nil, level_totp: nil)
     Args.new(
-      Inputs.new(Keyboard.new(left, right, KeyDown.new(space))),
-      State.new(camera_x, platforms, enemies, collectables, player, level, tick_count, nil, holes),
+      Inputs.new(Keyboard.new(left, right, KeyDown.new(space, e))),
+      State.new(camera_x, platforms, enemies, collectables, player, level, tick_count, nil,
+                holes, keypad, level_totp),
       Outputs.new([], [], [])
     )
   end
