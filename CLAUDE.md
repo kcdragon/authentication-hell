@@ -43,7 +43,7 @@ bin/ci                 # run the full CI pipeline locally (config/ci.rb)
 
 **`bin/ci` must pass locally before merging** — it's what records the signoff. It needs the gh extension installed once per developer (`gh extension install basecamp/gh-signoff`); without it the final signoff step errors. Branch protection requiring the `signoff` status is configured once with `gh signoff install` (repo admin).
 
-**Always run `bin/ci` after opening a PR, and again after pushing any further commits to it** — it records the signoff that unblocks the merge, and every new push invalidates the prior signoff, so re-running it is part of the PR flow on every push, not an afterthought.
+**Always run `bin/ci` after opening a PR, and again after pushing any further commits to it** — it records the signoff that unblocks the merge, and every new push invalidates the prior signoff, so re-running it is part of the PR flow on every push, not an afterthought. **Run it yourself — don't ask the user to.** It's an automatic step after every PR push, not something to prompt for.
 
 **Never run `gh signoff` directly.** The signoff must only ever be recorded as `bin/ci`'s final step on a fully green run — calling `gh signoff` by hand would mark the PR green without the checks actually passing.
 
