@@ -23,7 +23,7 @@ class GauntletLevel < Level
   ENEMY_END_X = 5400
   ENEMY_PITCH = 350
 
-  def number = 3
+  def number = 4
 
   def title = "The Gauntlet"
 

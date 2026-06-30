@@ -4,7 +4,7 @@
 # pause screen. Cleared by collecting the certificate at the world's right exit, which
 # hands off to the gauntlet finale.
 class MainLevel < Level
-  def number = 2
+  def number = 3
 
   def title = "The Open Web"
 

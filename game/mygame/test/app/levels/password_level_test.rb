@@ -138,7 +138,7 @@ class PasswordLevelTest < Minitest::Test
     assert_equal 1, @args.state.collectables.count { |c| c.is_a?(Certificate) }
   end
 
-  def test_completes_when_the_certificate_is_collected_and_hands_off_to_main
+  def test_completes_when_the_certificate_is_collected_and_hands_off_to_totp
     @level.setup(@args)
     collect_all
     @level.update(@args) # spawns the certificate
@@ -146,7 +146,7 @@ class PasswordLevelTest < Minitest::Test
     @level.update(@args)
 
     assert @level.complete?
-    assert_instance_of MainLevel, @level.next_level
+    assert_instance_of TotpLevel, @level.next_level
   end
 
   def test_draw_hud_paints_a_slot_for_every_required_character

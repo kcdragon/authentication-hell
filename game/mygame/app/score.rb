@@ -9,13 +9,13 @@ module Score
 
   # mruby Integer/Integer returns a Float; .to_i truncates back to whole seconds
   # (the value is non-negative, so this floors) and is a no-op under MRI in tests.
-  def self.seconds_remaining(ticks)
-    ([ LEVEL_TIME_LIMIT * 60 - ticks, 0 ].max / 60).to_i
+  def self.seconds_remaining(ticks, time_limit = LEVEL_TIME_LIMIT)
+    ([ time_limit * 60 - ticks, 0 ].max / 60).to_i
   end
 
-  def self.for(kills:, ticks:, hearts:)
+  def self.for(kills:, ticks:, hearts:, time_limit: LEVEL_TIME_LIMIT)
     kill_points = kills * KILL_POINTS
-    time_bonus = seconds_remaining(ticks) * TIME_BONUS_PER_SECOND
+    time_bonus = seconds_remaining(ticks, time_limit) * TIME_BONUS_PER_SECOND
     heart_bonus = hearts * HEART_BONUS
     { kills: kills, kill_points: kill_points, time_bonus: time_bonus,
       hearts: hearts, heart_bonus: heart_bonus,

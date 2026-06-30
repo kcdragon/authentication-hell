@@ -8,9 +8,10 @@ class Ui::Transport
     by = PLAY_BUTTON[:y]
     draw_play_button(bx, by) unless State.intro_active?(@args)
 
-    elapsed = State.progress(@args) * LEVEL_TIME_LIMIT
+    limit = @args.state.level.time_limit
+    elapsed = State.progress(@args) * limit
     @args.outputs.labels << { x: bx + 48, y: by + 26,
-                              text: "#{timecode(elapsed)} / #{timecode(LEVEL_TIME_LIMIT)}",
+                              text: "#{timecode(elapsed)} / #{timecode(limit)}",
                               size_px: 22, font: FONT_MONO,
                               r: TS_INK[0], g: TS_INK[1], b: TS_INK[2],
                               anchor_x: 0, anchor_y: 1 }

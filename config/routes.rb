@@ -63,6 +63,11 @@ Rails.application.routes.draw do
     post "password/start"    => "password_challenge#start",    as: :password_start
     post "password/complete" => "password_challenge#complete", as: :password_complete
 
+    get  "level_totp/status"   => "level_totp_challenge#status",   as: :level_totp_status
+    post "level_totp/start"    => "level_totp_challenge#start",    as: :level_totp_start
+    post "level_totp/register" => "level_totp_challenge#register", as: :level_totp_register
+    post "level_totp/submit"   => "level_totp_challenge#submit",   as: :level_totp_submit
+
     post "levels/complete" => "levels#complete", as: :levels_complete
     post "levels/playing"  => "levels#playing",  as: :levels_playing
   end

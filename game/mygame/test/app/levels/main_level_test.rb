@@ -44,8 +44,8 @@ class MainLevelTest < Minitest::Test
     assert_equal "MainLevel", @level.serialize[:level]
   end
 
-  def test_number_is_two
-    assert_equal 2, @level.number
+  def test_number_is_three
+    assert_equal 3, @level.number
   end
 
   def test_world_is_the_full_width

@@ -1,7 +1,8 @@
 module State
   def self.progress(args)
     started_at = args.state.level_started_at || args.state.tick_count
-    ((args.state.tick_count - started_at) / (LEVEL_TIME_LIMIT * 60).to_f).clamp(0.0, 1.0)
+    limit = args.state.level.time_limit * 60
+    ((args.state.tick_count - started_at) / limit.to_f).clamp(0.0, 1.0)
   end
 
   def self.intro_active?(args)

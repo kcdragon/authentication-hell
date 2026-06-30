@@ -3,6 +3,9 @@ require "app/requires.rb"
 module Main
   def tick(args)
     args.state.player ||= Player.new
+    # Seed a level before the loading scene draws the transport (which reads its time
+    # limit); /game/start swaps in the real starting level once it resolves.
+    args.state.level ||= Level.build(args.state.start_level || 0)
     args.state.captions_on = true if args.state.captions_on.nil?
 
     # The loading scene owns the frame until /game/start resolves the starting level;
@@ -159,6 +162,8 @@ module Main
 
     poll_unlock(args) if args.state.player.locked && args.state.player.lock_confirmed
 
+    args.state.level.poll_network(args) unless args.state.player.game_over
+
     # On game over the run can be restarted from the "Video Ended" card.
     restart_run(args) if args.state.player.game_over && args.inputs.keyboard.key_down.r
   end
@@ -213,6 +218,8 @@ module Main
       args.state.enemies.each { |enemy| enemy.render(args, cam) if enemy.alive }
 
       args.state.collectables.each { |pickup| pickup.render(args, cam) if pickup.alive }
+
+      (args.state.keypad || []).each { |pad| pad.render(args, cam) }
 
       args.state.player.render(args, cam)
     end
@@ -287,11 +294,22 @@ module Main
 
     cx = 640
     cy = 392
-    w = 520
     h = 152
+    accent = level.accent
+
+    # Fit the card to its title so a long one (the TOTP level) doesn't spill past a
+    # fixed box: widen the card to hold the title (clamped to the screen, never below
+    # the original 520), and only shrink the display font if even the widest card
+    # can't contain it. 0.6 px per point of font size is a safe width estimate for the
+    # heavy display face — there's no engine-free way to measure a string here.
+    title = level.title
+    title_size = 40
+    pad_x = 48
+    est_w = title.length * title_size * 0.6
+    w = (est_w + 2 * pad_x).clamp(520, SCREEN_W - 120).to_i
+    title_size = ((w - 2 * pad_x) * title_size / est_w).to_i if est_w > w - 2 * pad_x
     left = cx - w / 2
     bottom = cy - h / 2
-    accent = level.accent
 
     # Hard offset ink shadow, then the ink border, then the white face.
     args.outputs.solids << { x: left + 8, y: bottom - 8, w: w, h: h,
@@ -308,8 +326,8 @@ module Main
     # Short accent rule between the eyebrow and the title.
     args.outputs.solids << { x: cx - 28, y: cy + 26, w: 56, h: 4,
                              r: accent[0], g: accent[1], b: accent[2], a: alpha }
-    args.outputs.labels << { x: cx, y: cy - 18, text: level.title,
-                             size_px: 40, font: FONT_DISPLAY,
+    args.outputs.labels << { x: cx, y: cy - 18, text: title,
+                             size_px: title_size, font: FONT_DISPLAY,
                              r: INK[0], g: INK[1], b: INK[2], a: alpha,
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
@@ -454,6 +472,14 @@ module Main
   def setup_level(args)
     args.state.player.x = args.state.level.start_x
     args.state.camera_x = 0
+    # Clear any keypad / temp-TOTP state so it never leaks into a level that doesn't
+    # use it; only TotpLevel#setup repopulates these.
+    args.state.keypad = nil
+    args.state.level_totp = nil
+    args.state.level_totp_start_request = nil
+    args.state.level_totp_status_request = nil
+    args.state.level_totp_submit_request = nil
+    args.state.level_totp_next_poll = nil
     args.state.level.setup(args)
   end
 
@@ -480,7 +506,8 @@ module Main
   def begin_level_summary(args)
     ticks = args.state.tick_count - args.state.level_started_at
     args.state.level_summary = Score.for(kills: args.state.level_kills, ticks: ticks,
-                                        hearts: args.state.player.hearts)
+                                        hearts: args.state.player.hearts,
+                                        time_limit: args.state.level.time_limit)
                                    .merge(title: args.state.level.title,
                                           number: args.state.level.number,
                                           ticks: ticks)

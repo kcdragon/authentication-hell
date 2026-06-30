@@ -15,9 +15,11 @@ class GameLevel
       achievement_description: "Finish the Welcome level and step into the world."),
     new(number: 1, name: "Password Complexity", emoji: "🔑",
       achievement_description: "Collect two of every character class and forge a password."),
-    new(number: 2, name: "The Open World", emoji: "🌅",
+    new(number: 2, name: "Time-Based One-Time Passwords", emoji: "⏱️",
+      achievement_description: "Link a temporary authenticator and enter three codes in a row."),
+    new(number: 3, name: "The Open World", emoji: "🌅",
       achievement_description: "Clear the main level."),
-    new(number: 3, name: "The Gauntlet", emoji: "🏃",
+    new(number: 4, name: "The Gauntlet", emoji: "🏃",
       achievement_description: "Cross the gauntlet without touching the floor.")
   ].freeze
 

@@ -1,0 +1,163 @@
+require_relative "../../test_helper"
+
+class TotpLevelTest < Minitest::Test
+  include GameTest
+
+  def setup
+    @level = TotpLevel.new
+    @args = build_args(player: Player.new, level: @level)
+    @level.setup(@args)
+  end
+
+  def test_number_is_two
+    assert_equal 2, @level.number
+  end
+
+  def test_world_is_a_single_screen
+    assert_equal SCREEN_W, @level.world_w
+  end
+
+  def test_melee_is_live
+    assert @level.melee?
+  end
+
+  def test_allows_five_minutes
+    assert_equal 300, @level.time_limit
+  end
+
+  def test_hands_off_to_the_open_world
+    assert_instance_of MainLevel, @level.next_level
+  end
+
+  def test_setup_lays_ten_keypad_platforms_with_a_pad_on_each
+    assert_equal 10, @args.state.platforms.length
+    assert_equal 10, @args.state.keypad.length
+    assert(@args.state.keypad.all? { |pad| pad.is_a?(DigitPad) })
+  end
+
+  def test_setup_places_every_digit_zero_through_nine
+    assert_equal (0..9).to_a, @args.state.keypad.map(&:digit).sort
+  end
+
+  def test_keys_are_laid_out_like_a_phone_number_pad
+    at = @args.state.keypad.to_h { |pad| [ pad.digit, [ pad.x, pad.y ] ] }
+    # 1-2-3 share a row, left→right; 7-8-9 sit above them; 0 is centered below.
+    assert_equal at[1][1], at[2][1]
+    assert_equal at[2][1], at[3][1]
+    assert_operator at[1][0], :<, at[2][0]
+    assert_operator at[2][0], :<, at[3][0]
+    assert_operator at[7][1], :>, at[4][1], "7-8-9 sit above 4-5-6"
+    assert_operator at[4][1], :>, at[1][1], "4-5-6 sit above 1-2-3"
+    assert_equal at[2][0], at[0][0], "0 is in the middle column"
+    assert_operator at[0][1], :<, at[1][1], "0 is the lowest key"
+  end
+
+  def test_rows_are_within_a_single_hop_of_each_other
+    reach = Platform::TIERS.first - GROUND_Y # the proven ground→first-ledge jump
+    tops = (@args.state.keypad.map(&:y) + [ GROUND_Y ]).uniq.sort
+    steps = tops.each_cons(2).map { |a, b| b - a }
+    assert(steps.all? { |s| s <= reach }, "each row is a reachable hop above the last: #{steps.inspect}")
+  end
+
+  def test_setup_starts_with_no_enemies_and_a_fresh_challenge
+    assert_empty @args.state.enemies
+    lt = @args.state.level_totp
+    assert lt[:active]
+    refute lt[:registered]
+    assert_equal 0, lt[:streak]
+    assert_equal [], lt[:entered]
+  end
+
+  def test_keypad_is_inert_until_the_authenticator_is_registered
+    press(pad_for(5))
+    assert_empty @args.state.level_totp[:entered]
+  end
+
+  def test_standing_on_a_key_without_pressing_e_enters_nothing
+    register!
+    pad = pad_for(5)
+    stand_on(pad)
+    @level.update(@args) # moving/standing, but E not pressed
+
+    assert_empty @args.state.level_totp[:entered], "navigation must never type a digit"
+  end
+
+  def test_pressing_e_punches_in_the_key_underfoot
+    register!
+    press(pad_for(7))
+    assert_equal [ 7 ], @args.state.level_totp[:entered]
+  end
+
+  def test_six_digits_assemble_a_pending_code_and_clear_the_tray
+    register!
+    [ 1, 2, 3, 4, 5, 6 ].each { |d| press(pad_for(d)) }
+
+    lt = @args.state.level_totp
+    assert_equal "123456", lt[:pending_code]
+    assert_equal [], lt[:entered]
+    assert lt[:submitting], "entry freezes until the server answers the submit"
+  end
+
+  def test_completes_once_the_server_reports_the_streak_met
+    register!
+    @args.state.level_totp[:complete] = true
+    @level.update(@args)
+
+    assert @level.complete?
+    refute @args.state.level_totp[:active], "stops polling once cleared"
+  end
+
+  def test_spawns_a_capped_wave_of_enemies_over_time
+    register!
+    # No enemy yet at tick 0...
+    @level.update(@args)
+    assert_empty @args.state.enemies
+
+    # ...one arrives a wave-interval later, and the floor never packs past the cap.
+    20.times do |i|
+      @args.state.tick_count += TotpLevel::WAVE_INTERVAL
+      @level.update(@args)
+    end
+    refute_empty @args.state.enemies
+    assert_operator @args.state.enemies.count(&:alive), :<=, TotpLevel::WAVE_CAP
+    assert(@args.state.enemies.all? { |e| %i[totp password passkey].include?(e.auth) })
+  end
+
+  def test_serialize_names_the_level
+    assert_equal "TotpLevel", @level.serialize[:level]
+  end
+
+  def test_dev_codes_render_in_the_hud_when_present
+    @args.state.level_totp[:codes] = %w[111111 222222 333333]
+    @level.draw_hud(@args)
+    texts = @args.outputs.labels.map { |l| l[:text] }
+    assert_includes texts, "111111"
+    assert_includes texts, "333333"
+  end
+
+  def test_dev_codes_are_omitted_when_absent
+    @args.state.level_totp[:codes] = nil
+    @level.draw_hud(@args)
+    texts = @args.outputs.labels.map { |l| l[:text] }
+    refute_includes texts, "DEV — enter in order:"
+  end
+
+  private
+
+  def register! = @args.state.level_totp[:registered] = true
+
+  def pad_for(digit) = @args.state.keypad.find { |pad| pad.digit == digit }
+
+  def stand_on(pad)
+    @args.state.player.x = pad.x
+    @args.state.player.y = pad.y
+  end
+
+  # Stand on a key and tap E for one frame — one deliberate entry.
+  def press(pad)
+    stand_on(pad)
+    @args.inputs.keyboard.key_down.e = true
+    @level.update(@args)
+    @args.inputs.keyboard.key_down.e = false
+  end
+end
