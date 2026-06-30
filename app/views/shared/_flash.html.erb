@@ -1,5 +1,5 @@
-<%# Renders all flash messages. Rendered once in the application layout so views
-    don't each repeat alert/notice markup. %>
+<%# locals: () %>
+
 <% flash.each do |type, message| %>
   <% next if message.blank? %>
   <%
