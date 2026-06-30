@@ -43,6 +43,8 @@ bin/ci                 # run the full CI pipeline locally (config/ci.rb)
 
 **`bin/ci` must pass locally before merging** — it's what records the signoff. It needs the gh extension installed once per developer (`gh extension install basecamp/gh-signoff`); without it the final signoff step errors. Branch protection requiring the `signoff` status is configured once with `gh signoff install` (repo admin).
 
+**Always run `bin/ci` when opening a PR** — it records the signoff that unblocks the merge, so make it part of the PR flow, not an afterthought.
+
 RuboCop and Brakeman are scoped to *our* code only: everything under `game/` is excluded except `game/mygame/`, and within that, only `main.rb` is linted (`repl.rb` is DragonRuby's vendored console scratch file). See `.rubocop.yml` (`AllCops/Exclude`) and `config/brakeman.yml` (`skip_files`). If you add a new hand-written file under `game/mygame/`, it will be linted by default — that's intended.
 
 ### Conventions

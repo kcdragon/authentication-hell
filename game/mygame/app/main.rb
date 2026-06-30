@@ -114,7 +114,7 @@ module Main
           enemy.alive = false
           if args.state.player.hearts <= 0
             # Losing the last heart ends the run; skip the re-auth (nothing to unlock).
-            args.state.player.game_over = true
+            end_run(args)
           else
             report_collision(args, enemy.auth)
             args.state.player.locked = true
@@ -144,7 +144,7 @@ module Main
     # the summary card; the player presses Space/E to hand off (handle_summary_input).
     begin_level_summary(args) if args.state.level.complete? && !args.state.level_summary
 
-    args.state.player.game_over = true if out_of_time?(args)
+    end_run(args) if out_of_time?(args)
 
     # Only poll once the collision POST has landed, so a status check can't beat
     # the server flag. Drop the (non-serializable) handle so state export works.
@@ -159,6 +159,8 @@ module Main
     if args.state.level_complete_request && args.state.level_complete_request[:complete]
       args.state.level_complete_request = nil
     end
+
+    Network::Death.maybe_complete(args.state)
 
     poll_unlock(args) if args.state.player.locked && args.state.player.lock_confirmed
 
@@ -177,7 +179,7 @@ module Main
 
     player.hearts -= 1
     if player.hearts <= 0
-      player.game_over = true
+      end_run(args)
     else
       cx = player.x + player.w / 2
       # The nearest gap at or left of the center: they may have drifted past its
@@ -393,6 +395,12 @@ module Main
     when :password then AMBER
     else PURPLE
     end
+  end
+
+  def end_run(args)
+    return if args.state.player.game_over
+    args.state.player.game_over = true
+    Network::Death.start(args)
   end
 
   # POST to the Rails app so it can broadcast a message to the page. Same-origin,
