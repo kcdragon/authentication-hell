@@ -54,12 +54,12 @@ module GameTest
   Args = Struct.new(:inputs, :state, :outputs)
 
   # Build an `args` double for a single tick. Defaults mean "no input". The level
-  # defaults to MainLevel (the full-width world) so the player clamps to WORLD_W
+  # defaults to PasswordLevel (a full-width world) so the player clamps to WORLD_W
   # like it does in the running game; pass a WelcomeLevel to exercise the
   # one-screen bound.
   def build_args(left: false, right: false, e: false,
                  space: false, camera_x: 0, platforms: [], enemies: nil,
-                 collectables: nil, player: nil, level: MainLevel.new, tick_count: 0,
+                 collectables: nil, player: nil, level: PasswordLevel.new, tick_count: 0,
                  holes: [])
     Args.new(
       Inputs.new(Keyboard.new(left, right, KeyDown.new(space, e))),

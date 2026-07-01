@@ -8,8 +8,6 @@ class Level
     case number
     when 1 then PasswordLevel.new
     when 2 then TotpLevel.new
-    when 3 then MainLevel.new
-    when 4 then GauntletLevel.new
     else WelcomeLevel.new
     end
   end

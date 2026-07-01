@@ -65,7 +65,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
 
     # One-shot: a subsequent boot falls back to progress (the frontier level).
     get game_start_url
-    assert_equal 3, response.parsed_body["start_level"]
+    assert_equal 2, response.parsed_body["start_level"]
   end
 
   test "frame honors selecting the frontier (the next, not-yet-cleared level)" do
@@ -123,7 +123,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "frame still honors an in-frontier selection in production" do
-    @user.update!(highest_level_completed: 2) # frontier is 3
+    @user.update!(highest_level_completed: 1) # frontier is 2
     sign_in_as(@user)
 
     in_env("production") { get game_frame_url(level: 1) } # 1 <= frontier
@@ -145,9 +145,9 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
   test "show forwards the level param into the iframe src" do
     sign_in_as(@user)
 
-    get game_url(level: 3)
+    get game_url(level: 2)
     assert_response :success
-    assert_match %r{/game/frame\?level=3}, response.body
+    assert_match %r{/game/frame\?level=2}, response.body
   end
 
   test "start enqueues the achievement-awarding job with the current time" do
