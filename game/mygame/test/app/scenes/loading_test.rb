@@ -1,30 +1,14 @@
 require_relative "../../test_helper"
-require "json"
-
-# DragonRuby's HTTP/JSON globals, stubbed for plain MRI: http_get records the URL
-# it was given and hands back an in-flight request handle; parse_json is just JSON.
-module DR
-  class << self
-    attr_accessor :last_url
-
-    def http_get(url)
-      @last_url = url
-      { complete: false }
-    end
-
-    def parse_json(str) = JSON.parse(str)
-  end
-end
 
 # Exercises the loading scene's engine-free responsibility: polling /game/start and
 # resolving the starting level. The drawing path needs the engine, so it's left to
 # the build/native run.
 class LoadingSceneTest < Minitest::Test
-  State = Struct.new(:start_request, :server_base, :start_level, :level)
+  State = Struct.new(:start_request, :start_level, :level)
   Args = Struct.new(:state)
 
   def poll(start_request: nil)
-    args = Args.new(State.new(start_request, "http://test", nil, nil))
+    args = Args.new(State.new(start_request, nil, nil))
     LoadingScene.new(args).send(:poll_start_request)
     args.state
   end

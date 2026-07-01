@@ -2,6 +2,7 @@ require "app/requires.rb"
 
 module Main
   def tick(args)
+    Network.base_url(args)
     args.state.player ||= Player.new
     # Seed a level before the loading scene draws the transport (which reads its time
     # limit); /game/start swaps in the real starting level once it resolves.
@@ -167,8 +168,6 @@ module Main
 
     poll_unlock(args) if args.state.player.locked && args.state.player.lock_confirmed
 
-    args.state.level.poll_network(args) unless args.state.player.game_over
-
     # On game over the run can be restarted from the "Video Ended" card.
     restart_run(args) if args.state.player.game_over && args.inputs.keyboard.key_down.r
   end
@@ -224,7 +223,7 @@ module Main
 
       args.state.collectables.each { |pickup| pickup.render(args, cam) if pickup.alive }
 
-      (args.state.keypad || []).each { |pad| pad.render(args, cam) }
+      args.state.level.render_world(args, cam)
 
       args.state.player.render(args, cam)
     end
@@ -483,14 +482,6 @@ module Main
   def setup_level(args)
     args.state.player.x = args.state.level.start_x
     args.state.camera_x = 0
-    # Clear any keypad / temp-TOTP state so it never leaks into a level that doesn't
-    # use it; only TotpLevel#setup repopulates these.
-    args.state.keypad = nil
-    args.state.level_totp = nil
-    args.state.level_totp_start_request = nil
-    args.state.level_totp_status_request = nil
-    args.state.level_totp_submit_request = nil
-    args.state.level_totp_next_poll = nil
     args.state.level.setup(args)
   end
 

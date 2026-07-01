@@ -18,8 +18,4 @@ class LevelTest < Minitest::Test
   def test_built_levels_report_their_own_number
     [ 0, 1, 2, 3, 4 ].each { |n| assert_equal n, Level.build(n).number }
   end
-
-  def test_poll_network_is_a_no_op_for_levels_that_do_not_talk_to_the_server
-    assert_nil MainLevel.new.poll_network(build_args)
-  end
 end

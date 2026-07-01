@@ -4,6 +4,7 @@
 # duck-typed `args`, which we stub below. That keeps them runnable anywhere Ruby
 # is — including CI on Linux.
 require "minitest/autorun"
+require "json"
 
 # Load the game's files exactly as main.rb does — through app/requires.rb. The
 # engine resolves "app/..." against the mygame/ root; here we put that root on the
@@ -11,6 +12,32 @@ require "minitest/autorun"
 # engine-only and never loaded.
 $LOAD_PATH.unshift(File.expand_path("..", __dir__))
 require "app/requires.rb"
+
+# Seed the server-origin global that Main normally sets from config on the first tick,
+# so network code (e.g. the loading scene) builds URLs without an engine file read.
+$server_base = "http://test"
+
+# DragonRuby's HTTP/JSON globals, stubbed for plain MRI: the http_* calls record the
+# last URL and hand back an in-flight (never-completing) request handle; parse_json is
+# just JSON. Lets code that reaches the Network layer (the loading scene, the TOTP
+# level's #update) run under test without the engine.
+module DR
+  class << self
+    attr_accessor :last_url
+
+    def http_get(url)
+      @last_url = url
+      { complete: false }
+    end
+
+    def http_post(url, _body = nil, _headers = nil)
+      @last_url = url
+      { complete: false }
+    end
+
+    def parse_json(str) = JSON.parse(str)
+  end
+end
 
 # Minimal stand-ins for DragonRuby's `args`. The entities only read a handful of
 # input/state fields and append to output arrays, so plain Structs suffice. Use
@@ -22,7 +49,7 @@ module GameTest
   Inputs = Struct.new(:keyboard)
   # captions_on gates the closed caption a level draws (via Caption) in its #draw path.
   State = Struct.new(:camera_x, :platforms, :enemies, :collectables, :player, :level,
-                     :tick_count, :captions_on, :holes, :keypad, :level_totp)
+                     :tick_count, :captions_on, :holes)
   Outputs = Struct.new(:sprites, :solids, :labels)
   Args = Struct.new(:inputs, :state, :outputs)
 
@@ -33,11 +60,11 @@ module GameTest
   def build_args(left: false, right: false, e: false,
                  space: false, camera_x: 0, platforms: [], enemies: nil,
                  collectables: nil, player: nil, level: MainLevel.new, tick_count: 0,
-                 holes: [], keypad: nil, level_totp: nil)
+                 holes: [])
     Args.new(
       Inputs.new(Keyboard.new(left, right, KeyDown.new(space, e))),
       State.new(camera_x, platforms, enemies, collectables, player, level, tick_count, nil,
-                holes, keypad, level_totp),
+                holes),
       Outputs.new([], [], [])
     )
   end
