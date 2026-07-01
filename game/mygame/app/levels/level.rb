@@ -1,7 +1,8 @@
 # Base class for the game's levels — discrete scripted stages. Shared concerns
 # (collision/re-auth, camera, hearts, the locked challenge prompt) stay in Main's
-# tick; levels do no engine I/O directly (a level that talks to the server overrides
-# #poll_network to delegate to the Network layer), so they load under plain MRI.
+# tick. Levels hold their own state as ivars and run under plain MRI; a level that
+# talks to the server (the TOTP level) does so from #update via the Network layer,
+# whose HTTP/JSON globals are stubbed in tests.
 class Level
   def self.build(number)
     case number
@@ -19,10 +20,6 @@ class Level
   # Per-tick hook for scripted stages (e.g. spawning an enemy mid-level once the
   # player does something). Runs every tick after the player + camera update.
   def update(_args) = nil
-
-  # Per-tick server sync, run unless the run is over. The one sanctioned engine
-  # touchpoint: a level overrides this to drive its Network conversation. No-op by default.
-  def poll_network(_args) = nil
 
   # Called once a re-auth clears (the player just unlocked). Lets a level script
   # what happens next, e.g. the welcome level dropping a heal heart.
@@ -101,6 +98,10 @@ class Level
   # A persistent HUD overlay the level paints by the hearts every tick (the password
   # level's collected-character tray). Most levels have none.
   def draw_hud(_args) = nil
+
+  # World-space entities a level owns that Main's generic render loop doesn't (the TOTP
+  # keypad), drawn in the same camera-offset pass as platforms/enemies. No-op by default.
+  def render_world(_args, _cam) = nil
 
   # args.state.level rides along in DragonRuby's state export; levels are
   # stateless, so the class name is all the export needs.

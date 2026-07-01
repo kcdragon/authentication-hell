@@ -3,9 +3,9 @@
 # scanning the QR in the toast and entering one code. Then they clear the level by
 # entering three codes from three consecutive 30-second windows, "typing" each
 # six-digit code on a giant number pad while a wave of enemies marches in. All the
-# TOTP verification lives server-side; this level only owns the keypad + the shared
-# args.state.level_totp contract that Main's tick uses to talk to /games/level_totp
-# (start the QR toast, poll status, submit a code).
+# TOTP verification lives server-side; this level owns the keypad + the @totp state
+# machine that Network::LevelTotp drives over /games/level_totp (start the QR toast,
+# poll status, submit a code).
 #
 # The keypad is a phone number pad — 1–9 in a 3×3 grid with 0 below — of climbable
 # ledges floating above the floor. Crucially, *moving over a key never enters it*: the
@@ -13,6 +13,10 @@
 # the E key, so a digit is only ever typed on purpose (collision-based entry made every
 # jump a misfire). Single-screen arena (world_w = SCREEN_W) so the whole pad is in view.
 class TotpLevel < Level
+  attr_reader :totp, :keypad
+  attr_accessor :totp_start_request, :totp_status_request,
+                :totp_submit_request, :totp_next_poll
+
   CODE_LENGTH = 6
   REQUIRED_STREAK = 3
 
@@ -50,15 +54,18 @@ class TotpLevel < Level
     args.state.collectables = []
     args.state.enemies = []
     build_keypad(args)
-    args.state.level_totp = { active: true, started: false, registered: false,
-                              streak: 0, entered: [], pending_code: nil,
-                              submitting: false, complete: false, codes: nil }
+    @totp = { active: true, started: false, registered: false,
+              streak: 0, entered: [], pending_code: nil,
+              submitting: false, complete: false, codes: nil }
     @wave_count = 0
     @last_wave_at = nil
   end
 
   def update(args)
-    lt = args.state.level_totp
+    lt = @totp
+    # Drain the server conversation first (registration, streak, submit results), then
+    # act on this tick's input. Stops once the run is over — nothing left to unlock.
+    Network::LevelTotp.new(self).poll(args.state.tick_count) unless args.state.player.game_over
     read_keypad_presses(args) if lt[:registered] && !lt[:complete]
     spawn_waves(args) if lt[:registered] && !lt[:complete]
 
@@ -72,11 +79,15 @@ class TotpLevel < Level
 
   def next_level = MainLevel.new
 
-  def poll_network(args) = Network::LevelTotp.poll(args)
+  # The TOTP keypad lives on the level, not args.state, so Main's generic render loop
+  # can't reach it — draw it here in the camera-offset pass.
+  def render_world(args, cam)
+    @keypad.each { |pad| pad.render(args, cam) }
+  end
 
   # The code-entry tray (six digit slots) and the three streak pips, under the hearts.
   def draw_hud(args)
-    lt = args.state.level_totp
+    lt = @totp
     CODE_LENGTH.times { |slot| draw_digit_slot(args, slot, lt[:entered][slot]) }
     REQUIRED_STREAK.times { |i| draw_streak_pip(args, i, i < lt[:streak].to_i) }
     draw_dev_codes(args, lt[:codes]) if lt[:codes]
@@ -92,7 +103,7 @@ class TotpLevel < Level
     end
     add_key(platforms, pads, COL_X[1], ZERO_TOP, 0)
     args.state.platforms = platforms
-    args.state.keypad = pads
+    @keypad = pads
   end
 
   def add_key(platforms, pads, x, top, digit)
@@ -107,10 +118,10 @@ class TotpLevel < Level
   def read_keypad_presses(args)
     return unless args.inputs.keyboard.key_down.e
 
-    lt = args.state.level_totp
+    lt = @totp
     return if lt[:submitting] || lt[:entered].length >= CODE_LENGTH
 
-    pad = key_under(args.state.player, args.state.keypad)
+    pad = key_under(args.state.player, @keypad)
     return unless pad
 
     pad.press(args.state.tick_count)

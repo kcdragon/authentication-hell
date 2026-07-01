@@ -31,16 +31,16 @@ class TotpLevelTest < Minitest::Test
 
   def test_setup_lays_ten_keypad_platforms_with_a_pad_on_each
     assert_equal 10, @args.state.platforms.length
-    assert_equal 10, @args.state.keypad.length
-    assert(@args.state.keypad.all? { |pad| pad.is_a?(DigitPad) })
+    assert_equal 10, @level.keypad.length
+    assert(@level.keypad.all? { |pad| pad.is_a?(DigitPad) })
   end
 
   def test_setup_places_every_digit_zero_through_nine
-    assert_equal (0..9).to_a, @args.state.keypad.map(&:digit).sort
+    assert_equal (0..9).to_a, @level.keypad.map(&:digit).sort
   end
 
   def test_keys_are_laid_out_like_a_phone_number_pad
-    at = @args.state.keypad.to_h { |pad| [ pad.digit, [ pad.x, pad.y ] ] }
+    at = @level.keypad.to_h { |pad| [ pad.digit, [ pad.x, pad.y ] ] }
     # 1-2-3 share a row, left→right; 7-8-9 sit above them; 0 is centered below.
     assert_equal at[1][1], at[2][1]
     assert_equal at[2][1], at[3][1]
@@ -54,14 +54,14 @@ class TotpLevelTest < Minitest::Test
 
   def test_rows_are_within_a_single_hop_of_each_other
     reach = Platform::TIERS.first - GROUND_Y # the proven ground→first-ledge jump
-    tops = (@args.state.keypad.map(&:y) + [ GROUND_Y ]).uniq.sort
+    tops = (@level.keypad.map(&:y) + [ GROUND_Y ]).uniq.sort
     steps = tops.each_cons(2).map { |a, b| b - a }
     assert(steps.all? { |s| s <= reach }, "each row is a reachable hop above the last: #{steps.inspect}")
   end
 
   def test_setup_starts_with_no_enemies_and_a_fresh_challenge
     assert_empty @args.state.enemies
-    lt = @args.state.level_totp
+    lt = @level.totp
     assert lt[:active]
     refute lt[:registered]
     assert_equal 0, lt[:streak]
@@ -70,7 +70,7 @@ class TotpLevelTest < Minitest::Test
 
   def test_keypad_is_inert_until_the_authenticator_is_registered
     press(pad_for(5))
-    assert_empty @args.state.level_totp[:entered]
+    assert_empty @level.totp[:entered]
   end
 
   def test_standing_on_a_key_without_pressing_e_enters_nothing
@@ -79,20 +79,20 @@ class TotpLevelTest < Minitest::Test
     stand_on(pad)
     @level.update(@args) # moving/standing, but E not pressed
 
-    assert_empty @args.state.level_totp[:entered], "navigation must never type a digit"
+    assert_empty @level.totp[:entered], "navigation must never type a digit"
   end
 
   def test_pressing_e_punches_in_the_key_underfoot
     register!
     press(pad_for(7))
-    assert_equal [ 7 ], @args.state.level_totp[:entered]
+    assert_equal [ 7 ], @level.totp[:entered]
   end
 
   def test_six_digits_assemble_a_pending_code_and_clear_the_tray
     register!
     [ 1, 2, 3, 4, 5, 6 ].each { |d| press(pad_for(d)) }
 
-    lt = @args.state.level_totp
+    lt = @level.totp
     assert_equal "123456", lt[:pending_code]
     assert_equal [], lt[:entered]
     assert lt[:submitting], "entry freezes until the server answers the submit"
@@ -100,11 +100,11 @@ class TotpLevelTest < Minitest::Test
 
   def test_completes_once_the_server_reports_the_streak_met
     register!
-    @args.state.level_totp[:complete] = true
+    @level.totp[:complete] = true
     @level.update(@args)
 
     assert @level.complete?
-    refute @args.state.level_totp[:active], "stops polling once cleared"
+    refute @level.totp[:active], "stops polling once cleared"
   end
 
   def test_spawns_a_capped_wave_of_enemies_over_time
@@ -128,7 +128,7 @@ class TotpLevelTest < Minitest::Test
   end
 
   def test_dev_codes_render_in_the_hud_when_present
-    @args.state.level_totp[:codes] = %w[111111 222222 333333]
+    @level.totp[:codes] = %w[111111 222222 333333]
     @level.draw_hud(@args)
     texts = @args.outputs.labels.map { |l| l[:text] }
     assert_includes texts, "111111"
@@ -136,7 +136,7 @@ class TotpLevelTest < Minitest::Test
   end
 
   def test_dev_codes_are_omitted_when_absent
-    @args.state.level_totp[:codes] = nil
+    @level.totp[:codes] = nil
     @level.draw_hud(@args)
     texts = @args.outputs.labels.map { |l| l[:text] }
     refute_includes texts, "DEV — enter in order:"
@@ -144,9 +144,9 @@ class TotpLevelTest < Minitest::Test
 
   private
 
-  def register! = @args.state.level_totp[:registered] = true
+  def register! = @level.totp[:registered] = true
 
-  def pad_for(digit) = @args.state.keypad.find { |pad| pad.digit == digit }
+  def pad_for(digit) = @level.keypad.find { |pad| pad.digit == digit }
 
   def stand_on(pad)
     @args.state.player.x = pad.x

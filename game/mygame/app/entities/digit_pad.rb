@@ -1,7 +1,4 @@
-# A key on the TOTP level's number pad (levels/02_totp.rb): a tile on a one-way ledge
-# the player stands on and punches in with E. Persistent (unlike a one-shot
-# collectable) so a digit can be re-entered for a repeat in the code. Lives in
-# args.state.keypad; #press just stamps the flash — the entry itself is in TotpLevel.
+# A key on the TOTP level's number pad
 class DigitPad
   SIZE = 52          # the keycap square
   FLASH_TICKS = 12   # how long the green press-flash lasts
