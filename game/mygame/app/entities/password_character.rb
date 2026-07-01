@@ -2,7 +2,7 @@
 # glyph it carries, floating a little above its surface; walking into it is friendly:
 # it holds one of the four character classes (uppercase, lowercase, digit, symbol)
 # and a representative glyph, and collecting it records that class on the player.
-# Lives in args.state.collectables; pickup collision (and the no-harm collect) is
+# Lives on the level's collectables; pickup collision (and the no-harm collect) is
 # wired in Main's tick.
 class PasswordCharacter
   CLASSES = %i[upper lower digit symbol] # the four targets, in display order
@@ -42,7 +42,7 @@ class PasswordCharacter
   def hitbox = chip_rect
 
   def collect(args)
-    args.state.player.collected_password_characters << @glyph
+    args.state.level.collect_password_character(@glyph)
   end
 
   # The carried glyph in a class-colored, ink-bordered chip, hovering above its surface.

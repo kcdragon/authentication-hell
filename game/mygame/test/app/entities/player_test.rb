@@ -25,10 +25,6 @@ class PlayerTest < Minitest::Test
     refute @player.reached_platform
   end
 
-  def test_starts_with_no_collected_password_characters
-    assert_empty @player.collected_password_characters
-  end
-
   # --- horizontal movement ---
 
   def test_moves_right_and_faces_east

@@ -27,6 +27,16 @@ class PasswordLevel < Level
   HAZARD_KINDS = [ TotpEnemy, PasskeyEnemy ]
   HAZARD_PITCH = 760
 
+  # The password the player is building — the glyphs walked into so far. Only this
+  # level tracks it, so it's a private ivar here rather than state on the player.
+  def initialize
+    super
+    @collected = []
+  end
+
+  # Record a padlock's character; called from PasswordCharacter#collect in Main's tick.
+  def collect_password_character(glyph) = @collected << glyph
+
   def number = 1
 
   def title = "Password Complexity"
@@ -45,19 +55,19 @@ class PasswordLevel < Level
   end
 
   def setup(args)
-    args.state.player.collected_password_characters = []
-    args.state.platforms = Platform.scatter
-    args.state.holes = Hole.scatter
-    args.state.collectables = scatter_chars(args.state.platforms)
-    args.state.enemies = hazard_enemies(args.state.player.x)
+    @collected = []
+    @platforms = Platform.scatter
+    @holes = Hole.scatter
+    @collectables = scatter_chars(@platforms)
+    @enemies = hazard_enemies(args.state.player.x)
   end
 
   def update(args)
-    validate_password(args) if password_full?(args) && !@certificate_spawned
+    validate_password(args) if password_full? && !@certificate_spawned
     @cleared = true if certificate_collected?(args)
   end
 
-  def all_collected?(args) = TARGETS.all? { |klass| held_count(args, klass) >= REQUIRED_PER_CLASS }
+  def all_collected? = TARGETS.all? { |klass| held_count(klass) >= REQUIRED_PER_CLASS }
 
   def validation_error_active?(args)
     @validation_error_at && (args.state.tick_count - @validation_error_at) < VALIDATION_ERROR_TICKS
@@ -68,18 +78,17 @@ class PasswordLevel < Level
   def next_level = TotpLevel.new
 
   def draw_hud(args)
-    glyphs = args.state.player.collected_password_characters
-    PASSWORD_LENGTH.times { |slot| draw_password_slot(args, slot, glyphs[slot]) }
+    PASSWORD_LENGTH.times { |slot| draw_password_slot(args, slot, @collected[slot]) }
   end
 
   # Prod the player to sweep up the characters, then flip to "head right" once the
   # set is complete — shown as the top closed caption, updating on each pickup. While a
   # rejected password is still fading, the validation banner rides over the play area.
   def draw(args)
-    lines = if all_collected?(args)
+    lines = if all_collected?
       [ "Password complete —", "head right to finish →" ]
     else
-      [ "#{collected_count(args)}/#{PASSWORD_LENGTH} characters" ]
+      [ "#{collected_count}/#{PASSWORD_LENGTH} characters" ]
     end
     Caption.new(args, lines).draw
     draw_validation_error(args) if validation_error_active?(args)
@@ -130,27 +139,27 @@ class PasswordLevel < Level
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
 
-  def password_full?(args) = collected_count(args) >= PASSWORD_LENGTH
+  def password_full? = collected_count >= PASSWORD_LENGTH
 
   def validate_password(args)
-    all_collected?(args) ? spawn_exit_certificate(args) : fail_validation(args)
+    all_collected? ? spawn_exit_certificate : fail_validation(args)
   end
 
   # Dropped only once the password is valid, so the player can't finish empty-handed.
-  def spawn_exit_certificate(args)
-    args.state.collectables << certificate_at_exit
+  def spawn_exit_certificate
+    @collectables << certificate_at_exit
     @certificate_spawned = true
   end
 
   def fail_validation(args)
-    args.state.player.collected_password_characters = []
-    args.state.collectables.each { |c| c.alive = true if c.is_a?(PasswordCharacter) }
+    @collected = []
+    @collectables.each { |c| c.alive = true if c.is_a?(PasswordCharacter) }
     @validation_error_at = args.state.tick_count
   end
 
-  def held_count(args, klass) = args.state.player.collected_password_characters.count { |g| PasswordCharacter.klass_of(g) == klass }
+  def held_count(klass) = @collected.count { |g| PasswordCharacter.klass_of(g) == klass }
 
-  def collected_count(args) = args.state.player.collected_password_characters.size
+  def collected_count = @collected.size
 
   def scatter_chars(platforms)
     spots = ground_spots + platform_spots(platforms)

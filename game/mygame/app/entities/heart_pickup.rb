@@ -1,6 +1,6 @@
 # A collectable heart the player walks into to heal one heart. Owns its rect and
 # rendering; pickup collision and the heal itself live in Main's tick. Smaller than
-# the HUD hearts so it reads as a world item. Lives in args.state.collectables.
+# the HUD hearts so it reads as a world item. Lives on the level's collectables.
 class HeartPickup
   SIZE = 28
   LIFT = 40 # px the heart floats above its base (ground or a platform top)

@@ -30,7 +30,7 @@ class TotpLevelTest < Minitest::Test
   end
 
   def test_setup_lays_ten_keypad_platforms_with_a_pad_on_each
-    assert_equal 10, @args.state.platforms.length
+    assert_equal 10, @level.platforms.length
     assert_equal 10, @level.keypad.length
     assert(@level.keypad.all? { |pad| pad.is_a?(DigitPad) })
   end
@@ -60,7 +60,7 @@ class TotpLevelTest < Minitest::Test
   end
 
   def test_setup_starts_with_no_enemies_and_a_fresh_challenge
-    assert_empty @args.state.enemies
+    assert_empty @level.enemies
     lt = @level.totp
     assert lt[:active]
     refute lt[:registered]
@@ -111,16 +111,16 @@ class TotpLevelTest < Minitest::Test
     register!
     # No enemy yet at tick 0...
     @level.update(@args)
-    assert_empty @args.state.enemies
+    assert_empty @level.enemies
 
     # ...one arrives a wave-interval later, and the floor never packs past the cap.
     20.times do |i|
       @args.state.tick_count += TotpLevel::WAVE_INTERVAL
       @level.update(@args)
     end
-    refute_empty @args.state.enemies
-    assert_operator @args.state.enemies.count(&:alive), :<=, TotpLevel::WAVE_CAP
-    assert(@args.state.enemies.all? { |e| %i[totp password passkey].include?(e.auth) })
+    refute_empty @level.enemies
+    assert_operator @level.enemies.count(&:alive), :<=, TotpLevel::WAVE_CAP
+    assert(@level.enemies.all? { |e| %i[totp password passkey].include?(e.auth) })
   end
 
   def test_serialize_names_the_level

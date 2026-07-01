@@ -4,6 +4,8 @@
 # talks to the server (the TOTP level) does so from #update via the Network layer,
 # whose HTTP/JSON globals are stubbed in tests.
 class Level
+  attr_reader :enemies, :platforms, :collectables, :holes, :kills
+
   def self.build(number)
     case number
     when 1 then PasswordLevel.new
@@ -12,7 +14,15 @@ class Level
     end
   end
 
-  # Seed args.state.enemies / args.state.platforms for this stage.
+  def initialize
+    @enemies = []
+    @platforms = []
+    @collectables = []
+    @holes = []
+    @kills = 0
+  end
+
+  # Seed the level's enemies / platforms / collectables / holes for this stage.
   def setup(_args) = nil
 
   # Per-tick hook for scripted stages (e.g. spawning an enemy mid-level once the
@@ -65,9 +75,59 @@ class Level
   # Whether the level's certificate has been picked up. The pickup loop retires it
   # (alive → false) but leaves it in the collectables list; #complete? runs without
   # args, so levels latch a flag on this in #update.
-  def certificate_collected?(args)
-    (args.state.collectables || []).any? { |c| c.is_a?(Certificate) && !c.alive }
+  def certificate_collected?(_args)
+    @collectables.any? { |c| c.is_a?(Certificate) && !c.alive }
   end
+
+  # The top edge of the one-way platform the player is settling onto this frame, or
+  # nil if none — so the player asks the level rather than reaching into its
+  # platforms. A landing counts only while descending and only if the player's feet
+  # crossed the platform's top this frame (prev_y above it, now at/below), so they
+  # pass up through it from underneath.
+  def platform_landing_top(player, prev_y)
+    @platforms.each do |plat|
+      top = plat.y + plat.h
+      horizontal = player.x + player.w > plat.x && player.x < plat.x + plat.w
+      return top if horizontal && prev_y >= top && player.y <= top
+    end
+    nil
+  end
+
+  # Whether the player is over a pit — more than 3/4 of their body overhangs a gap,
+  # so the ground check lets them drop instead of landing. Asked by the player
+  # rather than exposing the level's holes (empty on pit-less levels).
+  def over_hole?(player)
+    @holes.any? do |hole|
+      overlap = [ player.x + player.w, hole.x + hole.w ].min - [ player.x, hole.x ].max
+      overlap > player.w * 3 / 4
+    end
+  end
+
+  # Count a stomped enemy toward this level's score.
+  def record_kill = @kills += 1
+
+  # Stamp the tick the level's clock starts: the intro card runs from here and the
+  # countdown/scoring both measure elapsed from here. Main sets it on level entry.
+  def begin_clock(tick)
+    @started_at = tick
+    @intro_at = tick
+  end
+
+  # Fraction (0.0–1.0) of the level's time budget elapsed — drives the scrubber and
+  # the out-of-time end. Zero before the clock is stamped (the loading frames).
+  def progress(tick)
+    return 0.0 unless @started_at
+    ((tick - @started_at) / (time_limit * 60).to_f).clamp(0.0, 1.0)
+  end
+
+  # Ticks the player has spent in the level, for the results card's finish time.
+  def run_ticks(tick) = tick - @started_at
+
+  # Whether the level-intro "chapter card" is still playing (world frozen behind it).
+  def intro_active?(tick) = !@intro_at.nil? && (tick - @intro_at) < LEVEL_INTRO_TICKS
+
+  # Ticks since the intro card began, driving its fade-in/out alpha.
+  def intro_elapsed(tick) = tick - @intro_at
 
   # The level's prompt, drawn while the player is free (not locked) as the top closed
   # caption (a level with a hint builds its copy and draws a Caption); the default is
@@ -101,8 +161,9 @@ class Level
   # keypad), drawn in the same camera-offset pass as platforms/enemies. No-op by default.
   def render_world(_args, _cam) = nil
 
-  # args.state.level rides along in DragonRuby's state export; levels are
-  # stateless, so the class name is all the export needs.
+  # args.state.level rides along in DragonRuby's state export; a level's own
+  # ivars (its entities + bookkeeping) are intentionally left out — the class
+  # name is all the export needs, and #setup rebuilds the contents.
   def serialize = { level: self.class.name }
   def inspect = serialize.to_s
   def to_s = serialize.to_s

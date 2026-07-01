@@ -92,7 +92,7 @@ module Main
 
     # Patrol: each enemy paces within its region. Keeps going while the player is
     # locked mid re-auth — only the player freezes — and stops only on game-over.
-    args.state.enemies.each { |enemy| enemy.update if enemy.alive } unless args.state.player.game_over
+    args.state.level.enemies.each { |enemy| enemy.update if enemy.alive } unless args.state.player.game_over
 
     # Fire once on contact (the transition, not every overlapping frame). Coming
     # down on top of an enemy stomps it — defeated outright, no heart loss, and
@@ -101,7 +101,7 @@ module Main
     # dock a heart, retire the enemy, then either game-over (last heart) or kick
     # off that enemy's auth flow and freeze the player.
     stomped = false
-    args.state.enemies.each do |enemy|
+    args.state.level.enemies.each do |enemy|
       next unless enemy.alive
 
       colliding = args.geometry.intersect_rect?(enemy.hitbox, args.state.player)
@@ -109,7 +109,7 @@ module Main
         if args.state.level.melee? && args.state.player.stomping?(enemy)
           enemy.alive = false
           stomped = true
-          args.state.level_kills += 1
+          args.state.level.record_kill
         elsif enemy.slows?
           enemy.alive = false
           args.state.player.slow(args)
@@ -135,7 +135,7 @@ module Main
     # Walking into a collectable retires the pickup and applies its own effect (a
     # heart heals, a password character is recorded); the level then decides what
     # that means (the welcome level counts the heal as cleared).
-    args.state.collectables.each do |pickup|
+    args.state.level.collectables.each do |pickup|
       next unless pickup.alive
       next unless args.geometry.intersect_rect?(pickup.hitbox, args.state.player)
 
@@ -189,7 +189,7 @@ module Main
       # The nearest gap at or left of the center: they may have drifted past its
       # right edge while falling, so a containment check could miss the pit they
       # actually fell through.
-      hole = (args.state.holes || []).select { |h| h.x <= cx }.max_by(&:x)
+      hole = args.state.level.holes.select { |h| h.x <= cx }.max_by(&:x)
       back = (hole ? hole.x : player.x) - HOLE_RESPAWN_BACK
       player.x = back.clamp(0, args.state.level.world_w - Player::WIDTH)
       player.y = GROUND_Y
@@ -217,11 +217,11 @@ module Main
     hidden_for_dialogue = dialogue_active?(args) && args.state.level.dialogue_hides_scene?
     unless State.intro_active?(args) || hidden_for_dialogue
       # World entities are in world coords; each subtracts the camera offset to draw.
-      args.state.platforms.each { |plat| plat.render(args, cam) }
+      args.state.level.platforms.each { |plat| plat.render(args, cam) }
 
-      args.state.enemies.each { |enemy| enemy.render(args, cam) if enemy.alive }
+      args.state.level.enemies.each { |enemy| enemy.render(args, cam) if enemy.alive }
 
-      args.state.collectables.each { |pickup| pickup.render(args, cam) if pickup.alive }
+      args.state.level.collectables.each { |pickup| pickup.render(args, cam) if pickup.alive }
 
       args.state.level.render_world(args, cam)
 
@@ -286,7 +286,7 @@ module Main
   # holds frozen behind it.
   def draw_level_intro(args)
     level = args.state.level
-    elapsed = args.state.tick_count - args.state.level_intro_at
+    elapsed = args.state.level.intro_elapsed(args.state.tick_count)
     alpha = if elapsed < LEVEL_INTRO_FADE_IN
               255 * elapsed / LEVEL_INTRO_FADE_IN
     elsif elapsed > LEVEL_INTRO_TICKS - LEVEL_INTRO_FADE_OUT
@@ -498,16 +498,14 @@ module Main
   # Stamp the tick a level begins: the intro card shows (and the world freezes) for
   # the next LEVEL_INTRO_TICKS frames, and the level's countdown runtime starts here.
   def begin_level_intro(args)
-    args.state.level_intro_at = args.state.tick_count
-    args.state.level_started_at = args.state.tick_count
-    args.state.level_kills = 0
+    args.state.level.begin_clock(args.state.tick_count)
   end
 
   # Score the cleared level and stash it (with the level's title/number and the
   # finish time) for the results card, which the world freezes behind until Space.
   def begin_level_summary(args)
-    ticks = args.state.tick_count - args.state.level_started_at
-    args.state.level_summary = Score.for(kills: args.state.level_kills, ticks: ticks,
+    ticks = args.state.level.run_ticks(args.state.tick_count)
+    args.state.level_summary = Score.for(kills: args.state.level.kills, ticks: ticks,
                                         hearts: args.state.player.hearts,
                                         time_limit: args.state.level.time_limit)
                                    .merge(title: args.state.level.title,

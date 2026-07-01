@@ -2,7 +2,7 @@
 # level, replacing the old "reach the right wall" trigger. There's no per-player
 # effect: the level latches completion off the retired certificate (alive: false),
 # so #collect is a no-op. Pickup collision lives in Main's tick, like the other
-# collectables; lives in args.state.collectables.
+# collectables; lives on the level's collectables.
 class Certificate
   SIZE = 60
   LIFT = 30 # px the certificate floats above its surface

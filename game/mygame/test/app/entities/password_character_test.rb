@@ -33,16 +33,16 @@ class PasswordCharacterTest < Minitest::Test
                    w: PasswordCharacter::CHIP, h: PasswordCharacter::CHIP }, char.hitbox)
   end
 
-  def test_collect_records_the_glyph_on_the_player
+  def test_collect_records_the_glyph_on_the_level
     char = PasswordCharacter.new(x: 100, klass: :symbol, glyph: "#")
     char.collect(@args)
-    assert_equal [ "#" ], @args.state.player.collected_password_characters
+    assert_equal [ "#" ], @args.state.level.instance_variable_get(:@collected)
   end
 
   def test_collect_appends_each_glyph_in_pickup_order
     PasswordCharacter.new(x: 100, klass: :upper, glyph: "A").collect(@args)
     PasswordCharacter.new(x: 200, klass: :digit, glyph: "7").collect(@args)
-    assert_equal [ "A", "7" ], @args.state.player.collected_password_characters
+    assert_equal [ "A", "7" ], @args.state.level.instance_variable_get(:@collected)
   end
 
   def test_klass_of_recovers_a_glyphs_class

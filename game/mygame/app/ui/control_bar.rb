@@ -18,6 +18,6 @@ class Ui::ControlBar
 
   def draw_holes
     cam = @args.state.camera_x || 0
-    (@args.state.holes || []).each { |hole| hole.render(@args, cam) }
+    @args.state.level.holes.each { |hole| hole.render(@args, cam) }
   end
 end
