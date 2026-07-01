@@ -1,6 +1,6 @@
 # A one-way ledge the player can land on from below: owns its rect and rendering,
 # plus the shared layout constants and a factory so any level can build a scattered
-# field of them. Lives in args.state.platforms; landing collision is in
+# field of them. Lives on the level's platforms; landing collision is in
 # Player#update (it reads x/y/w/h duck-typed).
 class Platform
   H = 30

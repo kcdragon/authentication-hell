@@ -38,7 +38,7 @@ class Player
   attr_accessor :x, :y, :w, :h, :vy, :grounded, :facing,
                 :locked, :colliding, :lock_confirmed, :pending_challenge,
                 :hearts, :game_over, :moved, :blink_until_tick, :slow_until_tick,
-                :reached_platform, :collected_password_characters
+                :reached_platform
 
   def initialize
     @x = 200            # near the left of the world; the scene extends right
@@ -58,7 +58,6 @@ class Player
     @blink_until_tick = 0
     @slow_until_tick = 0
     @reached_platform = false
-    @collected_password_characters = []
   end
 
   # Move left/right with the arrow keys (no wrapping — clamp to screen); space
@@ -95,34 +94,16 @@ class Player
     # Re-ground only while crossing the floor line from above (prev_y >= GROUND_Y),
     # like the one-way platform check below — otherwise a player already sunk into a
     # pit would snap back the instant their center cleared the gap horizontally.
-    if @y <= GROUND_Y && prev_y >= GROUND_Y && !over_hole?(args)
+    if @y <= GROUND_Y && prev_y >= GROUND_Y && !args.state.level.over_hole?(self)
       @y = GROUND_Y
       @vy = 0
       @grounded = true
-    elsif @vy <= 0
-      # One-way platforms: land only while descending and only if the player's
-      # bottom crossed the platform's top this frame (so you pass up through it).
-      args.state.platforms.each do |plat|
-        top = plat.y + plat.h
-        horizontal = @x + @w > plat.x && @x < plat.x + plat.w
-        if horizontal && prev_y >= top && @y <= top
-          @y = top
-          @vy = 0
-          @grounded = true
-          @reached_platform = true
-          break
-        end
-      end
-    end
-  end
-
-  # True once more than 3/4 of the player's body overhangs a gap, so they fall
-  # instead of landing. Holes live in args.state.holes (empty on pit-less levels).
-  def over_hole?(args)
-    return false unless args.state.holes
-    args.state.holes.any? do |hole|
-      overlap = [ @x + @w, hole.x + hole.w ].min - [ @x, hole.x ].max
-      overlap > @w * 3 / 4
+    elsif @vy <= 0 && (top = args.state.level.platform_landing_top(self, prev_y))
+      # Settle onto the one-way platform the level says we crossed this frame.
+      @y = top
+      @vy = 0
+      @grounded = true
+      @reached_platform = true
     end
   end
 
@@ -213,8 +194,7 @@ class Player
       locked: @locked, colliding: @colliding, lock_confirmed: @lock_confirmed,
       pending_challenge: @pending_challenge, hearts: @hearts, game_over: @game_over,
       moved: @moved, blink_until_tick: @blink_until_tick, slow_until_tick: @slow_until_tick,
-      reached_platform: @reached_platform,
-      collected_password_characters: @collected_password_characters }
+      reached_platform: @reached_platform }
   end
 
   def inspect = serialize.to_s

@@ -48,23 +48,30 @@ module GameTest
   Keyboard = Struct.new(:left, :right, :key_down)
   Inputs = Struct.new(:keyboard)
   # captions_on gates the closed caption a level draws (via Caption) in its #draw path.
-  State = Struct.new(:camera_x, :platforms, :enemies, :collectables, :player, :level,
-                     :tick_count, :captions_on, :holes)
+  # The level owns its own entities (enemies/platforms/collectables/holes) — build_args
+  # seeds them onto the level, not the shared state.
+  State = Struct.new(:camera_x, :player, :level, :tick_count, :captions_on)
   Outputs = Struct.new(:sprites, :solids, :labels)
   Args = Struct.new(:inputs, :state, :outputs)
 
   # Build an `args` double for a single tick. Defaults mean "no input". The level
   # defaults to PasswordLevel (a full-width world) so the player clamps to WORLD_W
   # like it does in the running game; pass a WelcomeLevel to exercise the
-  # one-screen bound.
+  # one-screen bound. Any passed platforms/enemies/collectables/holes are seeded
+  # onto the level (where they live), so the code under test reads them there.
   def build_args(left: false, right: false, e: false,
-                 space: false, camera_x: 0, platforms: [], enemies: nil,
+                 space: false, camera_x: 0, platforms: nil, enemies: nil,
                  collectables: nil, player: nil, level: PasswordLevel.new, tick_count: 0,
-                 holes: [])
+                 holes: nil)
+    # The level's collections are read-only in production (only the level seeds them
+    # in #setup); poke them directly here to stage a specific scene for a single tick.
+    level.instance_variable_set(:@platforms, platforms) if platforms
+    level.instance_variable_set(:@enemies, enemies) if enemies
+    level.instance_variable_set(:@collectables, collectables) if collectables
+    level.instance_variable_set(:@holes, holes) if holes
     Args.new(
       Inputs.new(Keyboard.new(left, right, KeyDown.new(space, e))),
-      State.new(camera_x, platforms, enemies, collectables, player, level, tick_count, nil,
-                holes),
+      State.new(camera_x, player, level, tick_count, nil),
       Outputs.new([], [], [])
     )
   end

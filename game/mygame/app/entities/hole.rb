@@ -1,7 +1,7 @@
 # A Mario-style pit: a gap in the ground the player falls through. Owns its x-span;
-# Player#over_hole? reads it so the ground check lets the player drop, and Main's tick
+# Level#over_hole? reads it so the player's ground check lets them drop, and Main's tick
 # docks a heart and respawns them just to the left (no re-auth — that's for enemies).
-# Lives in args.state.holes; levels without pits leave it []. Visual-only otherwise:
+# Lives on the level's holes; levels without pits leave it []. Visual-only otherwise:
 # it breaks the floor lip and cuts a dark recess into the control-bar "floor."
 class Hole
   W = 150          # gap width — under a jump's ~320px reach, so a pit is clearable

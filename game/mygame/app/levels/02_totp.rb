@@ -50,10 +50,10 @@ class TotpLevel < Level
   def time_limit = 300
 
   def setup(args)
-    args.state.holes = []
-    args.state.collectables = []
-    args.state.enemies = []
-    build_keypad(args)
+    @holes = []
+    @collectables = []
+    @enemies = []
+    build_keypad
     @totp = { active: true, started: false, registered: false,
               streak: 0, entered: [], pending_code: nil,
               submitting: false, complete: false, codes: nil }
@@ -95,14 +95,14 @@ class TotpLevel < Level
 
   private
 
-  def build_keypad(args)
+  def build_keypad
     platforms = []
     pads = []
     NUMPAD_ROWS.each_with_index do |row, r|
       row.each_with_index { |digit, c| add_key(platforms, pads, COL_X[c], ROW_TOPS[r], digit.to_i) }
     end
     add_key(platforms, pads, COL_X[1], ZERO_TOP, 0)
-    args.state.platforms = platforms
+    @platforms = platforms
     @keypad = pads
   end
 
@@ -159,7 +159,7 @@ class TotpLevel < Level
   def spawn_waves(args)
     @last_wave_at ||= args.state.tick_count
     return if args.state.tick_count - @last_wave_at < WAVE_INTERVAL
-    return if args.state.enemies.count(&:alive) >= WAVE_CAP
+    return if @enemies.count(&:alive) >= WAVE_CAP
 
     @last_wave_at = args.state.tick_count
     kind = WAVE_KINDS[@wave_count % WAVE_KINDS.length]
@@ -170,7 +170,7 @@ class TotpLevel < Level
       enemy = kind.new(x: world_w)
       enemy.march_left(ENEMY_SPEED)
     end
-    args.state.enemies << enemy
+    @enemies << enemy
     @wave_count += 1
   end
 

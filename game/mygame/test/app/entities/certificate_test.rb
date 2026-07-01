@@ -20,7 +20,7 @@ class CertificateTest < Minitest::Test
   def test_collect_is_a_harmless_no_op
     cert = Certificate.new(x: 100)
     assert_nil cert.collect(@args)
-    assert_empty @args.state.player.collected_password_characters
+    assert_empty @args.state.level.instance_variable_get(:@collected)
   end
 
   def test_render_draws_the_certificate_sprite

@@ -1,8 +1,8 @@
 # Abstract base for the auth enemies: paces left/right within a patrol region and
 # owns its state, movement and rendering. Walking into one fires a re-auth flow
 # (collision detection and the lock side effects live in tick). Each concrete kind
-# is a subclass under entities/enemies/ declaring its AUTH and COLOR; they live in
-# args.state.enemies. Never instantiated directly.
+# is a subclass under entities/enemies/ declaring its AUTH and COLOR; they live on
+# the level's enemies. Never instantiated directly.
 class Enemy
   WIDTH = 64
   HEIGHT = 96

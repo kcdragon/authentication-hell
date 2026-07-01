@@ -21,20 +21,21 @@ class WelcomeLevel < Level
   def start_x = 200
 
   def initialize
+    super
     @healed = false
     @combat_spawned = false
     @certificate_dropped = false
   end
 
-  def setup(args)
+  def setup(_args)
     # No enemy yet — update spawns it once the player reaches the platform. The
     # heal heart is dropped later, on re-auth (#on_unlock).
-    args.state.enemies = []
-    args.state.collectables = []
-    args.state.holes = [] # flat ground — the lesson stays predictable
+    @enemies = []
+    @collectables = []
+    @holes = [] # flat ground — the lesson stays predictable
     # One reachable ledge near the player's start (x:200) so the jump lesson has
     # something to land on.
-    args.state.platforms = [
+    @platforms = [
       Platform.new(x: 360, y: Platform::TIERS.first - Platform::H, w: 180, h: Platform::H)
     ]
   end
@@ -45,24 +46,24 @@ class WelcomeLevel < Level
   # it to learn the re-auth. Then, after the heal, send a second one in from the
   # left edge, marching right, for the player to defeat with a stomp.
   def update(args)
-    if args.state.player.reached_platform && args.state.enemies.empty? && !@combat_spawned
+    if args.state.player.reached_platform && @enemies.empty? && !@combat_spawned
       enemy = PasswordEnemy.new(x: args.state.camera_x + SCREEN_W)
       enemy.march_left(ENEMY_SPEED)
-      args.state.enemies = [ enemy ]
+      @enemies = [ enemy ]
     elsif @healed && !@combat_spawned
       enemy = PasswordEnemy.new(x: args.state.camera_x - Enemy::WIDTH)
       enemy.march_right(ENEMY_SPEED, max: world_w)
-      args.state.enemies = [ enemy ]
+      @enemies = [ enemy ]
       @combat_spawned = true
     end
 
     # Combat enemy dead and the player is free (a body bump kills it but locks the
     # player for a re-auth — wait until that clears, not mid-challenge): drop the
     # completion certificate a short walk ahead, once. Grabbing it finishes the lesson.
-    if @combat_spawned && args.state.enemies.none?(&:alive) &&
+    if @combat_spawned && @enemies.none?(&:alive) &&
        !args.state.player.locked && !args.state.player.game_over && !@certificate_dropped
       x = (args.state.player.x + 180).clamp(0, world_w - Certificate::SIZE)
-      args.state.collectables << Certificate.new(x: x)
+      @collectables << Certificate.new(x: x)
       @certificate_dropped = true
     end
 
@@ -79,7 +80,7 @@ class WelcomeLevel < Level
   # heart the enemy cost and triggers the stomp-combat beat (see #update).
   def on_unlock(args)
     x = (args.state.player.x + 220).clamp(0, world_w - HeartPickup::SIZE)
-    args.state.collectables << HeartPickup.new(x: x, y: GROUND_Y + HeartPickup::LIFT)
+    @collectables << HeartPickup.new(x: x, y: GROUND_Y + HeartPickup::LIFT)
   end
 
   def on_collect(_args) = @healed = true
@@ -124,7 +125,7 @@ class WelcomeLevel < Level
       [ player.moved,                                  [ "Press Space to jump onto the ledge" ] ],
       [ player.reached_platform,                       [ "Run into the enemy",
                                                          "to learn the re-auth →" ] ],
-      [ (args.state.collectables || []).any?(&:alive), [ "Grab the heart to heal" ] ],
+      [ @collectables.any?(&:alive),                   [ "Grab the heart to heal" ] ],
       [ @healed,                                       [ "Fight back — jump on its head",
                                                          "to stomp it",
                                                          "← Defeat the enemy on the left" ] ],

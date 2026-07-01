@@ -23,23 +23,23 @@ class WelcomeLevelTest < Minitest::Test
 
   def test_setup_seeds_a_reachable_ledge_and_no_enemy_yet
     @level.setup(@args)
-    assert_empty @args.state.enemies
+    assert_empty @level.enemies
 
-    assert_equal 1, @args.state.platforms.length
-    platform = @args.state.platforms.first
+    assert_equal 1, @level.platforms.length
+    platform = @level.platforms.first
     assert_includes Platform::TIERS, platform.y + platform.h
   end
 
   def test_setup_leaves_the_ground_flat_with_no_pits
     @level.setup(@args)
-    assert_empty @args.state.holes
+    assert_empty @level.holes
   end
 
   def test_update_holds_the_enemy_until_the_player_reaches_the_platform
     @level.setup(@args)
     @args.state.player.reached_platform = false
     @level.update(@args)
-    assert_empty @args.state.enemies
+    assert_empty @level.enemies
   end
 
   def test_update_sends_in_a_leftbound_password_enemy_from_the_right_edge
@@ -48,8 +48,8 @@ class WelcomeLevelTest < Minitest::Test
     @args.state.camera_x = 0
     @level.update(@args)
 
-    assert_equal 1, @args.state.enemies.length
-    enemy = @args.state.enemies.first
+    assert_equal 1, @level.enemies.length
+    enemy = @level.enemies.first
     assert_equal :password, enemy.auth
     assert_equal SCREEN_W, enemy.x          # enters at the right edge of the view
     assert_operator enemy.vx, :<, 0          # marching left
@@ -60,9 +60,9 @@ class WelcomeLevelTest < Minitest::Test
     @level.setup(@args)
     @args.state.player.reached_platform = true
     @level.update(@args)
-    @args.state.enemies.first.alive = false  # player defeated/passed it
+    @level.enemies.first.alive = false  # player defeated/passed it
     @level.update(@args)
-    assert_equal 1, @args.state.enemies.length
+    assert_equal 1, @level.enemies.length
   end
 
   def test_on_collect_heals_but_does_not_complete
@@ -76,8 +76,8 @@ class WelcomeLevelTest < Minitest::Test
     @level.on_collect(@args)
     @level.update(@args)
 
-    assert_equal 1, @args.state.enemies.length
-    enemy = @args.state.enemies.first
+    assert_equal 1, @level.enemies.length
+    enemy = @level.enemies.first
     assert_equal :password, enemy.auth
     assert_equal(-Enemy::WIDTH, enemy.x)     # enters just off the left edge
     assert_operator enemy.vx, :>, 0          # marching right
@@ -89,10 +89,10 @@ class WelcomeLevelTest < Minitest::Test
     @level.setup(@args)
     @level.on_collect(@args)
     @level.update(@args)                     # spawns the combat enemy
-    @args.state.enemies.first.alive = false  # player stomped it
+    @level.enemies.first.alive = false  # player stomped it
     @level.update(@args)
 
-    certs = @args.state.collectables.select { |c| c.is_a?(Certificate) }
+    certs = @level.collectables.select { |c| c.is_a?(Certificate) }
     assert_equal 1, certs.length, "a certificate drops once the enemy is down"
     refute @level.complete?, "but the welcome level isn't done until it's picked up"
   end
@@ -101,10 +101,10 @@ class WelcomeLevelTest < Minitest::Test
     @level.setup(@args)
     @level.on_collect(@args)
     @level.update(@args)
-    @args.state.enemies.first.alive = false
+    @level.enemies.first.alive = false
     @level.update(@args)                     # drops the certificate
 
-    @args.state.collectables.find { |c| c.is_a?(Certificate) }.alive = false
+    @level.collectables.find { |c| c.is_a?(Certificate) }.alive = false
     @level.update(@args)
 
     assert @level.complete?
@@ -114,7 +114,7 @@ class WelcomeLevelTest < Minitest::Test
     @level.setup(@args)
     @level.on_collect(@args)
     @level.update(@args)
-    @args.state.enemies.first.alive = false
+    @level.enemies.first.alive = false
     @args.state.player.locked = true         # bumped it — re-auth in progress
     @level.update(@args)
 
