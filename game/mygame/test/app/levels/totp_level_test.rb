@@ -25,8 +25,8 @@ class TotpLevelTest < Minitest::Test
     assert_equal 300, @level.time_limit
   end
 
-  def test_hands_off_to_the_open_world
-    assert_instance_of MainLevel, @level.next_level
+  def test_loops_back_to_itself_as_the_final_level
+    assert_instance_of TotpLevel, @level.next_level
   end
 
   def test_setup_lays_ten_keypad_platforms_with_a_pad_on_each

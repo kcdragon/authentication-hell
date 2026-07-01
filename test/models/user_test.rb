@@ -235,15 +235,15 @@ class UserTest < ActiveSupport::TestCase
 
   test "record_level_completed never moves backward and returns false" do
     user = users(:one)
-    user.update!(highest_level_completed: 3)
+    user.update!(highest_level_completed: 2)
 
     assert_not user.record_level_completed(1)
-    assert_equal 3, user.reload.highest_level_completed
+    assert_equal 2, user.reload.highest_level_completed
   end
 
   test "reset_progress! clears levels and earned achievements" do
     user = users(:one)
-    user.update!(highest_level_completed: 3, now_playing_level: 2)
+    user.update!(highest_level_completed: 2, now_playing_level: 1)
     user.grant_achievement(:password_survivor)
 
     user.reset_progress!
