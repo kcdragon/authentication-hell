@@ -125,6 +125,17 @@ class Player
     @blink_until_tick = args.state.tick_count + BLINK_TICKS
   end
 
+  # A side/ground hit from an auth enemy: dock a heart, then (unless that was the
+  # last one) freeze for the re-auth and start the damage blink. On a fatal hit the
+  # player just drops to zero hearts — Main watches for that and ends the run.
+  def take_hit(args, auth)
+    @hearts -= 1
+    return if @hearts <= 0
+    @locked = true
+    @pending_challenge = auth
+    hurt(args)
+  end
+
   # A buffering enemy lagged the player: crawl their move speed for SLOW_TICKS frames.
   def slow(args)
     @slow_until_tick = args.state.tick_count + SLOW_TICKS

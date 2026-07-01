@@ -4,6 +4,7 @@ module Main
   def tick(args)
     Network.base_url(args)
     args.state.player ||= Player.new
+    args.state.collision_manager ||= CollisionManager.new
     # Seed a level before the loading scene draws the transport (which reads its time
     # limit); /game/start swaps in the real starting level once it resolves.
     args.state.level ||= Level.build(args.state.start_level || 0)
@@ -94,43 +95,23 @@ module Main
     # locked mid re-auth — only the player freezes — and stops only on game-over.
     args.state.level.enemies.each { |enemy| enemy.update if enemy.alive } unless args.state.player.game_over
 
-    # Fire once on contact (the transition, not every overlapping frame). Coming
-    # down on top of an enemy stomps it — defeated outright, no heart loss, and
-    # the player bounces up (gated on melee?, so the welcome level's re-auth lesson
-    # still forces the challenge). Otherwise it's a side/ground hit:
-    # dock a heart, retire the enemy, then either game-over (last heart) or kick
-    # off that enemy's auth flow and freeze the player.
-    stomped = false
-    args.state.level.enemies.each do |enemy|
-      next unless enemy.alive
+    # The CollisionManager detects player↔enemy contact and lets each enemy decide how
+    # to behave (stomp/slow/hurt — see Enemy#on_collision), which mutates only entity
+    # state. The un-testable network/game-over side effects stay here, fired by watching
+    # what that left on the player: a fatal hit (no hearts) ends the run; a survivable
+    # one locks the player, so POST the re-auth once (guarded so it can't refire while
+    # the request is in flight or already confirmed).
+    unless args.state.player.game_over
+      args.state.collision_manager.resolve(args)
 
-      colliding = args.geometry.intersect_rect?(enemy.hitbox, args.state.player)
-      if colliding && !enemy.colliding
-        if args.state.level.melee? && args.state.player.stomping?(enemy)
-          enemy.alive = false
-          stomped = true
-          args.state.level.record_kill
-        elsif enemy.slows?
-          enemy.alive = false
-          args.state.player.slow(args)
-        elsif !args.state.player.invincible?(args)
-          args.state.player.hearts -= 1
-          enemy.alive = false
-          if args.state.player.hearts <= 0
-            # Losing the last heart ends the run; skip the re-auth (nothing to unlock).
-            end_run(args)
-          else
-            report_collision(args, enemy.auth)
-            args.state.player.locked = true
-            args.state.player.pending_challenge = enemy.auth
-            args.state.player.hurt(args)
-          end
-        end
+      player = args.state.player
+      if player.hearts <= 0
+        end_run(args)
+      elsif player.locked && player.pending_challenge &&
+            !player.lock_confirmed && args.state.collision_request.nil?
+        report_collision(args, player.pending_challenge)
       end
-      enemy.colliding = colliding
-    end unless args.state.player.game_over
-
-    args.state.player.bounce if stomped
+    end
 
     # Walking into a collectable retires the pickup and applies its own effect (a
     # heart heals, a password character is recorded); the level then decides what

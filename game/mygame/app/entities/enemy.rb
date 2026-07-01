@@ -82,6 +82,28 @@ class Enemy
     { x: @x, y: @y, w: @w, h: @h }
   end
 
+  # The CollisionManager alerts the enemy the tick the player first touches it; the
+  # enemy decides its own fate and drives the player's reaction. Coming down on top
+  # stomps it (defeated, player bounces, no heart lost — gated on the level's melee?
+  # so the welcome lesson still forces the challenge); a buffering enemy lags the
+  # player instead; otherwise it's a side/ground hit that retires the enemy and docks
+  # the player (unless they're mid-blink invincible). The network POST + game-over
+  # stay in Main, which watches the player state this sets.
+  def on_collision(args)
+    player = args.state.player
+    if args.state.level.melee? && player.stomping?(self)
+      @alive = false
+      args.state.level.record_kill
+      player.bounce
+    elsif slows?
+      @alive = false
+      player.slow(args)
+    elsif !player.invincible?(args)
+      @alive = false
+      player.take_hit(args, @auth)
+    end
+  end
+
   def slows? = false
 
   def render(args, camera_x = 0)

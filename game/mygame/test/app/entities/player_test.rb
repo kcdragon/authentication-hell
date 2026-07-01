@@ -214,6 +214,24 @@ class PlayerTest < Minitest::Test
     refute @player.grounded
   end
 
+  # --- taking a hit ---
+
+  def test_take_hit_docks_a_heart_and_locks_for_re_auth
+    @player.take_hit(build_args(tick_count: 0), :totp)
+    assert_equal Player::MAX_HEARTS - 1, @player.hearts
+    assert @player.locked
+    assert_equal :totp, @player.pending_challenge
+    assert @player.invincible?(build_args(tick_count: 1)) # blink started
+  end
+
+  def test_fatal_hit_drops_to_zero_hearts_without_locking
+    @player.hearts = 1
+    @player.take_hit(build_args(tick_count: 0), :password)
+    assert_equal 0, @player.hearts
+    refute @player.locked, "the last heart ends the run — Main handles death, not a lock"
+    assert_nil @player.pending_challenge
+  end
+
   # --- frozen states ---
 
   def test_locked_player_ignores_movement
