@@ -125,9 +125,6 @@ class Player
     @blink_until_tick = args.state.tick_count + BLINK_TICKS
   end
 
-  # The player's own side of a contact; the enemy decides its own fate separately in
-  # Enemy#on_collision. A side/ground hit is skipped while mid-blink invincible. Only
-  # enemies collide with the player right now.
   def on_collision(other, args)
     return unless other.is_a?(Enemy)
 
@@ -140,13 +137,17 @@ class Player
     end
   end
 
+  private
+
   def take_hit(args, auth)
     @hearts -= 1
-    return if @hearts <= 0 # fatal — Main watches for zero hearts and ends the run
+    return if @hearts <= 0
     @locked = true
     @pending_challenge = auth
     hurt(args)
   end
+
+  public
 
   # A buffering enemy lagged the player: crawl their move speed for SLOW_TICKS frames.
   def slow(args)

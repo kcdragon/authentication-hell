@@ -81,10 +81,6 @@ class Enemy
     { x: @x, y: @y, w: @w, h: @h }
   end
 
-  # The enemy's own side of a contact; the player reacts separately in
-  # Player#on_collision. Runs before that reaction (Main registers enemies first) so it
-  # reads the player's pre-bounce / pre-hit state. The manager is type-blind, so ignore
-  # a non-player partner (e.g. another enemy).
   def on_collision(other, args)
     return unless other.is_a?(Player)
 
@@ -98,8 +94,6 @@ class Enemy
     end
   end
 
-  # Whether a stomp from above defeats this enemy. The tutorial's gate overrides this
-  # to force the re-auth instead (see TutorialEnemy).
   def stompable? = true
 
   def slows? = false
