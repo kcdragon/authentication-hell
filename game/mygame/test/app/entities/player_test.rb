@@ -226,6 +226,15 @@ class PlayerTest < Minitest::Test
     refute @player.stomping?(enemy)
   end
 
+  # After bouncing off one enemy this tick, a second one under the feet is still a
+  # stomp even though the bounce flipped @vy positive.
+  def test_still_stomping_after_bouncing_this_tick
+    enemy = PasswordEnemy.new(x: @player.x)
+    @player.y = enemy.y + enemy.h - 6
+    @player.bounce
+    assert @player.stomping?(enemy)
+  end
+
   def test_bounce_hops_up_and_leaves_the_ground
     @player.grounded = true
     @player.bounce

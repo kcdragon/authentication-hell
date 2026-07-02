@@ -60,11 +60,13 @@ class Player
     @reached_platform = false
     @prev_y = @y
     @pickup_count = 0
+    @stomped_this_tick = false
   end
 
   # Move left/right with the arrow keys (no wrapping — clamp to screen); space
   # jumps when grounded. Frozen while locked, until the player re-authenticates.
   def update(args)
+    @stomped_this_tick = false
     return if @locked || @game_over
 
     speed = slowed?(args.state.tick_count) ? SLOW_MOVE_SPEED : MOVE_SPEED
@@ -100,18 +102,17 @@ class Player
     end
   end
 
-  # A Mario-style stomp: the player is descending (@vy < 0) and their feet are
-  # above the enemy's vertical midpoint — i.e. they came down onto its head, not
-  # into its side. A side/ground hit (@vy >= 0, or feet low on the body) is not a
-  # stomp and still triggers the re-auth flow.
+  # A Mario-style stomp: coming down onto an enemy's head (descending, or already
+  # bounced this tick so two-at-once both stomp), not into its side or the ground.
   def stomping?(enemy)
-    @vy < 0 && @y > enemy.y + enemy.h / 2
+    (@vy < 0 || @stomped_this_tick) && @y > enemy.y + enemy.h / 2
   end
 
   # Hop up off a stomped enemy and leave the ground.
   def bounce
     @vy = STOMP_BOUNCE
     @grounded = false
+    @stomped_this_tick = true
   end
 
   def hurt(args)
