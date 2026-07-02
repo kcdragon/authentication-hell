@@ -37,8 +37,11 @@ class TemporaryTotpChallenge < ApplicationRecord
 
   def complete? = streak >= REQUIRED_STREAK
 
-  def upcoming_codes(count = REQUIRED_STREAK)
-    base = Time.now
-    Array.new(count) { |i| totp.at(base + i * INTERVAL) }
+  def next_code
+    return unless DevPrefills.enabled?
+
+    current = Time.now.to_i / INTERVAL
+    window = last_window && last_window >= current ? last_window + 1 : current
+    totp.at(Time.at(window * INTERVAL))
   end
 end

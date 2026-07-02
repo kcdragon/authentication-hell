@@ -10,7 +10,5 @@ module ApplicationHelper
     end
   end
 
-  def dev_prefills_enabled?
-    Rails.env.development? && ENV["DISABLE_DEV_PREFILLS"].blank?
-  end
+  def dev_prefills_enabled? = DevPrefills.enabled?
 end
