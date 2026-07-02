@@ -83,14 +83,35 @@ class CollisionManagerTest < Minitest::Test
     assert_empty a.alerts
   end
 
-  # One end-to-end check against real entities: a side hit docks a heart.
-  def test_drives_a_real_player_enemy_collision
+  # End-to-end against real entities: both sides react. Enemies are registered before
+  # the player (as Main does), so the enemy classifies the contact before the player's
+  # reaction mutates the state it reads.
+  def test_a_side_hit_defeats_the_enemy_and_docks_the_player
     player = Player.new
     enemy = TotpEnemy.new(x: player.x) # bodies overlap; feet on the ground → side hit
-    @manager.add(player)
     @manager.add(enemy)
+    @manager.add(player)
     @manager.resolve(build_args(player: player, tick_count: 0))
+
+    refute enemy.alive
     assert_equal Player::MAX_HEARTS - 1, player.hearts
     assert player.locked
+  end
+
+  def test_a_stomp_defeats_the_enemy_and_bounces_the_player
+    player = Player.new
+    enemy = PasswordEnemy.new(x: player.x)
+    player.y = enemy.y + enemy.h - 6 # descending onto its head
+    player.vy = -5
+    player.grounded = false
+    level = PasswordLevel.new
+    @manager.add(enemy)
+    @manager.add(player)
+    @manager.resolve(build_args(player: player, level: level))
+
+    refute enemy.alive
+    assert_equal 1, level.kills
+    assert_equal Player::STOMP_BOUNCE, player.vy
+    assert_equal Player::MAX_HEARTS, player.hearts
   end
 end

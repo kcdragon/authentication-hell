@@ -95,18 +95,20 @@ module Main
     # locked mid re-auth — only the player freezes — and stops only on game-over.
     args.state.level.enemies.each { |enemy| enemy.update if enemy.alive } unless args.state.player.game_over
 
-    # Refresh the collidables (the player + the enemies still in play) and let the
-    # CollisionManager detect contact; each enemy then decides how to behave
-    # (stomp/slow/hurt — see Enemy#on_collision), mutating only entity state. The
-    # un-testable network/game-over side effects stay here, fired by watching what that
-    # left on the player: a fatal hit (no hearts) ends the run; a survivable one locks
-    # the player, so POST the re-auth once (guarded so it can't refire while the request
-    # is in flight or already confirmed).
+    # Refresh the collidables (the enemies still in play + the player) and let the
+    # CollisionManager detect contact; on a hit each side decides its own reaction
+    # (Enemy#on_collision / Player#on_collision). Enemies are registered before the
+    # player so an enemy classifies the contact (was it a stomp? was the player
+    # hittable?) before the player's reaction — a bounce or a heart loss — mutates the
+    # state it reads. The un-testable network/game-over side effects stay here, fired by
+    # watching what the collision left on the player: a fatal hit (no hearts) ends the
+    # run; a survivable one locks the player, so POST the re-auth once (guarded so it
+    # can't refire while the request is in flight or already confirmed).
     unless args.state.player.game_over
       cm = args.state.collision_manager
       cm.reset
-      cm.add(args.state.player)
       args.state.level.enemies.each { |enemy| cm.add(enemy) if enemy.alive }
+      cm.add(args.state.player)
       cm.resolve(args)
 
       player = args.state.player

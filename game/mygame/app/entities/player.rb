@@ -125,18 +125,24 @@ class Player
     @blink_until_tick = args.state.tick_count + BLINK_TICKS
   end
 
-  # The CollisionManager alerts the player of every overlap, but the player↔enemy
-  # interaction is owned by the enemy (see Enemy#on_collision), which drives the
-  # player through #take_hit / #bounce / #slow. This hook is where the player will
-  # handle collidables it owns itself (e.g. one-way platforms) in a later cut.
-  def on_collision(other, args) = nil
+  # The player's own side of a contact; the enemy decides its own fate separately in
+  # Enemy#on_collision. A side/ground hit is skipped while mid-blink invincible. Only
+  # enemies collide with the player right now.
+  def on_collision(other, args)
+    return unless other.is_a?(Enemy)
 
-  # A side/ground hit from an auth enemy: dock a heart, then (unless that was the
-  # last one) freeze for the re-auth and start the damage blink. On a fatal hit the
-  # player just drops to zero hearts — Main watches for that and ends the run.
+    if other.stompable? && stomping?(other)
+      bounce
+    elsif other.slows?
+      slow(args)
+    elsif !invincible?(args)
+      take_hit(args, other.auth)
+    end
+  end
+
   def take_hit(args, auth)
     @hearts -= 1
-    return if @hearts <= 0
+    return if @hearts <= 0 # fatal — Main watches for zero hearts and ends the run
     @locked = true
     @pending_challenge = auth
     hurt(args)

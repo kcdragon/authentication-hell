@@ -232,6 +232,64 @@ class PlayerTest < Minitest::Test
     assert_nil @player.pending_challenge
   end
 
+  # --- reacting to a collision (Player#on_collision) ---
+
+  def test_bounces_off_a_stomped_enemy
+    enemy = PasswordEnemy.new(x: @player.x)
+    @player.y = enemy.y + enemy.h - 6 # feet on its head, descending
+    @player.vy = -5
+    @player.grounded = false
+    @player.on_collision(enemy, build_args)
+
+    assert_equal Player::STOMP_BOUNCE, @player.vy
+    refute @player.grounded
+    assert_equal Player::MAX_HEARTS, @player.hearts, "a stomp costs no heart"
+  end
+
+  def test_takes_a_hit_from_a_side_contact
+    enemy = TotpEnemy.new(x: @player.x) # feet on the ground, not descending
+    @player.on_collision(enemy, build_args(tick_count: 0))
+
+    assert_equal Player::MAX_HEARTS - 1, @player.hearts
+    assert @player.locked
+    assert_equal :totp, @player.pending_challenge
+  end
+
+  def test_slows_from_a_buffering_enemy
+    enemy = BufferingEnemy.new(x: @player.x)
+    @player.on_collision(enemy, build_args(tick_count: 0))
+
+    assert @player.slowed?(1)
+    assert_equal Player::MAX_HEARTS, @player.hearts
+    refute @player.locked
+  end
+
+  def test_a_stomp_on_an_unstompable_enemy_re_auths_instead_of_bouncing
+    enemy = TutorialEnemy.new(x: @player.x)
+    @player.y = enemy.y + enemy.h - 6 # would be a stomp on a normal enemy
+    @player.vy = -5
+    @player.grounded = false
+    @player.on_collision(enemy, build_args(tick_count: 0))
+
+    assert_equal Player::MAX_HEARTS - 1, @player.hearts, "no bounce — the gate forces the hit"
+    assert @player.locked
+    refute_equal Player::STOMP_BOUNCE, @player.vy
+  end
+
+  def test_ignores_a_collision_while_invincible
+    @player.hurt(build_args(tick_count: 0)) # blink window open
+    enemy = TotpEnemy.new(x: @player.x)
+    @player.on_collision(enemy, build_args(tick_count: 1))
+
+    assert_equal Player::MAX_HEARTS, @player.hearts
+    refute @player.locked
+  end
+
+  def test_ignores_a_non_enemy_partner
+    @player.on_collision(Player.new, build_args)
+    assert_equal Player::MAX_HEARTS, @player.hearts
+  end
+
   # --- frozen states ---
 
   def test_locked_player_ignores_movement

@@ -1,9 +1,9 @@
 require_relative "../../test_helper"
 
-# Exercises Enemy#on_collision — the behavior the CollisionManager fires on contact.
-# The player is placed at the enemy's x so their bodies overlap; the vertical setup
-# (descending onto the head vs. feet on the ground) picks the outcome. The player is
-# passed as the collision partner (the manager, not args.state, supplies it).
+# Exercises Enemy#on_collision — the enemy's own side of a contact (its fate + the
+# kill count). The player's reaction lives in Player#on_collision (player_test.rb);
+# here we only assert what the enemy decides about itself. The player is placed at the
+# enemy's x so their bodies overlap; the vertical setup picks the outcome.
 class EnemyTest < Minitest::Test
   include GameTest
 
@@ -18,7 +18,11 @@ class EnemyTest < Minitest::Test
     @player.grounded = false
   end
 
-  def test_stomp_defeats_the_enemy_and_bounces_the_player
+  def test_is_stompable_by_default
+    assert TotpEnemy.new(x: 0).stompable?
+  end
+
+  def test_a_stomp_defeats_it_and_records_a_kill
     enemy = PasswordEnemy.new(x: @player.x)
     stomp_the(enemy)
     level = PasswordLevel.new
@@ -26,38 +30,31 @@ class EnemyTest < Minitest::Test
 
     refute enemy.alive
     assert_equal 1, level.kills
-    assert_equal Player::STOMP_BOUNCE, @player.vy
-    refute @player.grounded
-    assert_equal Player::MAX_HEARTS, @player.hearts, "a stomp costs no heart"
   end
 
-  def test_buffering_enemy_slows_the_player_instead_of_docking_a_heart
-    enemy = BufferingEnemy.new(x: @player.x) # side hit: feet on the ground
+  def test_a_buffering_enemy_is_spent_on_a_side_hit
+    enemy = BufferingEnemy.new(x: @player.x) # feet on the ground
     enemy.on_collision(@player, build_args(tick_count: 0))
-
     refute enemy.alive
-    assert @player.slowed?(1)
-    assert_equal Player::MAX_HEARTS, @player.hearts
-    refute @player.locked, "buffering never re-auths"
   end
 
-  def test_side_hit_docks_a_heart_and_locks_for_re_auth
-    enemy = TotpEnemy.new(x: @player.x) # side hit: feet on the ground, not descending
+  def test_a_side_hit_defeats_it
+    enemy = TotpEnemy.new(x: @player.x) # feet on the ground, not descending
     enemy.on_collision(@player, build_args(tick_count: 0))
-
     refute enemy.alive
-    assert_equal Player::MAX_HEARTS - 1, @player.hearts
-    assert @player.locked
-    assert_equal :totp, @player.pending_challenge
   end
 
-  def test_invincible_player_passes_through_unharmed
-    @player.hurt(build_args(tick_count: 0)) # start the blink window
+  def test_survives_a_hit_while_the_player_is_invincible
+    @player.hurt(build_args(tick_count: 0)) # blink window open
     enemy = TotpEnemy.new(x: @player.x)
     enemy.on_collision(@player, build_args(tick_count: 1))
+    assert enemy.alive
+  end
 
-    assert enemy.alive, "the enemy survives a hit that lands during invincibility"
-    assert_equal Player::MAX_HEARTS, @player.hearts
+  def test_leaves_the_player_alone
+    enemy = TotpEnemy.new(x: @player.x)
+    enemy.on_collision(@player, build_args(tick_count: 0))
+    assert_equal Player::MAX_HEARTS, @player.hearts, "the player's reaction is its own concern"
     refute @player.locked
   end
 
@@ -65,7 +62,6 @@ class EnemyTest < Minitest::Test
     enemy = TotpEnemy.new(x: @player.x)
     other = TotpEnemy.new(x: @player.x) # two enemies overlapping
     enemy.on_collision(other, build_args(tick_count: 0))
-
     assert enemy.alive, "enemies don't collide with each other"
     assert other.alive
   end

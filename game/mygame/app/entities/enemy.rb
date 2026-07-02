@@ -81,30 +81,26 @@ class Enemy
     { x: @x, y: @y, w: @w, h: @h }
   end
 
-  # The CollisionManager alerts the enemy the tick something first touches it; the
-  # enemy owns this interaction (the aggressor) and drives the player's reaction
-  # through the player's own methods. Coming down on top stomps it (defeated, player
-  # bounces, no heart lost); a buffering enemy lags the player instead; otherwise it's
-  # a side/ground hit that retires the enemy and docks the player (unless they're
-  # mid-blink invincible). The network POST + game-over stay in Main, which watches
-  # the player state this sets. Only the player interacts with an enemy — the manager
-  # is type-blind, so ignore anything else it pairs us with (e.g. another enemy).
-  # Subclasses that must force the challenge (the tutorial's gate) override this.
+  # The enemy's own side of a contact; the player reacts separately in
+  # Player#on_collision. Runs before that reaction (Main registers enemies first) so it
+  # reads the player's pre-bounce / pre-hit state. The manager is type-blind, so ignore
+  # a non-player partner (e.g. another enemy).
   def on_collision(other, args)
     return unless other.is_a?(Player)
 
-    if other.stomping?(self)
+    if stompable? && other.stomping?(self)
       @alive = false
       args.state.level.record_kill
-      other.bounce
     elsif slows?
       @alive = false
-      other.slow(args)
     elsif !other.invincible?(args)
       @alive = false
-      other.take_hit(args, @auth)
     end
   end
+
+  # Whether a stomp from above defeats this enemy. The tutorial's gate overrides this
+  # to force the re-auth instead (see TutorialEnemy).
+  def stompable? = true
 
   def slows? = false
 
