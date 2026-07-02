@@ -1,6 +1,7 @@
 <%# locals: (user:, challenge:, error: nil) %>
 
-<%= tag.div id: level_totp_challenge_toast_id(user), class: "game-challenge-toast w-[346px] max-w-[90vw] border-[3px] border-ink rounded-[3px] bg-card shadow-brut-lg overflow-hidden pointer-events-auto" do %>
+<% toast_animation = challenge&.registered? ? "game-challenge-toast-linked" : "game-challenge-toast" %>
+<%= tag.div id: level_totp_challenge_toast_id(user), class: "#{toast_animation} w-[346px] max-w-[90vw] border-[3px] border-ink rounded-[3px] bg-card shadow-brut-lg overflow-hidden pointer-events-auto" do %>
   <div class="flex items-center justify-between border-b-[3px] border-ink px-4 py-2.5 bg-totp text-white font-display text-[13px] uppercase tracking-tight">
     <span>Temporary 2FA</span>
     <span class="ah-badge bg-card text-ink text-[10px] py-1 shadow-none">TOTP</span>
