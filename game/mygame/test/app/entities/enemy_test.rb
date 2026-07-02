@@ -22,14 +22,12 @@ class EnemyTest < Minitest::Test
     assert TotpEnemy.new(x: 0).stompable?
   end
 
-  def test_a_stomp_defeats_it_and_records_a_kill
+  def test_a_stomp_defeats_it
     enemy = PasswordEnemy.new(x: @player.x)
     stomp_the(enemy)
-    args = build_args(kills: 0)
-    enemy.on_collision(@player, args)
+    enemy.on_collision(@player, build_args)
 
     refute enemy.alive
-    assert_equal 1, args.state.kills
   end
 
   def test_a_buffering_enemy_is_spent_on_a_side_hit

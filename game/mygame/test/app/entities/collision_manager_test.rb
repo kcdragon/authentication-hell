@@ -110,7 +110,6 @@ class CollisionManagerTest < Minitest::Test
     @manager.resolve(args)
 
     refute enemy.alive
-    assert_equal 1, args.state.kills
     assert_equal Player::STOMP_BOUNCE, player.vy
     assert_equal Player::MAX_HEARTS, player.hearts
   end

@@ -100,7 +100,7 @@ class Level
   end
 
   # Stamp the tick the level's clock starts: the intro card runs from here and the
-  # countdown/scoring both measure elapsed from here. Main sets it on level entry.
+  # countdown measures elapsed from here. Main sets it on level entry.
   def begin_clock(tick)
     @started_at = tick
     @intro_at = tick
@@ -112,9 +112,6 @@ class Level
     return 0.0 unless @started_at
     ((tick - @started_at) / (time_limit * 60).to_f).clamp(0.0, 1.0)
   end
-
-  # Ticks the player has spent in the level, for the results card's finish time.
-  def run_ticks(tick) = tick - @started_at
 
   # Whether the level-intro "chapter card" is still playing (world frozen behind it).
   def intro_active?(tick) = !@intro_at.nil? && (tick - @intro_at) < LEVEL_INTRO_TICKS
