@@ -64,17 +64,41 @@ class TemporaryTotpChallengeTest < ActiveSupport::TestCase
     assert_equal :incorrect, @challenge.submit!(@challenge.totp.now)
   end
 
-  test "upcoming_codes lists the current code then the next two windows" do
-    base = window_boundary
-    codes = travel_to(Time.at(base)) { @challenge.upcoming_codes }
+  test "next_code is the current window's code before any is entered" do
+    in_development do
+      travel_to Time.at(window_boundary) do
+        assert_equal @challenge.totp.now, @challenge.next_code
+      end
+    end
+  end
 
-    assert_equal 3, codes.length
-    travel_to(Time.at(base))      { assert_equal codes[0], @challenge.totp.now }
-    travel_to(Time.at(base + 30)) { assert_equal codes[1], @challenge.totp.now }
-    travel_to(Time.at(base + 60)) { assert_equal codes[2], @challenge.totp.now }
+  test "next_code jumps to the next window right after the current one is accepted" do
+    @challenge.update!(registered: true)
+    base = window_boundary
+
+    in_development do
+      travel_to Time.at(base) do
+        @challenge.submit!(@challenge.totp.now)
+        assert_equal @challenge.totp.at(Time.at(base + 30)), @challenge.next_code
+      end
+    end
+  end
+
+  test "next_code is nil unless dev prefills are enabled" do
+    travel_to Time.at(window_boundary) do
+      assert_nil @challenge.next_code
+    end
   end
 
   private
+
+  def in_development
+    original = Rails.env
+    Rails.env = "development"
+    yield
+  ensure
+    Rails.env = original
+  end
 
   # A unix time aligned to a 30s TOTP window so successive +30s steps land in
   # consecutive windows.

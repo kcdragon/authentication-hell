@@ -56,7 +56,7 @@ class TotpLevel < Level
     build_keypad
     @totp = { active: true, started: false, registered: false,
               streak: 0, entered: [], pending_code: nil,
-              submitting: false, complete: false, codes: nil }
+              submitting: false, complete: false }
     @wave_count = 0
     @last_wave_at = nil
   end
@@ -90,7 +90,6 @@ class TotpLevel < Level
     lt = @totp
     CODE_LENGTH.times { |slot| draw_digit_slot(args, slot, lt[:entered][slot]) }
     REQUIRED_STREAK.times { |i| draw_streak_pip(args, i, i < lt[:streak].to_i) }
-    draw_dev_codes(args, lt[:codes]) if lt[:codes]
   end
 
   private
@@ -200,18 +199,5 @@ class TotpLevel < Level
     face = filled ? GREEN : PAPER
     args.outputs.solids << { x: x + 2, y: y + 2, w: PIP - 4, h: PIP - 4,
                              r: face[0], g: face[1], b: face[2] }
-  end
-
-  # Dev-only: the server hands the upcoming codes over the status poll so a tester
-  # without an authenticator can read them; the first is the one to enter now.
-  def draw_dev_codes(args, codes)
-    y = SLOT_Y - 52
-    args.outputs.labels << { x: SLOT_X, y: y, text: "DEV — enter in order:", size_px: 13,
-                             font: FONT_MONO_B, r: INK[0], g: INK[1], b: INK[2] }
-    codes.each_with_index do |code, i|
-      tone = i.zero? ? GREEN : PURPLE
-      args.outputs.labels << { x: SLOT_X + i * 92, y: y - 18, text: code, size_px: 18,
-                               font: FONT_MONO_B, r: tone[0], g: tone[1], b: tone[2] }
-    end
   end
 end

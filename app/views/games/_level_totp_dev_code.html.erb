@@ -1,0 +1,9 @@
+<%# locals: (user:, code:) %>
+
+<%= tag.div id: level_totp_dev_code_toast_id(user), class: "game-challenge-toast w-max max-w-[90vw] border-[3px] border-ink rounded-[3px] bg-card shadow-brut-lg overflow-hidden pointer-events-none" do %>
+  <div class="flex items-center gap-2 px-3.5 py-2.5">
+    <span class="ah-badge bg-totp text-white text-[10px] py-1 shadow-none">DEV</span>
+    <span class="ah-hint text-[11px]">Enter this code:</span>
+    <code class="font-mono font-bold text-lg tracking-widest text-totp"><%= code %></code>
+  </div>
+<% end %>

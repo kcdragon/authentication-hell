@@ -101,34 +101,52 @@ class Games::LevelTotpChallengeControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "status omits dev codes outside development" do
-    register_fresh_challenge
+  test "the status payload never carries codes" do
+    sign_in_as(@user)
     get games_level_totp_status_url
-    assert_nil response.parsed_body["codes"]
+    assert_not response.parsed_body.key?("codes")
   end
 
-  test "status reveals the upcoming codes when dev prefills are enabled" do
-    secret = register_fresh_challenge
+  test "linking broadcasts a dev-code toast with the current code when dev prefills are enabled" do
+    secret = start_and_read_secret
     original_env = Rails.env
     Rails.env = "development"
     travel_to(Time.at(1_700_000_000)) do
-      get games_level_totp_status_url
-      assert_equal 3, response.parsed_body["codes"].length
-      assert_equal ROTP::TOTP.new(secret).now, response.parsed_body["codes"].first
+      streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+        post games_level_totp_register_url, params: { code: ROTP::TOTP.new(secret).now }, as: :turbo_stream
+      end
+      append = streams.find { |s| s["action"] == "append" }
+      assert_includes append.to_html, ROTP::TOTP.new(secret).now
+      assert_includes append.to_html, level_totp_dev_code_toast_id(@user)
     end
   ensure
     Rails.env = original_env
   end
 
-  private
-
-  def register_fresh_challenge
+  test "an accepted submit refreshes the dev-code toast and completing removes it" do
     secret = start_and_read_secret
-    travel_to(Time.at(1_700_000_000)) do
-      post games_level_totp_register_url, params: { code: ROTP::TOTP.new(secret).now }, as: :turbo_stream
+    totp = ROTP::TOTP.new(secret)
+    base = 1_700_000_000 - (1_700_000_000 % 30)
+    original_env = Rails.env
+    Rails.env = "development"
+
+    travel_to(Time.at(base)) do
+      post games_level_totp_register_url, params: { code: totp.now }, as: :turbo_stream
+      streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) { submit(totp.now) }
+      assert(streams.any? { |s| s["action"] == "replace" && s["target"] == level_totp_dev_code_toast_id(@user) })
     end
-    secret
+    travel_to(Time.at(base + 30)) { submit(totp.now) }
+
+    streams = nil
+    travel_to(Time.at(base + 60)) do
+      streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) { submit(totp.now) }
+    end
+    assert(streams.any? { |s| s["action"] == "remove" && s["target"] == level_totp_dev_code_toast_id(@user) })
+  ensure
+    Rails.env = original_env
   end
+
+  private
 
   def start_and_read_secret
     sign_in_as(@user)

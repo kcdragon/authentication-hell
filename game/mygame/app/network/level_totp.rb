@@ -52,6 +52,5 @@ class Network::LevelTotp
     lt[:registered] = data["registered"] if data.key?("registered")
     lt[:streak] = data["streak"] if data.key?("streak")
     lt[:complete] = data["complete"] if data.key?("complete")
-    lt[:codes] = data["codes"] if data.key?("codes")
   end
 end
