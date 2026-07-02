@@ -15,9 +15,11 @@
     <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
     <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
@@ -27,8 +29,8 @@
   <body>
     <header class="border-b-[3px] border-ink bg-paper">
       <div class="container mx-auto px-5 py-4 flex items-center justify-between gap-4">
-        <%= link_to root_path, class: "font-display text-xl uppercase tracking-tight" do %>
-          AUTH<span class="text-error">HELL</span>
+        <%= link_to root_path, class: "shrink-0", aria: { label: "Authentication Hell — home" } do %>
+          <%= render "shared/logo", layout: :horizontal %>
         <% end %>
         <% if authenticated? %>
           <%= render "shared/navigation" %>

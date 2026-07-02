@@ -6,7 +6,11 @@
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/favicon.ico" sizes="32x32">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32">
+    <link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
 
     <%# No app-wide importmap: the game canvas lives in an <iframe> (its loader
@@ -20,8 +24,8 @@
   <body>
     <header class="border-b-[3px] border-ink bg-paper">
       <div class="container mx-auto px-5 py-4 flex items-center justify-between gap-4">
-        <%= link_to root_path, data: { turbo: false }, class: "font-display text-xl uppercase tracking-tight" do %>
-          AUTH<span class="text-error">HELL</span>
+        <%= link_to root_path, data: { turbo: false }, class: "shrink-0", aria: { label: "Authentication Hell — home" } do %>
+          <%= render "shared/logo", layout: :horizontal %>
         <% end %>
         <%= render "shared/navigation", turbo: false %>
       </div>

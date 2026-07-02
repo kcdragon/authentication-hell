@@ -12,11 +12,9 @@
     <div class="grid lg:grid-cols-2">
       <div class="p-8 md:p-10 border-b-[3px] lg:border-b-0 lg:border-r-[3px] border-ink"
            style="background-image:radial-gradient(circle at 1px 1px,#1111110f 1px,transparent 0);background-size:22px 22px">
-        <span class="ah-badge ah-badge--totp text-white">
-          <span class="size-2 rounded-full bg-ink animate-pulse"></span> New-hire onboarding · Required training
-        </span>
+        <%= render "shared/logo_mark", size: "3.5rem", tone: :default, shadow: true, label: "Authentication Hell" %>
 
-        <h1 class="font-display text-4xl md:text-5xl leading-[.95] uppercase tracking-tight mt-5">
+        <h1 class="font-display text-4xl md:text-5xl leading-[.95] uppercase tracking-tight mt-6">
           Authentication<br>
           <span class="text-paper [-webkit-text-stroke:3px_#111]">Hell</span>
         </h1>

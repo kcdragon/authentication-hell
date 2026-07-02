@@ -1,0 +1,23 @@
+<%# locals: (layout: :horizontal, tone: :default, mark_size: nil, text_class: nil, shadow: true) %>
+
+<%# AUTHHELL lockup: the mark + wordmark. layout ∈ horizontal|primary|stacked|icon.
+    Callers wanting a link wrap this in link_to (as the layouts do). %>
+<%
+  mark_default, text_default, wrap =
+    case layout
+    when :primary then [ "4rem",    "text-4xl", "inline-flex flex-col items-center gap-4" ]
+    when :stacked then [ "2.5rem",  "text-2xl", "inline-flex flex-col items-center gap-2" ]
+    when :icon    then [ "2rem",    nil,        "inline-flex" ]
+    else               [ "1.75rem", "text-xl",  "inline-flex items-center gap-2.5" ]
+    end
+  ms  = mark_size || mark_default
+  tc  = text_class || text_default
+  auth_color = tone == :reversed ? "text-paper" : "text-ink"
+%>
+<span class="<%= wrap %>">
+  <%= render "shared/logo_mark", size: ms, tone: tone, digits: true, shadow: shadow,
+        label: layout == :icon ? "AUTHHELL" : "" %>
+  <% if layout != :icon %>
+    <span class="font-display uppercase leading-none <%= tc %> <%= auth_color %>" style="letter-spacing:-0.03em">AUTH<span class="text-error">HELL</span></span>
+  <% end %>
+</span>

@@ -1,0 +1,125 @@
+#!/usr/bin/env ruby
+require "fileutils"
+require "tmpdir"
+
+# Regenerates the AUTHHELL "The Code" favicons from the brand mark (a 2×2 grid of
+# OTP cells: 6 6 6 / red 0). Re-runnable; commit its outputs under public/.
+#
+# The digit glyphs are pre-outlined vector paths (from game/mygame/fonts/
+# archivo-black-400.ttf via fontTools SVGPathPen) so the generated assets carry no
+# font dependency. To re-extract after a font change, dump the "zero"/"six" glyphs
+# with SVGPathPen (unitsPerEm 1000) and replace the constants below.
+#
+# Needs rsvg-convert (librsvg) + magick (ImageMagick) on PATH.
+
+APP_ROOT = File.expand_path("..", __dir__)
+PUBLIC   = File.join(APP_ROOT, "public")
+TMP      = File.join(Dir.tmpdir, "authhell-favicons")
+
+def system!(*args) = system(*args, exception: true)
+
+INK   = "#111111"
+PAPER = "#f5f2e9"
+WHITE = "#ffffff"
+RED   = "#e5342a"
+
+# Mark geometry in a 0 0 100 100 viewBox (README ratios, 117 → 100).
+B = 2.5    # border inset
+C = 44.5   # cell edge
+G = 6.0    # gutter
+RX = 12.0  # container corner radius
+
+# Archivo Black glyph outlines (unitsPerEm 1000, advance 667, y-up).
+SIX  = "M614 468H436V475Q436 514 412.0 539.5Q388 565 342 565Q295 565 268.5 532.5Q242 500 242 445V387Q271 413 311.0 426.0Q351 439 387 439Q456 439 511.5 414.5Q567 390 599.0 342.5Q631 295 631 228Q631 114 552.5 51.0Q474 -12 339 -12Q188 -12 114.5 70.5Q41 153 41 327Q41 524 113.5 612.0Q186 700 339 700Q464 700 539.0 639.5Q614 579 614 468ZM242 221Q242 174 267.0 148.5Q292 123 339 123Q387 123 412.5 147.5Q438 172 438 219Q438 266 412.5 292.5Q387 319 340 319Q293 319 267.5 293.5Q242 268 242 221Z"
+ZERO = "M626 344Q626 171 560.5 79.5Q495 -12 334 -12Q172 -12 106.5 79.5Q41 171 41 344Q41 517 106.5 608.5Q172 700 334 700Q495 700 560.5 608.5Q626 517 626 344ZM238 394V295Q238 203 260.0 163.0Q282 123 334 123Q386 123 407.0 163.0Q428 203 428 295V394Q428 486 407.0 525.5Q386 565 334 565Q282 565 260.0 525.0Q238 485 238 394Z"
+
+# Glyph → cell transform: font-size ≈ 52% of the cell edge (27px in a 52px cell);
+# 1000 upem, so scale = font-size/1000. Flip y (font is y-up) and center the ink
+# (advance 667, glyph mid-height ≈ 344) on the cell centre.
+S = (0.519 * C) / 1000.0
+
+def digit_group(col, row, path, fill)
+  cx = B + col * (C + G) + C / 2
+  cy = B + row * (C + G) + C / 2
+  t = format("translate(%.3f %.3f) scale(%.5f %.5f) translate(-333.5 -344)", cx, cy, S, -S)
+  %(<path transform="#{t}" fill="#{fill}" d="#{path}"/>)
+end
+
+# The four cells; BR is the red "0" cell.
+def cells
+  [ [ 0, 0, WHITE ], [ 1, 0, WHITE ], [ 0, 1, WHITE ], [ 1, 1, RED ] ].map do |col, row, fill|
+    x = B + col * (C + G)
+    y = B + row * (C + G)
+    format(%(<rect x="%.1f" y="%.1f" width="%.1f" height="%.1f" fill="#{fill}"/>), x, y, C, C)
+  end.join
+end
+
+def digits
+  [ digit_group(0, 0, SIX, INK), digit_group(1, 0, SIX, INK),
+    digit_group(0, 1, SIX, INK), digit_group(1, 1, ZERO, WHITE) ].join
+end
+
+# The mark on its own transparent 100×100 canvas. The container is a rounded rect;
+# cells clip to a rect inset by the frame width so the ink border stays even around
+# the corners and the cells round concentrically inside it (mirrors CSS overflow:hidden
+# on a bordered box).
+def mark_svg(with_digits: true)
+  <<~SVG
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+      <defs><clipPath id="r"><rect x="#{B}" y="#{B}" width="#{100 - 2 * B}" height="#{100 - 2 * B}" rx="#{RX - B}"/></clipPath></defs>
+      <rect width="100" height="100" rx="#{RX}" fill="#{INK}"/>
+      <g clip-path="url(#r)">#{cells}</g>
+      #{with_digits ? digits : ""}
+    </svg>
+  SVG
+end
+
+# Pad the mark onto a paper square (apple-touch / maskable safe zone).
+def padded_svg(pad_frac)
+  inner = 100 - 2 * pad_frac * 100
+  scale = inner / 100.0
+  off = pad_frac * 100
+  <<~SVG
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+      <rect width="100" height="100" fill="#{PAPER}"/>
+      <g transform="translate(#{format('%.2f', off)} #{format('%.2f', off)}) scale(#{format('%.4f', scale)})">
+        <defs><clipPath id="r"><rect x="#{B}" y="#{B}" width="#{100 - 2 * B}" height="#{100 - 2 * B}" rx="#{RX - B}"/></clipPath></defs>
+        <rect width="100" height="100" rx="#{RX}" fill="#{INK}"/>
+        <g clip-path="url(#r)">#{cells}</g>
+        #{digits}
+      </g>
+    </svg>
+  SVG
+end
+
+FileUtils.rm_rf(TMP)
+FileUtils.mkdir_p(TMP)
+
+def write(path, contents)
+  File.write(path, contents)
+  path
+end
+
+def rasterize(svg_path, out, size)
+  system! "rsvg-convert", "-w", size.to_s, "-h", size.to_s, svg_path, "-o", out
+end
+
+full    = write(File.join(TMP, "mark.svg"), mark_svg)
+nodigit = write(File.join(TMP, "mark-nodigit.svg"), mark_svg(with_digits: false))
+apple   = write(File.join(TMP, "apple.svg"), padded_svg(0.14))
+maskbl  = write(File.join(TMP, "maskable.svg"), padded_svg(0.12))
+
+puts "== Writing public/icon.svg =="
+write(File.join(PUBLIC, "icon.svg"), mark_svg)
+
+puts "== Rasterizing PNGs =="
+rasterize(nodigit, File.join(PUBLIC, "favicon-16.png"), 16)   # digits drop out below ~20px
+rasterize(full,    File.join(PUBLIC, "favicon-32.png"), 32)
+rasterize(apple,   File.join(PUBLIC, "apple-touch-icon.png"), 180)
+rasterize(maskbl,  File.join(PUBLIC, "icon.png"), 512)
+
+puts "== Assembling public/favicon.ico (16 no-digit + 32 with digits) =="
+system! "magick", File.join(PUBLIC, "favicon-16.png"), File.join(PUBLIC, "favicon-32.png"),
+        File.join(PUBLIC, "favicon.ico")
+
+puts "== Done. Favicons in public/ =="

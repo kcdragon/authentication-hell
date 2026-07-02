@@ -3,6 +3,10 @@
      data-tabs-active-value="<%= @signup_method || "password" %>"
      data-tabs-active-class="bg-password text-ink"
      data-tabs-inactive-class="bg-card text-muted hover:bg-paper">
+  <%= link_to root_path, class: "inline-block mb-5", aria: { label: "Authentication Hell — home" } do %>
+    <%= render "shared/logo", layout: :horizontal %>
+  <% end %>
+
   <h1 class="text-[28px] leading-[.95]">Create an account</h1>
 
   <div class="inline-flex border-[3px] border-ink rounded-[3px] overflow-hidden mt-4">
