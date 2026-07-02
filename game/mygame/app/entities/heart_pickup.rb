@@ -1,12 +1,13 @@
-# A collectable heart the player walks into to heal one heart. Owns its rect and
-# rendering; pickup collision and the heal itself live in Main's tick. Smaller than
-# the HUD hearts so it reads as a world item. Lives on the level's collectables.
+# A collectable heart the player walks into to heal one heart, smaller than the HUD
+# hearts so it reads as a world item.
 class HeartPickup
+  include Collectable
+
   SIZE = 28
   LIFT = 40 # px the heart floats above its base (ground or a platform top)
   BOB = 6 # px of vertical drift so it reads as a floating pickup
 
-  attr_accessor :x, :y, :w, :h, :alive
+  attr_accessor :x, :y, :w, :h
 
   def initialize(x:, y:)
     @x = x
@@ -18,12 +19,7 @@ class HeartPickup
 
   def hitbox = { x: @x, y: @y, w: @w, h: @h }
 
-  # Walked into: restore one heart, capped at the max. The pickup-collision loop in
-  # Main's tick calls this; each collectable owns its own effect.
-  def collect(args)
-    player = args.state.player
-    player.hearts = [ player.hearts + 1, Player::MAX_HEARTS ].min
-  end
+  def collect(player) = player.heal
 
   def render(args, camera_x = 0)
     bob = Math.sin(args.state.tick_count / 15.0) * BOB

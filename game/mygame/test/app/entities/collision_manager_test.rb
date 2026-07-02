@@ -95,6 +95,42 @@ class CollisionManagerTest < Minitest::Test
     assert_equal Player::MAX_HEARTS, player.hearts
   end
 
+  # Collectables ride the same path: the player walking over one retires it and applies
+  # its effect via the shared Collectable#on_collision.
+  def test_a_heart_pickup_heals_and_retires_when_the_player_reaches_it
+    player = Player.new
+    player.hearts = 1
+    heart = HeartPickup.new(x: player.x, y: player.y)
+    @manager.add(heart)
+    @manager.add(player)
+    @manager.resolve(build_args(player: player))
+
+    refute heart.alive?
+    assert_equal 2, player.hearts
+  end
+
+  def test_a_password_character_retires_and_is_stamped_when_the_player_reaches_it
+    player = Player.new
+    char = PasswordCharacter.new(x: player.x, klass: :upper, glyph: "Q")
+    @manager.add(char)
+    @manager.add(player)
+    @manager.resolve(build_args(player: player))
+
+    refute char.alive?
+    assert char.pickup_order # the level rebuilds the password from stamped, retired padlocks
+  end
+
+  def test_a_certificate_retires_when_the_player_reaches_it
+    player = Player.new
+    cert = Certificate.new(x: player.x, y: player.y)
+    @manager.add(cert)
+    @manager.add(player)
+    @manager.resolve(build_args(player: player))
+
+    refute cert.alive?
+    assert_equal Player::MAX_HEARTS, player.hearts # the pickup leaves the player otherwise untouched
+  end
+
   # A descending player overlapping a platform is settled onto it — the manager stays
   # type-agnostic; Player#on_collision owns the landing (the platform is passive).
   def test_settles_a_descending_player_onto_a_platform

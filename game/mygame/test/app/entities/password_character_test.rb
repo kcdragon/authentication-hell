@@ -33,16 +33,27 @@ class PasswordCharacterTest < Minitest::Test
                    w: PasswordCharacter::CHIP, h: PasswordCharacter::CHIP }, char.hitbox)
   end
 
-  def test_collect_records_the_glyph_on_the_level
+  def test_on_collision_retires_the_padlock_and_stamps_pickup_order
     char = PasswordCharacter.new(x: 100, klass: :symbol, glyph: "#")
-    char.collect(@args)
-    assert_equal [ "#" ], @args.state.level.instance_variable_get(:@collected)
+    char.on_collision(Player.new, @args)
+    refute char.alive?
+    assert char.pickup_order # the retired padlock carries the level's record
   end
 
-  def test_collect_appends_each_glyph_in_pickup_order
-    PasswordCharacter.new(x: 100, klass: :upper, glyph: "A").collect(@args)
-    PasswordCharacter.new(x: 200, klass: :digit, glyph: "7").collect(@args)
-    assert_equal [ "A", "7" ], @args.state.level.instance_variable_get(:@collected)
+  def test_on_collision_stamps_grabs_in_order
+    player = Player.new
+    first = PasswordCharacter.new(x: 100, klass: :upper, glyph: "A")
+    second = PasswordCharacter.new(x: 200, klass: :digit, glyph: "7")
+    first.on_collision(player, @args)
+    second.on_collision(player, @args)
+    assert_operator first.pickup_order, :<, second.pickup_order
+  end
+
+  def test_on_collision_ignores_a_non_player_collider
+    char = PasswordCharacter.new(x: 100, klass: :symbol, glyph: "#")
+    char.on_collision(Object.new, @args)
+    assert char.alive?
+    assert_nil char.pickup_order
   end
 
   def test_klass_of_recovers_a_glyphs_class

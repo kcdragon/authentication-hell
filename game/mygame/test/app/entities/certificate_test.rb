@@ -8,7 +8,7 @@ class CertificateTest < Minitest::Test
   end
 
   def test_starts_alive
-    assert Certificate.new(x: 100).alive
+    assert Certificate.new(x: 100).alive?
   end
 
   def test_floats_its_hitbox_above_its_surface
@@ -17,10 +17,20 @@ class CertificateTest < Minitest::Test
                    w: Certificate::SIZE, h: Certificate::SIZE }, cert.hitbox)
   end
 
-  def test_collect_is_a_harmless_no_op
+  def test_on_collision_retires_the_certificate
     cert = Certificate.new(x: 100)
-    assert_nil cert.collect(@args)
-    assert_empty @args.state.level.instance_variable_get(:@collected)
+    cert.on_collision(Player.new, @args)
+    refute cert.alive?
+  end
+
+  def test_on_collision_ignores_a_non_player_collider
+    cert = Certificate.new(x: 100)
+    cert.on_collision(Object.new, @args)
+    assert cert.alive?
+  end
+
+  def test_collect_is_a_harmless_no_op
+    assert_nil Certificate.new(x: 100).collect(Player.new)
   end
 
   def test_render_draws_the_certificate_sprite

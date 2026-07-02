@@ -32,10 +32,6 @@ class Level
   # what happens next, e.g. the welcome level dropping a heal heart.
   def on_unlock(_args) = nil
 
-  # Called when the player picks up a collectable. The heal itself is generic (in
-  # Main's tick); this is the level's chance to react.
-  def on_collect(_args) = nil
-
   # Whether the player has satisfied this stage's goal and it should hand off.
   def complete? = false
 
@@ -72,7 +68,7 @@ class Level
   # (alive → false) but leaves it in the collectables list; #complete? runs without
   # args, so levels latch a flag on this in #update.
   def certificate_collected?(_args)
-    @collectables.any? { |c| c.is_a?(Certificate) && !c.alive }
+    @collectables.any? { |c| c.is_a?(Certificate) && !c.alive? }
   end
 
   # Whether the player is over a pit — more than 3/4 of their body overhangs a gap,

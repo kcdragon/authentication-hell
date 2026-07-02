@@ -93,6 +93,7 @@ module Main
       cm.reset
       args.state.level.platforms.each { |plat| cm.add(plat) }
       args.state.level.enemies.each { |enemy| cm.add(enemy) if enemy.alive }
+      args.state.level.collectables.each { |pickup| cm.add(pickup) if pickup.alive? }
       cm.add(args.state.player)
       cm.resolve(args)
 
@@ -104,18 +105,6 @@ module Main
         report_collision(args, player.pending_challenge)
       end
     end
-
-    # Walking into a collectable retires the pickup and applies its own effect (a
-    # heart heals, a password character is recorded); the level then decides what
-    # that means (the welcome level counts the heal as cleared).
-    args.state.level.collectables.each do |pickup|
-      next unless pickup.alive
-      next unless args.geometry.intersect_rect?(pickup.hitbox, args.state.player)
-
-      pickup.alive = false
-      pickup.collect(args)
-      args.state.level.on_collect(args)
-    end unless args.state.player.game_over
 
     # Goal met (e.g. the welcome level after the heal): hand off to the next level,
     # which freezes the world behind its intro card. #complete? is false on the new
@@ -195,7 +184,7 @@ module Main
 
       args.state.level.enemies.each { |enemy| enemy.render(args, cam) if enemy.alive }
 
-      args.state.level.collectables.each { |pickup| pickup.render(args, cam) if pickup.alive }
+      args.state.level.collectables.each { |pickup| pickup.render(args, cam) if pickup.alive? }
 
       args.state.level.render_world(args, cam)
 

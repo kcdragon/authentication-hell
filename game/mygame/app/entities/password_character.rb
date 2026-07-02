@@ -1,10 +1,8 @@
-# A collectable password character — the password level's quarry. Drawn as just the
-# glyph it carries, floating a little above its surface; walking into it is friendly:
-# it holds one of the four character classes (uppercase, lowercase, digit, symbol)
-# and a representative glyph, and collecting it records that class on the player.
-# Lives on the level's collectables; pickup collision (and the no-harm collect) is
-# wired in Main's tick.
+# A collectable password character — a floating glyph in one of the four classes
+# (upper, lower, digit, symbol) the player sweeps up to build the password.
 class PasswordCharacter
+  include Collectable
+
   CLASSES = %i[upper lower digit symbol] # the four targets, in display order
   # A representative glyph per class (ambiguous look-alikes like 0/O/1/l omitted so
   # the collected character reads clearly in the HUD tray).
@@ -24,7 +22,7 @@ class PasswordCharacter
   CHIP = 50 # the glyph chip's drawn size
   FLOAT_GAP = 16 # how far the chip hovers above its surface
 
-  attr_accessor :x, :y, :w, :h, :alive, :klass, :glyph
+  attr_accessor :x, :y, :w, :h, :klass, :glyph
 
   def initialize(x:, klass:, y: GROUND_Y, glyph: nil)
     @x = x
@@ -41,9 +39,7 @@ class PasswordCharacter
 
   def hitbox = chip_rect
 
-  def collect(args)
-    args.state.level.collect_password_character(@glyph)
-  end
+  def collect(_player) = nil
 
   # The carried glyph in a class-colored, ink-bordered chip, hovering above its surface.
   def render(args, camera_x = 0)
