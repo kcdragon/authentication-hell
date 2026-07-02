@@ -24,7 +24,8 @@ module Main
       # level start, and the player's reset to the new scene's left edge, lands while
       # it's covered.
       update_world(args) unless args.state.paused || toggled || cc_clicked ||
-                                State.intro_active?(args) || dialogue_active?(args)
+                                State.intro_active?(args) || dialogue_active?(args) ||
+                                args.state.beaten
     end
 
     render_world(args)
@@ -106,10 +107,13 @@ module Main
       end
     end
 
-    # Goal met (e.g. the welcome level after the heal): hand off to the next level,
-    # which freezes the world behind its intro card. #complete? is false on the new
-    # level, so this won't re-fire.
-    advance_level(args) if args.state.level.complete?
+    # Goal met: the last level clearing beats the game (freeze on the completion card
+    # while the page redirects to the certificate); any other level hands off to the
+    # next, which freezes the world behind its intro card. #complete? is false on the
+    # new level, so advancing won't re-fire.
+    if args.state.level.complete?
+      args.state.level.last? ? beat_game(args) : advance_level(args)
+    end
 
     end_run(args) if out_of_time?(args)
 
@@ -197,7 +201,9 @@ module Main
     draw_hearts(args)
     args.state.level.draw_hud(args)
 
-    if args.state.player.game_over
+    if args.state.beaten
+      draw_course_complete(args)
+    elsif args.state.player.game_over
       draw_video_ended(args)
     elsif args.state.player.locked
       draw_buffering(args)
@@ -366,6 +372,25 @@ module Main
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
 
+  # Beat the final level → "Course Complete": the celebratory counterpart to Video
+  # Ended. Indigo dim, the Archivo Black headline in paper over a green rule, then a
+  # spinner + line while the page redirects to the certificate.
+  def draw_course_complete(args)
+    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H,
+                             r: INDIGO[0], g: INDIGO[1], b: INDIGO[2], a: 184 }
+    args.outputs.labels << { x: 640, y: 430, text: "Course Complete",
+                             size_px: 84, font: FONT_DISPLAY,
+                             r: PAPER[0], g: PAPER[1], b: PAPER[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
+    args.outputs.solids << { x: 640 - 210, y: 372, w: 420, h: 5,
+                             r: GREEN[0], g: GREEN[1], b: GREEN[2] }
+    Ui::Spinner.new(args).draw(640, 320, PAPER)
+    args.outputs.labels << { x: 640, y: 270, text: "loading your certificate...",
+                             size_px: 22, font: FONT_MONO,
+                             r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2],
+                             anchor_x: 0.5, anchor_y: 0.5 }
+  end
+
   # The semantic color for a pending challenge kind (matches the HTML toasts).
   def challenge_color(kind)
     case kind
@@ -444,6 +469,21 @@ module Main
     args.state.player.x = args.state.level.start_x
     args.state.camera_x = 0
     args.state.level.setup(args)
+  end
+
+  # The final level is cleared: report it (the server records the win, grants the
+  # Graduate achievement, and broadcasts a redirect that sends the page to the
+  # certificate), then freeze on the completion card. Fire-and-forget — we never poll
+  # the handle (the page redirects away), and not stashing it in args.state keeps the
+  # per-tick state export clean once `beaten` stops the world updating. Reported once.
+  def beat_game(args)
+    return if args.state.beaten
+    args.state.beaten = true
+    DR.http_post(
+      "#{levels_complete_url(args)}?level=#{args.state.level.number}",
+      {},
+      [ "Content-Type: application/x-www-form-urlencoded" ]
+    )
   end
 
   # The active stage is cleared: report it to the server, then swap in the level it

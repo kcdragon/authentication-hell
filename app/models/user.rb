@@ -16,6 +16,10 @@ class User < ApplicationRecord
     attachable.variant :nav, resize_to_fill: [ 64, 64 ]
   end
 
+  # The "you beat the game" certificate, rendered once by GenerateCertificatePdfJob
+  # when the player clears the final level so the download endpoint serves a cached copy.
+  has_one_attached :certificate_pdf
+
   encrypts :totp_secret
 
   scope :ranked, ->(by: :level) {
@@ -157,6 +161,7 @@ class User < ApplicationRecord
       update!(highest_level_completed: nil, now_playing_level: nil)
       earned_achievements.delete_all
     end
+    certificate_pdf.purge_later
   end
 
   def record_level_completed(level)
@@ -175,6 +180,10 @@ class User < ApplicationRecord
 
   def now_playing
     now_playing_level || current_level&.number
+  end
+
+  def beat_game?
+    highest_level_completed.to_i >= GameLevel.all.last.number
   end
 
   private

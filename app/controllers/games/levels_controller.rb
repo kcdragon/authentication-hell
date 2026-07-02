@@ -29,7 +29,17 @@ class Games::LevelsController < ApplicationController
     if next_level
       mark_now_playing(next_level)
     else
-      Game::PlaylistBroadcaster.call(Current.user)
+      beat_game
     end
+  end
+
+  # No next level: the player just beat the game. Award the Graduate achievement,
+  # kick off certificate rendering, refresh the playlist, and send the page to the
+  # certificate.
+  def beat_game
+    Achievement::Awarder.call(Current.user, :graduate)
+    GenerateCertificatePdfJob.perform_later(Current.user, root_url)
+    Game::PlaylistBroadcaster.call(Current.user)
+    Game::CompletionBroadcaster.call(Current.user)
   end
 end

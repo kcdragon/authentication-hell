@@ -27,6 +27,13 @@ class Achievement
       description: "Survive a collision with your passkey.")
   ].freeze
 
+  COMPLETION = [
+    new(key: "graduate", name: "Certified", emoji: "📜",
+      description: "Beat Authentication Hell and claim your certificate."),
+    new(key: "social_sharer", name: "Influencer", emoji: "📣",
+      description: "Share your certificate with the world.")
+  ].freeze
+
   PACIFIC = ActiveSupport::TimeZone["America/Los_Angeles"]
 
   EVENTS = [
@@ -41,7 +48,7 @@ class Achievement
       window: PACIFIC.parse("2026-07-16 11:15:00")..PACIFIC.parse("2026-07-16 11:45:00"))
   ].freeze
 
-  ALL = (SURVIVOR + EVENTS + GameLevel.all.map(&:achievement)).freeze
+  ALL = (SURVIVOR + COMPLETION + EVENTS + GameLevel.all.map(&:achievement)).freeze
 
   def self.all
     ALL

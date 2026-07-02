@@ -284,6 +284,17 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 0, user.now_playing
   end
 
+  test "beat_game? is true only once the final level is cleared" do
+    user = users(:one)
+    last = GameLevel.all.last.number
+
+    assert_not user.beat_game?
+    user.update!(highest_level_completed: last - 1)
+    assert_not user.beat_game?
+    user.update!(highest_level_completed: last)
+    assert user.beat_game?
+  end
+
   test "ranked exposes an achievements_count aggregate" do
     users(:one).grant_achievement(:password_survivor)
     users(:one).grant_achievement(:totp_survivor)

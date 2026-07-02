@@ -49,6 +49,11 @@ Rails.application.routes.draw do
 
   get "leaderboard" => "leaderboard#index", as: :leaderboard
 
+  # The "you beat the game" certificate (HTML page + .pdf download) and the share
+  # hook that grants the Influencer achievement.
+  get  "certificate"       => "certificates#show",  as: :certificate
+  post "certificate/share" => "certificates#share", as: :certificate_share
+
   namespace :games do
     get  "totp/status"   => "totp_challenge#status",   as: :totp_status
     post "totp/start"    => "totp_challenge#start",    as: :totp_start

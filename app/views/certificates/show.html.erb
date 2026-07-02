@@ -1,0 +1,73 @@
+<% content_for :title, "Authentication Hell — Certificate" %>
+
+<% share_url = root_url %>
+<% share_text = "I just survived Authentication Hell 😈🔐 — the full credential gauntlet. Think you can beat it?" %>
+
+<% content_for :head do %>
+  <meta property="og:title" content="I beat Authentication Hell">
+  <meta property="og:description" content="<%= share_text %>">
+  <meta property="og:url" content="<%= share_url %>">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+<% end %>
+
+<div class="mx-auto w-full max-w-3xl">
+  <div class="text-center">
+    <p class="font-mono font-bold text-sm uppercase tracking-widest text-muted">🏆 Course complete</p>
+    <h1 class="text-4xl mt-2">You beat Authentication Hell</h1>
+    <p class="ah-hint mt-3 text-base">
+      You cleared every level. Download your certificate and tell the world — sharing unlocks the
+      <span class="font-bold text-ink">Influencer</span> achievement.
+    </p>
+  </div>
+
+  <%# On-screen certificate — mirrors the downloadable PDF. %>
+  <div class="ah-card mt-8 bg-paper p-2 sm:p-3">
+    <div class="border-2 border-password rounded-[3px] px-6 py-10 sm:px-10 text-center">
+      <p class="font-mono font-bold text-xs uppercase tracking-[0.3em] text-muted">Authentication Hell</p>
+      <h2 class="font-display text-3xl sm:text-4xl uppercase tracking-tight mt-4">Certificate of Completion</h2>
+      <div class="mx-auto mt-4 h-1.5 w-24 bg-password"></div>
+
+      <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mt-8">This certifies that</p>
+      <p class="font-display text-4xl sm:text-5xl mt-3"><%= Current.user.username %></p>
+
+      <p class="ah-hint mt-6 max-w-xl mx-auto text-[15px]">
+        has descended through every circle of Authentication Hell — passwords, time-based
+        one-time passwords, and passkeys — and lived to tell of it.
+      </p>
+
+      <div class="flex items-end justify-between gap-4 mt-10">
+        <%= certificate_qr_code(share_url) %>
+        <p class="font-mono font-bold text-xs uppercase tracking-widest text-muted text-right">
+          Awarded<br><%= Date.current.to_fs(:long) %>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+    <%= link_to "⬇ Download PDF", certificate_path(format: :pdf, download: 1),
+          class: "ah-btn ah-btn--primary", data: { turbo: false } %>
+    <%= link_to "▶ Back to the game", game_path, class: "ah-btn ah-btn--secondary" %>
+  </div>
+
+  <%# Share row — the share controller opens each intent, then awards Influencer. %>
+  <div class="mt-10 border-t-[3px] border-ink pt-6"
+       data-controller="share"
+       data-share-url-value="<%= share_url %>"
+       data-share-text-value="<%= share_text %>"
+       data-share-award-path-value="<%= certificate_share_path %>">
+    <h3 class="font-display text-lg uppercase tracking-tight text-center">Share your victory</h3>
+    <div class="flex flex-wrap items-center justify-center gap-3 mt-4">
+      <button type="button" data-share-target="native" data-action="share#native"
+              class="ah-btn ah-btn--ghost" hidden>Share…</button>
+      <button type="button" data-action="share#x" class="ah-btn ah-btn--secondary">Post on X</button>
+      <button type="button" data-action="share#linkedin" class="ah-btn ah-btn--secondary">LinkedIn</button>
+      <button type="button" data-action="share#bluesky" class="ah-btn ah-btn--secondary">Bluesky</button>
+      <button type="button" data-action="share#mastodon" class="ah-btn ah-btn--secondary">Mastodon</button>
+      <button type="button" data-action="share#copy" class="ah-btn ah-btn--outline">
+        <span data-share-target="copyLabel">Copy link</span>
+      </button>
+    </div>
+  </div>
+</div>
