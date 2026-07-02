@@ -58,6 +58,7 @@ class Player
     @blink_until_tick = 0
     @slow_until_tick = 0
     @reached_platform = false
+    @prev_y = @y
   end
 
   # Move left/right with the arrow keys (no wrapping — clamp to screen); space
@@ -87,23 +88,14 @@ class Player
     end
 
     @vy -= GRAVITY
-    prev_y = @y
+    @prev_y = @y
     @y += @vy
 
     @grounded = false
-    # Re-ground only while crossing the floor line from above (prev_y >= GROUND_Y),
-    # like the one-way platform check below — otherwise a player already sunk into a
-    # pit would snap back the instant their center cleared the gap horizontally.
-    if @y <= GROUND_Y && prev_y >= GROUND_Y && !args.state.level.over_hole?(self)
+    if landing_on_floor?(args)
       @y = GROUND_Y
       @vy = 0
       @grounded = true
-    elsif @vy <= 0 && (top = args.state.level.platform_landing_top(self, prev_y))
-      # Settle onto the one-way platform the level says we crossed this frame.
-      @y = top
-      @vy = 0
-      @grounded = true
-      @reached_platform = true
     end
   end
 
@@ -126,14 +118,9 @@ class Player
   end
 
   def on_collision(other, args)
-    return unless other.is_a?(Enemy)
-
-    if other.stompable? && stomping?(other)
-      bounce
-    elsif other.slows?
-      slow(args)
-    elsif !invincible?(args)
-      take_hit(args, other.auth)
+    case other
+    when Enemy then collide_with_enemy(other, args)
+    when Platform then land_on(other)
     end
   end
 
@@ -213,6 +200,32 @@ class Player
   def to_s = serialize.to_s
 
   private
+
+  # Crossing the world floor from above onto solid ground — not rising up through it,
+  # and not over a pit we should drop into.
+  def landing_on_floor?(args)
+    @y <= GROUND_Y && @prev_y >= GROUND_Y && !args.state.level.over_hole?(self)
+  end
+
+  def collide_with_enemy(enemy, args)
+    if enemy.stompable? && stomping?(enemy)
+      bounce
+    elsif enemy.slows?
+      slow(args)
+    elsif !invincible?(args)
+      take_hit(args, enemy.auth)
+    end
+  end
+
+  def land_on(platform)
+    top = platform.y + platform.h
+    return unless @vy <= 0 && @prev_y >= top && @y <= top
+
+    @y = top
+    @vy = 0
+    @grounded = true
+    @reached_platform = true
+  end
 
   def take_hit(args, auth)
     @hearts -= 1

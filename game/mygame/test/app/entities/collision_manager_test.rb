@@ -46,31 +46,12 @@ class CollisionManagerTest < Minitest::Test
     assert_empty b.alerts
   end
 
-  def test_fires_once_per_contact_not_every_frame
+  def test_fires_every_frame_while_overlapping
     a = Rect.new(x: 0)
     b = Rect.new(x: 5)
     resolve(a, b)
-    resolve(a, b) # still overlapping — no new alert
-    assert_equal 1, a.alerts.length
-  end
-
-  def test_a_fresh_contact_after_separating_alerts_again
-    a = Rect.new(x: 0)
-    b = Rect.new(x: 5)
-    resolve(a, b)          # contact
-    b.x = 100
-    resolve(a, b)          # apart
-    b.x = 5
-    resolve(a, b)          # touching again
+    resolve(a, b) # still overlapping — alerts again (a resting contact must re-settle)
     assert_equal 2, a.alerts.length
-  end
-
-  def test_refreshing_the_registry_keeps_a_resting_overlap_from_re_firing
-    a = Rect.new(x: 0)
-    b = Rect.new(x: 5)
-    resolve(a, b)          # reset + add happen inside; edge recorded
-    resolve(a, b)          # reset again, same pair still resting
-    assert_equal 1, a.alerts.length, "reset empties the set but not the edge state"
   end
 
   def test_reset_empties_the_registry
@@ -112,5 +93,25 @@ class CollisionManagerTest < Minitest::Test
     refute enemy.alive
     assert_equal Player::STOMP_BOUNCE, player.vy
     assert_equal Player::MAX_HEARTS, player.hearts
+  end
+
+  # A descending player overlapping a platform is settled onto it — the manager stays
+  # type-agnostic; Player#on_collision owns the landing (the platform is passive).
+  def test_settles_a_descending_player_onto_a_platform
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    player = Player.new
+    player.x = 200
+    player.y = 275 # feet dipped below the top this frame
+    player.vy = -10
+    player.grounded = false
+    player.instance_variable_set(:@prev_y, 285) # was above the top last frame
+    @manager.add(platform)
+    @manager.add(player)
+    @manager.resolve(build_args(player: player))
+
+    assert_equal 280, player.y
+    assert_equal 0, player.vy
+    assert player.grounded
+    assert player.reached_platform
   end
 end

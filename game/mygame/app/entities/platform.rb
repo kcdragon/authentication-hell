@@ -1,7 +1,6 @@
-# A one-way ledge the player can land on from below: owns its rect and rendering,
-# plus the shared layout constants and a factory so any level can build a scattered
-# field of them. Lives on the level's platforms; landing collision is in
-# Player#update (it reads x/y/w/h duck-typed).
+# A one-way ledge the player lands on from below — owns its rect, rendering, layout
+# constants, and a scatter factory, and is registered with the CollisionManager, which
+# alerts Player#on_collision to settle onto it (reading x/y/w/h duck-typed).
 class Platform
   H = 30
 
@@ -54,6 +53,8 @@ class Platform
                              r: INDIGO[0], g: INDIGO[1], b: INDIGO[2] }
     draw_caption(args, sx)
   end
+
+  def on_collision(_other, _args) = nil
 
   private
 

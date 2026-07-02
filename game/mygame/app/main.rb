@@ -64,8 +64,9 @@ module Main
 
   # One tick of live gameplay (only while the run is started and not over).
   def update_world(args)
-    # Input, jumping, gravity, and platform/ground collision (frozen while
-    # locked) — all owned by the player.
+    # Input, jumping, gravity, and world-floor/pit landing (frozen while locked), owned
+    # by the player; one-way platform landings are entities, resolved below by the
+    # CollisionManager.
     args.state.player.update(args)
 
     # A pit-fall: the player walked off a gap in the ground and dropped through.
@@ -84,18 +85,13 @@ module Main
     # locked mid re-auth — only the player freezes — and stops only on game-over.
     args.state.level.enemies.each { |enemy| enemy.update if enemy.alive } unless args.state.player.game_over
 
-    # Refresh the collidables (the enemies still in play + the player) and let the
-    # CollisionManager detect contact; on a hit each side decides its own reaction
-    # (Enemy#on_collision / Player#on_collision). Enemies are registered before the
-    # player so an enemy classifies the contact (was it a stomp? was the player
-    # hittable?) before the player's reaction — a bounce or a heart loss — mutates the
-    # state it reads. The un-testable network/game-over side effects stay here, fired by
-    # watching what the collision left on the player: a fatal hit (no hearts) ends the
-    # run; a survivable one locks the player, so POST the re-auth once (guarded so it
-    # can't refire while the request is in flight or already confirmed).
+    # Register the collidables player-last (so surfaces/enemies settle the player before
+    # it's read), resolve contact, then fire the un-testable side effects the collision
+    # left on the player: no hearts ends the run, a survivable hit POSTs the re-auth once.
     unless args.state.player.game_over
       cm = args.state.collision_manager
       cm.reset
+      args.state.level.platforms.each { |plat| cm.add(plat) }
       args.state.level.enemies.each { |enemy| cm.add(enemy) if enemy.alive }
       cm.add(args.state.player)
       cm.resolve(args)

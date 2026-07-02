@@ -75,23 +75,9 @@ class Level
     @collectables.any? { |c| c.is_a?(Certificate) && !c.alive }
   end
 
-  # The top edge of the one-way platform the player is settling onto this frame, or
-  # nil if none — so the player asks the level rather than reaching into its
-  # platforms. A landing counts only while descending and only if the player's feet
-  # crossed the platform's top this frame (prev_y above it, now at/below), so they
-  # pass up through it from underneath.
-  def platform_landing_top(player, prev_y)
-    @platforms.each do |plat|
-      top = plat.y + plat.h
-      horizontal = player.x + player.w > plat.x && player.x < plat.x + plat.w
-      return top if horizontal && prev_y >= top && player.y <= top
-    end
-    nil
-  end
-
   # Whether the player is over a pit — more than 3/4 of their body overhangs a gap,
-  # so the ground check lets them drop instead of landing. Asked by the player
-  # rather than exposing the level's holes (empty on pit-less levels).
+  # so the ground check lets them drop instead of landing. Asked by the player rather
+  # than exposing the level's holes (empty on pit-less levels).
   def over_hole?(player)
     @holes.any? do |hole|
       overlap = [ player.x + player.w, hole.x + hole.w ].min - [ player.x, hole.x ].max
