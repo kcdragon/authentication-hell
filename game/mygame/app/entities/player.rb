@@ -137,18 +137,6 @@ class Player
     end
   end
 
-  private
-
-  def take_hit(args, auth)
-    @hearts -= 1
-    return if @hearts <= 0
-    @locked = true
-    @pending_challenge = auth
-    hurt(args)
-  end
-
-  public
-
   # A buffering enemy lagged the player: crawl their move speed for SLOW_TICKS frames.
   def slow(args)
     @slow_until_tick = args.state.tick_count + SLOW_TICKS
@@ -223,4 +211,14 @@ class Player
 
   def inspect = serialize.to_s
   def to_s = serialize.to_s
+
+  private
+
+  def take_hit(args, auth)
+    @hearts -= 1
+    return if @hearts <= 0
+    @locked = true
+    @pending_challenge = auth
+    hurt(args)
+  end
 end
