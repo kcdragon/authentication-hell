@@ -1,38 +1,69 @@
-# Decides, each tick, whether the player is colliding with something and alerts the
-# object it hit — which then decides how to behave (see Enemy#on_collision). This
-# first cut covers only the player vs. the level's enemies; platforms/holes stay in
-# Player#update and collectables stay in Main's tick.
+# Tracks a set of collidable objects and, each tick, works out which pairs overlap
+# and alerts both — each object then decides how to behave (see #on_collision on the
+# entities). It is deliberately type-agnostic: it knows nothing about players, enemies
+# or platforms, only that every registered object exposes x/y/w/h (position + size).
+# It owns its own state (the registry + which pairs were touching last tick) rather
+# than reading anything from args.state; args is forwarded untouched to the objects.
 #
-# Stateless on purpose: it reads the level's *live* enemy list every tick rather than
-# holding a registry, so mid-level enemy swaps (the welcome level reassigns @enemies),
-# deaths, and level changes need no re-registration. Lives on args.state.
+# Contact is edge-triggered: a pair is alerted the tick it starts overlapping, not
+# every frame it stays overlapping, so a resting overlap fires once.
 class CollisionManager
-  # Fire once per contact: alert the enemy on the tick the player first overlaps it
-  # (the rising edge), and keep its colliding flag in sync so a resting overlap
-  # doesn't re-trigger. Skips the dead, and (via Main) never runs on game-over.
-  def resolve(args)
-    player = args.state.player
-    args.state.level.enemies.each do |enemy|
-      next unless enemy.alive
+  def initialize
+    @collidables = []
+    @touching = {} # pair key => true, for the previous tick's overlaps
+  end
 
-      overlap = intersect?(enemy, player)
-      enemy.on_collision(args) if overlap && !enemy.colliding
-      enemy.colliding = overlap
+  # Register an object to collide. Callers refresh the set each tick (#reset then
+  # #add) so objects that come and go — enemies spawning, dying — stay in sync.
+  def add(object)
+    @collidables << object
+    self
+  end
+
+  # Empty the registry. Leaves the edge-tracking alone (it self-prunes in #resolve),
+  # so refreshing the set between ticks doesn't re-fire a still-resting overlap.
+  def reset
+    @collidables = []
+  end
+
+  # Check every pair; on the rising edge of an overlap, alert both objects. args is
+  # passed straight through to #on_collision — this class never reads it.
+  def resolve(args)
+    now = {}
+    @collidables.each_with_index do |a, i|
+      @collidables.each_with_index do |b, j|
+        next unless j > i
+        next unless overlap?(a, b)
+
+        key = pair_key(a, b)
+        now[key] = true
+        next if @touching[key]
+
+        a.on_collision(b, args)
+        b.on_collision(a, args)
+      end
     end
+    @touching = now
   end
 
   private
 
-  # Axis-aligned bounding-box overlap on any two rects exposing x/y/w/h. Replaces the
-  # engine's args.geometry.intersect_rect? so this runs under plain-Ruby tests too.
-  def intersect?(a, b)
+  # Axis-aligned bounding-box overlap on any two objects exposing x/y/w/h.
+  def overlap?(a, b)
     a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y
+  end
+
+  # A stable, order-independent id for a pair, so the same two objects map to the
+  # same key whichever order they're checked in.
+  def pair_key(a, b)
+    ids = [ a.object_id, b.object_id ].sort
+    "#{ids[0]}-#{ids[1]}"
   end
 
   public
 
-  # DragonRuby exports args.state for its dev tools; give it a plain-hash view (see the
-  # same pattern on Enemy/Platform). Stateless, so an empty hash is enough.
+  # DragonRuby exports args.state for its dev tools; give it a plain-hash view (see
+  # the same pattern on Enemy/Platform). Its state isn't worth exporting, so it's empty.
   def serialize = {}
   def inspect = "{}"
   def to_s = "{}"

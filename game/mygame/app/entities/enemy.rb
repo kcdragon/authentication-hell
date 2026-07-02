@@ -10,7 +10,7 @@ class Enemy
   # Clearance ahead of the player so the nearest enemy's patrol never reaches it.
   SAFE_GAP = PATROL_RANGE + WIDTH + 64
 
-  attr_accessor :x, :y, :w, :h, :alive, :colliding, :auth, :r, :g, :b,
+  attr_accessor :x, :y, :w, :h, :alive, :auth, :r, :g, :b,
                 :vx, :patrol_min_x, :patrol_max_x
 
   # Two of each kind, scattered across the world: one per evenly spaced slot (so
@@ -35,7 +35,6 @@ class Enemy
     @h = HEIGHT
     @auth = self.class::AUTH
     @alive = true
-    @colliding = false
     @patrol_min_x = @x - PATROL_RANGE
     @patrol_max_x = @x + PATROL_RANGE
     @vx = [ -1, 1 ].sample * (1 + rand(2)) # 1–2 px/frame, random direction
@@ -82,25 +81,28 @@ class Enemy
     { x: @x, y: @y, w: @w, h: @h }
   end
 
-  # The CollisionManager alerts the enemy the tick the player first touches it; the
-  # enemy decides its own fate and drives the player's reaction. Coming down on top
-  # stomps it (defeated, player bounces, no heart lost — gated on the level's melee?
-  # so the welcome lesson still forces the challenge); a buffering enemy lags the
-  # player instead; otherwise it's a side/ground hit that retires the enemy and docks
-  # the player (unless they're mid-blink invincible). The network POST + game-over
-  # stay in Main, which watches the player state this sets.
-  def on_collision(args)
-    player = args.state.player
-    if args.state.level.melee? && player.stomping?(self)
+  # The CollisionManager alerts the enemy the tick something first touches it; the
+  # enemy owns this interaction (the aggressor) and drives the player's reaction
+  # through the player's own methods. Coming down on top stomps it (defeated, player
+  # bounces, no heart lost — gated on the level's melee? so the welcome lesson still
+  # forces the challenge); a buffering enemy lags the player instead; otherwise it's a
+  # side/ground hit that retires the enemy and docks the player (unless they're
+  # mid-blink invincible). The network POST + game-over stay in Main, which watches
+  # the player state this sets. Only the player interacts with an enemy — the manager
+  # is type-blind, so ignore anything else it pairs us with (e.g. another enemy).
+  def on_collision(other, args)
+    return unless other.is_a?(Player)
+
+    if args.state.level.melee? && other.stomping?(self)
       @alive = false
       args.state.level.record_kill
-      player.bounce
+      other.bounce
     elsif slows?
       @alive = false
-      player.slow(args)
-    elsif !player.invincible?(args)
+      other.slow(args)
+    elsif !other.invincible?(args)
       @alive = false
-      player.take_hit(args, @auth)
+      other.take_hit(args, @auth)
     end
   end
 
@@ -114,7 +116,7 @@ class Enemy
   # serialize method can choke that export (see the http-handle nils in main.rb).
   def serialize
     { x: @x, y: @y, w: @w, h: @h, auth: @auth, alive: @alive,
-      colliding: @colliding, r: @r, g: @g, b: @b, vx: @vx,
+      r: @r, g: @g, b: @b, vx: @vx,
       patrol_min_x: @patrol_min_x, patrol_max_x: @patrol_max_x }
   end
 
