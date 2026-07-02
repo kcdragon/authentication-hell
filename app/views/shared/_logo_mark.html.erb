@@ -22,7 +22,7 @@
 %>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 <%= span %> <%= span %>"
      style="width:<%= size %>;height:<%= size %>;display:inline-block;vertical-align:middle"
-     <%= label.present? ? "role=\"img\" aria-label=\"#{label}\"".html_safe : 'aria-hidden="true"'.html_safe %>>
+     <% if label.present? %>role="img" aria-label="<%= label %>"<% else %>aria-hidden="true"<% end %>>
   <%# Cells clip to a rect inset by the frame width so the ink border stays even
       around the rounded corners and the cells round concentrically inside it. %>
   <defs><clipPath id="<%= cid %>"><rect x="<%= b %>" y="<%= b %>" width="<%= 100 - 2 * b %>" height="<%= 100 - 2 * b %>" rx="<%= rx - b %>"/></clipPath></defs>
