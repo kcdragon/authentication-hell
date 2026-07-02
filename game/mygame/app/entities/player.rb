@@ -125,6 +125,18 @@ class Player
     @blink_until_tick = args.state.tick_count + BLINK_TICKS
   end
 
+  def on_collision(other, args)
+    return unless other.is_a?(Enemy)
+
+    if other.stompable? && stomping?(other)
+      bounce
+    elsif other.slows?
+      slow(args)
+    elsif !invincible?(args)
+      take_hit(args, other.auth)
+    end
+  end
+
   # A buffering enemy lagged the player: crawl their move speed for SLOW_TICKS frames.
   def slow(args)
     @slow_until_tick = args.state.tick_count + SLOW_TICKS
@@ -199,4 +211,14 @@ class Player
 
   def inspect = serialize.to_s
   def to_s = serialize.to_s
+
+  private
+
+  def take_hit(args, auth)
+    @hearts -= 1
+    return if @hearts <= 0
+    @locked = true
+    @pending_challenge = auth
+    hurt(args)
+  end
 end

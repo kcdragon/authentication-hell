@@ -1,10 +1,10 @@
 # The opening welcome level: one reachable ledge on flat ground and a scripted pair of
 # password enemies, so the lesson stays predictable — move, jump onto the platform,
-# then bump the enemy marching in from the right (melee is off, so the only way past
-# is the password re-auth). Clearing it drops a heal heart; grabbing it turns melee
-# on and sends a second enemy in from the left for the player to defeat with a
-# stomp, which drops the completion certificate; grabbing it finishes the welcome level
-# and hands off to the password level.
+# then bump the enemy marching in from the right (a TutorialEnemy — it can't be
+# stomped, so the only way past is the password re-auth). Clearing it drops a heal
+# heart; grabbing it sends a second, ordinary enemy in from the left for the player to
+# defeat with a stomp, which drops the completion certificate; grabbing it finishes the
+# welcome level and hands off to the password level.
 #
 # Sized to a single screen (world_w = SCREEN_W): the whole lesson plays in one view,
 # so the player can't wander off into the empty main world and the camera never scrolls.
@@ -47,7 +47,7 @@ class WelcomeLevel < Level
   # left edge, marching right, for the player to defeat with a stomp.
   def update(args)
     if args.state.player.reached_platform && @enemies.empty? && !@combat_spawned
-      enemy = PasswordEnemy.new(x: args.state.camera_x + SCREEN_W)
+      enemy = TutorialEnemy.new(x: args.state.camera_x + SCREEN_W)
       enemy.march_left(ENEMY_SPEED)
       @enemies = [ enemy ]
     elsif @healed && !@combat_spawned
@@ -69,11 +69,6 @@ class WelcomeLevel < Level
 
     @cleared = true if certificate_collected?(args)
   end
-
-  # Melee is off during the re-auth lesson (so the only way past the first enemy is
-  # the password challenge) and turns on once the heart is grabbed, so a stomp can
-  # defeat the second enemy.
-  def melee? = @healed
 
   # Re-auth cleared: drop a heal heart on the ground a short walk ahead of the
   # player (clamped to the world so it stays reachable). Collecting it heals the

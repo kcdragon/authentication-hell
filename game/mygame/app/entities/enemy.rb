@@ -10,7 +10,7 @@ class Enemy
   # Clearance ahead of the player so the nearest enemy's patrol never reaches it.
   SAFE_GAP = PATROL_RANGE + WIDTH + 64
 
-  attr_accessor :x, :y, :w, :h, :alive, :colliding, :auth, :r, :g, :b,
+  attr_accessor :x, :y, :w, :h, :alive, :auth, :r, :g, :b,
                 :vx, :patrol_min_x, :patrol_max_x
 
   # Two of each kind, scattered across the world: one per evenly spaced slot (so
@@ -35,7 +35,6 @@ class Enemy
     @h = HEIGHT
     @auth = self.class::AUTH
     @alive = true
-    @colliding = false
     @patrol_min_x = @x - PATROL_RANGE
     @patrol_max_x = @x + PATROL_RANGE
     @vx = [ -1, 1 ].sample * (1 + rand(2)) # 1–2 px/frame, random direction
@@ -82,6 +81,21 @@ class Enemy
     { x: @x, y: @y, w: @w, h: @h }
   end
 
+  def on_collision(other, args)
+    return unless other.is_a?(Player)
+
+    if stompable? && other.stomping?(self)
+      @alive = false
+      args.state.kills += 1
+    elsif slows?
+      @alive = false
+    elsif !other.invincible?(args)
+      @alive = false
+    end
+  end
+
+  def stompable? = true
+
   def slows? = false
 
   def render(args, camera_x = 0)
@@ -92,7 +106,7 @@ class Enemy
   # serialize method can choke that export (see the http-handle nils in main.rb).
   def serialize
     { x: @x, y: @y, w: @w, h: @h, auth: @auth, alive: @alive,
-      colliding: @colliding, r: @r, g: @g, b: @b, vx: @vx,
+      r: @r, g: @g, b: @b, vx: @vx,
       patrol_min_x: @patrol_min_x, patrol_max_x: @patrol_max_x }
   end
 
