@@ -20,13 +20,11 @@ module Main
     if args.state.started
       toggled = handle_pause_input(args)
       handle_dialogue_input(args)
-      handle_summary_input(args)
-      # The world stays frozen behind the intro card (and any in-level dialogue, or
-      # the end-of-level results card) so a level start, and the player's reset to
-      # the new scene's left edge, lands while it's covered.
+      # The world stays frozen behind the intro card (and any in-level dialogue) so a
+      # level start, and the player's reset to the new scene's left edge, lands while
+      # it's covered.
       update_world(args) unless args.state.paused || toggled || cc_clicked ||
-                                State.intro_active?(args) || dialogue_active?(args) ||
-                                State.summary_active?(args)
+                                State.intro_active?(args) || dialogue_active?(args)
     end
 
     render_world(args)
@@ -58,15 +56,6 @@ module Main
     return unless dialogue_active?(args)
 
     args.state.level.advance_dialogue if advance_pressed?(args)
-  end
-
-  def handle_summary_input(args)
-    return unless State.summary_active?(args)
-
-    if advance_pressed?(args)
-      advance_level(args)
-      args.state.level_summary = nil
-    end
   end
 
   def advance_pressed?(args)
@@ -132,9 +121,10 @@ module Main
       args.state.level.on_collect(args)
     end unless args.state.player.game_over
 
-    # Goal met (e.g. the welcome level after the heal): freeze the world and raise
-    # the summary card; the player presses Space/E to hand off (handle_summary_input).
-    begin_level_summary(args) if args.state.level.complete? && !args.state.level_summary
+    # Goal met (e.g. the welcome level after the heal): hand off to the next level,
+    # which freezes the world behind its intro card. #complete? is false on the new
+    # level, so this won't re-fire.
+    advance_level(args) if args.state.level.complete?
 
     end_run(args) if out_of_time?(args)
 
@@ -224,8 +214,6 @@ module Main
 
     if args.state.player.game_over
       draw_video_ended(args)
-    elsif args.state.level_summary
-      Ui::LevelSummary.new(args).draw
     elsif args.state.player.locked
       draw_buffering(args)
     elsif args.state.paused
@@ -470,7 +458,6 @@ module Main
   def setup_level(args)
     args.state.player.x = args.state.level.start_x
     args.state.camera_x = 0
-    args.state.kills = 0 # per-level tally, scored into that level's summary
     args.state.level.setup(args)
   end
 
@@ -488,18 +475,6 @@ module Main
   # the next LEVEL_INTRO_TICKS frames, and the level's countdown runtime starts here.
   def begin_level_intro(args)
     args.state.level.begin_clock(args.state.tick_count)
-  end
-
-  # Score the cleared level and stash it (with the level's title/number and the
-  # finish time) for the results card, which the world freezes behind until Space.
-  def begin_level_summary(args)
-    ticks = args.state.level.run_ticks(args.state.tick_count)
-    args.state.level_summary = Score.for(kills: args.state.kills, ticks: ticks,
-                                        hearts: args.state.player.hearts,
-                                        time_limit: args.state.level.time_limit)
-                                   .merge(title: args.state.level.title,
-                                          number: args.state.level.number,
-                                          ticks: ticks)
   end
 
   # An in-level dialogue holds the world frozen after the intro card fades, while a

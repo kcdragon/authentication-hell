@@ -50,7 +50,7 @@ module GameTest
   # captions_on gates the closed caption a level draws (via Caption) in its #draw path.
   # The level owns its own entities (enemies/platforms/collectables/holes) — build_args
   # seeds them onto the level, not the shared state.
-  State = Struct.new(:camera_x, :player, :level, :tick_count, :captions_on, :kills)
+  State = Struct.new(:camera_x, :player, :level, :tick_count, :captions_on)
   Outputs = Struct.new(:sprites, :solids, :labels)
   Args = Struct.new(:inputs, :state, :outputs)
 
@@ -62,7 +62,7 @@ module GameTest
   def build_args(left: false, right: false, e: false,
                  space: false, camera_x: 0, platforms: nil, enemies: nil,
                  collectables: nil, player: nil, level: PasswordLevel.new, tick_count: 0,
-                 holes: nil, kills: 0)
+                 holes: nil)
     # The level's collections are read-only in production (only the level seeds them
     # in #setup); poke them directly here to stage a specific scene for a single tick.
     level.instance_variable_set(:@platforms, platforms) if platforms
@@ -71,7 +71,7 @@ module GameTest
     level.instance_variable_set(:@holes, holes) if holes
     Args.new(
       Inputs.new(Keyboard.new(left, right, KeyDown.new(space, e))),
-      State.new(camera_x, player, level, tick_count, nil, kills),
+      State.new(camera_x, player, level, tick_count, nil),
       Outputs.new([], [], [])
     )
   end
