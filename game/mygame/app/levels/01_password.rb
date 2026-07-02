@@ -27,16 +27,6 @@ class PasswordLevel < Level
   HAZARD_KINDS = [ TotpEnemy, PasskeyEnemy ]
   HAZARD_PITCH = 760
 
-  # The password the player is building — the glyphs walked into so far. Only this
-  # level tracks it, so it's a private ivar here rather than state on the player.
-  def initialize
-    super
-    @collected = []
-  end
-
-  # Record a padlock's character; called from PasswordCharacter#collect in Main's tick.
-  def collect_password_character(glyph) = @collected << glyph
-
   def number = 1
 
   def title = "Password Complexity"
@@ -55,7 +45,6 @@ class PasswordLevel < Level
   end
 
   def setup(args)
-    @collected = []
     @platforms = Platform.scatter
     @holes = Hole.scatter
     @collectables = scatter_chars(@platforms)
@@ -78,7 +67,7 @@ class PasswordLevel < Level
   def next_level = TotpLevel.new
 
   def draw_hud(args)
-    PASSWORD_LENGTH.times { |slot| draw_password_slot(args, slot, @collected[slot]) }
+    PASSWORD_LENGTH.times { |slot| draw_password_slot(args, slot, collected[slot]) }
   end
 
   # Prod the player to sweep up the characters, then flip to "head right" once the
@@ -152,14 +141,19 @@ class PasswordLevel < Level
   end
 
   def fail_validation(args)
-    @collected = []
     @collectables.each { |c| c.alive = true if c.is_a?(PasswordCharacter) }
     @validation_error_at = args.state.tick_count
   end
 
-  def held_count(klass) = @collected.count { |g| PasswordCharacter.klass_of(g) == klass }
+  def collected
+    @collectables.select { |c| c.is_a?(PasswordCharacter) && !c.alive? }
+                 .sort_by(&:pickup_order)
+                 .map(&:glyph)
+  end
 
-  def collected_count = @collected.size
+  def held_count(klass) = collected.count { |g| PasswordCharacter.klass_of(g) == klass }
+
+  def collected_count = collected.size
 
   def scatter_chars(platforms)
     spots = ground_spots + platform_spots(platforms)

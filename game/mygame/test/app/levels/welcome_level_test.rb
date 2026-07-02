@@ -57,15 +57,16 @@ class WelcomeLevelTest < Minitest::Test
     assert_equal 1, @level.enemies.length
   end
 
-  def test_on_collect_heals_but_does_not_complete
-    @level.on_collect(@args)
+  def test_grabbing_the_heart_heals_but_does_not_complete
+    heal
+    assert @level.send(:healed?)
     refute @level.complete?
   end
 
   def test_update_sends_a_rightbound_enemy_in_from_the_left_after_the_heal
     @level.setup(@args)
     @args.state.camera_x = 0
-    @level.on_collect(@args)
+    heal
     @level.update(@args)
 
     assert_equal 1, @level.enemies.length
@@ -79,7 +80,7 @@ class WelcomeLevelTest < Minitest::Test
 
   def test_defeating_the_combat_enemy_drops_a_certificate_but_does_not_complete
     @level.setup(@args)
-    @level.on_collect(@args)
+    heal
     @level.update(@args)                     # spawns the combat enemy
     @level.enemies.first.alive = false  # player stomped it
     @level.update(@args)
@@ -91,7 +92,7 @@ class WelcomeLevelTest < Minitest::Test
 
   def test_completes_once_the_certificate_is_collected
     @level.setup(@args)
-    @level.on_collect(@args)
+    heal
     @level.update(@args)
     @level.enemies.first.alive = false
     @level.update(@args)                     # drops the certificate
@@ -104,7 +105,7 @@ class WelcomeLevelTest < Minitest::Test
 
   def test_combat_enemy_defeat_does_not_complete_while_locked
     @level.setup(@args)
-    @level.on_collect(@args)
+    heal
     @level.update(@args)
     @level.enemies.first.alive = false
     @args.state.player.locked = true         # bumped it — re-auth in progress
@@ -164,5 +165,15 @@ class WelcomeLevelTest < Minitest::Test
 
   def test_world_fits_one_screen
     assert_equal SCREEN_W, @level.world_w
+  end
+
+  private
+
+  # Simulate the player grabbing the heal heart: drop a retired one onto the level's
+  # collectables, the way a real pickup leaves it. #healed? reads it back.
+  def heal
+    heart = HeartPickup.new(x: 0, y: GROUND_Y)
+    heart.alive = false
+    @level.collectables << heart
   end
 end

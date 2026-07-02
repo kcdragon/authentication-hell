@@ -1,14 +1,13 @@
-# A certificate of completion — each level's goal. Walking into it finishes the
-# level, replacing the old "reach the right wall" trigger. There's no per-player
-# effect: the level latches completion off the retired certificate (alive: false),
-# so #collect is a no-op. Pickup collision lives in Main's tick, like the other
-# collectables; lives on the level's collectables.
+# A certificate of completion — each level's goal, finished by walking into it (the
+# level latches completion off the retired certificate).
 class Certificate
+  include Collectable
+
   SIZE = 60
   LIFT = 30 # px the certificate floats above its surface
   BOB = 6 # px of vertical drift so it reads as a floating pickup
 
-  attr_accessor :x, :y, :w, :h, :alive
+  attr_accessor :x, :y, :w, :h
 
   def initialize(x:, y: GROUND_Y)
     @x = x
@@ -20,9 +19,7 @@ class Certificate
 
   def hitbox = { x: @x, y: @y, w: @w, h: @h }
 
-  # Walked into: nothing to apply — the level detects the consumed certificate
-  # (alive flipped false by the pickup loop) to latch completion.
-  def collect(args) = nil
+  def collect(_player) = nil
 
   def render(args, camera_x = 0)
     bob = Math.sin(args.state.tick_count / 15.0) * BOB

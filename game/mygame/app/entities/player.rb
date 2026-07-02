@@ -59,6 +59,7 @@ class Player
     @slow_until_tick = 0
     @reached_platform = false
     @prev_y = @y
+    @pickup_count = 0
   end
 
   # Move left/right with the arrow keys (no wrapping — clamp to screen); space
@@ -115,6 +116,16 @@ class Player
 
   def hurt(args)
     @blink_until_tick = args.state.tick_count + BLINK_TICKS
+  end
+
+  def heal
+    @hearts = [ @hearts + 1, MAX_HEARTS ].min
+  end
+
+  def record_pickup
+    seq = @pickup_count
+    @pickup_count += 1
+    seq
   end
 
   def on_collision(other, args)

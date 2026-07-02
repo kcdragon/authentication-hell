@@ -22,7 +22,6 @@ class WelcomeLevel < Level
 
   def initialize
     super
-    @healed = false
     @combat_spawned = false
     @certificate_dropped = false
   end
@@ -50,7 +49,7 @@ class WelcomeLevel < Level
       enemy = TutorialEnemy.new(x: args.state.camera_x + SCREEN_W)
       enemy.march_left(ENEMY_SPEED)
       @enemies = [ enemy ]
-    elsif @healed && !@combat_spawned
+    elsif healed? && !@combat_spawned
       enemy = PasswordEnemy.new(x: args.state.camera_x - Enemy::WIDTH)
       enemy.march_right(ENEMY_SPEED, max: world_w)
       @enemies = [ enemy ]
@@ -77,8 +76,6 @@ class WelcomeLevel < Level
     x = (args.state.player.x + 220).clamp(0, world_w - HeartPickup::SIZE)
     @collectables << HeartPickup.new(x: x, y: GROUND_Y + HeartPickup::LIFT)
   end
-
-  def on_collect(_args) = @healed = true
 
   def complete? = @cleared == true
 
@@ -113,6 +110,8 @@ class WelcomeLevel < Level
 
   private
 
+  def healed? = @collectables.any? { |c| c.is_a?(HeartPickup) && !c.alive? }
+
   def beats(args)
     player = args.state.player
     [
@@ -120,8 +119,8 @@ class WelcomeLevel < Level
       [ player.moved,                                  [ "Press Space to jump onto the ledge" ] ],
       [ player.reached_platform,                       [ "Run into the enemy",
                                                          "to learn the re-auth →" ] ],
-      [ @collectables.any?(&:alive),                   [ "Grab the heart to heal" ] ],
-      [ @healed,                                       [ "Fight back — jump on its head",
+      [ @collectables.any?(&:alive?),                  [ "Grab the heart to heal" ] ],
+      [ healed?,                                       [ "Fight back — jump on its head",
                                                          "to stomp it",
                                                          "← Defeat the enemy on the left" ] ],
       [ @certificate_dropped,                          [ "Grab your certificate",

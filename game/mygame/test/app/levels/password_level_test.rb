@@ -24,7 +24,7 @@ class PasswordLevelTest < Minitest::Test
     stage([ "A" ]) # stale, from a prior run
     @level.setup(@args)
 
-    assert_equal [], @level.instance_variable_get(:@collected)
+    assert_empty @level.send(:collected)
   end
 
   def test_setup_scatters_at_least_one_padlock_of_every_class
@@ -92,13 +92,12 @@ class PasswordLevelTest < Minitest::Test
   def test_a_full_but_unbalanced_password_is_rejected_and_reset
     @level.setup(@args)
     # Eight characters, but 3 upper / 2 lower / 2 digit / only 1 symbol — invalid.
-    stage(%w[A B C a b 2 3 !])
-    @level.collectables.each { |c| c.alive = false } # pretend the field was picked clean
+    stage(%w[A B C a b 2 3 !]) # the retired padlocks stand in for a picked-clean field
     @level.update(@args)
 
     refute(@level.collectables.any? { |c| c.is_a?(Certificate) }, "an invalid password doesn't finish")
-    assert_empty @level.instance_variable_get(:@collected), "the rejected password is cleared"
-    assert(@level.collectables.all?(&:alive), "every padlock respawns at its spot")
+    assert_empty @level.send(:collected), "the rejected password is cleared"
+    assert(@level.collectables.all?(&:alive?), "every padlock respawns at its spot")
     assert @level.validation_error_active?(@args), "the invalid-password banner is showing"
   end
 
@@ -179,9 +178,17 @@ class PasswordLevelTest < Minitest::Test
 
   private
 
-  # Walk the level's collected-password state forward the way the game does — through
-  # the public collect hook — rather than poking a player field.
-  def stage(glyphs) = glyphs.each { |g| @level.collect_password_character(g) }
+  # Simulate a collected password: replace the field with retired padlocks carrying the
+  # given glyphs, in pickup order — exactly what #collected reads back from the world.
+  def stage(glyphs)
+    staged = glyphs.each_with_index.map do |g, i|
+      char = PasswordCharacter.new(x: 0, klass: PasswordCharacter.klass_of(g), glyph: g)
+      char.alive = false
+      char.instance_variable_set(:@pickup_order, i)
+      char
+    end
+    @level.instance_variable_set(:@collectables, staged)
+  end
 
   def collect_all
     stage(PasswordCharacter::CLASSES.flat_map { |klass| Array.new(PasswordLevel::REQUIRED_PER_CLASS, glyph_for(klass)) })
