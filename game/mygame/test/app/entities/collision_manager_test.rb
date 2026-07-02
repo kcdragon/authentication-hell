@@ -95,6 +95,27 @@ class CollisionManagerTest < Minitest::Test
     assert_equal Player::MAX_HEARTS, player.hearts
   end
 
+  # Landing on two enemies in one frame stomps both: the first bounce flips @vy positive,
+  # but the player must still classify the second as a stomp, not take a hit from it.
+  def test_stomping_two_enemies_at_once_defeats_both_without_docking_the_player
+    player = Player.new
+    e1 = PasswordEnemy.new(x: player.x)
+    e2 = PasswordEnemy.new(x: player.x) # both overlap the player
+    player.y = e1.y + e1.h - 6 # descending onto their heads
+    player.vy = -5
+    player.grounded = false
+    @manager.add(e1)
+    @manager.add(e2)
+    @manager.add(player) # player last, as Main does
+    @manager.resolve(build_args(player: player))
+
+    refute e1.alive
+    refute e2.alive
+    assert_equal Player::MAX_HEARTS, player.hearts
+    refute player.locked
+    assert_equal Player::STOMP_BOUNCE, player.vy
+  end
+
   # Collectables ride the same path: the player walking over one retires it and applies
   # its effect via the shared Collectable#on_collision.
   def test_a_heart_pickup_heals_and_retires_when_the_player_reaches_it
