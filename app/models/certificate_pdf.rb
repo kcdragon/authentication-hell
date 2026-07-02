@@ -1,5 +1,3 @@
-require "prawn"
-
 # Renders the "you beat Authentication Hell" certificate as a landscape PDF diploma,
 # in the site's neo-brutalist voice (ink frame, paper ground, Archivo Black display /
 # Space Mono body). A verification QR in the corner links back to the app. Plain Ruby
