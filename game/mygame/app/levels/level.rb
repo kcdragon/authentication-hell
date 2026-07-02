@@ -43,9 +43,6 @@ class Level
   # The level to hand off to once complete? (nil for an endless/terminal stage).
   def next_level = nil
 
-  # Whether the keyboard melee can defeat enemies on this level.
-  def melee? = true
-
   # The level's human-readable name, shown on the intro "chapter card" (the chapter
   # number itself is derived from #number, so each level only supplies a title).
   def title = "Authentication Hell"

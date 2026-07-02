@@ -17,10 +17,6 @@ class TotpLevelTest < Minitest::Test
     assert_equal SCREEN_W, @level.world_w
   end
 
-  def test_melee_is_live
-    assert @level.melee?
-  end
-
   def test_allows_five_minutes
     assert_equal 300, @level.time_limit
   end

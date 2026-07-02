@@ -84,16 +84,16 @@ class Enemy
   # The CollisionManager alerts the enemy the tick something first touches it; the
   # enemy owns this interaction (the aggressor) and drives the player's reaction
   # through the player's own methods. Coming down on top stomps it (defeated, player
-  # bounces, no heart lost — gated on the level's melee? so the welcome lesson still
-  # forces the challenge); a buffering enemy lags the player instead; otherwise it's a
-  # side/ground hit that retires the enemy and docks the player (unless they're
+  # bounces, no heart lost); a buffering enemy lags the player instead; otherwise it's
+  # a side/ground hit that retires the enemy and docks the player (unless they're
   # mid-blink invincible). The network POST + game-over stay in Main, which watches
   # the player state this sets. Only the player interacts with an enemy — the manager
   # is type-blind, so ignore anything else it pairs us with (e.g. another enemy).
+  # Subclasses that must force the challenge (the tutorial's gate) override this.
   def on_collision(other, args)
     return unless other.is_a?(Player)
 
-    if args.state.level.melee? && other.stomping?(self)
+    if other.stomping?(self)
       @alive = false
       args.state.level.record_kill
       other.bounce

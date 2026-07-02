@@ -21,7 +21,7 @@ class EnemyTest < Minitest::Test
   def test_stomp_defeats_the_enemy_and_bounces_the_player
     enemy = PasswordEnemy.new(x: @player.x)
     stomp_the(enemy)
-    level = PasswordLevel.new # melee? is true
+    level = PasswordLevel.new
     enemy.on_collision(@player, build_args(level: level))
 
     refute enemy.alive
@@ -59,17 +59,6 @@ class EnemyTest < Minitest::Test
     assert enemy.alive, "the enemy survives a hit that lands during invincibility"
     assert_equal Player::MAX_HEARTS, @player.hearts
     refute @player.locked
-  end
-
-  def test_melee_off_turns_a_would_be_stomp_into_the_re_auth
-    enemy = PasswordEnemy.new(x: @player.x)
-    stomp_the(enemy)
-    level = WelcomeLevel.new # melee? is false until the heal
-    enemy.on_collision(@player, build_args(level: level, tick_count: 0))
-
-    assert_equal Player::MAX_HEARTS - 1, @player.hearts, "no stomp — the hit re-auths"
-    assert @player.locked
-    assert_equal 0, level.kills
   end
 
   def test_ignores_a_non_player_partner

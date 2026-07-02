@@ -12,15 +12,6 @@ class WelcomeLevelTest < Minitest::Test
     assert_equal 200, @level.start_x
   end
 
-  def test_melee_is_off_during_the_reauth_lesson
-    refute @level.melee?
-  end
-
-  def test_melee_turns_on_after_the_heal
-    @level.on_collect(@args)
-    assert @level.melee?
-  end
-
   def test_setup_seeds_a_reachable_ledge_and_no_enemy_yet
     @level.setup(@args)
     assert_empty @level.enemies
@@ -50,6 +41,7 @@ class WelcomeLevelTest < Minitest::Test
 
     assert_equal 1, @level.enemies.length
     enemy = @level.enemies.first
+    assert_instance_of TutorialEnemy, enemy  # the gate you must re-auth past, not stomp
     assert_equal :password, enemy.auth
     assert_equal SCREEN_W, enemy.x          # enters at the right edge of the view
     assert_operator enemy.vx, :<, 0          # marching left
@@ -78,7 +70,7 @@ class WelcomeLevelTest < Minitest::Test
 
     assert_equal 1, @level.enemies.length
     enemy = @level.enemies.first
-    assert_equal :password, enemy.auth
+    assert_instance_of PasswordEnemy, enemy  # an ordinary enemy — meant to be stomped
     assert_equal(-Enemy::WIDTH, enemy.x)     # enters just off the left edge
     assert_operator enemy.vx, :>, 0          # marching right
     assert_equal enemy.x, enemy.patrol_min_x # won't wander back past its entry

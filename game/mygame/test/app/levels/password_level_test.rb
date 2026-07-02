@@ -16,10 +16,6 @@ class PasswordLevelTest < Minitest::Test
     assert_equal WORLD_W, @level.world_w
   end
 
-  def test_melee_is_live
-    assert @level.melee?
-  end
-
   def test_starts_at_the_left_edge
     assert_equal 0, @level.start_x
   end
