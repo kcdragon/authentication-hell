@@ -86,7 +86,7 @@ class Enemy
 
     if stompable? && other.stomping?(self)
       @alive = false
-      args.state.level.record_kill
+      args.state.kills += 1
     elsif slows?
       @alive = false
     elsif !other.invincible?(args)

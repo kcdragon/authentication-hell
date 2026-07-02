@@ -104,13 +104,13 @@ class CollisionManagerTest < Minitest::Test
     player.y = enemy.y + enemy.h - 6 # descending onto its head
     player.vy = -5
     player.grounded = false
-    level = PasswordLevel.new
+    args = build_args(player: player)
     @manager.add(enemy)
     @manager.add(player)
-    @manager.resolve(build_args(player: player, level: level))
+    @manager.resolve(args)
 
     refute enemy.alive
-    assert_equal 1, level.kills
+    assert_equal 1, args.state.kills
     assert_equal Player::STOMP_BOUNCE, player.vy
     assert_equal Player::MAX_HEARTS, player.hearts
   end

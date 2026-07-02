@@ -470,6 +470,7 @@ module Main
   def setup_level(args)
     args.state.player.x = args.state.level.start_x
     args.state.camera_x = 0
+    args.state.kills = 0 # per-level tally, scored into that level's summary
     args.state.level.setup(args)
   end
 
@@ -493,7 +494,7 @@ module Main
   # finish time) for the results card, which the world freezes behind until Space.
   def begin_level_summary(args)
     ticks = args.state.level.run_ticks(args.state.tick_count)
-    args.state.level_summary = Score.for(kills: args.state.level.kills, ticks: ticks,
+    args.state.level_summary = Score.for(kills: args.state.kills, ticks: ticks,
                                         hearts: args.state.player.hearts,
                                         time_limit: args.state.level.time_limit)
                                    .merge(title: args.state.level.title,

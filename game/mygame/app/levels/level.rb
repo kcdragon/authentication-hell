@@ -4,7 +4,7 @@
 # talks to the server (the TOTP level) does so from #update via the Network layer,
 # whose HTTP/JSON globals are stubbed in tests.
 class Level
-  attr_reader :enemies, :platforms, :collectables, :holes, :kills
+  attr_reader :enemies, :platforms, :collectables, :holes
 
   def self.build(number)
     case number
@@ -19,7 +19,6 @@ class Level
     @platforms = []
     @collectables = []
     @holes = []
-    @kills = 0
   end
 
   # Seed the level's enemies / platforms / collectables / holes for this stage.
@@ -99,9 +98,6 @@ class Level
       overlap > player.w * 3 / 4
     end
   end
-
-  # Count a stomped enemy toward this level's score.
-  def record_kill = @kills += 1
 
   # Stamp the tick the level's clock starts: the intro card runs from here and the
   # countdown/scoring both measure elapsed from here. Main sets it on level entry.

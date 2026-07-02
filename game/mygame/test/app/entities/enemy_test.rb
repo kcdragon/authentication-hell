@@ -25,11 +25,11 @@ class EnemyTest < Minitest::Test
   def test_a_stomp_defeats_it_and_records_a_kill
     enemy = PasswordEnemy.new(x: @player.x)
     stomp_the(enemy)
-    level = PasswordLevel.new
-    enemy.on_collision(@player, build_args(level: level))
+    args = build_args(kills: 0)
+    enemy.on_collision(@player, args)
 
     refute enemy.alive
-    assert_equal 1, level.kills
+    assert_equal 1, args.state.kills
   end
 
   def test_a_buffering_enemy_is_spent_on_a_side_hit
