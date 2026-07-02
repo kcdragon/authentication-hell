@@ -17,36 +17,6 @@ class LevelTest < Minitest::Test
     [ 0, 1, 2 ].each { |n| assert_equal n, Level.build(n).number }
   end
 
-  # --- platform_landing_top: the query the player asks instead of reading platforms ---
-
-  def platform_level
-    level = Level.new
-    # top edge at y = 280; seeded directly since #platforms is read-only.
-    level.instance_variable_set(:@platforms, [ Platform.new(x: 180, y: 250, w: 200, h: 30) ])
-    level
-  end
-
-  def test_platform_landing_top_returns_the_top_when_feet_cross_it_while_descending
-    player = Player.new
-    player.x = 200
-    player.y = 275 # feet now below the platform top
-    assert_equal 280, platform_level.platform_landing_top(player, 285) # prev_y was above it
-  end
-
-  def test_platform_landing_top_is_nil_when_not_over_the_platform_horizontally
-    player = Player.new
-    player.x = 1000
-    player.y = 275
-    assert_nil platform_level.platform_landing_top(player, 285)
-  end
-
-  def test_platform_landing_top_is_nil_when_feet_have_not_crossed_the_top
-    player = Player.new
-    player.x = 200
-    player.y = 285 # still above the top (passing up through it)
-    assert_nil platform_level.platform_landing_top(player, 300)
-  end
-
   # --- over_hole?: the pit query the player asks instead of reading holes ---
 
   def hole_level

@@ -111,17 +111,36 @@ class PlayerTest < Minitest::Test
     refute @player.reached_platform # landing on the ground is not a platform
   end
 
+  # Landing is now the player's reaction to a platform contact the CollisionManager
+  # reports (Player#on_collision), so drive it there. @prev_y (set by #update before
+  # gravity) is what makes the platform one-way.
+  def descend_onto(platform, prev_y:)
+    @player.instance_variable_set(:@prev_y, prev_y)
+    @player.on_collision(platform, build_args)
+  end
+
   def test_lands_on_a_platform_while_descending
     platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
     @player.x = 200
-    @player.y = 285
+    @player.y = 275 # feet dipped below the top this frame
     @player.vy = -10
     @player.grounded = false
-    @player.update(build_args(platforms: [ platform ]))
+    descend_onto(platform, prev_y: 285) # was above the top last frame
     assert_equal 280, @player.y
     assert_equal 0, @player.vy
     assert @player.grounded
     assert @player.reached_platform
+  end
+
+  def test_does_not_land_when_rising_up_through_a_platform
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    @player.x = 200
+    @player.y = 275
+    @player.vy = 10 # ascending
+    @player.grounded = false
+    descend_onto(platform, prev_y: 270) # feet were below the top last frame
+    refute @player.grounded
+    refute @player.reached_platform
   end
 
   # --- falling through holes ---
