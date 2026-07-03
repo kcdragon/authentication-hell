@@ -124,12 +124,6 @@ module Main
       args.state.player.lock_confirmed = true
     end
 
-    # Fire-and-forget level report: drop the (non-serializable) handle once it
-    # lands so the per-tick state export doesn't choke on it.
-    if args.state.level_complete_request && args.state.level_complete_request[:complete]
-      args.state.level_complete_request = nil
-    end
-
     Network::Death.maybe_complete(args.state)
 
     poll_unlock(args) if args.state.player.locked && args.state.player.lock_confirmed
@@ -397,13 +391,14 @@ module Main
     )
   end
 
-  # Tell the Rails app the player cleared a level (records progress + grants its achievement).
+  # Tell the Rails app the player cleared a level (records progress + grants its
+  # achievement). Fire-and-forget — we never read the result.
   def report_level_complete(args, level)
-    args.state.level_complete_request = Network::Levels.complete(args, level)
+    Network::Levels.complete(args, level)
   end
 
   def report_now_playing(args, level)
-    args.state.now_playing_request = Network::Levels.playing(args, level)
+    Network::Levels.playing(args, level)
   end
 
   # Poll /games/<kind>/status (~twice a second) while frozen; unfreeze once the
