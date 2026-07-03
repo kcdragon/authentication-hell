@@ -15,3 +15,5 @@ cloudflare:
   secret_access_key: <%= Rails.application.credentials.dig(:r2, :secret_access_key) %>
   region: auto
   bucket: <%= Rails.application.credentials.dig(:r2, :bucket) %>
+  request_checksum_calculation: when_required
+  response_checksum_validation: when_required
