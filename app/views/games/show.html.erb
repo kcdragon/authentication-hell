@@ -37,7 +37,9 @@
       container is fixed to the bottom-right and stacks toasts as a column, so it
       floats over the page without shifting the game layout. %>
   <%= turbo_stream_from Current.user, :toasts %>
-  <div id="toasts" class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2"></div>
+  <div id="toasts" class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2">
+    <%= render "games/certificate_toast" if Current.user.beat_game? %>
+  </div>
 
   <%# The game canvas + its loader live in the <iframe> above; this page only needs
       the chrome's JS. The game_page layout omits the app-wide importmap, so declare

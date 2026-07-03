@@ -17,6 +17,24 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show surfaces the certificate claim toast once the game is beaten" do
+    @user.update!(highest_level_completed: GameLevel.all.last.number)
+    sign_in_as(@user)
+
+    get game_url
+    assert_response :success
+    assert_match certificate_path, response.body
+    assert_match "Claim your certificate", response.body
+  end
+
+  test "show hides the certificate claim toast until the game is beaten" do
+    sign_in_as(@user)
+
+    get game_url
+    assert_response :success
+    assert_no_match(/Claim your certificate/, response.body)
+  end
+
   test "start requires authentication" do
     get game_start_url
     assert_redirected_to new_session_path
