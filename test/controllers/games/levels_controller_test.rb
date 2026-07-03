@@ -154,6 +154,28 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 2, @user.reload.now_playing_level
   end
 
+  test "starting a level after beating the game clears the certificate toast" do
+    @user.update!(highest_level_completed: GameLevel.all.last.number)
+    sign_in_as(@user)
+
+    streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+      post games_levels_playing_url, params: { level: 0 }
+    end
+
+    assert(streams.any? { |s| s.to_html.include?("certificate_toast") },
+      "expected the certificate toast to be removed when replaying a level")
+  end
+
+  test "starting a level before beating the game broadcasts no toast" do
+    sign_in_as(@user)
+
+    streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+      post games_levels_playing_url, params: { level: 0 }
+    end
+
+    assert_empty streams
+  end
+
   test "playing ignores an unknown level" do
     sign_in_as(@user)
 

@@ -29,6 +29,7 @@ class GamesController < ApplicationController
       if (frontier && level.number <= frontier) || Rails.env.development?
         session[:selected_level] = level.number
         mark_now_playing(level)
+        clear_completion_toast_if_beaten
       end
     end
     render layout: "game_frame"
@@ -38,6 +39,7 @@ class GamesController < ApplicationController
     number = session.delete(:selected_level) || Current.user.current_level&.number || 0
     level = GameLevel.find(number)
     mark_now_playing(level) if level
+    clear_completion_toast_if_beaten
     award_active_achievements
     render json: { start_level: number }
   end

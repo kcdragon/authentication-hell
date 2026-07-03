@@ -108,6 +108,51 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, streams.size
   end
 
+  test "starting the run after beating the game clears the certificate toast" do
+    @user.update!(highest_level_completed: GameLevel.all.last.number)
+    sign_in_as(@user)
+
+    streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+      get game_start_url
+    end
+
+    assert(streams.any? { |s| s.to_html.include?("certificate_toast") },
+      "expected the certificate toast to be removed when the run starts")
+  end
+
+  test "starting the run before beating the game broadcasts no toast" do
+    sign_in_as(@user)
+
+    streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+      get game_start_url
+    end
+
+    assert_empty streams
+  end
+
+  test "selecting a level after beating the game clears the certificate toast" do
+    @user.update!(highest_level_completed: GameLevel.all.last.number)
+    sign_in_as(@user)
+
+    streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+      get game_frame_url(level: 0)
+    end
+
+    assert(streams.any? { |s| s.to_html.include?("certificate_toast") },
+      "expected the certificate toast to be removed when selecting a level")
+  end
+
+  test "a plain frame load leaves the certificate toast in place" do
+    @user.update!(highest_level_completed: GameLevel.all.last.number)
+    sign_in_as(@user)
+
+    streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+      get game_frame_url
+    end
+
+    assert_empty streams
+  end
+
   test "frame does not touch now playing on a plain load with no selection" do
     @user.update!(highest_level_completed: 2, now_playing_level: 2)
     sign_in_as(@user)

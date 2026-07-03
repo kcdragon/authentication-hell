@@ -35,13 +35,14 @@ if dev_passkey
   end
 end
 
-# A spread of players to exercise the leaderboard. Level and achievement count are
-# deliberately uncorrelated (e.g. ada is furthest but least decorated, grace is the
-# reverse) so the two sort columns produce visibly different orderings.
+# A spread of players to exercise the leaderboard. The dev user (mike) has beaten the
+# game — furthest and fully decorated. Among the rest, level and achievement count are
+# deliberately uncorrelated (e.g. ada is further than grace but less decorated, grace is
+# the reverse) so the two sort columns produce visibly different orderings.
 # Idempotent — grant_achievement/record_level_completed are no-ops once set.
 leaderboard_players = [
   { username: "ada",      level: 1,   achievements: %w[ passkey_survivor ] },
-  { username: "mike",     level: 1,   achievements: %w[ level_0_complete password_survivor totp_survivor ] },
+  { username: "mike",     level: 2,   achievements: %w[ level_0_complete level_1_complete level_2_complete password_survivor totp_survivor passkey_survivor graduate ] },
   { username: "grace",    level: 0,   achievements: Achievement.keys },
   { username: "linus",    level: 0,   achievements: %w[ level_0_complete password_survivor totp_survivor passkey_survivor ] },
   { username: "margaret", level: nil, achievements: %w[ password_survivor totp_survivor ] }
@@ -57,6 +58,10 @@ leaderboard_players.each do |attrs|
   player.record_level_completed(attrs[:level]) if attrs[:level]
   attrs[:achievements].each { |key| player.grant_achievement(key) }
 end
+
+# The dev user has beaten the game — issue the certificate so the claim link resolves.
+user.mark_certified!
+user.ensure_certificate_token!
 
 # Pre-enroll the dev user with a fixed secret (JBSWY3DPEHPK3PXP) so a fresh DB
 # doesn't force re-enrollment — add it to your authenticator once. Dev only.

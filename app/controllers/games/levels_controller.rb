@@ -19,6 +19,7 @@ class Games::LevelsController < ApplicationController
     return head(:no_content) unless level
 
     mark_now_playing(level)
+    clear_completion_toast_if_beaten
     head :no_content
   end
 
