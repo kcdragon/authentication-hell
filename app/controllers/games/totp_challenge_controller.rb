@@ -10,7 +10,7 @@ class Games::TotpChallengeController < ApplicationController
     Current.session.game_challenges.find_or_create_by!(kind: "totp")
     Turbo::StreamsChannel.broadcast_append_to(
       Current.user, :toasts,
-      target: "toasts",
+      target: Game::Toasts::PERMANENT_CONTAINER,
       partial: "games/totp_challenge",
       locals: { user: Current.user }
     )

@@ -108,29 +108,19 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, streams.size
   end
 
-  test "starting the run after beating the game clears the certificate toast" do
-    @user.update!(highest_level_completed: GameLevel.all.last.number)
+  test "starting the run wipes the permanent toasts so a stale challenge can't linger" do
     sign_in_as(@user)
+    post games_level_totp_start_url # leaves a "Link a temporary authenticator" toast in #permanent_toasts
 
     streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
       get game_start_url
     end
 
-    assert(streams.any? { |s| s.to_html.include?("certificate_toast") },
-      "expected the certificate toast to be removed when the run starts")
+    assert(streams.any? { |s| s["action"] == "update" && s["target"] == Game::Toasts::PERMANENT_CONTAINER },
+      "expected the permanent toasts to be wiped when the run starts")
   end
 
-  test "starting the run before beating the game broadcasts no toast" do
-    sign_in_as(@user)
-
-    streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
-      get game_start_url
-    end
-
-    assert_empty streams
-  end
-
-  test "selecting a level after beating the game clears the certificate toast" do
+  test "selecting a level wipes the permanent toasts so a stale challenge can't linger" do
     @user.update!(highest_level_completed: GameLevel.all.last.number)
     sign_in_as(@user)
 
@@ -138,8 +128,8 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
       get game_frame_url(level: 0)
     end
 
-    assert(streams.any? { |s| s.to_html.include?("certificate_toast") },
-      "expected the certificate toast to be removed when selecting a level")
+    assert(streams.any? { |s| s["action"] == "update" && s["target"] == Game::Toasts::PERMANENT_CONTAINER },
+      "expected the permanent toasts to be wiped when selecting a level")
   end
 
   test "a plain frame load leaves the certificate toast in place" do

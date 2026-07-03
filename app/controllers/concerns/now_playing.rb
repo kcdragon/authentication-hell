@@ -8,7 +8,7 @@ module NowPlaying
     Game::PlaylistBroadcaster.call(Current.user)
   end
 
-  def clear_completion_toast_if_beaten
-    Game::CompletionBroadcaster.clear(Current.user) if Current.user.beat_game?
+  def clear_permanent_toasts
+    Turbo::StreamsChannel.broadcast_update_to(Current.user, :toasts, target: Game::Toasts::PERMANENT_CONTAINER, html: "")
   end
 end
