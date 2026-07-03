@@ -6,6 +6,9 @@
 class Level
   attr_reader :enemies, :platforms, :collectables, :holes
 
+  HEART_DROP_CHANCE = 0.20
+  REWIND_DROP_CHANCE = 0.25
+
   def self.build(number)
     case number
     when 1 then PasswordLevel.new
@@ -95,6 +98,16 @@ class Level
     ((tick - @started_at) / (time_limit * 60).to_f).clamp(0.0, 1.0)
   end
 
+  def rewind(seconds, now)
+    return unless @started_at
+    @started_at = [ @started_at + seconds * 60, now ].min
+  end
+
+  def drop_loot(enemy)
+    drop = loot_for(enemy)
+    @collectables << drop if drop
+  end
+
   # Whether the level-intro "chapter card" is still playing (world frozen behind it).
   def intro_active?(tick) = !@intro_at.nil? && (tick - @intro_at) < LEVEL_INTRO_TICKS
 
@@ -139,4 +152,16 @@ class Level
   def serialize = { level: self.class.name }
   def inspect = serialize.to_s
   def to_s = serialize.to_s
+
+  private
+
+  def loot_for(enemy)
+    roll = rand
+    if roll < HEART_DROP_CHANCE
+      HeartPickup.new(x: enemy.x.clamp(0, world_w - HeartPickup::SIZE), y: GROUND_Y + HeartPickup::LIFT)
+    elsif roll < HEART_DROP_CHANCE + REWIND_DROP_CHANCE
+      RewindPickup.new(x: enemy.x.clamp(0, world_w - RewindPickup::SIZE),
+                       y: GROUND_Y + RewindPickup::LIFT, level: self)
+    end
+  end
 end

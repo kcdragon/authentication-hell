@@ -45,9 +45,7 @@ class TotpLevel < Level
 
   def start_x = SCREEN_W / 2 - Player::WIDTH / 2
 
-  # Linking an authenticator and entering three codes from consecutive windows takes a
-  # while — give the player five minutes instead of the usual two.
-  def time_limit = 300
+  def time_limit = 60
 
   def setup(args)
     @holes = []
@@ -162,10 +160,10 @@ class TotpLevel < Level
     @last_wave_at = args.state.tick_count
     kind = WAVE_KINDS[@wave_count % WAVE_KINDS.length]
     if @wave_count.even?
-      enemy = kind.new(x: -Enemy::WIDTH)
+      enemy = kind.new(x: -Enemy::WIDTH, level: self)
       enemy.march_right(ENEMY_SPEED, max: world_w)
     else
-      enemy = kind.new(x: world_w)
+      enemy = kind.new(x: world_w, level: self)
       enemy.march_left(ENEMY_SPEED)
     end
     @enemies << enemy

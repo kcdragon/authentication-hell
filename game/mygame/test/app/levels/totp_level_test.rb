@@ -17,8 +17,8 @@ class TotpLevelTest < Minitest::Test
     assert_equal SCREEN_W, @level.world_w
   end
 
-  def test_allows_five_minutes
-    assert_equal 300, @level.time_limit
+  def test_allows_only_sixty_seconds
+    assert_equal 60, @level.time_limit
   end
 
   def test_is_the_final_level

@@ -279,21 +279,21 @@ class PlayerTest < Minitest::Test
   # --- stomping enemies ---
 
   def test_stomping_when_descending_onto_an_enemys_head
-    enemy = PasswordEnemy.new(x: @player.x) # top at GROUND_Y + HEIGHT
+    enemy = PasswordEnemy.new(x: @player.x, level: enemy_level) # top at GROUND_Y + HEIGHT
     @player.y = enemy.y + enemy.h - 6 # feet just below the head, well above the midpoint
     @player.vy = -5 # descending
     assert @player.stomping?(enemy)
   end
 
   def test_not_stomping_while_rising_into_an_enemy
-    enemy = PasswordEnemy.new(x: @player.x)
+    enemy = PasswordEnemy.new(x: @player.x, level: enemy_level)
     @player.y = enemy.y + enemy.h - 6
     @player.vy = 5 # moving up
     refute @player.stomping?(enemy)
   end
 
   def test_not_stomping_on_a_side_or_ground_hit
-    enemy = PasswordEnemy.new(x: @player.x)
+    enemy = PasswordEnemy.new(x: @player.x, level: enemy_level)
     @player.y = GROUND_Y # feet on the ground, low on the enemy's body
     @player.vy = 0
     refute @player.stomping?(enemy)
@@ -302,7 +302,7 @@ class PlayerTest < Minitest::Test
   # After bouncing off one enemy this tick, a second one under the feet is still a
   # stomp even though the bounce flipped @vy positive.
   def test_still_stomping_after_bouncing_this_tick
-    enemy = PasswordEnemy.new(x: @player.x)
+    enemy = PasswordEnemy.new(x: @player.x, level: enemy_level)
     @player.y = enemy.y + enemy.h - 6
     @player.bounce
     assert @player.stomping?(enemy)
@@ -318,7 +318,7 @@ class PlayerTest < Minitest::Test
   # --- reacting to a collision (Player#on_collision) ---
 
   def test_bounces_off_a_stomped_enemy
-    enemy = PasswordEnemy.new(x: @player.x)
+    enemy = PasswordEnemy.new(x: @player.x, level: enemy_level)
     @player.y = enemy.y + enemy.h - 6 # feet on its head, descending
     @player.vy = -5
     @player.grounded = false
@@ -330,7 +330,7 @@ class PlayerTest < Minitest::Test
   end
 
   def test_takes_a_hit_from_a_side_contact
-    enemy = TotpEnemy.new(x: @player.x) # feet on the ground, not descending
+    enemy = TotpEnemy.new(x: @player.x, level: enemy_level) # feet on the ground, not descending
     @player.on_collision(enemy, build_args(tick_count: 0))
 
     assert_equal Player::MAX_HEARTS - 1, @player.hearts
@@ -341,7 +341,7 @@ class PlayerTest < Minitest::Test
 
   def test_a_fatal_hit_drops_to_zero_hearts_without_locking
     @player.hearts = 1
-    enemy = TotpEnemy.new(x: @player.x)
+    enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
     @player.on_collision(enemy, build_args(tick_count: 0))
 
     assert_equal 0, @player.hearts
@@ -350,7 +350,7 @@ class PlayerTest < Minitest::Test
   end
 
   def test_slows_from_a_buffering_enemy
-    enemy = BufferingEnemy.new(x: @player.x)
+    enemy = BufferingEnemy.new(x: @player.x, level: enemy_level)
     @player.on_collision(enemy, build_args(tick_count: 0))
 
     assert @player.slowed?(1)
@@ -359,7 +359,7 @@ class PlayerTest < Minitest::Test
   end
 
   def test_a_stomp_on_an_unstompable_enemy_re_auths_instead_of_bouncing
-    enemy = TutorialEnemy.new(x: @player.x)
+    enemy = TutorialEnemy.new(x: @player.x, level: enemy_level)
     @player.y = enemy.y + enemy.h - 6 # would be a stomp on a normal enemy
     @player.vy = -5
     @player.grounded = false
@@ -372,7 +372,7 @@ class PlayerTest < Minitest::Test
 
   def test_ignores_a_collision_while_invincible
     @player.hurt(build_args(tick_count: 0)) # blink window open
-    enemy = TotpEnemy.new(x: @player.x)
+    enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
     @player.on_collision(enemy, build_args(tick_count: 1))
 
     assert_equal Player::MAX_HEARTS, @player.hearts

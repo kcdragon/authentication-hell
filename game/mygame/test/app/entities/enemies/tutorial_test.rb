@@ -8,7 +8,7 @@ class TutorialEnemyTest < Minitest::Test
 
   def setup
     @player = Player.new
-    @enemy = TutorialEnemy.new(x: @player.x)
+    @enemy = TutorialEnemy.new(x: @player.x, level: enemy_level)
   end
 
   def test_looks_and_authenticates_like_a_password_enemy

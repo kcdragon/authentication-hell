@@ -46,11 +46,11 @@ class WelcomeLevel < Level
   # left edge, marching right, for the player to defeat with a stomp.
   def update(args)
     if args.state.player.reached_platform && @enemies.empty? && !@combat_spawned
-      enemy = TutorialEnemy.new(x: args.state.camera_x + SCREEN_W)
+      enemy = TutorialEnemy.new(x: args.state.camera_x + SCREEN_W, level: self)
       enemy.march_left(ENEMY_SPEED)
       @enemies = [ enemy ]
     elsif healed? && !@combat_spawned
-      enemy = PasswordEnemy.new(x: args.state.camera_x - Enemy::WIDTH)
+      enemy = PasswordEnemy.new(x: args.state.camera_x - Enemy::WIDTH, level: self)
       enemy.march_right(ENEMY_SPEED, max: world_w)
       @enemies = [ enemy ]
       @combat_spawned = true

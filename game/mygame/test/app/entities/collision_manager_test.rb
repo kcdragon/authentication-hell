@@ -69,7 +69,7 @@ class CollisionManagerTest < Minitest::Test
   # reaction mutates the state it reads.
   def test_a_side_hit_defeats_the_enemy_and_docks_the_player
     player = Player.new
-    enemy = TotpEnemy.new(x: player.x) # bodies overlap; feet on the ground → side hit
+    enemy = TotpEnemy.new(x: player.x, level: enemy_level) # bodies overlap; feet on the ground → side hit
     @manager.add(enemy)
     @manager.add(player)
     @manager.resolve(build_args(player: player, tick_count: 0))
@@ -81,7 +81,7 @@ class CollisionManagerTest < Minitest::Test
 
   def test_a_stomp_defeats_the_enemy_and_bounces_the_player
     player = Player.new
-    enemy = PasswordEnemy.new(x: player.x)
+    enemy = PasswordEnemy.new(x: player.x, level: enemy_level)
     player.y = enemy.y + enemy.h - 6 # descending onto its head
     player.vy = -5
     player.grounded = false
@@ -99,8 +99,8 @@ class CollisionManagerTest < Minitest::Test
   # but the player must still classify the second as a stomp, not take a hit from it.
   def test_stomping_two_enemies_at_once_defeats_both_without_docking_the_player
     player = Player.new
-    e1 = PasswordEnemy.new(x: player.x)
-    e2 = PasswordEnemy.new(x: player.x) # both overlap the player
+    e1 = PasswordEnemy.new(x: player.x, level: enemy_level)
+    e2 = PasswordEnemy.new(x: player.x, level: enemy_level) # both overlap the player
     player.y = e1.y + e1.h - 6 # descending onto their heads
     player.vy = -5
     player.grounded = false
