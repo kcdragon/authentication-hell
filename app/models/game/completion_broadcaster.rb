@@ -3,6 +3,10 @@ class Game::CompletionBroadcaster
     new(user).call
   end
 
+  def self.clear(user)
+    Turbo::StreamsChannel.broadcast_remove_to(user, :toasts, target: ApplicationController.helpers.certificate_toast_id)
+  end
+
   def initialize(user)
     @user = user
   end
