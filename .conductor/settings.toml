@@ -2,5 +2,13 @@
 
 [scripts]
 setup = ".conductor/setup.sh && bin/setup --skip-server"
-run = "PORT=$CONDUCTOR_PORT bin/dev"
 run_mode = "concurrent"
+
+[scripts.run.app]
+command = "PORT=$CONDUCTOR_PORT bin/dev"
+default = true
+icon = "flame"
+
+[scripts.run.rubyconf]
+command = "cd talks/rubyconf && { [ -d node_modules ] || npm install; } && npm run dev -- --port $CONDUCTOR_PORT"
+icon = "presentation"
