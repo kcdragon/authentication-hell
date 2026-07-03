@@ -4,5 +4,20 @@
       "Bash(gh signoff)",
       "Bash(gh signoff:*)"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cmd=\"$(jq -r '.tool_input.command // empty')\"; if printf '%s' \"$cmd\" | grep -Eq '(^|[;&|]+)[[:space:]]*git[[:space:]]+push([[:space:]]|$|[;&|])'; then echo '↻ git push detected — running bin/ci' >&2; if bin/ci >&2; then exit 0; else echo 'bin/ci FAILED after the push — it is NOT done until CI is green; investigate and fix before continuing.' >&2; exit 2; fi; fi",
+            "timeout": 900,
+            "statusMessage": "git push detected — running bin/ci"
+          }
+        ]
+      }
+    ]
   }
 }
