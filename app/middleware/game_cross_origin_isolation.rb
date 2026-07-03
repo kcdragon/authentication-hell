@@ -24,6 +24,7 @@ class GameCrossOriginIsolation
       headers["Cross-Origin-Resource-Policy"] = "same-origin"
       headers["Cross-Origin-Embedder-Policy"] = "require-corp"
       headers["Cross-Origin-Opener-Policy"] = "same-origin"
+      headers["cache-control"] = "public, max-age=#{1.year.to_i}, immutable"
     end
 
     [ status, headers, body ]
