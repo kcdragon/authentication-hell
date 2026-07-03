@@ -13,28 +13,14 @@ class Enemy
   attr_accessor :x, :y, :w, :h, :alive, :auth, :r, :g, :b,
                 :vx, :patrol_min_x, :patrol_max_x
 
-  # Two of each kind, scattered across the world: one per evenly spaced slot (so
-  # they spread out) starting a safe gap to the right of the player (who carries
-  # their position over from the welcome level) so none can collide on load, each at a
-  # random x within its slot. Listed here (not a constant) so the subclasses —
-  # required after this file — are already defined when spawn runs.
-  def self.spawn_random(player_x)
-    kinds = [ TotpEnemy, TotpEnemy, PasskeyEnemy, PasskeyEnemy, PasswordEnemy, PasswordEnemy ].shuffle
-    start = [ player_x + SAFE_GAP, 800 ].max
-    slot = (WORLD_W - start - WIDTH) / kinds.length
-    kinds.map.with_index do |kind, i|
-      x = start + i * slot + rand([ slot - WIDTH, 0 ].max)
-      kind.new(x: x)
-    end
-  end
-
-  def initialize(x:)
+  def initialize(x:, level:)
     @x = x
     @y = GROUND_Y
     @w = WIDTH
     @h = HEIGHT
     @auth = self.class::AUTH
     @alive = true
+    @level = level
     @patrol_min_x = @x - PATROL_RANGE
     @patrol_max_x = @x + PATROL_RANGE
     @vx = [ -1, 1 ].sample * (1 + rand(2)) # 1–2 px/frame, random direction
@@ -85,11 +71,11 @@ class Enemy
     return unless other.is_a?(Player)
 
     if stompable? && other.stomping?(self)
-      @alive = false
+      die
     elsif slows?
-      @alive = false
+      die
     elsif !other.invincible?(args)
-      @alive = false
+      die
     end
   end
 
@@ -111,4 +97,11 @@ class Enemy
 
   def inspect = serialize.to_s
   def to_s = serialize.to_s
+
+  private
+
+  def die
+    @alive = false
+    @level.drop_loot(self)
+  end
 end

@@ -59,6 +59,8 @@ module GameTest
   # like it does in the running game; pass a WelcomeLevel to exercise the
   # one-screen bound. Any passed platforms/enemies/collectables/holes are seeded
   # onto the level (where they live), so the code under test reads them there.
+  def enemy_level = @enemy_level ||= Level.new
+
   def build_args(left: false, right: false, e: false,
                  space: false, down: false, s: false, camera_x: 0, platforms: nil, enemies: nil,
                  collectables: nil, player: nil, level: PasswordLevel.new, tick_count: 0,

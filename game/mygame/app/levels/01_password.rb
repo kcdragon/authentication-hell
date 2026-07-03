@@ -183,7 +183,7 @@ class PasswordLevel < Level
     start = player_x + Enemy::SAFE_GAP
     count = ((CHAR_END_X - start) / HAZARD_PITCH).to_i + 1
     count.times.map do |i|
-      HAZARD_KINDS[i % HAZARD_KINDS.length].new(x: start + i * HAZARD_PITCH)
+      HAZARD_KINDS[i % HAZARD_KINDS.length].new(x: start + i * HAZARD_PITCH, level: self)
     end
   end
 end

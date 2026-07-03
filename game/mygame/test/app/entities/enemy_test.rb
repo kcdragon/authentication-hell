@@ -19,11 +19,11 @@ class EnemyTest < Minitest::Test
   end
 
   def test_is_stompable_by_default
-    assert TotpEnemy.new(x: 0).stompable?
+    assert TotpEnemy.new(x: 0, level: enemy_level).stompable?
   end
 
   def test_a_stomp_defeats_it
-    enemy = PasswordEnemy.new(x: @player.x)
+    enemy = PasswordEnemy.new(x: @player.x, level: enemy_level)
     stomp_the(enemy)
     enemy.on_collision(@player, build_args)
 
@@ -31,36 +31,58 @@ class EnemyTest < Minitest::Test
   end
 
   def test_a_buffering_enemy_is_spent_on_a_side_hit
-    enemy = BufferingEnemy.new(x: @player.x) # feet on the ground
+    enemy = BufferingEnemy.new(x: @player.x, level: enemy_level) # feet on the ground
     enemy.on_collision(@player, build_args(tick_count: 0))
     refute enemy.alive
   end
 
   def test_a_side_hit_defeats_it
-    enemy = TotpEnemy.new(x: @player.x) # feet on the ground, not descending
+    enemy = TotpEnemy.new(x: @player.x, level: enemy_level) # feet on the ground, not descending
     enemy.on_collision(@player, build_args(tick_count: 0))
     refute enemy.alive
   end
 
   def test_survives_a_hit_while_the_player_is_invincible
     @player.hurt(build_args(tick_count: 0)) # blink window open
-    enemy = TotpEnemy.new(x: @player.x)
+    enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
     enemy.on_collision(@player, build_args(tick_count: 1))
     assert enemy.alive
   end
 
   def test_leaves_the_player_alone
-    enemy = TotpEnemy.new(x: @player.x)
+    enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
     enemy.on_collision(@player, build_args(tick_count: 0))
     assert_equal Player::MAX_HEARTS, @player.hearts, "the player's reaction is its own concern"
     refute @player.locked
   end
 
   def test_ignores_a_non_player_partner
-    enemy = TotpEnemy.new(x: @player.x)
-    other = TotpEnemy.new(x: @player.x) # two enemies overlapping
+    enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
+    other = TotpEnemy.new(x: @player.x, level: enemy_level) # two enemies overlapping
     enemy.on_collision(other, build_args(tick_count: 0))
     assert enemy.alive, "enemies don't collide with each other"
     assert other.alive
+  end
+
+  def test_a_defeated_enemy_drops_loot_into_its_level
+    level = Level.new
+    drop = HeartPickup.new(x: 0, y: GROUND_Y)
+    level.define_singleton_method(:loot_for) { |_e| drop }
+    enemy = TotpEnemy.new(x: @player.x, level: level)
+
+    enemy.on_collision(@player, build_args(tick_count: 0)) # side hit → dies
+    refute enemy.alive
+    assert_includes level.collectables, drop
+  end
+
+  def test_a_surviving_enemy_drops_no_loot
+    level = Level.new
+    level.define_singleton_method(:loot_for) { |_e| flunk "no drop unless it dies" }
+    @player.hurt(build_args(tick_count: 0)) # invincibility window open
+    enemy = TotpEnemy.new(x: @player.x, level: level)
+
+    enemy.on_collision(@player, build_args(tick_count: 1)) # player invincible → survives
+    assert enemy.alive
+    assert_empty level.collectables
   end
 end

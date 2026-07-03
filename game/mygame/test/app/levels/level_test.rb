@@ -44,4 +44,44 @@ class LevelTest < Minitest::Test
     assert_empty Level.new.holes
     refute Level.new.over_hole?(player)
   end
+
+  def test_rewind_gives_time_back
+    level = TotpLevel.new
+    level.begin_clock(0)
+    forty_seconds_in = 40 * 60
+    before = level.progress(forty_seconds_in)
+    level.rewind(30, forty_seconds_in)
+    assert_operator level.progress(forty_seconds_in), :<, before
+  end
+
+  def test_rewind_clamps_at_the_level_start
+    level = TotpLevel.new
+    level.begin_clock(0)
+    ten_seconds_in = 10 * 60
+    level.rewind(30, ten_seconds_in)
+    assert_equal 0.0, level.progress(ten_seconds_in), "elapsed can't drop below zero"
+  end
+
+  def test_rewind_is_inert_before_the_clock_starts
+    level = TotpLevel.new
+    level.rewind(30, 100)
+    assert_equal 0.0, level.progress(100)
+  end
+
+  def test_drop_loot_appends_the_rolled_pickup
+    level = Level.new
+    drop = HeartPickup.new(x: 300, y: GROUND_Y)
+    level.define_singleton_method(:loot_for) { |_e| drop }
+
+    level.drop_loot(TotpEnemy.new(x: 300, level: level))
+    assert_includes level.collectables, drop
+  end
+
+  def test_drop_loot_appends_nothing_on_an_empty_roll
+    level = Level.new
+    level.define_singleton_method(:loot_for) { |_e| nil }
+
+    level.drop_loot(TotpEnemy.new(x: 300, level: level))
+    assert_empty level.collectables
+  end
 end
