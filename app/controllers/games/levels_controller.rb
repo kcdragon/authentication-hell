@@ -38,7 +38,7 @@ class Games::LevelsController < ApplicationController
   # certificate.
   def beat_game
     Achievement::Awarder.call(Current.user, :graduate)
-    GenerateCertificatePdfJob.perform_later(Current.user, root_url)
+    GenerateCertificatePdfJob.perform_later(Current.user, certificate_verify_url(token: Current.user.certificate_token!))
     Game::PlaylistBroadcaster.call(Current.user)
     Game::CompletionBroadcaster.call(Current.user)
   end

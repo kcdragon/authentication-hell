@@ -75,18 +75,13 @@ class CertificatePdf
     centered(doc, 330, @user.username, font: "Display", size: 46)
 
     centered(doc, 250, completion_line, font: "Mono", size: 13, color: INK, width: 560, leading: 6)
-    centered(doc, 150, "Awarded #{completion_date.to_fs(:long)}",
+    centered(doc, 150, "Awarded #{@user.certificate_awarded_on.to_fs(:long)}",
       font: "Mono", style: :bold, size: 13, spacing: 1, color: MUTED)
   end
 
   def completion_line
     "has descended through every circle of Authentication Hell — passwords, " \
     "time-based one-time passwords, and passkeys — and lived to tell of it."
-  end
-
-  def completion_date
-    graduated = @user.earned_achievements.find_by(achievement_key: "graduate")
-    (graduated&.created_at || Time.current).to_date
   end
 
   # A verification QR + label in the bottom-left, inside the frame.

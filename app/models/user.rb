@@ -158,7 +158,7 @@ class User < ApplicationRecord
 
   def reset_progress!
     transaction do
-      update!(highest_level_completed: nil, now_playing_level: nil)
+      update!(highest_level_completed: nil, now_playing_level: nil, certificate_token: nil)
       earned_achievements.delete_all
     end
     certificate_pdf.purge_later
@@ -184,6 +184,18 @@ class User < ApplicationRecord
 
   def beat_game?
     highest_level_completed.to_i >= GameLevel.all.last.number
+  end
+
+  # A stable, unguessable token for the public certificate verification URL, minted the
+  # first time it's needed (when the player beats the game or views their certificate).
+  def certificate_token!
+    certificate_token.presence || update!(certificate_token: SecureRandom.urlsafe_base64(24)) && certificate_token
+  end
+
+  # The date the certificate bears — when the game was beaten (the Graduate grant),
+  # falling back to today for a player who beat it before that achievement existed.
+  def certificate_awarded_on
+    (earned_achievements.find_by(achievement_key: "graduate")&.created_at || Time.current).to_date
   end
 
   private

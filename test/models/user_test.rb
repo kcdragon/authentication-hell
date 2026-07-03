@@ -253,6 +253,26 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 0, user.earned_achievements.count
   end
 
+  test "reset_progress! clears the certificate token so old verify links stop resolving" do
+    user = users(:one)
+    user.certificate_token!
+
+    user.reset_progress!
+
+    assert_nil user.reload.certificate_token
+  end
+
+  test "certificate_token! mints a stable, unguessable token" do
+    user = users(:one)
+    assert_nil user.certificate_token
+
+    token = user.certificate_token!
+
+    assert_predicate token, :present?
+    assert_equal token, user.reload.certificate_token
+    assert_equal token, user.certificate_token!, "the token is stable once minted"
+  end
+
   test "current_level is the first level before any are cleared" do
     user = users(:one)
     assert_nil user.highest_level_completed

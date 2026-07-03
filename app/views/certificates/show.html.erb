@@ -1,6 +1,6 @@
 <% content_for :title, "Authentication Hell — Certificate" %>
 
-<% share_url = root_url %>
+<% share_url = @verify_url %>
 <% share_text = "I just survived Authentication Hell 😈🔐 — the full credential gauntlet. Think you can beat it?" %>
 
 <% content_for :head do %>
@@ -22,27 +22,8 @@
   </div>
 
   <%# On-screen certificate — mirrors the downloadable PDF. %>
-  <div class="ah-card mt-8 bg-paper p-2 sm:p-3">
-    <div class="border-2 border-password rounded-[3px] px-6 py-10 sm:px-10 text-center">
-      <p class="font-mono font-bold text-xs uppercase tracking-[0.3em] text-muted">Authentication Hell</p>
-      <h2 class="font-display text-3xl sm:text-4xl uppercase tracking-tight mt-4">Certificate of Completion</h2>
-      <div class="mx-auto mt-4 h-1.5 w-24 bg-password"></div>
-
-      <p class="font-mono text-xs uppercase tracking-[0.2em] text-muted mt-8">This certifies that</p>
-      <p class="font-display text-4xl sm:text-5xl mt-3"><%= Current.user.username %></p>
-
-      <p class="ah-hint mt-6 max-w-xl mx-auto text-[15px]">
-        has descended through every circle of Authentication Hell — passwords, time-based
-        one-time passwords, and passkeys — and lived to tell of it.
-      </p>
-
-      <div class="flex items-end justify-between gap-4 mt-10">
-        <%= certificate_qr_code(share_url) %>
-        <p class="font-mono font-bold text-xs uppercase tracking-widest text-muted text-right">
-          Awarded<br><%= Date.current.to_fs(:long) %>
-        </p>
-      </div>
-    </div>
+  <div class="mt-8">
+    <%= render "certificates/certificate", user: Current.user, verify_url: @verify_url %>
   </div>
 
   <div class="mt-6 flex flex-wrap items-center justify-center gap-3">

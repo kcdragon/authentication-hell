@@ -1,12 +1,13 @@
-# The "you beat Authentication Hell" certificate. Reachable only once the player has
-# cleared the final level (otherwise back to the game). Serves an HTML page with
-# social-share buttons and a true PDF download; #share grants the Influencer achievement.
+# The "you beat Authentication Hell" certificate. #show and #share are the owner's
+# (auth-gated, reachable only once the final level is cleared); #verify is a public,
+# token-gated page anyone can view — the URL the QR and share links point at.
 class CertificatesController < ApplicationController
-  before_action :require_completed_game
+  allow_unauthenticated_access only: :verify
+  before_action :require_completed_game, except: :verify
 
   def show
     respond_to do |format|
-      format.html
+      format.html { @verify_url = verify_url }
       format.pdf do
         send_data certificate_pdf,
           filename: "authentication-hell-certificate.pdf",
@@ -14,6 +15,14 @@ class CertificatesController < ApplicationController
           disposition: params[:download] ? "attachment" : "inline"
       end
     end
+  end
+
+  # Public proof of completion. Unguessable token ⇒ no enumeration; a token only exists
+  # once its owner has beaten the game (cleared on progress reset), so it always points
+  # at a real completion.
+  def verify
+    @user = User.find_by!(certificate_token: params[:token])
+    @verify_url = certificate_verify_url(token: params[:token])
   end
 
   def share
@@ -29,8 +38,12 @@ class CertificatesController < ApplicationController
   def certificate_pdf
     return Current.user.certificate_pdf.download if Current.user.certificate_pdf.attached?
 
-    GenerateCertificatePdfJob.perform_later(Current.user, root_url)
-    CertificatePdf.call(Current.user, verify_url: root_url)
+    GenerateCertificatePdfJob.perform_later(Current.user, verify_url)
+    CertificatePdf.call(Current.user, verify_url: verify_url)
+  end
+
+  def verify_url
+    certificate_verify_url(token: Current.user.certificate_token!)
   end
 
   def require_completed_game

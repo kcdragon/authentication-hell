@@ -1,0 +1,25 @@
+<% content_for :title, "#{@user.username} beat Authentication Hell" %>
+
+<% content_for :head do %>
+  <meta property="og:title" content="<%= @user.username %> beat Authentication Hell">
+  <meta property="og:description" content="Verified completion of Authentication Hell — the full credential gauntlet.">
+  <meta property="og:url" content="<%= @verify_url %>">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+<% end %>
+
+<div class="mx-auto w-full max-w-3xl">
+  <div class="text-center">
+    <span class="ah-badge ah-badge--success">✓ Verified</span>
+    <h1 class="text-4xl mt-4"><%= @user.username %> beat Authentication Hell</h1>
+    <p class="ah-hint mt-3 text-base">This certificate of completion is genuine.</p>
+  </div>
+
+  <div class="mt-8">
+    <%= render "certificates/certificate", user: @user, verify_url: @verify_url %>
+  </div>
+
+  <div class="mt-6 flex flex-wrap items-center justify-center gap-3">
+    <%= link_to "▶ Think you can beat it? Play", root_path, class: "ah-btn ah-btn--primary" %>
+  </div>
+</div>
