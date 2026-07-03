@@ -44,7 +44,7 @@ class Games::LevelTotpChallengeController < ApplicationController
 
   def broadcast_toast(challenge)
     Turbo::StreamsChannel.broadcast_append_to(
-      Current.user, :toasts, target: "toasts",
+      Current.user, :toasts, target: Game::Toasts::PERMANENT_CONTAINER,
       partial: "games/level_totp_challenge",
       locals: { user: Current.user, challenge: challenge }
     )
@@ -52,7 +52,7 @@ class Games::LevelTotpChallengeController < ApplicationController
 
   def broadcast_result_toast(challenge, result)
     Turbo::StreamsChannel.broadcast_append_to(
-      Current.user, :toasts, target: "toasts",
+      Current.user, :toasts, target: Game::Toasts::EPHEMERAL_CONTAINER,
       partial: "games/level_totp_result",
       locals: { result: result_toast(challenge, result) }
     )
@@ -62,7 +62,7 @@ class Games::LevelTotpChallengeController < ApplicationController
     return unless challenge&.registered? && (code = challenge.next_code)
 
     Turbo::StreamsChannel.broadcast_append_to(
-      Current.user, :toasts, target: "toasts",
+      Current.user, :toasts, target: Game::Toasts::PERMANENT_CONTAINER,
       partial: "games/level_totp_dev_code",
       locals: { user: Current.user, code: code }
     )

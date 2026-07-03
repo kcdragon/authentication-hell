@@ -22,10 +22,10 @@ class Games::DeathsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 2, streams.size
     clear, notice = streams
     assert_equal "update", clear["action"]
-    assert_equal "toasts", clear["target"]
+    assert_equal Game::Toasts::PERMANENT_CONTAINER, clear["target"]
 
     assert_equal "append", notice["action"]
-    assert_equal "toasts", notice["target"]
+    assert_equal Game::Toasts::EPHEMERAL_CONTAINER, notice["target"]
     assert_includes notice.to_html, "Video ended"
 
     get games_totp_status_url

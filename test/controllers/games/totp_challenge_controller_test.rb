@@ -21,7 +21,7 @@ class Games::TotpChallengeControllerTest < ActionDispatch::IntegrationTest
     assert_equal 1, streams.size
     broadcast = streams.first
     assert_equal "append", broadcast["action"]
-    assert_equal "toasts", broadcast["target"]
+    assert_equal Game::Toasts::PERMANENT_CONTAINER, broadcast["target"]
     assert_includes broadcast.to_html, "Re-authenticate with your TOTP code"
 
     assert_response :no_content

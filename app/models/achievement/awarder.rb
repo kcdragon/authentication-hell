@@ -17,7 +17,7 @@ class Achievement::Awarder
 
     Turbo::StreamsChannel.broadcast_append_to(
       @user, :toasts,
-      target: "toasts",
+      target: Game::Toasts::EPHEMERAL_CONTAINER,
       partial: "games/achievement_toast",
       locals: { achievement: Achievement.find(@key) }
     )

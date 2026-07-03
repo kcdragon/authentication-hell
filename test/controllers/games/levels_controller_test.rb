@@ -154,26 +154,18 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
     assert_equal 2, @user.reload.now_playing_level
   end
 
-  test "starting a level after beating the game clears the certificate toast" do
-    @user.update!(highest_level_completed: GameLevel.all.last.number)
+  test "starting a level wipes the permanent toasts so stale challenges can't linger" do
     sign_in_as(@user)
+    post games_level_totp_start_url
+    assert @user.sessions.last.temporary_totp_challenge.present?,
+      "expected the TOTP level challenge (its toast is permanent) to be active"
 
     streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
       post games_levels_playing_url, params: { level: 0 }
     end
 
-    assert(streams.any? { |s| s.to_html.include?("certificate_toast") },
-      "expected the certificate toast to be removed when replaying a level")
-  end
-
-  test "starting a level before beating the game broadcasts no toast" do
-    sign_in_as(@user)
-
-    streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
-      post games_levels_playing_url, params: { level: 0 }
-    end
-
-    assert_empty streams
+    assert(streams.any? { |s| s["action"] == "update" && s["target"] == Game::Toasts::PERMANENT_CONTAINER },
+      "expected the permanent toasts to be wiped on level start")
   end
 
   test "playing ignores an unknown level" do

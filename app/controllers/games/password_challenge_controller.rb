@@ -10,7 +10,7 @@ class Games::PasswordChallengeController < ApplicationController
     Current.session.game_challenges.find_or_create_by!(kind: "password")
     Turbo::StreamsChannel.broadcast_append_to(
       Current.user, :toasts,
-      target: "toasts",
+      target: Game::Toasts::PERMANENT_CONTAINER,
       partial: "games/password_challenge",
       locals: { user: Current.user }
     )
