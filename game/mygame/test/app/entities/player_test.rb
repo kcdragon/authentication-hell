@@ -143,6 +143,79 @@ class PlayerTest < Minitest::Test
     refute @player.reached_platform
   end
 
+  # --- dropping through platforms (down arrow) ---
+
+  def test_down_arrow_leaves_the_ledge_underfoot
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    @player.x = 200
+    @player.y = 280 # standing on the ledge
+    @player.vy = 0
+    @player.grounded = true
+    @player.update(build_args(down: true, platforms: [ platform ]))
+    refute @player.grounded, "pressing down releases the ledge"
+    assert_operator @player.y, :<, 280, "and starts falling below it"
+  end
+
+  def test_s_key_also_leaves_the_ledge_underfoot
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    @player.x = 200
+    @player.y = 280
+    @player.vy = 0
+    @player.grounded = true
+    @player.update(build_args(s: true, platforms: [ platform ]))
+    refute @player.grounded, "S drops just like the down arrow"
+    assert_operator @player.y, :<, 280
+  end
+
+  def test_a_dropping_player_falls_through_instead_of_re_landing
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    @player.x = 200
+    @player.y = 280
+    @player.grounded = true
+    @player.update(build_args(down: true, platforms: [ platform ])) # begin the drop
+    # The collision manager still reports contact this frame; land_on must ignore it.
+    @player.on_collision(platform, build_args)
+    refute @player.grounded, "the ledge underfoot no longer catches a dropping player"
+    assert_operator @player.y, :<, 280
+  end
+
+  def test_down_arrow_does_nothing_on_the_ground
+    @player.y = GROUND_Y
+    @player.vy = 0
+    @player.grounded = true
+    @player.update(build_args(down: true))
+    assert @player.grounded, "you can't drop through the world floor"
+    assert_equal GROUND_Y, @player.y
+  end
+
+  def test_drop_completes_and_lands_on_the_ground_below
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    @player.x = 200
+    @player.y = 280
+    @player.grounded = true
+    @player.update(build_args(down: true, platforms: [ platform ])) # begin the drop
+    40.times { @player.update(build_args) } # keep falling, no input
+    assert_equal GROUND_Y, @player.y, "settles on the floor once the drop has cleared"
+    assert @player.grounded
+  end
+
+  # A stomp mid-drop flips @vy upward; the drop must clear so landing works again
+  # rather than leaving the player permanently falling through every ledge.
+  def test_a_dropping_player_who_bounces_can_land_again
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    @player.x = 200
+    @player.y = 280
+    @player.grounded = true
+    @player.update(build_args(down: true, platforms: [ platform ])) # begin the drop
+    @player.bounce             # stomp an enemy on the way down → upward vy
+    @player.update(build_args) # the rising tick ends the drop
+    @player.vy = -10           # now come back down onto a ledge
+    @player.y = 275
+    descend_onto(platform, prev_y: 285)
+    assert @player.grounded, "landing works again once the drop has cleared"
+    assert_equal 280, @player.y
+  end
+
   # --- falling through holes ---
 
   def test_falls_through_a_hole_when_most_of_the_body_overhangs

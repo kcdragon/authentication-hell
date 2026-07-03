@@ -44,7 +44,7 @@ end
 # Structs (not Hashes) because the engine's hashes quack like attr_accessor —
 # code reads `keyboard.left`, not `keyboard[:left]` — which plain Ruby hashes don't.
 module GameTest
-  KeyDown = Struct.new(:space, :e)
+  KeyDown = Struct.new(:space, :e, :down, :s)
   Keyboard = Struct.new(:left, :right, :key_down)
   Inputs = Struct.new(:keyboard)
   # captions_on gates the closed caption a level draws (via Caption) in its #draw path.
@@ -60,7 +60,7 @@ module GameTest
   # one-screen bound. Any passed platforms/enemies/collectables/holes are seeded
   # onto the level (where they live), so the code under test reads them there.
   def build_args(left: false, right: false, e: false,
-                 space: false, camera_x: 0, platforms: nil, enemies: nil,
+                 space: false, down: false, s: false, camera_x: 0, platforms: nil, enemies: nil,
                  collectables: nil, player: nil, level: PasswordLevel.new, tick_count: 0,
                  holes: nil)
     # The level's collections are read-only in production (only the level seeds them
@@ -70,7 +70,7 @@ module GameTest
     level.instance_variable_set(:@collectables, collectables) if collectables
     level.instance_variable_set(:@holes, holes) if holes
     Args.new(
-      Inputs.new(Keyboard.new(left, right, KeyDown.new(space, e))),
+      Inputs.new(Keyboard.new(left, right, KeyDown.new(space, e, down, s))),
       State.new(camera_x, player, level, tick_count, nil),
       Outputs.new([], [], [])
     )
