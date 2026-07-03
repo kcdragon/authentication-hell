@@ -77,7 +77,7 @@ class CertificatesControllerTest < ActionDispatch::IntegrationTest
     streams = nil
     assert_difference -> { @user.earned_achievements.count }, 1 do
       streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
-        post certificate_share_url
+        post share_certificate_url
       end
     end
 
@@ -91,7 +91,7 @@ class CertificatesControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@user)
 
     assert_no_difference -> { @user.earned_achievements.count } do
-      post certificate_share_url
+      post share_certificate_url
     end
   end
 

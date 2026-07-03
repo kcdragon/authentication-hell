@@ -1,6 +1,3 @@
-# The owner's "you beat Authentication Hell" certificate — auth-gated, reachable only
-# once the final level is cleared. The public, shareable view lives in
-# Public::CertificatesController.
 class CertificatesController < ApplicationController
   before_action :require_completed_game
   before_action :ensure_certified, only: :show
@@ -24,9 +21,6 @@ class CertificatesController < ApplicationController
 
   private
 
-  # Prefer the copy GenerateCertificatePdfJob cached when the player beat the game;
-  # render on the fly (and backfill the cache) if it hasn't landed yet or predates
-  # this feature.
   def certificate_pdf
     return Current.user.certificate_pdf.download if Current.user.certificate_pdf.attached?
 
@@ -38,9 +32,6 @@ class CertificatesController < ApplicationController
     public_certificate_url(Current.user.ensure_certificate_token!)
   end
 
-  # Guarantees the award date is stamped before any certificate renders, so the PDF and
-  # page can read certificate_awarded_at directly (backfills players who beat the game
-  # before it was recorded).
   def ensure_certified
     Current.user.mark_certified!
   end

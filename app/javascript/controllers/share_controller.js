@@ -1,9 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Wires the certificate's share buttons. Each opens a platform's share intent (or the
-// native share sheet / clipboard), then POSTs to the award path so the server grants
-// the Influencer achievement. We can't verify an external post landed, so any share or
-// copy counts.
 export default class extends Controller {
   static values = { url: String, text: String, awardPath: String }
   static targets = ["native", "copyLabel"]
@@ -16,7 +12,7 @@ export default class extends Controller {
     try {
       await navigator.share({ title: "Authentication Hell", text: this.textValue, url: this.urlValue })
     } catch (e) {
-      if (e.name === "AbortError") return // user dismissed the sheet — no award
+      if (e.name === "AbortError") return
     }
     this.award()
   }
