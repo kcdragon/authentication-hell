@@ -16,16 +16,6 @@ class BufferingEnemy < Enemy
 
   def slows? = true
 
-  # A couple of spinners spread across the world past the player's safe gap (mirrors
-  # Enemy.spawn_random's start), so they never load already touching the player.
-  def self.scatter(player_x, count: 2)
-    start = [ player_x + SAFE_GAP, 1200 ].max
-    slot = (WORLD_W - start - WIDTH) / count
-    count.times.map do |i|
-      new(x: start + i * slot + rand([ slot - WIDTH, 0 ].max))
-    end
-  end
-
   # A ring of segments with one bright "head" that rotates each tick, trailing into a
   # faint tail — the classic buffering spinner. Centered in the body footprint.
   def render(args, camera_x = 0)

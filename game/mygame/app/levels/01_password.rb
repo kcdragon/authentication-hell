@@ -21,10 +21,11 @@ class PasswordLevel < Level
   CHAR_START_X = 700
   CHAR_END_X = 5600
 
-  # The hazards: TOTP/passkey patrols cycling the floor, the first a safe gap past
-  # the player's start so nothing can collide on load. No password enemies — those
-  # are collectables here.
-  HAZARD_KINDS = [ TotpEnemy, PasskeyEnemy ]
+  # The hazards: TOTP/passkey patrols plus buffering spinners (which lag the player
+  # instead of re-authing) cycling the floor, the first a safe gap past the player's
+  # start so nothing can collide on load. No password enemies — those are collectables
+  # here.
+  HAZARD_KINDS = [ TotpEnemy, PasskeyEnemy, BufferingEnemy ]
   HAZARD_PITCH = 760
 
   def number = 1

@@ -33,17 +33,6 @@ class BufferingEnemyTest < Minitest::Test
     assert_operator enemy.x, :<=, max
   end
 
-  # --- scatter ---
-
-  def test_scatter_returns_the_requested_count_clear_of_the_player
-    spinners = BufferingEnemy.scatter(200, count: 2)
-    assert_equal 2, spinners.length
-    spinners.each do |s|
-      assert_operator s.x, :>=, 200 + Enemy::SAFE_GAP
-      assert_operator s.x + Enemy::WIDTH, :<=, WORLD_W
-    end
-  end
-
   def test_render_emits_solids_and_no_sprite
     args = build_args(tick_count: 0)
     BufferingEnemy.new(x: 1500).render(args, 100)

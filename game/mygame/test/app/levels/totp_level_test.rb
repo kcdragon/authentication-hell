@@ -116,7 +116,7 @@ class TotpLevelTest < Minitest::Test
     end
     refute_empty @level.enemies
     assert_operator @level.enemies.count(&:alive), :<=, TotpLevel::WAVE_CAP
-    assert(@level.enemies.all? { |e| %i[totp password passkey].include?(e.auth) })
+    assert(@level.enemies.all? { |e| [ TotpEnemy, PasswordEnemy, PasskeyEnemy, BufferingEnemy ].include?(e.class) })
   end
 
   def test_serialize_names_the_level
