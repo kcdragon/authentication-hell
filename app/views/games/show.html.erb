@@ -55,8 +55,7 @@
         "lib/webauthn_ceremony_controller": "<%= asset_path("lib/webauthn_ceremony_controller.js") %>",
         "controllers/games_passkey_challenge_controller": "<%= asset_path("controllers/games_passkey_challenge_controller.js") %>",
         "controllers/dropdown_controller": "<%= asset_path("controllers/dropdown_controller.js") %>",
-        "controllers/game_frame_controller": "<%= asset_path("controllers/game_frame_controller.js") %>",
-        "controllers/redirect_controller": "<%= asset_path("controllers/redirect_controller.js") %>"
+        "controllers/game_frame_controller": "<%= asset_path("controllers/game_frame_controller.js") %>"
       }
     }
   </script>
@@ -66,12 +65,10 @@
     import GamesPasskeyChallengeController from "controllers/games_passkey_challenge_controller"
     import DropdownController from "controllers/dropdown_controller"
     import GameFrameController from "controllers/game_frame_controller"
-    import RedirectController from "controllers/redirect_controller"
 
     const application = Application.start()
     application.register("games-passkey-challenge", GamesPasskeyChallengeController)
     application.register("dropdown", DropdownController)
     application.register("game-frame", GameFrameController)
-    application.register("redirect", RedirectController)
   </script>
 </div>

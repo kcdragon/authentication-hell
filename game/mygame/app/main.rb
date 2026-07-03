@@ -380,8 +380,7 @@ module Main
                              anchor_x: 0.5, anchor_y: 0.5 }
     args.outputs.solids << { x: 640 - 210, y: 372, w: 420, h: 5,
                              r: GREEN[0], g: GREEN[1], b: GREEN[2] }
-    Ui::Spinner.new(args).draw(640, 320, PAPER)
-    args.outputs.labels << { x: 640, y: 270, text: "loading your certificate...",
+    args.outputs.labels << { x: 640, y: 320, text: "claim your certificate from the toast →",
                              size_px: 22, font: FONT_MONO,
                              r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2],
                              anchor_x: 0.5, anchor_y: 0.5 }

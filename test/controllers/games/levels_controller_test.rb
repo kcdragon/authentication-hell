@@ -99,7 +99,7 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
     assert_nil @user.now_playing_level
   end
 
-  test "beating the final level awards Graduate and redirects the page to the certificate" do
+  test "beating the final level awards Graduate and toasts a certificate claim link" do
     last = GameLevel.all.last
     @user.update!(highest_level_completed: last.number - 1)
     sign_in_as(@user)
@@ -113,8 +113,8 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
 
     assert @user.earned?(:graduate)
     assert(streams.any? { |s| s.to_html.include?("Achievement unlocked") })
-    assert(streams.any? { |s| s.to_html.include?("data-controller=\"redirect\"") },
-      "expected a redirect broadcast to send the page to the certificate")
+    assert(streams.any? { |s| s.to_html.include?(certificate_path) && s.to_html.include?("Course Complete") },
+      "expected a permanent toast linking to the certificate")
   end
 
   test "beating the final level enqueues certificate PDF generation" do

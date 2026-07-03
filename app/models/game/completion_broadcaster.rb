@@ -11,7 +11,7 @@ class Game::CompletionBroadcaster
     Turbo::StreamsChannel.broadcast_append_to(
       @user, :toasts,
       target: "toasts",
-      partial: "games/certificate_redirect"
+      partial: "games/certificate_toast"
     )
   end
 end
