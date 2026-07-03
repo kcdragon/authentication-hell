@@ -22,7 +22,7 @@ class TotpLevel < Level
 
   WAVE_INTERVAL = 150 # ticks between enemy spawns (~2.5s)
   WAVE_CAP = 5        # most enemies alive at once
-  WAVE_KINDS = [ TotpEnemy, PasswordEnemy, PasskeyEnemy ]
+  WAVE_KINDS = [ TotpEnemy, PasswordEnemy, PasskeyEnemy, BufferingEnemy ]
   ENEMY_SPEED = 3
 
   # Number-pad layout: rows top→bottom, then 0 on its own row below the middle column.

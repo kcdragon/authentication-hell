@@ -44,11 +44,14 @@ class PasswordLevelTest < Minitest::Test
     refute_empty grounded, "a row still sits on the floor"
   end
 
-  def test_setup_seeds_only_totp_and_passkey_hazards
+  def test_setup_seeds_totp_passkey_and_buffering_hazards
     @level.setup(@args)
     refute_empty @level.enemies
-    auths = @level.enemies.map(&:auth).uniq.sort
-    assert_equal %i[passkey totp], auths, "password enemies are collectables here, not hazards"
+    kinds = @level.enemies.map(&:class).uniq
+    assert_includes kinds, TotpEnemy
+    assert_includes kinds, PasskeyEnemy
+    assert_includes kinds, BufferingEnemy
+    refute_includes kinds, PasswordEnemy, "password enemies are collectables here, not hazards"
   end
 
   def test_hazards_never_spawn_on_top_of_the_player
