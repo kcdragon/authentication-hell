@@ -61,6 +61,11 @@ gem "image_processing", "~> 1.2"
 # Admin dashboard at /admin, gated to super admins (see config/initializers/avo.rb)
 gem "avo"
 
+# Error monitoring in production (see config/initializers/airbrake.rb)
+group :production do
+  gem "airbrake", "~> 13.0"
+end
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"
