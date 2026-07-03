@@ -306,6 +306,12 @@ class UserTest < ActiveSupport::TestCase
     assert_equal GameLevel.all.map(&:number).max, user.current_level.number
   end
 
+  test "current_level clamps to the last level when highest_level_completed exceeds it" do
+    user = users(:one)
+    user.update!(highest_level_completed: GameLevel.all.map(&:number).max + 1)
+    assert_equal GameLevel.all.map(&:number).max, user.current_level.number
+  end
+
   test "now_playing falls back to current_level when unreported" do
     user = users(:one)
     user.update!(highest_level_completed: 0)
