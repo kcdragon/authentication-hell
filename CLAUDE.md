@@ -1,127 +1,91 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) working in this repo.
 
 ## Overview
 
-Two things live in one repo:
+One repo, two things:
 
-1. **A Rails 8.1 web application** (root) — generated with `rails new --css tailwind --edge`. No domain/auth models exist yet (`app/models` has only `ApplicationRecord`); the presumable goal, per the repo name, is authentication. The one real feature so far is embedding the DragonRuby game (below) at `/game`.
-2. **A bundled copy of DragonRuby GTK** under `game/` — the proprietary game engine binary plus a sample game in `game/mygame/`. The engine and `game/{samples,docs,builds,logs}` are vendored as-is; treat them as a tool, not application code. The game *source* in `game/mygame/` is ours to edit, and the Rails app serves a built copy of it.
+1. **A Rails 8.1 web app** (root) — a gamified auth system: a full credential stack (sign-up, sign-in, email confirmation, password reset, TOTP 2FA, recovery codes, WebAuthn passkeys, profile, achievements) wrapped around an embedded game where colliding with an enemy forces re-authentication mid-play.
+2. **A bundled copy of DragonRuby GTK** under `game/` — the proprietary engine binary plus our game source in `game/mygame/`. Everything under `game/` except `game/mygame/` is vendored as-is; treat it as a tool, not our code.
 
-**How the two connect:** `bin/build-game` packages `game/mygame/` to an HTML5/WASM bundle and unzips it into `public/game_assets/` (a static, gitignored build artifact). Rails serves it at `/game` via `GamesController`. So the game is no longer standalone — it's a build input to the Rails app. See "DragonRuby game served at /game" below.
+**How they connect:** `bin/build-game` packages `game/mygame/` to an HTML5/WASM bundle in `public/game_assets/` (gitignored build artifact); Rails serves it at `/game` via `GamesController`. See "DragonRuby game served at /game".
 
 ## Rails app
 
 ### Stack
-- **Rails 8.1** tracking the `8-1-stable` branch from GitHub (edge — `bundle update rails` pulls new commits).
-- **Ruby 4.0.2** (see `.ruby-version`).
-- **SQLite** for everything, including production (separate DB files per concern: primary, cache, queue, cable — all under `storage/`).
-- **Solid Queue / Solid Cache / Solid Cable** — database-backed adapters, no Redis.
-- **Hotwire** (Turbo + Stimulus) with **importmap** (no JS bundler/npm). **Propshaft** asset pipeline. **Tailwind** via `tailwindcss-rails`.
-- Deploy via **Kamal** (Docker); `config/deploy.yml` still has placeholder servers/IPs.
+- **Rails 8.1** on the edge `8-1-stable` branch (`bundle update rails` pulls new commits). **Ruby 4.0.2** (`.ruby-version`).
+- **SQLite** everywhere including production (separate files per concern under `storage/`); **Solid Queue/Cache/Cable**, no Redis.
+- **Hotwire** (Turbo + Stimulus), **importmap** (no JS bundler/npm), **Propshaft**, **Tailwind** via `tailwindcss-rails`.
+- Deploy via **Kamal** (Docker); `config/deploy.yml` has placeholder servers.
 
 ### Commands
 ```bash
-bin/setup              # install deps, prepare DB, start server (--skip-server to stop short, --reset to reset DB)
-bin/dev                # web server + Tailwind watcher + game watcher together (foreman, Procfile.dev), port 3000
-bin/build-game         # package game/mygame/ to HTML5 and unzip into public/game_assets/ (one-shot)
-bin/watch-game         # build-game once, then rebuild on any change under game/mygame/ (run by bin/dev)
-bin/rails test         # run all tests (Minitest)
-bin/rails test test/models/user_test.rb            # single file
-bin/rails test test/models/user_test.rb:42         # single test by line number
-bin/rails test:system  # Capybara + Selenium system tests (not run in bin/ci by default)
-bin/test-game          # run the DragonRuby game's plain-Ruby unit tests (no engine needed)
-bin/rubocop            # lint (rubocop-rails-omakase house style)
-bin/brakeman           # static security scan
+bin/setup              # install deps, prepare DB, start server (--skip-server, --reset)
+bin/dev                # web + Tailwind watcher + game watcher (foreman, Procfile.dev), port 3000
+bin/build-game         # package game/mygame/ to HTML5 into public/game_assets/ (one-shot)
+bin/watch-game         # build-game once, then rebuild on changes (run by bin/dev)
+bin/rails test         # all tests (Minitest); append path or path:line for one
+bin/rails test:system  # Capybara + Selenium (not in bin/ci)
+bin/test-game          # game's plain-Ruby unit tests (no engine needed)
+bin/rubocop            # lint (rubocop-rails-omakase)
+bin/brakeman           # security scan
 bin/bundler-audit      # gem vulnerability audit
-bin/ci                 # run the full CI pipeline locally (config/ci.rb)
+bin/ci                 # full CI pipeline locally (config/ci.rb)
 ```
 
 ### CI
-`config/ci.rb` (run via `bin/ci`) is the source of truth for what must pass: setup, RuboCop, bundler-audit, importmap audit, Brakeman, `bin/rails test`, and seed replant. **There is no cloud CI** — we use [basecamp/gh-signoff](https://github.com/basecamp/gh-signoff) instead. On a green run `bin/ci`'s final step calls `gh signoff`, which sets the `signoff` commit status; that status is the only required check that unblocks a PR merge.
+There's no cloud CI — `bin/ci` (defined by `config/ci.rb`) runs everything and, on a green run, records the [gh-signoff](https://github.com/basecamp/gh-signoff) status that unblocks a merge. Always run it yourself after every PR push (each push invalidates the prior signoff); never run `gh signoff` by hand.
 
-**`bin/ci` must pass locally before merging** — it's what records the signoff. It needs the gh extension installed once per developer (`gh extension install basecamp/gh-signoff`); without it the final signoff step errors. Branch protection requiring the `signoff` status is configured once with `gh signoff install` (repo admin).
-
-**Always run `bin/ci` after opening a PR, and again after pushing any further commits to it** — it records the signoff that unblocks the merge, and every new push invalidates the prior signoff, so re-running it is part of the PR flow on every push, not an afterthought. **Run it yourself — never ask the user to, never offer to, never wait for permission.** Do not end a turn having pushed a PR without having run `bin/ci`; do not say "want me to run bin/ci?" or defer it as a suggestion. It is a mandatory, automatic step after every PR push, not something to prompt for. Running the game checks (`bin/test-game`, `bin/rubocop`, `bin/build-game`) is not a substitute — `bin/ci` is the only thing that records the signoff.
-
-**Never run `gh signoff` directly.** The signoff must only ever be recorded as `bin/ci`'s final step on a fully green run — calling `gh signoff` by hand would mark the PR green without the checks actually passing.
-
-RuboCop and Brakeman are scoped to *our* code only: everything under `game/` is excluded except `game/mygame/`, and within that, only `main.rb` is linted (`repl.rb` is DragonRuby's vendored console scratch file). See `.rubocop.yml` (`AllCops/Exclude`) and `config/brakeman.yml` (`skip_files`). If you add a new hand-written file under `game/mygame/`, it will be linted by default — that's intended.
+RuboCop and Brakeman scope to *our* code only: all of `game/` is excluded except `game/mygame/main.rb` (see `.rubocop.yml` / `config/brakeman.yml`). New hand-written files under `game/mygame/` are linted by default — intended.
 
 ### Conventions
-- Tailwind compiles to `app/assets/builds/tailwind.css`; `bin/dev` runs `tailwindcss:watch` so edits to `app/assets/tailwind/` rebuild live. Don't hand-edit the built file.
-- The three `db/*_schema.rb` files (cable/cache/queue) are the Solid adapters' schemas — not the app schema. There is no `db/schema.rb` yet because no app migrations exist; one appears after the first `bin/rails generate model`.
-- For `has_secure_password`, uncomment `bcrypt` in the `Gemfile` first (it ships commented out).
-- **Comments are rare — default to none.** Most methods and lines need no comment; a clear name beats a comment. Add one *only* for a genuinely non-obvious *why* — a workaround, a surprising constraint, a subtle ordering. Never restate what the code does, and never narrate intent the method name and body already convey (e.g. `# Lay out the scene` above a method that lays out the scene). **Keep it very short — a single sentence is optimal, and shorter is better.** One sentence is a hard cap: if you're reaching for a second, fix the name or the code instead. Cut every word that isn't load-bearing — no preamble, no restating the obvious half before the *why*. Don't repeat the same rationale on related methods; explain it in one place and let the others stand. Put it on, or directly above, the line it describes.
-- Methods not called from outside their class should be `private` — keep the public surface to what callers actually use. (DragonRuby's mruby lacks `private_class_method`, so in `game/mygame/` prefer an instantiable class with instance methods over class methods when you need privacy — see `app/hint_card.rb`.)
+- Tailwind builds to `app/assets/builds/tailwind.css` (don't hand-edit); `bin/dev` watches `app/assets/tailwind/`.
+- The three `db/*_schema.rb` files are the Solid adapters' schemas, not the app schema. No `db/schema.rb` until the first `bin/rails generate model`.
+- For `has_secure_password`, uncomment `bcrypt` in the `Gemfile` first.
+- **Never add code comments unless I explicitly ask.** Write self-documenting code instead: extract well-named local variables and private methods so intent is clear from the names and structure, not from a comment.
+- Methods not called externally should be `private`. (mruby lacks `private_class_method`, so in `game/mygame/` prefer instance methods on an instantiable class over class methods when you need privacy — see `app/hint_card.rb`.)
 
-### UI surface and visual conventions
+### UI conventions
+- **Two layouts.** `layouts/application.html.erb` is the standard chrome (centered `container mx-auto md:w-2/3 w-full px-5`, top-right authenticated nav in `shared/_navigation.html.erb`, flash in `shared/_flash.html.erb`). `layouts/game.html.erb` is the minimal game shell.
+- **Stock Tailwind v4**, no config/theme. Only custom CSS is the toast keyframes in `app/assets/tailwind/application.css`. Button/input class patterns are copied per view, not extracted: primary `rounded-lg px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium`, secondary `bg-gray-800`, destructive `bg-red-600`; inputs `block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 w-full`; `h1` is `font-bold text-4xl`.
+- **Semantic colors** (keep distinct if restyling): purple = TOTP/2FA, amber/gold = password challenges + achievements, blue = passkeys + primary actions, green = success, red = errors + destructive.
+- **Helpers:** `application_helper#avatar_badge`, `totp_helper#totp_qr_code`; `games/*_helper` compute per-user DOM ids for challenge toasts.
+- **Overlay toasts** (`app/views/games/_*.html.erb`, bottom-right over canvas): three persistent challenge toasts (`_totp_challenge` purple, `_password_challenge` amber, `_passkey_challenge` blue — inline re-auth forms) and two ephemeral fading ones (`_toast`, `_achievement_toast`). Keyframes and the two-animation split are documented in the Tailwind source.
 
-The app is a gamified auth system: a full credential stack (sign-up, sign-in, email confirmation, password reset, TOTP 2FA, recovery codes, WebAuthn passkeys, profile, achievements) wrapped around the embedded game, where colliding with an enemy forces re-authentication mid-play.
+### Game visual re-skin — "The Onboarding Tape"
 
-- **Two layouts.** `layouts/application.html.erb` is the standard chrome: a centered `container mx-auto md:w-2/3 w-full px-5` content column with a top-right authenticated nav (`shared/_navigation.html.erb` — avatar badge + username dropdown: Play / Profile / Passkeys / Two-factor / Sign out) and flash via `shared/_flash.html.erb`. `layouts/game.html.erb` is the minimal game shell (see the DragonRuby section). Pages served under each look different by design.
-- **Styling is stock Tailwind v4**, no customization: system-ui fonts, default palette, no `tailwind.config.js`, no `@theme` tokens. The only custom CSS is the toast keyframes in `app/assets/tailwind/application.css`. Recurring class patterns (not extracted into helpers — copied per view): primary button `rounded-lg px-3.5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium`; secondary/passkey button uses `bg-gray-800`; destructive uses `bg-red-600`; inputs `block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 w-full`; page `h1` is `font-bold text-4xl`.
-- **Semantic color system** — these hues carry meaning and recur across views; keep them distinct if restyling: **purple** = TOTP/2FA, **amber/gold** = password challenges + achievements, **blue** = passkeys (and primary actions), **green** = enabled/success status, **red** = errors + destructive actions.
-- **Presentation helpers:** `application_helper#avatar_badge` (uploaded variant or initial-letter fallback), `totp_helper#totp_qr_code` (inline SVG via rqrcode). The `games/*_helper` files only compute per-user DOM ids for the challenge toasts.
-- **Game overlay toasts** (`app/views/games/_*.html.erb`, fixed bottom-right over the canvas): the three persistent challenge toasts (`_totp_challenge` purple, `_password_challenge` amber, `_passkey_challenge` blue — each an inline re-auth form dismissed only by a valid answer) and two ephemeral auto-fading ones (`_toast` generic collision, `_achievement_toast` gold). The keyframes (`toast-fade`/`toast-collapse` for ephemeral, `challenge-toast-in` for persistent) live in the Tailwind source; comments there explain the two-animation split.
+The game at `/game` is re-skinned (design handoff in `game/README-video-player.md`) to read as an embedded corporate-training video player — the fiction: a new hire thinks they're *watching* "Authentication Hell" but are *playing* the platformer. **Visual-only** — no geometry/collision/camera/resolution change (fixed 1280×720, world 6400px). Character sprites deferred.
 
-#### Game visual re-skin — "The Onboarding Tape" (video-player frame)
+Design tokens + chrome geometry live in `game/mygame/app/constants.rb` (palette as `[r,g,b]`, semantic `BLUE/GREEN/RED/PURPLE/AMBER`, scrubber/bar layout, font paths). Drawing is in `main.rb` (engine-only, untested); entities/levels stay plain-Ruby testable.
 
-The game at `/game` is re-skinned (Claude Design handoff in `game/README-video-player.md`) to read as an embedded **corporate-training video player**: the fiction is that a new hire thinks they're *watching* "Authentication Hell," but they're actually *playing* the platformer. It's **visual-only** — no geometry, collision, camera, or resolution change (fixed 1280×720, world 6400px wide). Character art (player + enemy sprites) was **deferred** — this pass is environment + video-player chrome only.
+- **Scene:** paper wall; the control bar *is* the floor (a dark `INDIGO` band below `GROUND_Y` with an `INDIGO_LIP` the player stands on — bar height = `GROUND_Y` keeps physics unchanged).
+- **Platforms** (`entities/platform.rb`): white face + ink border + 7px ink underside, drawn with the platform (no offset shadow, which would crawl against scroll).
+- **Video chrome** (`main.rb` `draw_control_bar`/`draw_scrubber`/`draw_transport`): scrubber + faux `m:ss / 3:20` timestamp driven by `player.x / WORLD_W`; play/pause glyph, static CC/speed/fullscreen. No chapter ticks (would spoil enemy positions).
+- **States** beyond locked/game-over: **loading → auto-start** (`args.state.started`, world frozen until `/play/me` resolves and `start_run` flips it); **level intro** (`level_intro_at`, a fading chapter card on every level start, scene hidden behind it); **buffering** (quiet in-canvas spinner on collision, the HTML toast owns the challenge); **Video Ended** (replaces game-over; R restarts via `restart_run`).
+- **Hearts:** `sprites/ui/heart_hardmode.png` / `heart_empty.png` swapped per life.
+- **Fonts** (`game/mygame/fonts/`, ttf): `archivo-black-400`, `space-mono-400`/`-700`, converted from the site's woff2 via fonttools; lowercase-kebab filenames for the case-sensitive WASM lookup; referenced via the label `font:` key.
 
-Design tokens + chrome geometry live in `game/mygame/app/constants.rb` (palette `PAPER/INK/INDIGO/...` as `[r,g,b]`, the semantic `BLUE/GREEN/RED/PURPLE/AMBER`, scrubber/bar layout, font paths). The drawing all lives in `main.rb` (engine-only, untested); the entities/levels stay plain-Ruby testable.
-
-- **Scene:** warm-paper wall (`PAPER`); the bottom **control bar = the floor** — a dark `INDIGO` band filling everything below `GROUND_Y` with an `INDIGO_LIP` lip the player stands on. Keeping the bar height = `GROUND_Y` means physics is unchanged (the lip lands exactly on the existing ground line).
-- **Platforms** (`entities/platform.rb`): white card face + `INDIGO` ink border + a 7px ink underside band (drawn *with* the platform, no offset drop-shadow — a baked shadow would crawl against the scroll).
-- **Video chrome** (`main.rb` `draw_control_bar`/`draw_scrubber`/`draw_transport`): a scrubber (track / cosmetic "buffered" bar / green progress fill / playhead) whose fill + a faux `m:ss / 3:20` timestamp are driven by `player.x / WORLD_W`; a play/pause glyph and static CC/speed/fullscreen affordances. **No chapter ticks** (decided against — they'd spoil enemy positions).
-- **New states** (beyond the original locked/game-over):
-  - **Loading → auto-start** (`args.state.started`): there's no in-canvas poster (the site's ▶ Play nav link is the only play affordance). While `/play/me` is in flight the canvas shows the "AUTHENTICATION HELL" card with a spinner (`draw_loading`); once it resolves `start_run` flips `started` and the run begins automatically. The world is frozen until then (`update_world` is gated on `started`).
-  - **Level intro** (`args.state.level_intro_at`): every level start (auto-start, level→level handoff via `advance_level`, and replay via `restart_run`) plays a centered neo-brutalist "chapter card" (`CHAPTER N` over `level.title`, `draw_level_intro`) that fades in/out over `LEVEL_INTRO_TICKS`. The world is frozen and the whole scene (entities + player) and the transport play/pause button are hidden behind it, so a level swap isn't a jarring cut.
-  - **Buffering** (replaces the old `draw_challenge_hint`): on collision the in-canvas treatment is quiet — a spinner + one mono line tinted to the enemy's color pointing at the HTML toast (the toast still owns the loud challenge card).
-  - **Video Ended** (replaces `draw_game_over`): indigo dim + Archivo Black "Video Ended" + red rule + "press R to replay"; **R restarts the run** (`restart_run` resets player/level to the welcome level).
-- **Hearts:** `sprites/ui/heart_hardmode.png` (full) / `heart_empty.png` (spent) swapped per life instead of alpha-fading one sprite.
-- **Fonts** (`game/mygame/fonts/`, ttf): `archivo-black-400` (display, "Video Ended"), `space-mono-400`/`-700` (HUD/greeting/hints/timestamp) — **converted from the site's self-hosted woff2** (`app/assets/fonts/`) via fonttools so the glyphs match the site exactly. Lowercase-kebab filenames so the case-sensitive WASM asset lookup resolves. Referenced via the label `font:` key (path relative to `mygame/`).
-
-Any future game art must ship as bare PNGs (IHDR/IDAT/IEND, no ancillary chunks) or it checkerboards in the WebGL build — see [[reference-dragonruby-png-encoder]]. Note: solid-color **triangles** go on `args.outputs.solids` with `x/y,x2/y2,x3/y3` + `r/g/b` (not a separate `triangles` output).
+Future game art must be bare PNGs (IHDR/IDAT/IEND, no ancillary chunks) or it checkerboards in WebGL — see [[reference-dragonruby-png-encoder]]. Solid triangles go on `args.outputs.solids` with `x/y,x2/y2,x3/y3` + `r/g/b`.
 
 ## DragonRuby (`game/`)
 
-- `game/dragonruby` is a Mach-O binary (the engine). Game code lives in `game/mygame/app/main.rb` — the entry point is a `tick` method called every frame. `game/samples/` has 150+ example apps and `game/docs/` has the offline docs.
-- The engine binaries and `game/{samples,docs,builds,logs,.dragonruby}` are vendored/gitignored upstream artifacts (see `game/.gitignore`). Avoid reformatting, linting, or "cleaning up" anything outside `game/mygame/` — it's not ours.
-- **Editable source is `game/mygame/`.** Edit it freely; it's what ships to `/game`.
-- **Always run `bin/test-game` after changing any game code under `game/mygame/`, and before returning to the user.** The entities/levels are plain-Ruby Minitest (no engine needed); if a change alters their behavior, update the matching tests under `game/mygame/test/` and confirm the suite is green before reporting back.
-- Run the game natively (without Rails): `cd game && ./dragonruby mygame`. Hot-reloads `main.rb` on save while running.
-- Current engine version is in `game/VERSION.txt` (a date + git hash, no semver — the version number lives in the top heading of `game/CHANGELOG-CURR.txt`).
-
-### Upgrading DragonRuby
-
-DragonRuby is distributed as a zip (e.g. `dragonruby-7-7-gtk-macos.zip`) that unzips to a single `dragonruby-macos/` folder containing the engine plus a stock `mygame/`. To upgrade, replace our vendored copy with the new release **without clobbering `game/mygame/`** (our game source + customized metadata):
-
-1. Unzip the release to a temp dir: `unzip -q ~/Documents/dragonruby-X-Y-gtk-macos.zip -d /tmp/drXY` → contents land in `/tmp/drXY/dragonruby-macos/`.
-2. Copy every entry **except `mygame`** into `game/`, overwriting. **Critically, include dotfiles** — the release ships a `.dragonruby/` directory holding the per-platform build *stubs* (including the HTML5/WASM stub that `dragonruby-publish` bakes into the web bundle). A bare `for e in *` glob misses `.dragonruby`, leaving the old stubs in place — `bin/build-game` then silently produces a bundle running the **previous** engine's web runtime even though the native binaries upgraded. Enable dotglob (or list it explicitly):
-   ```bash
-   cd /tmp/drXY/dragonruby-macos
-   setopt local_options dotglob 2>/dev/null || shopt -s dotglob   # zsh/bash: make * match dotfiles
-   for e in *; do [ "$e" = mygame ] && continue; rm -rf "game/$e" && cp -R "$e" "game/$e"; done
-   ```
-   This swaps the binaries (`dragonruby`, `dragonruby-publish`, `dragonruby-httpd` — only `-httpd` is tracked; the other two are gitignored, so they won't show in `git status`), the `samples/`/`docs/`, the committed constants (`VERSION.txt`, `CHANGELOG-*.txt`, `README.txt`, `eula.txt`, fonts/images), **and `.dragonruby/` (the build-stub cache)**. Our `game/mygame/` (game code in `app/main.rb`, our `devid`/`devtitle` flags in `metadata/game_metadata.txt`) is left intact, as are local-only dirs the release doesn't ship (`builds/`, `logs/`, `tmp/`).
-3. Read the new release's `game/CHANGELOG-CURR.txt` for what changed — engine HTML5/WASM fixes can let us delete client-side workarounds in `app/views/games/show.html.erb` (see below).
-4. Rebuild and verify: `bin/build-game`, then **confirm the served bundle is actually the new engine** — e.g. `grep -c Module.HEAPU8.set public/game_assets/dragonruby-wasm.js` (0 on 7.7+; nonzero means a stale `.dragonruby/` stub leaked through). Then load `/game`.
-
-**Engine WASM bug history:** 7.x before 7.7 shipped a broken HTML5 `http_get` (Emscripten compiled `HEAPU8` as a runtime local never assigned back onto `Module`, so the first successful same-origin request threw `Cannot read properties of undefined (reading 'set')` and froze the tick loop at tick 0). We worked around it with a JS polyfill in `show.html.erb` that pre-created `Module.wasmMemory` + `HEAPU8` getters. **7.7 fixed this** (changelog: "Fixed HTTP apis for web builds. Emscripten 5 changed `Module.HEAPU8.set` to `HEAPU8.set`"), so the polyfill was removed. If a future upgrade reintroduces a WASM/`http_get` regression, that script block is where a workaround would go.
+- Engine is the `game/dragonruby` Mach-O binary; game code is `game/mygame/app/main.rb` (`tick` runs every frame). `game/samples/` has examples, `game/docs/` the offline docs.
+- Everything under `game/` except `game/mygame/` is vendored/gitignored upstream — don't reformat or lint it.
+- **Editable source is `game/mygame/`** — it's what ships to `/game`.
+- **Run `bin/test-game` after any change under `game/mygame/`, before returning.** Entities/levels are plain-Ruby Minitest; update matching tests under `game/mygame/test/` when behavior changes.
+- Engine version is in `game/VERSION.txt` (date + hash; the number is in the top of `game/CHANGELOG-CURR.txt`).
+- Upgrading the engine to a new release has its own procedure — use the `upgrade-dragonruby` skill.
 
 ### DragonRuby game served at /game
 
-The Rails app embeds the game as a static HTML5/WASM bundle:
-
-- **`bin/build-game`** runs `dragonruby-publish --only-package --platforms=html5 mygame`, then unzips the result into `public/game_assets/` (wiping it first). It deletes the bundle's standalone `index.html` because Rails renders the canvas itself. `public/game_assets/` is a build artifact — do not edit it by hand or commit it.
-- **`GamesController` (`app/controllers/games_controller.rb`)** serves `/game` with `layout "game"`. The game view (`app/views/games/show.html.erb`) renders the `<canvas>` + loader elements inline and loads `dragonruby-html5-loader.js`.
-- **`<base href="/game_assets/">`** in `app/views/layouts/game.html.erb` makes the loader's bare relative asset paths resolve against the static bundle in `public/game_assets/`. That layout intentionally omits the app-wide `javascript_importmap_tags` so the loader's bare paths don't get rewritten. The trade-off: any Hotwire/JS the `/game` view needs must be loaded with a **page-scoped `<script type="importmap">` whose specifiers are absolute, digested `asset_path(...)` URLs** — absolute so the base href leaves them alone. `show.html.erb` does exactly this to load Turbo for the collision toasts (below).
-- **Collision → TOTP re-auth (Turbo Streams):** colliding with the enemy forces the player to re-authenticate. The game POSTs to `/games/totp/collision` (`Games::TotpController#collision`, CSRF skipped for that action since the WASM client can't carry a token — it's still same-origin + session-gated and only sets a session flag + broadcasts), which `Turbo::StreamsChannel.broadcast_replace_to`s the persistent `games/_totp_challenge.html.erb` toast (a code form) onto the page, scoped to `Current.user`. `show.html.erb` subscribes with `turbo_stream_from Current.user, :toasts` and holds an empty per-player target (id from `dom_id`, via `Games::TotpHelper#totp_challenge_toast_id`) the broadcast replaces. The toast's form submits to `/games/totp/unlock` (Turbo form, CSRF kept via `csrf_meta_tags`); a valid `verify_totp` clears the session flag and removes the toast. The game freezes movement on collision and polls `/games/totp/status` until the lock clears. (The older fading `games/_toast.html.erb` + `toast-fade` CSS still exists for ephemeral messages.) No Stimulus/ActionCable JS of our own — Turbo does the DOM work.
-- **Cross-origin isolation** is required for the WASM runtime's `SharedArrayBuffer`: `GamesController` sets COOP/COEP on the `/game` page, and `GameCrossOriginIsolation` middleware (`app/middleware/game_cross_origin_isolation.rb`, registered in `config/application.rb` before `ActionDispatch::Static`) stamps `Cross-Origin-Resource-Policy: same-origin` onto `/game_assets/` responses. If the game won't load, suspect these headers first.
-- **Live dev:** `bin/dev` runs `bin/watch-game` (the `game:` process in `Procfile.dev`), which builds once on startup then re-runs `bin/build-game` on any change under `game/mygame/`. Only `game/mygame/` is watched — artifacts in `public/game_assets/` and `game/builds/` are not, so rebuilds don't loop. The publish step takes a couple seconds; hard-refresh `/game` to see changes (no iframe live-reload).
+- **`bin/build-game`** runs `dragonruby-publish --only-package --platforms=html5 mygame`, unzips into `public/game_assets/` (wiped first), and deletes the bundle's `index.html` (Rails renders the canvas). Don't edit or commit `public/game_assets/`.
+- **`GamesController`** serves `/game` with `layout "game"`; `show.html.erb` renders the `<canvas>` + loader inline.
+- **`<base href="/game_assets/">`** in `layouts/game.html.erb` resolves the loader's bare asset paths against the bundle. The layout omits `javascript_importmap_tags` so those paths aren't rewritten — so any JS the view needs loads via a page-scoped `<script type="importmap">` with absolute, digested `asset_path(...)` URLs (as `show.html.erb` does for Turbo).
+- **Collision → TOTP re-auth (Turbo Streams):** the game POSTs to `/games/totp/collision` (`Games::TotpController#collision`, CSRF skipped — WASM can't carry a token; still same-origin + session-gated, only sets a flag + broadcasts). That `broadcast_replace_to`s the persistent `_totp_challenge` toast (a code form) scoped to `Current.user`; `show.html.erb` subscribes via `turbo_stream_from Current.user, :toasts`. The form submits to `/games/totp/unlock` (CSRF kept); a valid code clears the flag and removes the toast. The game freezes on collision and polls `/games/totp/status` until it clears. No Stimulus/ActionCable of our own.
+- **Cross-origin isolation** (for the WASM `SharedArrayBuffer`): `GamesController` sets COOP/COEP on `/game`, and `GameCrossOriginIsolation` middleware stamps `Cross-Origin-Resource-Policy: same-origin` on `/game_assets/`. Suspect these headers first if the game won't load.
+- **Live dev:** `bin/dev` runs `bin/watch-game` (rebuilds on changes under `game/mygame/` only). Publish takes a couple seconds; hard-refresh `/game`.
 
 ## Secrets
 
-Never invent placeholder encryption keys or API tokens. If a real secret is needed, ask Mike to add it to Rails credentials (`bin/rails credentials:edit`) rather than hardcoding a fake value.
+Never invent placeholder encryption keys or API tokens. If a real secret is needed, ask Mike to add it via `bin/rails credentials:edit`.
