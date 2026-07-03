@@ -61,6 +61,8 @@ class Player
     @prev_y = @y
     @pickup_count = 0
     @stomped_this_tick = false
+    @dropping = false
+    @drop_floor_y = 0
   end
 
   # Move left/right with the arrow keys (no wrapping — clamp to screen); space
@@ -87,6 +89,17 @@ class Player
     # Jump on the press edge so holding space doesn't re-launch every frame.
     if args.inputs.keyboard.key_down.space && @grounded
       @vy = JUMP_SPEED
+      @grounded = false
+    end
+
+    fell_clear_of_ledge = @y < @drop_floor_y
+    reversed_upward = @vy > 0
+    @dropping = false if @dropping && (fell_clear_of_ledge || reversed_upward)
+
+    drop_pressed = args.inputs.keyboard.key_down.down || args.inputs.keyboard.key_down.s
+    if drop_pressed && @grounded && @y > GROUND_Y
+      @dropping = true
+      @drop_floor_y = @y - Platform::H
       @grounded = false
     end
 
@@ -230,6 +243,7 @@ class Player
   end
 
   def land_on(platform)
+    return if @dropping
     top = platform.y + platform.h
     return unless @vy <= 0 && @prev_y >= top && @y <= top
 
