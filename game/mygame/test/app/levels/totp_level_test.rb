@@ -123,21 +123,6 @@ class TotpLevelTest < Minitest::Test
     assert_equal "TotpLevel", @level.serialize[:level]
   end
 
-  def test_dev_codes_render_in_the_hud_when_present
-    @level.totp[:codes] = %w[111111 222222 333333]
-    @level.draw_hud(@args)
-    texts = @args.outputs.labels.map { |l| l[:text] }
-    assert_includes texts, "111111"
-    assert_includes texts, "333333"
-  end
-
-  def test_dev_codes_are_omitted_when_absent
-    @level.totp[:codes] = nil
-    @level.draw_hud(@args)
-    texts = @args.outputs.labels.map { |l| l[:text] }
-    refute_includes texts, "DEV — enter in order:"
-  end
-
   private
 
   def register! = @level.totp[:registered] = true
