@@ -35,8 +35,7 @@ class Level
   # Whether the player has satisfied this stage's goal and it should hand off.
   def complete? = false
 
-  # The level to hand off to once complete?. Nil marks the final level — clearing it
-  # beats the game, so Main sends the player to the certificate instead of advancing.
+  # The level to hand off to once complete? (nil for an endless/terminal stage).
   def next_level = nil
 
   # The level's human-readable name, shown on the intro "chapter card" (the chapter

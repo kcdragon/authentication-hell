@@ -4,7 +4,7 @@ class GenerateCertificatePdfJobTest < ActiveJob::TestCase
   setup do
     @user = users(:one)
     @user.update!(highest_level_completed: GameLevel.all.last.number)
-    @user.mark_certified! # beat_game stamps the award date before enqueuing
+    @user.mark_certified!
   end
 
   test "attaches a rendered certificate PDF to the user" do

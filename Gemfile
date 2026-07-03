@@ -26,7 +26,6 @@ gem "bcrypt", "~> 3.1.7"
 gem "rotp"
 gem "rqrcode"
 
-# Render the "you beat the game" certificate as a downloadable PDF (pure Ruby, no headless browser)
 gem "prawn"
 
 # WebAuthn passkey authentication: registration (attestation) + login (assertion) ceremonies

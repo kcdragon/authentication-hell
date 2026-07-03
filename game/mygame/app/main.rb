@@ -107,10 +107,9 @@ module Main
       end
     end
 
-    # Goal met: a level with no next_level is the last one, so clearing it beats the
-    # game (freeze on the completion card while the page redirects to the certificate);
-    # any other level hands off to the next, which freezes the world behind its intro
-    # card. #complete? is false on the new level, so advancing won't re-fire.
+    # Goal met (e.g. the welcome level after the heal): hand off to the next level,
+    # which freezes the world behind its intro card. #complete? is false on the new
+    # level, so this won't re-fire.
     if args.state.level.complete?
       args.state.level.next_level ? advance_level(args) : beat_game(args)
     end
@@ -372,9 +371,6 @@ module Main
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
 
-  # Beat the final level → "Course Complete": the celebratory counterpart to Video
-  # Ended. Indigo dim, the Archivo Black headline in paper over a green rule, then a
-  # spinner + line while the page redirects to the certificate.
   def draw_course_complete(args)
     args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H,
                              r: INDIGO[0], g: INDIGO[1], b: INDIGO[2], a: 184 }
@@ -471,11 +467,6 @@ module Main
     args.state.level.setup(args)
   end
 
-  # The final level is cleared: report it (the server records the win, grants the
-  # Graduate achievement, and broadcasts a redirect that sends the page to the
-  # certificate), then freeze on the completion card. Fire-and-forget — we never poll
-  # the handle (the page redirects away), and not stashing it in args.state keeps the
-  # per-tick state export clean once `beaten` stops the world updating. Reported once.
   def beat_game(args)
     return if args.state.beaten
     args.state.beaten = true

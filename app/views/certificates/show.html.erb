@@ -21,7 +21,6 @@
     </p>
   </div>
 
-  <%# On-screen certificate — mirrors the downloadable PDF. %>
   <div class="mt-8">
     <%= render "certificates/certificate", user: Current.user, verify_url: @verify_url %>
   </div>
@@ -32,7 +31,6 @@
     <%= link_to "▶ Back to the game", game_path, class: "ah-btn ah-btn--secondary" %>
   </div>
 
-  <%# Share row — the share controller opens each intent, then awards Influencer. %>
   <div class="mt-10 border-t-[3px] border-ink pt-6"
        data-controller="share"
        data-share-url-value="<%= share_url %>"

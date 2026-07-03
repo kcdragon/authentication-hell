@@ -105,7 +105,7 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
     sign_in_as(@user)
 
     streams = nil
-    assert_difference -> { @user.earned_achievements.count }, 2 do # Graduate + the level clear
+    assert_difference -> { @user.earned_achievements.count }, 2 do
       streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
         post games_levels_complete_url, params: { level: last.number }
       end

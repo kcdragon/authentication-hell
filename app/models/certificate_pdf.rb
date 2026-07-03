@@ -1,7 +1,3 @@
-# Renders the "you beat Authentication Hell" certificate as a landscape PDF diploma,
-# in the site's neo-brutalist voice (ink frame, paper ground, Archivo Black display /
-# Space Mono body). A verification QR in the corner links back to the app. Plain Ruby
-# so it can be unit-tested without a request.
 class CertificatePdf
   INK      = "111111"
   PAPER    = "F5F2E9"
@@ -49,7 +45,6 @@ class CertificatePdf
     end
   end
 
-  # Thick ink border with a thin gold inner rule — the site's card "frame."
   def frame(doc)
     doc.canvas do
       doc.stroke_color INK
@@ -84,7 +79,6 @@ class CertificatePdf
     "time-based one-time passwords, and passkeys — and lived to tell of it."
   end
 
-  # A verification QR + label in the bottom-left, inside the frame.
   def verification(doc)
     modules = RQRCode::QRCode.new(@verify_url).qrcode.modules
     size = 78

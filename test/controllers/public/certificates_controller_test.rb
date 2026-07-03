@@ -4,7 +4,7 @@ class Public::CertificatesControllerTest < ActionDispatch::IntegrationTest
   setup do
     @user = users(:one)
     @user.update!(highest_level_completed: GameLevel.all.last.number)
-    @user.mark_certified! # a token only exists once the game is beaten, which stamps the date
+    @user.mark_certified!
   end
 
   test "show renders a public certificate for a valid token without signing in" do
