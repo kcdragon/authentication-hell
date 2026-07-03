@@ -22,8 +22,7 @@ class TotpLevelTest < Minitest::Test
   end
 
   def test_is_the_final_level
-    assert @level.last?
-    assert_nil @level.next_level, "the last level is terminal — clearing it beats the game"
+    assert_nil @level.next_level, "no next level marks the terminal stage — clearing it beats the game"
   end
 
   def test_setup_lays_ten_keypad_platforms_with_a_pad_on_each

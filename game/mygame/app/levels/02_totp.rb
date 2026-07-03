@@ -77,8 +77,6 @@ class TotpLevel < Level
 
   def complete? = @cleared == true
 
-  def last? = true
-
   # The TOTP keypad lives on the level, not args.state, so Main's generic render loop
   # can't reach it — draw it here in the camera-offset pass.
   def render_world(args, cam)

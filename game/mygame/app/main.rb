@@ -107,12 +107,12 @@ module Main
       end
     end
 
-    # Goal met: the last level clearing beats the game (freeze on the completion card
-    # while the page redirects to the certificate); any other level hands off to the
-    # next, which freezes the world behind its intro card. #complete? is false on the
-    # new level, so advancing won't re-fire.
+    # Goal met: a level with no next_level is the last one, so clearing it beats the
+    # game (freeze on the completion card while the page redirects to the certificate);
+    # any other level hands off to the next, which freezes the world behind its intro
+    # card. #complete? is false on the new level, so advancing won't re-fire.
     if args.state.level.complete?
-      args.state.level.last? ? beat_game(args) : advance_level(args)
+      args.state.level.next_level ? advance_level(args) : beat_game(args)
     end
 
     end_run(args) if out_of_time?(args)
