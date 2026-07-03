@@ -26,12 +26,12 @@ class Games::LevelsController < ApplicationController
   private
 
   def advance_now_playing_past(level)
-    next_level = GameLevel.find(level.number + 1)
-    if next_level
+    if (next_level = GameLevel.find(level.number + 1))
       mark_now_playing(next_level)
     else
-      beat_game
+      Game::PlaylistBroadcaster.call(Current.user)
     end
+    beat_game if level == GameLevel.graduation
   end
 
   def beat_game

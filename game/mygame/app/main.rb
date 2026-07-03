@@ -216,7 +216,7 @@ module Main
     args.outputs.solids << { x: left + 4, y: bottom + 4, w: w - 8, h: h - 8,
                              r: CARD[0], g: CARD[1], b: CARD[2], a: alpha }
 
-    args.outputs.labels << { x: cx, y: cy + 44, text: "CHAPTER #{level.number + 1}",
+    args.outputs.labels << { x: cx, y: cy + 44, text: level.chapter_label.upcase,
                              size_px: 18, font: FONT_MONO_B,
                              r: accent[0], g: accent[1], b: accent[2], a: alpha,
                              anchor_x: 0.5, anchor_y: 0.5 }

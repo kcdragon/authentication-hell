@@ -8,6 +8,7 @@ class Level
     case number
     when 1 then PasswordLevel.new
     when 2 then TotpLevel.new
+    when 3 then RubyConfLevel.new
     else WelcomeLevel.new
     end
   end
@@ -30,6 +31,8 @@ class Level
   def next_level = nil
 
   def title = "Authentication Hell"
+
+  def chapter_label = "Chapter #{number + 1}"
 
   def accent = BLUE
 

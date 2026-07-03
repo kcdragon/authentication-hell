@@ -325,14 +325,14 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 0, user.now_playing
   end
 
-  test "beat_game? is true only once the final level is cleared" do
+  test "beat_game? is true once the graduation level is cleared, without the bonus level" do
     user = users(:one)
-    last = GameLevel.all.last.number
+    graduation = GameLevel.graduation.number
 
     assert_not user.beat_game?
-    user.update!(highest_level_completed: last - 1)
+    user.update!(highest_level_completed: graduation - 1)
     assert_not user.beat_game?
-    user.update!(highest_level_completed: last)
+    user.update!(highest_level_completed: graduation)
     assert user.beat_game?
   end
 
