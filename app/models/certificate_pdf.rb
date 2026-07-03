@@ -75,7 +75,7 @@ class CertificatePdf
     centered(doc, 330, @user.username, font: "Display", size: 46)
 
     centered(doc, 250, completion_line, font: "Mono", size: 13, color: INK, width: 560, leading: 6)
-    centered(doc, 150, "Awarded #{@user.certificate_awarded_on.to_fs(:long)}",
+    centered(doc, 150, "Awarded #{@user.certificate_awarded_at.to_date.to_fs(:long)}",
       font: "Mono", style: :bold, size: 13, spacing: 1, color: MUTED)
   end
 

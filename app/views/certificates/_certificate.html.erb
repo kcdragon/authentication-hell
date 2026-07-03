@@ -17,7 +17,7 @@
     <div class="flex items-end justify-between gap-4 mt-10">
       <%= certificate_qr_code(verify_url) %>
       <p class="font-mono font-bold text-xs uppercase tracking-widest text-muted text-right">
-        Awarded<br><%= user.certificate_awarded_on.to_fs(:long) %>
+        Awarded<br><%= user.certificate_awarded_at.to_date.to_fs(:long) %>
       </p>
     </div>
   </div>

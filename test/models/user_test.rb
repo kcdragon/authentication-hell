@@ -288,13 +288,6 @@ class UserTest < ActiveSupport::TestCase
     end
   end
 
-  test "certificate_awarded_on reflects the stored award date" do
-    user = users(:one)
-    user.update!(certificate_awarded_at: Time.utc(2026, 7, 1, 12))
-
-    assert_equal Date.new(2026, 7, 1), user.certificate_awarded_on
-  end
-
   test "current_level is the first level before any are cleared" do
     user = users(:one)
     assert_nil user.highest_level_completed

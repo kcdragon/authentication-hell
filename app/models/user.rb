@@ -188,10 +188,6 @@ class User < ApplicationRecord
     update!(certificate_awarded_at: Time.current) unless certificate_awarded_at
   end
 
-  def certificate_awarded_on
-    (certificate_awarded_at || Time.current).to_date
-  end
-
   private
 
   def password_or_passkey_present

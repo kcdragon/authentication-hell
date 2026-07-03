@@ -3,6 +3,7 @@
 # Public::CertificatesController.
 class CertificatesController < ApplicationController
   before_action :require_completed_game
+  before_action :ensure_certified, only: :show
 
   def show
     respond_to do |format|
@@ -35,6 +36,13 @@ class CertificatesController < ApplicationController
 
   def verify_url
     public_certificate_url(Current.user.ensure_certificate_token!)
+  end
+
+  # Guarantees the award date is stamped before any certificate renders, so the PDF and
+  # page can read certificate_awarded_at directly (backfills players who beat the game
+  # before it was recorded).
+  def ensure_certified
+    Current.user.mark_certified!
   end
 
   def require_completed_game
