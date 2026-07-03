@@ -33,12 +33,10 @@ class Games::LevelsController < ApplicationController
     end
   end
 
-  # No next level: the player just beat the game. Award the Graduate achievement,
-  # kick off certificate rendering, refresh the playlist, and send the page to the
-  # certificate.
   def beat_game
     Achievement::Awarder.call(Current.user, :graduate)
-    GenerateCertificatePdfJob.perform_later(Current.user, certificate_verify_url(token: Current.user.certificate_token!))
+    Current.user.mark_certified!
+    GenerateCertificatePdfJob.perform_later(Current.user, certificate_verify_url(token: Current.user.ensure_certificate_token!))
     Game::PlaylistBroadcaster.call(Current.user)
     Game::CompletionBroadcaster.call(Current.user)
   end

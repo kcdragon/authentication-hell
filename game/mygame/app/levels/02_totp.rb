@@ -77,7 +77,6 @@ class TotpLevel < Level
 
   def complete? = @cleared == true
 
-  # The last level: clearing it beats the game rather than handing off.
   def last? = true
 
   # The TOTP keypad lives on the level, not args.state, so Main's generic render loop

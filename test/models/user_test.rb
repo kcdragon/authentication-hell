@@ -253,24 +253,46 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 0, user.earned_achievements.count
   end
 
-  test "reset_progress! clears the certificate token so old verify links stop resolving" do
+  test "reset_progress! clears the certificate token and award date so old links stop resolving" do
     user = users(:one)
-    user.certificate_token!
+    user.ensure_certificate_token!
+    user.mark_certified!
 
     user.reset_progress!
 
     assert_nil user.reload.certificate_token
+    assert_nil user.certificate_awarded_at
   end
 
-  test "certificate_token! mints a stable, unguessable token" do
+  test "ensure_certificate_token! mints a stable, unguessable token" do
     user = users(:one)
     assert_nil user.certificate_token
 
-    token = user.certificate_token!
+    token = user.ensure_certificate_token!
 
     assert_predicate token, :present?
     assert_equal token, user.reload.certificate_token
-    assert_equal token, user.certificate_token!, "the token is stable once minted"
+    assert_equal token, user.ensure_certificate_token!, "the token is stable once minted"
+  end
+
+  test "mark_certified! stamps the award date once and doesn't move it on replays" do
+    user = users(:one)
+
+    user.mark_certified!
+    first = user.reload.certificate_awarded_at
+    assert_predicate first, :present?
+
+    travel 1.day do
+      user.mark_certified!
+      assert_equal first, user.reload.certificate_awarded_at, "the date is fixed at first completion"
+    end
+  end
+
+  test "certificate_awarded_on reflects the stored award date" do
+    user = users(:one)
+    user.update!(certificate_awarded_at: Time.utc(2026, 7, 1, 12))
+
+    assert_equal Date.new(2026, 7, 1), user.certificate_awarded_on
   end
 
   test "current_level is the first level before any are cleared" do

@@ -43,7 +43,7 @@ class CertificatesController < ApplicationController
   end
 
   def verify_url
-    certificate_verify_url(token: Current.user.certificate_token!)
+    certificate_verify_url(token: Current.user.ensure_certificate_token!)
   end
 
   def require_completed_game

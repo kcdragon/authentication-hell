@@ -1,7 +1,3 @@
-# Renders the certificate PDF and caches it on the user so the download endpoint
-# doesn't rebuild it on every request. Enqueued when the player beats the final level
-# (and lazily by the endpoint if the cache is ever missing). `verify_url` is passed in
-# because a job has no request to derive the host from.
 class GenerateCertificatePdfJob < ApplicationJob
   queue_as :default
 

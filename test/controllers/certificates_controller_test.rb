@@ -96,7 +96,7 @@ class CertificatesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "verify renders a public certificate for a valid token without signing in" do
-    token = @user.certificate_token!
+    token = @user.ensure_certificate_token!
 
     get certificate_verify_url(token: token)
 
