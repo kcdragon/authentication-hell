@@ -201,7 +201,7 @@ module Main
     args.state.level.draw_hud(args)
 
     if args.state.beaten
-      draw_course_complete(args)
+      Ui::CourseComplete.new(args).draw
     elsif args.state.player.game_over
       draw_video_ended(args)
     elsif args.state.player.locked
@@ -371,21 +371,6 @@ module Main
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
 
-  def draw_course_complete(args)
-    args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H,
-                             r: INDIGO[0], g: INDIGO[1], b: INDIGO[2], a: 184 }
-    args.outputs.labels << { x: 640, y: 430, text: "Course Complete",
-                             size_px: 84, font: FONT_DISPLAY,
-                             r: PAPER[0], g: PAPER[1], b: PAPER[2],
-                             anchor_x: 0.5, anchor_y: 0.5 }
-    args.outputs.solids << { x: 640 - 210, y: 372, w: 420, h: 5,
-                             r: GREEN[0], g: GREEN[1], b: GREEN[2] }
-    args.outputs.labels << { x: 640, y: 320, text: "claim your certificate from the toast →",
-                             size_px: 22, font: FONT_MONO,
-                             r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2],
-                             anchor_x: 0.5, anchor_y: 0.5 }
-  end
-
   # The semantic color for a pending challenge kind (matches the HTML toasts).
   def challenge_color(kind)
     case kind
@@ -412,24 +397,13 @@ module Main
     )
   end
 
-  # Tell the Rails app the player cleared a level (records progress + grants its
-  # achievement). The level goes in the query string, not the body: DR.http_post
-  # sends a Hash body as multipart, which Rails won't parse under our urlencoded
-  # header, so params[:level] would arrive empty (→ 0).
+  # Tell the Rails app the player cleared a level (records progress + grants its achievement).
   def report_level_complete(args, level)
-    args.state.level_complete_request = DR.http_post(
-      "#{levels_complete_url(args)}?level=#{level}",
-      {},
-      [ "Content-Type: application/x-www-form-urlencoded" ]
-    )
+    args.state.level_complete_request = Network::Levels.complete(args, level)
   end
 
   def report_now_playing(args, level)
-    args.state.now_playing_request = DR.http_post(
-      "#{levels_playing_url(args)}?level=#{level}",
-      {},
-      [ "Content-Type: application/x-www-form-urlencoded" ]
-    )
+    args.state.now_playing_request = Network::Levels.playing(args, level)
   end
 
   # Poll /games/<kind>/status (~twice a second) while frozen; unfreeze once the
@@ -469,11 +443,7 @@ module Main
   def beat_game(args)
     return if args.state.beaten
     args.state.beaten = true
-    DR.http_post(
-      "#{levels_complete_url(args)}?level=#{args.state.level.number}",
-      {},
-      [ "Content-Type: application/x-www-form-urlencoded" ]
-    )
+    Network::Levels.complete(args, args.state.level.number)
   end
 
   # The active stage is cleared: report it to the server, then swap in the level it
@@ -514,6 +484,4 @@ module Main
 
   def start_url(args, kind) = "#{Network.base_url(args)}/games/#{kind}/start"
   def status_url(args, kind) = "#{Network.base_url(args)}/games/#{kind}/status"
-  def levels_complete_url(args) = "#{Network.base_url(args)}/games/levels/complete"
-  def levels_playing_url(args) = "#{Network.base_url(args)}/games/levels/playing"
 end
