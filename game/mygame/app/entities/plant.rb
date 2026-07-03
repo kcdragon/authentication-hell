@@ -1,8 +1,8 @@
 class Plant
   KINDS = {
-    coreopsis: { path: "sprites/plants/coreopsis.png", w: 107, h: 165 },
-    pink_bush: { path: "sprites/plants/pink-bush.png", w: 120, h: 112 },
-    poppy_bush: { path: "sprites/plants/poppy-bush.png", w: 157, h: 140 }
+    coreopsis: { path: "sprites/plants/coreopsis.png", w: 106, h: 165 },
+    pink_bush: { path: "sprites/plants/pink-bush.png", w: 130, h: 98 },
+    poppy_bush: { path: "sprites/plants/poppy-bush.png", w: 153, h: 140 }
   }.freeze
 
   attr_reader :x, :y, :w, :h, :path
