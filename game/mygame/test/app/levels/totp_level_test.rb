@@ -21,8 +21,8 @@ class TotpLevelTest < Minitest::Test
     assert_equal 300, @level.time_limit
   end
 
-  def test_loops_back_to_itself_as_the_final_level
-    assert_instance_of TotpLevel, @level.next_level
+  def test_is_the_final_level
+    assert_nil @level.next_level, "no next level marks the terminal stage — clearing it beats the game"
   end
 
   def test_setup_lays_ten_keypad_platforms_with_a_pad_on_each

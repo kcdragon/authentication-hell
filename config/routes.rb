@@ -49,6 +49,14 @@ Rails.application.routes.draw do
 
   get "leaderboard" => "leaderboard#index", as: :leaderboard
 
+  resource :certificate, only: :show do
+    post :share
+  end
+
+  namespace :public do
+    resources :certificates, only: :show, param: :token
+  end
+
   namespace :games do
     get  "totp/status"   => "totp_challenge#status",   as: :totp_status
     post "totp/start"    => "totp_challenge#start",    as: :totp_start

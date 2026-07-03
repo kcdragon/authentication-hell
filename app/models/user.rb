@@ -16,6 +16,8 @@ class User < ApplicationRecord
     attachable.variant :nav, resize_to_fill: [ 64, 64 ]
   end
 
+  has_one_attached :certificate_pdf
+
   encrypts :totp_secret
 
   scope :ranked, ->(by: :level) {
@@ -145,8 +147,6 @@ class User < ApplicationRecord
     earned_achievements.exists?(achievement_key: key.to_s)
   end
 
-  # Records an achievement, returning it only the first time it's earned (nil if
-  # the user already had it). The uniqueness validation/index makes repeats no-ops.
   def grant_achievement(key)
     record = earned_achievements.create(achievement_key: key.to_s)
     record if record.persisted?
@@ -154,9 +154,11 @@ class User < ApplicationRecord
 
   def reset_progress!
     transaction do
-      update!(highest_level_completed: nil, now_playing_level: nil)
+      update!(highest_level_completed: nil, now_playing_level: nil,
+        certificate_token: nil, certificate_awarded_at: nil)
       earned_achievements.delete_all
     end
+    certificate_pdf.purge_later
   end
 
   def record_level_completed(level)
@@ -166,15 +168,24 @@ class User < ApplicationRecord
     true
   end
 
-  # The level the player is currently on: the one after their furthest cleared
-  # level (the first level if they've cleared none, the last level once they've
-  # cleared everything).
   def current_level
     GameLevel.find((highest_level_completed || -1) + 1) || GameLevel.find(highest_level_completed)
   end
 
   def now_playing
     now_playing_level || current_level&.number
+  end
+
+  def beat_game?
+    highest_level_completed.to_i >= GameLevel.all.last.number
+  end
+
+  def ensure_certificate_token!
+    certificate_token.presence || update!(certificate_token: SecureRandom.urlsafe_base64(24)) && certificate_token
+  end
+
+  def mark_certified!
+    update!(certificate_awarded_at: Time.current) unless certificate_awarded_at
   end
 
   private

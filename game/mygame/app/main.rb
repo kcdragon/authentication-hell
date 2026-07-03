@@ -24,7 +24,8 @@ module Main
       # level start, and the player's reset to the new scene's left edge, lands while
       # it's covered.
       update_world(args) unless args.state.paused || toggled || cc_clicked ||
-                                State.intro_active?(args) || dialogue_active?(args)
+                                State.intro_active?(args) || dialogue_active?(args) ||
+                                args.state.beaten
     end
 
     render_world(args)
@@ -109,7 +110,9 @@ module Main
     # Goal met (e.g. the welcome level after the heal): hand off to the next level,
     # which freezes the world behind its intro card. #complete? is false on the new
     # level, so this won't re-fire.
-    advance_level(args) if args.state.level.complete?
+    if args.state.level.complete?
+      args.state.level.next_level ? advance_level(args) : beat_game(args)
+    end
 
     end_run(args) if out_of_time?(args)
 
@@ -119,12 +122,6 @@ module Main
        args.state.collision_request[:complete]
       args.state.collision_request = nil
       args.state.player.lock_confirmed = true
-    end
-
-    # Fire-and-forget level report: drop the (non-serializable) handle once it
-    # lands so the per-tick state export doesn't choke on it.
-    if args.state.level_complete_request && args.state.level_complete_request[:complete]
-      args.state.level_complete_request = nil
     end
 
     Network::Death.maybe_complete(args.state)
@@ -197,7 +194,9 @@ module Main
     draw_hearts(args)
     args.state.level.draw_hud(args)
 
-    if args.state.player.game_over
+    if args.state.beaten
+      Ui::CourseComplete.new(args).draw
+    elsif args.state.player.game_over
       draw_video_ended(args)
     elsif args.state.player.locked
       draw_buffering(args)
@@ -393,23 +392,13 @@ module Main
   end
 
   # Tell the Rails app the player cleared a level (records progress + grants its
-  # achievement). The level goes in the query string, not the body: DR.http_post
-  # sends a Hash body as multipart, which Rails won't parse under our urlencoded
-  # header, so params[:level] would arrive empty (→ 0).
+  # achievement). Fire-and-forget — we never read the result.
   def report_level_complete(args, level)
-    args.state.level_complete_request = DR.http_post(
-      "#{levels_complete_url(args)}?level=#{level}",
-      {},
-      [ "Content-Type: application/x-www-form-urlencoded" ]
-    )
+    Network::Levels.complete(args, level)
   end
 
   def report_now_playing(args, level)
-    args.state.now_playing_request = DR.http_post(
-      "#{levels_playing_url(args)}?level=#{level}",
-      {},
-      [ "Content-Type: application/x-www-form-urlencoded" ]
-    )
+    Network::Levels.playing(args, level)
   end
 
   # Poll /games/<kind>/status (~twice a second) while frozen; unfreeze once the
@@ -444,6 +433,12 @@ module Main
     args.state.player.x = args.state.level.start_x
     args.state.camera_x = 0
     args.state.level.setup(args)
+  end
+
+  def beat_game(args)
+    return if args.state.beaten
+    args.state.beaten = true
+    Network::Levels.complete(args, args.state.level.number)
   end
 
   # The active stage is cleared: report it to the server, then swap in the level it
@@ -484,6 +479,4 @@ module Main
 
   def start_url(args, kind) = "#{Network.base_url(args)}/games/#{kind}/start"
   def status_url(args, kind) = "#{Network.base_url(args)}/games/#{kind}/status"
-  def levels_complete_url(args) = "#{Network.base_url(args)}/games/levels/complete"
-  def levels_playing_url(args) = "#{Network.base_url(args)}/games/levels/playing"
 end

@@ -253,6 +253,41 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 0, user.earned_achievements.count
   end
 
+  test "reset_progress! clears the certificate token and award date so old links stop resolving" do
+    user = users(:one)
+    user.ensure_certificate_token!
+    user.mark_certified!
+
+    user.reset_progress!
+
+    assert_nil user.reload.certificate_token
+    assert_nil user.certificate_awarded_at
+  end
+
+  test "ensure_certificate_token! mints a stable, unguessable token" do
+    user = users(:one)
+    assert_nil user.certificate_token
+
+    token = user.ensure_certificate_token!
+
+    assert_predicate token, :present?
+    assert_equal token, user.reload.certificate_token
+    assert_equal token, user.ensure_certificate_token!, "the token is stable once minted"
+  end
+
+  test "mark_certified! stamps the award date once and doesn't move it on replays" do
+    user = users(:one)
+
+    user.mark_certified!
+    first = user.reload.certificate_awarded_at
+    assert_predicate first, :present?
+
+    travel 1.day do
+      user.mark_certified!
+      assert_equal first, user.reload.certificate_awarded_at, "the date is fixed at first completion"
+    end
+  end
+
   test "current_level is the first level before any are cleared" do
     user = users(:one)
     assert_nil user.highest_level_completed
@@ -282,6 +317,17 @@ class UserTest < ActiveSupport::TestCase
     user = users(:one)
     user.update!(highest_level_completed: 2, now_playing_level: 0)
     assert_equal 0, user.now_playing
+  end
+
+  test "beat_game? is true only once the final level is cleared" do
+    user = users(:one)
+    last = GameLevel.all.last.number
+
+    assert_not user.beat_game?
+    user.update!(highest_level_completed: last - 1)
+    assert_not user.beat_game?
+    user.update!(highest_level_completed: last)
+    assert user.beat_game?
   end
 
   test "ranked exposes an achievements_count aggregate" do

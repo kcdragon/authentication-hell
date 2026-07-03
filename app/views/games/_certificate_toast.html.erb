@@ -1,0 +1,14 @@
+<%# locals: () %>
+
+<div id="certificate_toast" class="game-challenge-toast w-[346px] max-w-[90vw] border-[3px] border-ink rounded-[3px] bg-card shadow-brut-lg overflow-hidden pointer-events-auto">
+  <div class="flex items-center justify-between border-b-[3px] border-ink px-4 py-2.5 bg-success text-ink font-display text-[13px] uppercase tracking-tight">
+    <span>Course Complete</span>
+    <span class="ah-badge bg-card text-ink text-[10px] py-1 shadow-none">🎓</span>
+  </div>
+  <div class="p-4">
+    <p class="font-bold text-base">You beat Authentication Hell!</p>
+    <p class="ah-hint mt-0.5">You've completed the course. Claim your certificate of completion.</p>
+    <%= link_to "Claim your certificate", certificate_path, data: { turbo: false },
+          class: "ah-btn text-white w-full mt-3", style: "background: var(--color-success)" %>
+  </div>
+</div>

@@ -141,7 +141,7 @@ class PasswordLevelTest < Minitest::Test
     @level.update(@args)
 
     assert @level.complete?
-    assert_instance_of TotpLevel, @level.next_level
+    assert_instance_of TotpLevel, @level.next_level, "the password level hands off — it isn't the final level"
   end
 
   def test_draw_hud_paints_a_slot_for_every_required_character

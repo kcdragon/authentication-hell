@@ -99,6 +99,34 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
     assert_nil @user.now_playing_level
   end
 
+  test "beating the final level awards Graduate and toasts a certificate claim link" do
+    last = GameLevel.all.last
+    @user.update!(highest_level_completed: last.number - 1)
+    sign_in_as(@user)
+
+    streams = nil
+    assert_difference -> { @user.earned_achievements.count }, 2 do
+      streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+        post games_levels_complete_url, params: { level: last.number }
+      end
+    end
+
+    assert @user.earned?(:graduate)
+    assert(streams.any? { |s| s.to_html.include?("Achievement unlocked") })
+    assert(streams.any? { |s| s.to_html.include?(certificate_path) && s.to_html.include?("Course Complete") },
+      "expected a permanent toast linking to the certificate")
+  end
+
+  test "beating the final level enqueues certificate PDF generation" do
+    last = GameLevel.all.last
+    @user.update!(highest_level_completed: last.number - 1)
+    sign_in_as(@user)
+
+    assert_enqueued_with(job: GenerateCertificatePdfJob) do
+      post games_levels_complete_url, params: { level: last.number }
+    end
+  end
+
   test "playing requires authentication" do
     post games_levels_playing_url, params: { level: 1 }
     assert_redirected_to new_session_path
