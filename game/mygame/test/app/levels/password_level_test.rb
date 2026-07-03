@@ -21,7 +21,8 @@ class PasswordLevelTest < Minitest::Test
   end
 
   def test_setup_clears_any_carried_password_progress
-    stage([ "A" ]) # stale, from a prior run
+    stale_progress = [ "A" ]
+    stage(stale_progress)
     @level.setup(@args)
 
     assert_empty @level.send(:collected)
@@ -94,8 +95,8 @@ class PasswordLevelTest < Minitest::Test
 
   def test_a_full_but_unbalanced_password_is_rejected_and_reset
     @level.setup(@args)
-    # Eight characters, but 3 upper / 2 lower / 2 digit / only 1 symbol — invalid.
-    stage(%w[A B C a b 2 3 !]) # the retired padlocks stand in for a picked-clean field
+    only_one_symbol = %w[A B C a b 2 3 !]
+    stage(only_one_symbol)
     @level.update(@args)
 
     refute(@level.collectables.any? { |c| c.is_a?(Certificate) }, "an invalid password doesn't finish")
@@ -114,8 +115,9 @@ class PasswordLevelTest < Minitest::Test
 
   def test_validation_error_banner_expires_after_its_window
     @level.setup(@args)
-    stage(Array.new(PasswordLevel::PASSWORD_LENGTH, "A")) # all one class
-    @level.update(@args) # fails at tick 0
+    all_one_class = Array.new(PasswordLevel::PASSWORD_LENGTH, "A")
+    stage(all_one_class)
+    @level.update(@args)
     assert @level.validation_error_active?(@args)
 
     later = build_args(player: @args.state.player, level: @level,
@@ -132,14 +134,15 @@ class PasswordLevelTest < Minitest::Test
     assert_equal 1, certs.length, "the exit certificate appears once the set is complete"
     refute @level.complete?, "but not finished until it's picked up"
 
-    @level.update(@args) # idempotent: doesn't spawn a second one
-    assert_equal 1, @level.collectables.count { |c| c.is_a?(Certificate) }
+    @level.update(@args)
+    assert_equal 1, @level.collectables.count { |c| c.is_a?(Certificate) },
+                 "a second update doesn't spawn another"
   end
 
   def test_completes_when_the_certificate_is_collected_and_hands_off_to_totp
     @level.setup(@args)
     collect_all
-    @level.update(@args) # spawns the certificate
+    @level.update(@args)
     @level.collectables.find { |c| c.is_a?(Certificate) }.alive = false
     @level.update(@args)
 
@@ -149,7 +152,8 @@ class PasswordLevelTest < Minitest::Test
 
   def test_draw_hud_paints_a_slot_for_every_required_character
     @level.draw_hud(@args)
-    slots = @args.outputs.solids.count / 2 # each slot is an ink border + a face
+    solids_per_slot = 2
+    slots = @args.outputs.solids.count / solids_per_slot
     assert_equal PasswordCharacter::CLASSES.length * PasswordLevel::REQUIRED_PER_CLASS, slots
   end
 
@@ -168,8 +172,9 @@ class PasswordLevelTest < Minitest::Test
 
   def test_draw_shows_the_invalid_password_banner_while_the_error_is_active
     @level.setup(@args)
-    stage(Array.new(PasswordLevel::PASSWORD_LENGTH, "A")) # all one class
-    @level.update(@args) # rejected → banner active
+    all_one_class = Array.new(PasswordLevel::PASSWORD_LENGTH, "A")
+    stage(all_one_class)
+    @level.update(@args)
     @level.draw(@args)
 
     assert(@args.outputs.labels.any? { |l| l[:text] == "INVALID PASSWORD" })
@@ -181,21 +186,19 @@ class PasswordLevelTest < Minitest::Test
 
   private
 
-  # Simulate a collected password: replace the field with retired padlocks carrying the
-  # given glyphs, in pickup order — exactly what #collected reads back from the world.
   def stage(glyphs)
-    staged = glyphs.each_with_index.map do |g, i|
+    retired_padlocks = glyphs.each_with_index.map do |g, i|
       char = PasswordCharacter.new(x: 0, klass: PasswordCharacter.klass_of(g), glyph: g)
       char.alive = false
       char.instance_variable_set(:@pickup_order, i)
       char
     end
-    @level.instance_variable_set(:@collectables, staged)
+    @level.instance_variable_set(:@collectables, retired_padlocks)
   end
 
   def collect_all
     stage(PasswordCharacter::CLASSES.flat_map { |klass| Array.new(PasswordLevel::REQUIRED_PER_CLASS, glyph_for(klass)) })
   end
 
-  def glyph_for(klass) = PasswordCharacter::GLYPHS.fetch(klass).chars.first
+  def glyph_for(klass) = PasswordCharacter::UNAMBIGUOUS_GLYPHS.fetch(klass).chars.first
 end

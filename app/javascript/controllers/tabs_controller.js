@@ -1,10 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 
-// A simple tabbed interface. Each tab button and each panel carries a data-tabs-name;
-// selecting a tab shows the matching panel and hides the rest. The initially active
-// tab comes from the active value (defaults to the first tab). Active/inactive styling
-// is supplied by the view via data-tabs-active-class / data-tabs-inactive-class, so
-// the controller stays presentation-agnostic.
 export default class extends Controller {
   static targets = ["tab", "panel"]
   static values = { active: String }

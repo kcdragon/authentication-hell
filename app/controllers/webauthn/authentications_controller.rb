@@ -6,7 +6,7 @@ class Webauthn::AuthenticationsController < ApplicationController
     with: -> { render json: { error: "Try again later." }, status: :too_many_requests }
 
   # Usernameless login: an empty allow list lets the platform offer any discoverable
-  # passkey for this site; the assertion's user handle tells us who signed in.
+  # passkey for this site.
   def options
     get_options = WebAuthn::Credential.options_for_get(user_verification: "required")
     session[:webauthn_authentication_challenge] = get_options.challenge
@@ -18,8 +18,7 @@ class Webauthn::AuthenticationsController < ApplicationController
     stored = WebauthnCredential.find_by(external_id: webauthn_credential.id)
 
     raise WebAuthn::Error unless stored
-    # The credential id is globally unique, so it already identifies the account; when
-    # the authenticator also returns a user handle, it must agree (defense in depth).
+    # When the authenticator returns a user handle it must agree with the stored owner (defense in depth).
     raise WebAuthn::Error if webauthn_credential.user_handle.present? && webauthn_credential.user_handle != stored.user.webauthn_id
     raise WebAuthn::Error unless stored.user.confirmed?
 

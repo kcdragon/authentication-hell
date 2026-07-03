@@ -119,10 +119,8 @@ class Games::TotpChallengeControllerTest < ActionDispatch::IntegrationTest
     assert_equal({ "locked" => true }, response.parsed_body)
   end
 
-  # Regression: the lock used to live in the cookie session, where the game's
-  # concurrent /status polls and the page's /complete clobbered each other's
-  # cookie snapshot and could resurrect a cleared lock — freezing the player for
-  # good. It now lives in game_challenges rows, authoritative and cookie-independent.
+  # Regression: a cookie-session lock let concurrent /status polls and /complete
+  # clobber each other's cookie snapshot and resurrect a cleared lock, freezing the player.
   test "the lock lives in game_challenges, not the cookie session" do
     secret = enable_2fa_for(@user)
     sign_in_as(@user)
@@ -135,8 +133,6 @@ class Games::TotpChallengeControllerTest < ActionDispatch::IntegrationTest
     assert_not session_record.game_challenges.exists?(kind: "totp")
   end
 
-  # Concurrent challenges are tracked independently: clearing TOTP must not clear
-  # a password challenge the player also owes.
   test "completing TOTP leaves a concurrent password challenge locked" do
     secret = enable_2fa_for(@user)
     sign_in_as(@user)

@@ -1,12 +1,8 @@
 import { Controller } from "@hotwired/stimulus"
 
-// The game's canvas lives in a same-origin <iframe> (so the DragonRuby engine can
-// fill the frame at a true 16:9 with no letterbox). Answering a challenge toast,
-// which lives on this parent document, moves keyboard focus out of the frame — so
-// the game would stay deaf to keys until clicked again. When a resolved toast is
-// removed from the toast container, hand focus back to the frame so the player can
-// keep moving without re-clicking. The element this controller is attached to is
-// the <iframe>; it watches the toast container named by the `toasts` value.
+// Answering a challenge toast moves keyboard focus out of the game <iframe>,
+// leaving the game deaf to keys until clicked again — so when a toast is removed,
+// hand focus back to the frame.
 export default class extends Controller {
   static values = { toasts: String }
 
@@ -25,10 +21,9 @@ export default class extends Controller {
   }
 
   refocus() {
-    // Same-origin frame, so reaching into its document is allowed; guard anyway.
     try {
       this.element.contentWindow?.focus()
       this.element.contentWindow?.document.getElementById("canvas")?.focus()
-    } catch { /* cross-origin would throw; not our case */ }
+    } catch {}
   }
 }

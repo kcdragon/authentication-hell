@@ -10,8 +10,8 @@ class CaptionTest < Minitest::Test
 
   def test_draws_a_box_and_its_copy_when_on
     Caption.new(@args, [ "Grab the padlocks", "0/4 character types" ]).draw
-    refute_empty @args.outputs.solids # the box + lip border
-    assert_equal 2, @args.outputs.labels.length # one label per line
+    refute_empty @args.outputs.solids
+    assert_equal 2, @args.outputs.labels.length, "one label per line"
   end
 
   def test_draws_nothing_when_captions_off

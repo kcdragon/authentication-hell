@@ -1,8 +1,6 @@
 require "test_helper"
 require "capybara-playwright-driver"
 
-# Drive system tests with Playwright instead of Selenium.
-# https://justin.searls.co/posts/running-rails-system-tests-with-playwright-instead-of-selenium/
 Capybara.register_driver :playwright do |app|
   Capybara::Playwright::Driver.new(
     app,

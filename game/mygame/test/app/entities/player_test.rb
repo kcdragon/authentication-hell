@@ -7,8 +7,6 @@ class PlayerTest < Minitest::Test
     @player = Player.new
   end
 
-  # --- initial state ---
-
   def test_starts_with_full_hearts_grounded_and_facing_camera
     assert_equal Player::MAX_HEARTS, @player.hearts
     assert_equal :south, @player.facing
@@ -24,8 +22,6 @@ class PlayerTest < Minitest::Test
   def test_starts_having_not_reached_a_platform
     refute @player.reached_platform
   end
-
-  # --- horizontal movement ---
 
   def test_moves_right_and_faces_east
     start_x = @player.x
@@ -69,23 +65,21 @@ class PlayerTest < Minitest::Test
 
   def test_clamps_to_the_left_world_edge
     @player.x = 2
-    @player.update(build_args(left: true)) # would step to -6
+    @player.update(build_args(left: true))
     assert_equal 0, @player.x
   end
 
   def test_clamps_to_the_right_world_edge
     @player.x = WORLD_W - Player::WIDTH - 2
-    @player.update(build_args(right: true)) # would step past the world's right edge
+    @player.update(build_args(right: true))
     assert_equal WORLD_W - Player::WIDTH, @player.x
   end
 
   def test_clamps_to_the_one_screen_welcome_world
-    @player.x = SCREEN_W # past the welcome level's single-screen bound
+    @player.x = SCREEN_W
     @player.update(build_args(right: true, level: WelcomeLevel.new))
     assert_equal SCREEN_W - Player::WIDTH, @player.x
   end
-
-  # --- jumping & gravity ---
 
   def test_jumps_off_the_ground
     @player.update(build_args(space: true))
@@ -94,10 +88,10 @@ class PlayerTest < Minitest::Test
   end
 
   def test_cannot_launch_a_second_jump_while_airborne
-    @player.update(build_args(space: true)) # leave the ground
-    @player.vy = 0 # pretend we coasted to the apex
-    @player.update(build_args(space: true)) # space held, but not grounded
-    assert_equal(-Player::GRAVITY, @player.vy) # only gravity, no fresh launch
+    @player.update(build_args(space: true))
+    @player.vy = 0
+    @player.update(build_args(space: true))
+    assert_equal(-Player::GRAVITY, @player.vy, "only gravity, no fresh launch")
   end
 
   def test_gravity_pulls_down_and_lands_on_the_ground
@@ -108,24 +102,21 @@ class PlayerTest < Minitest::Test
     assert_equal GROUND_Y, @player.y
     assert_equal 0, @player.vy
     assert @player.grounded
-    refute @player.reached_platform # landing on the ground is not a platform
+    refute @player.reached_platform, "landing on the ground is not a platform"
   end
 
-  # Landing is now the player's reaction to a platform contact the CollisionManager
-  # reports (Player#on_collision), so drive it there. @prev_y (set by #update before
-  # gravity) is what makes the platform one-way.
   def descend_onto(platform, prev_y:)
     @player.instance_variable_set(:@prev_y, prev_y)
     @player.on_collision(platform, build_args)
   end
 
   def test_lands_on_a_platform_while_descending
-    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30)
     @player.x = 200
-    @player.y = 275 # feet dipped below the top this frame
+    @player.y = 275
     @player.vy = -10
     @player.grounded = false
-    descend_onto(platform, prev_y: 285) # was above the top last frame
+    descend_onto(platform, prev_y: 285)
     assert_equal 280, @player.y
     assert_equal 0, @player.vy
     assert @player.grounded
@@ -133,22 +124,20 @@ class PlayerTest < Minitest::Test
   end
 
   def test_does_not_land_when_rising_up_through_a_platform
-    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30)
     @player.x = 200
     @player.y = 275
-    @player.vy = 10 # ascending
+    @player.vy = 10
     @player.grounded = false
-    descend_onto(platform, prev_y: 270) # feet were below the top last frame
+    descend_onto(platform, prev_y: 270)
     refute @player.grounded
     refute @player.reached_platform
   end
 
-  # --- dropping through platforms (down arrow) ---
-
   def test_down_arrow_leaves_the_ledge_underfoot
-    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30)
     @player.x = 200
-    @player.y = 280 # standing on the ledge
+    @player.y = 280
     @player.vy = 0
     @player.grounded = true
     @player.update(build_args(down: true, platforms: [ platform ]))
@@ -157,7 +146,7 @@ class PlayerTest < Minitest::Test
   end
 
   def test_s_key_also_leaves_the_ledge_underfoot
-    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30)
     @player.x = 200
     @player.y = 280
     @player.vy = 0
@@ -168,12 +157,11 @@ class PlayerTest < Minitest::Test
   end
 
   def test_a_dropping_player_falls_through_instead_of_re_landing
-    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30)
     @player.x = 200
     @player.y = 280
     @player.grounded = true
-    @player.update(build_args(down: true, platforms: [ platform ])) # begin the drop
-    # The collision manager still reports contact this frame; land_on must ignore it.
+    @player.update(build_args(down: true, platforms: [ platform ]))
     @player.on_collision(platform, build_args)
     refute @player.grounded, "the ledge underfoot no longer catches a dropping player"
     assert_operator @player.y, :<, 280
@@ -189,12 +177,12 @@ class PlayerTest < Minitest::Test
   end
 
   def test_drop_completes_and_lands_on_the_ground_below
-    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30)
     @player.x = 200
     @player.y = 280
     @player.grounded = true
-    @player.update(build_args(down: true, platforms: [ platform ])) # begin the drop
-    40.times { @player.update(build_args) } # keep falling, no input
+    @player.update(build_args(down: true, platforms: [ platform ]))
+    40.times { @player.update(build_args) }
     assert_equal GROUND_Y, @player.y, "settles on the floor once the drop has cleared"
     assert @player.grounded
   end
@@ -202,24 +190,22 @@ class PlayerTest < Minitest::Test
   # A stomp mid-drop flips @vy upward; the drop must clear so landing works again
   # rather than leaving the player permanently falling through every ledge.
   def test_a_dropping_player_who_bounces_can_land_again
-    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30)
     @player.x = 200
     @player.y = 280
     @player.grounded = true
-    @player.update(build_args(down: true, platforms: [ platform ])) # begin the drop
-    @player.bounce             # stomp an enemy on the way down → upward vy
-    @player.update(build_args) # the rising tick ends the drop
-    @player.vy = -10           # now come back down onto a ledge
+    @player.update(build_args(down: true, platforms: [ platform ]))
+    @player.bounce
+    @player.update(build_args)
+    @player.vy = -10
     @player.y = 275
     descend_onto(platform, prev_y: 285)
     assert @player.grounded, "landing works again once the drop has cleared"
     assert_equal 280, @player.y
   end
 
-  # --- falling through holes ---
-
   def test_falls_through_a_hole_when_most_of_the_body_overhangs
-    hole = Hole.new(x: 200, w: 150) # player sits fully over the gap's left side
+    hole = Hole.new(x: 200, w: 150)
     @player.x = 200
     @player.y = GROUND_Y + 5
     @player.vy = -10
@@ -230,7 +216,7 @@ class PlayerTest < Minitest::Test
   end
 
   def test_lands_normally_when_the_hole_is_elsewhere
-    hole = Hole.new(x: 2000, w: 150) # nowhere near the player
+    hole = Hole.new(x: 2000, w: 150)
     @player.x = 200
     @player.y = GROUND_Y + 5
     @player.vy = -10
@@ -241,9 +227,9 @@ class PlayerTest < Minitest::Test
   end
 
   def test_keeps_falling_after_clearing_a_hole_while_descending
-    hole = Hole.new(x: 200, w: 150)            # center already past its right edge
-    @player.x = 360                            # center 392 > 350 (hole right edge)
-    @player.y = -50                            # already sunk below the floor line
+    hole = Hole.new(x: 200, w: 150)
+    @player.x = 360
+    @player.y = -50
     @player.vy = -12
     @player.grounded = false
     @player.update(build_args(holes: [ hole ], right: true))
@@ -252,9 +238,8 @@ class PlayerTest < Minitest::Test
   end
 
   def test_stands_on_the_edge_until_three_quarters_of_the_body_overhangs
-    # Hole starts just past the player's center, so the center overhangs but only
-    # about half the body does — under the forgiving 3/4 threshold, so they stand.
-    hole = Hole.new(x: @player.x + @player.w / 2 + 1, w: 150)
+    just_past_the_players_center = @player.x + @player.w / 2 + 1
+    hole = Hole.new(x: just_past_the_players_center, w: 150)
     @player.y = GROUND_Y + 5
     @player.vy = -10
     @player.grounded = false
@@ -264,8 +249,6 @@ class PlayerTest < Minitest::Test
   end
 
   def test_stands_when_the_center_overhangs_but_less_than_three_quarters_does
-    # Body [200,264], hole [220,...] → 44px (~69%) overhangs. The center (232) is
-    # over the gap, so the old center rule would drop them; the 3/4 rule holds.
     hole = Hole.new(x: 220, w: 150)
     @player.x = 200
     @player.y = GROUND_Y + 5
@@ -276,36 +259,32 @@ class PlayerTest < Minitest::Test
     assert_equal GROUND_Y, @player.y
   end
 
-  # --- stomping enemies ---
-
   def test_stomping_when_descending_onto_an_enemys_head
-    enemy = PasswordEnemy.new(x: @player.x, level: enemy_level) # top at GROUND_Y + HEIGHT
-    @player.y = enemy.y + enemy.h - 6 # feet just below the head, well above the midpoint
-    @player.vy = -5 # descending
+    enemy = PasswordEnemy.new(x: @player.x, level: enemy_level)
+    @player.y = enemy.y + enemy.h - 6
+    @player.vy = -5
     assert @player.stomping?(enemy)
   end
 
   def test_not_stomping_while_rising_into_an_enemy
     enemy = PasswordEnemy.new(x: @player.x, level: enemy_level)
     @player.y = enemy.y + enemy.h - 6
-    @player.vy = 5 # moving up
+    @player.vy = 5
     refute @player.stomping?(enemy)
   end
 
   def test_not_stomping_on_a_side_or_ground_hit
     enemy = PasswordEnemy.new(x: @player.x, level: enemy_level)
-    @player.y = GROUND_Y # feet on the ground, low on the enemy's body
+    @player.y = GROUND_Y
     @player.vy = 0
     refute @player.stomping?(enemy)
   end
 
-  # After bouncing off one enemy this tick, a second one under the feet is still a
-  # stomp even though the bounce flipped @vy positive.
   def test_still_stomping_after_bouncing_this_tick
     enemy = PasswordEnemy.new(x: @player.x, level: enemy_level)
     @player.y = enemy.y + enemy.h - 6
     @player.bounce
-    assert @player.stomping?(enemy)
+    assert @player.stomping?(enemy), "the bounce flipped vy positive, but a second enemy underfoot is still a stomp"
   end
 
   def test_bounce_hops_up_and_leaves_the_ground
@@ -315,11 +294,9 @@ class PlayerTest < Minitest::Test
     refute @player.grounded
   end
 
-  # --- reacting to a collision (Player#on_collision) ---
-
   def test_bounces_off_a_stomped_enemy
     enemy = PasswordEnemy.new(x: @player.x, level: enemy_level)
-    @player.y = enemy.y + enemy.h - 6 # feet on its head, descending
+    @player.y = enemy.y + enemy.h - 6
     @player.vy = -5
     @player.grounded = false
     @player.on_collision(enemy, build_args)
@@ -330,13 +307,13 @@ class PlayerTest < Minitest::Test
   end
 
   def test_takes_a_hit_from_a_side_contact
-    enemy = TotpEnemy.new(x: @player.x, level: enemy_level) # feet on the ground, not descending
+    enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
     @player.on_collision(enemy, build_args(tick_count: 0))
 
     assert_equal Player::MAX_HEARTS - 1, @player.hearts
     assert @player.locked
     assert_equal :totp, @player.pending_challenge
-    assert @player.invincible?(build_args(tick_count: 1)) # blink started
+    assert @player.invincible?(build_args(tick_count: 1))
   end
 
   def test_a_fatal_hit_drops_to_zero_hearts_without_locking
@@ -360,7 +337,7 @@ class PlayerTest < Minitest::Test
 
   def test_a_stomp_on_an_unstompable_enemy_re_auths_instead_of_bouncing
     enemy = TutorialEnemy.new(x: @player.x, level: enemy_level)
-    @player.y = enemy.y + enemy.h - 6 # would be a stomp on a normal enemy
+    @player.y = enemy.y + enemy.h - 6
     @player.vy = -5
     @player.grounded = false
     @player.on_collision(enemy, build_args(tick_count: 0))
@@ -371,7 +348,7 @@ class PlayerTest < Minitest::Test
   end
 
   def test_ignores_a_collision_while_invincible
-    @player.hurt(build_args(tick_count: 0)) # blink window open
+    @player.hurt(build_args(tick_count: 0))
     enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
     @player.on_collision(enemy, build_args(tick_count: 1))
 
@@ -383,8 +360,6 @@ class PlayerTest < Minitest::Test
     @player.on_collision(Player.new, build_args)
     assert_equal Player::MAX_HEARTS, @player.hearts
   end
-
-  # --- frozen states ---
 
   def test_locked_player_ignores_movement
     @player.locked = true
@@ -399,8 +374,6 @@ class PlayerTest < Minitest::Test
     @player.update(build_args(left: true))
     assert_equal start_x, @player.x
   end
-
-  # --- post-hit invincibility ---
 
   def test_not_invincible_before_being_hit
     refute @player.invincible?(build_args(tick_count: 0))
@@ -417,15 +390,12 @@ class PlayerTest < Minitest::Test
     refute @player.invincible?(build_args(tick_count: Player::BLINK_TICKS))
   end
 
-  # --- rendering & serialization ---
-
   def test_render_emits_the_figure_as_palette_solids
     args = build_args
     @player.render(args, 0)
-    assert_equal 0, args.outputs.sprites.length # no PNG art — the figure is primitives
-    # 2 legs + torso card (ink + indigo) + neck + head card (ink + skin) + hair +
-    # 2 eyes.
-    assert_equal 10, args.outputs.solids.length
+    assert_equal 0, args.outputs.sprites.length, "no PNG art — the figure is primitives"
+    assert_equal 10, args.outputs.solids.length,
+                 "2 legs + torso card (ink + indigo) + neck + head card (ink + skin) + hair + 2 eyes"
   end
 
   def test_serialize_includes_core_fields

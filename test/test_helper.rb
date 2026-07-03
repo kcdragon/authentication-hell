@@ -1,8 +1,7 @@
 ENV["RAILS_ENV"] ||= "test"
 
-# The minimum-coverage gate is enforced separately by script/check_coverage.rb
-# (SimpleCov's inline minimum_coverage doesn't propagate a non-zero exit through
-# `bin/rails test`). Here we only generate the report.
+# Only generates the report; the coverage gate is script/check_coverage.rb, because
+# SimpleCov's inline minimum_coverage can't propagate a non-zero exit through `bin/rails test`.
 if ENV["COVERAGE"] == "1"
   require "simplecov"
   SimpleCov.start "rails" do
@@ -14,22 +13,16 @@ require_relative "../config/environment"
 require "rails/test_help"
 require_relative "test_helpers/session_test_helper"
 
-# Hash passwords at bcrypt's minimum cost in tests. Fixtures, has_secure_password,
-# and recovery-code generation all create digests; at the default cost (12) this
-# dominates suite runtime. They all fall back to BCrypt::Engine.cost when no cost
-# is given, so this one knob speeds up every path.
+# Every digest path (fixtures, has_secure_password, recovery codes) falls back to
+# BCrypt::Engine.cost; at the default cost hashing dominates suite runtime.
 require "bcrypt"
 BCrypt::Engine.cost = BCrypt::Engine::MIN_COST
 
 module ActiveSupport
   class TestCase
-    # Run tests in parallel with specified workers. Under coverage, run serially
-    # so SimpleCov's resultset isn't fragmented across forked workers.
+    # Serial under coverage so SimpleCov's resultset isn't fragmented across forked workers.
     parallelize(workers: ENV["COVERAGE"] == "1" ? 1 : :number_of_processors)
 
-    # Setup all fixtures in test/fixtures/*.yml for all tests in alphabetical order.
     fixtures :all
-
-    # Add more helper methods to be used by all tests here...
   end
 end

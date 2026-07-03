@@ -26,8 +26,7 @@ class RegistrationsController < ApplicationController
       params.expect(user: [ :username, :email_address, :password, :password_confirmation ])
     end
 
-    # Bots fill the hidden :nickname field; humans never see it. Drop the signup
-    # silently so they get no signal to adapt.
+    # Bots fill the hidden :nickname field; the fake success gives them no signal to adapt.
     def honeypot_caught?
       params[:nickname].present?
     end

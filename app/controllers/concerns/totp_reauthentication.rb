@@ -1,5 +1,3 @@
-# Shared re-confirmation for sensitive 2FA actions (disable, regenerate codes):
-# accept either a current TOTP/recovery code or the account password.
 module TotpReauthentication
   extend ActiveSupport::Concern
 

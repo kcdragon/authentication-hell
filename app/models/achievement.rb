@@ -1,8 +1,3 @@
-# The catalog of every achievement a player can unlock. Plain value objects (not
-# ActiveRecord) — which ones a user has earned lives in EarnedAchievement, keyed
-# by `key`. Grants come from a few places: clearing a collision re-auth challenge,
-# completing a level, or — for the EVENTS below — playing while the clock falls
-# inside a fixed `window` (see GamesController#start).
 class Achievement
   attr_reader :key, :name, :description, :emoji, :window
 

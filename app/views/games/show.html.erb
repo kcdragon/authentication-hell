@@ -1,17 +1,10 @@
 <% content_for :title, "Authentication Hell — Play" %>
 
 <div class="w-full flex flex-col items-center gap-4 mt-8 px-5">
-  <%# Canvas (1280x720, 16:9) and the "Up Next" playlist rail side by side. The
-      rail sits to the right on wide screens and stacks under the canvas below lg. %>
   <div class="w-full max-w-[1660px] flex flex-col lg:flex-row gap-4 items-start">
-    <%# The game runs in a same-origin <iframe> (/game/frame). DragonRuby's HTML5
-        engine sizes its render to fill its *document*, so giving it a frame whose
-        viewport is exactly 16:9 makes the game fill the frame with no letterbox —
-        the bare canvas on a shared page can't do this (the engine would fill the
-        whole document and letterbox inside it). Same-origin, so the frame's loader
-        + the game's /games/* and /game/start fetches carry the session cookie as
-        before; the toast/playlist/nav chrome stays here on the parent. The 16:9
-        box scales with the column width via aspect-ratio. %>
+    <%# The game needs a same-origin <iframe> with an exactly-16:9 viewport: the
+        DragonRuby engine fills its whole *document*, so a bare canvas on this
+        shared page would letterbox. %>
     <div class="flex-1 min-w-0 w-full max-w-[1280px]">
       <div class="w-full bg-black border-[3px] border-ink rounded-[3px] shadow-brut overflow-hidden" style="aspect-ratio: 16 / 9;">
         <iframe
@@ -25,8 +18,6 @@
       </div>
     </div>
 
-    <%# Playlist of "training videos" = the game's levels. Re-rendered live by
-        Games::LevelsController#complete, broadcast over the :playlist stream. %>
     <%= turbo_stream_from Current.user, :playlist %>
     <%= render "games/playlist", user: Current.user %>
   </div>
@@ -39,13 +30,8 @@
     <div id="<%= Game::Toasts::EPHEMERAL_CONTAINER %>" class="contents"></div>
   </div>
 
-  <%# The game canvas + its loader live in the <iframe> above; this page only needs
-      the chrome's JS. The game_page layout omits the app-wide importmap, so declare
-      a page-scoped one (absolute, digested asset URLs): Turbo for the toast/playlist
-      streams, plus Stimulus and the passkey collision, dropdown, and game-frame
-      controllers. Then start Turbo and a minimal Stimulus app — the passkey
-      controller auto-connects to the challenge toast Turbo appends on collision,
-      and game-frame returns keyboard focus to the iframe once a toast is resolved. %>
+  <%# The game_page layout omits the app-wide importmap, so declare a page-scoped
+      one with absolute, digested asset URLs. %>
   <script type="importmap">
     {
       "imports": {

@@ -146,7 +146,7 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "playing tracks the reported level even before it's been cleared" do
-    sign_in_as(@user) # no progress yet, but the game is the source of truth
+    sign_in_as(@user)
 
     post games_levels_playing_url, params: { level: 2 }
 

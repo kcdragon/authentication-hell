@@ -1,15 +1,9 @@
-# A start-of-level dialogue card: a neo-brutalist card (hard offset ink shadow, ink
-# border, white face) centered on screen, holding one message's pre-wrapped lines in
-# dark mono with a "press space or E to continue" footer in the level's accent.
-# Engine-free (only touches args.outputs), like Caption, so it loads under plain MRI
-# and is testable. Drawn while the world is frozen at a level's start, until the
-# player advances through every message.
 class Dialogue
   W        = 720
-  PAD      = 28   # vertical padding inside the card, top and bottom
+  PAD      = 28
   LINE_H   = 38
-  FOOTER_H = 40   # space the "press E" footer occupies below the lines
-  CY       = 392  # screen y the card is centered on
+  FOOTER_H = 40
+  CY       = 392
 
   def initialize(args, lines, accent)
     @args = args
@@ -25,7 +19,6 @@ class Dialogue
     left = cx - W / 2
     bottom = CY - card_h / 2
 
-    # Hard offset ink shadow, then the ink border, then the white face.
     @args.outputs.solids << { x: left + 8, y: bottom - 8, w: W, h: card_h,
                               r: INK[0], g: INK[1], b: INK[2] }
     @args.outputs.solids << { x: left, y: bottom, w: W, h: card_h,

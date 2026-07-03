@@ -1,11 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
-// The DragonRuby HTML5 loader injects its splash (div#clicktoplaydiv: a logo + a
-// title <p> + a "Click or tap…" <p>) into the document body once assets finish
-// downloading. We can't edit that vendored JS, so once the splash appears we rewrite
-// its two text lines to the in-game poster's copy (its look is handled by
-// game_splash.css). Attached to the iframe body; it watches for the splash node,
-// which the loader adds asynchronously after this controller has connected.
+// The vendored DragonRuby loader injects div#clicktoplaydiv asynchronously and
+// can't be edited, so watch for it and rewrite its text to the poster copy.
 export default class extends Controller {
   connect() {
     const existing = document.getElementById("clicktoplaydiv")

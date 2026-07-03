@@ -45,7 +45,6 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
 
     get game_start_url
     assert_response :success
-    # No progress yet → starts on the welcome level (level 0).
     assert_equal 0, response.parsed_body["start_level"]
   end
 
@@ -74,14 +73,12 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     @user.update!(highest_level_completed: 2)
     sign_in_as(@user)
 
-    # Clicking a watched level in the playlist reloads the frame, which stashes it.
     get game_frame_url(level: 0)
     assert_response :success
 
     get game_start_url
     assert_equal 0, response.parsed_body["start_level"]
 
-    # One-shot: a subsequent boot falls back to progress (the frontier level).
     get game_start_url
     assert_equal 2, response.parsed_body["start_level"]
   end
@@ -90,7 +87,6 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     @user.update!(highest_level_completed: 0)
     sign_in_as(@user)
 
-    # current_level (frontier) is 1; the player can jump to it even un-cleared.
     get game_frame_url(level: 1)
     get game_start_url
     assert_equal 1, response.parsed_body["start_level"]
@@ -110,7 +106,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
 
   test "starting the run wipes the permanent toasts so a stale challenge can't linger" do
     sign_in_as(@user)
-    post games_level_totp_start_url # leaves a "Link a temporary authenticator" toast in #permanent_toasts
+    post games_level_totp_start_url
 
     streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
       get game_start_url
@@ -159,7 +155,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     @user.update!(highest_level_completed: 0)
     sign_in_as(@user)
 
-    in_env("development") { get game_frame_url(level: 2) } # frontier is 1, but dev jumps anywhere
+    in_env("development") { get game_frame_url(level: 2) }
     get game_start_url
     assert_equal 2, response.parsed_body["start_level"]
   end
@@ -171,25 +167,24 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     get game_frame_url(level: 99)
     assert_equal 0, @user.reload.now_playing_level
     get game_start_url
-    # No valid selection → resumes at progress (level after the welcome level).
     assert_equal 1, response.parsed_body["start_level"]
   end
 
   test "frame still honors an in-frontier selection in production" do
-    @user.update!(highest_level_completed: 1) # frontier is 2
+    @user.update!(highest_level_completed: 1)
     sign_in_as(@user)
 
-    in_env("production") { get game_frame_url(level: 1) } # 1 <= frontier
+    in_env("production") { get game_frame_url(level: 1) }
     assert_equal 1, @user.reload.now_playing_level
     get game_start_url
     assert_equal 1, response.parsed_body["start_level"]
   end
 
   test "frame blocks an out-of-frontier jump in production" do
-    @user.update!(highest_level_completed: 0, now_playing_level: 0) # frontier is 1
+    @user.update!(highest_level_completed: 0, now_playing_level: 0)
     sign_in_as(@user)
 
-    in_env("production") { get game_frame_url(level: 2) } # past the frontier
+    in_env("production") { get game_frame_url(level: 2) }
     assert_equal 0, @user.reload.now_playing_level
     get game_start_url
     assert_equal 1, response.parsed_body["start_level"]
@@ -213,8 +208,6 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  # End-to-end through the job: 11:30 PDT on the talk day = 18:30 UTC; 12:00 UTC
-  # mid-conference is still July 15 Pacific — both land inside their windows.
   test "playing before RubyConf awards the beta_tester achievement" do
     sign_in_as(@user)
 
@@ -227,7 +220,8 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
   test "playing during RubyConf awards only the attendee achievement" do
     sign_in_as(@user)
 
-    travel_to Time.utc(2026, 7, 15, 12, 0) do
+    noon_utc_still_july_15_in_pacific = Time.utc(2026, 7, 15, 12, 0)
+    travel_to noon_utc_still_july_15_in_pacific do
       perform_enqueued_jobs { get game_start_url }
     end
     assert @user.earned?(:rubyconf_attendee)
@@ -237,7 +231,8 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
   test "playing during the talk awards both attendee and talk" do
     sign_in_as(@user)
 
-    travel_to Time.utc(2026, 7, 16, 18, 30) do
+    eleven_thirty_pdt_on_talk_day = Time.utc(2026, 7, 16, 18, 30)
+    travel_to eleven_thirty_pdt_on_talk_day do
       perform_enqueued_jobs { get game_start_url }
     end
     assert @user.earned?(:rubyconf_attendee)

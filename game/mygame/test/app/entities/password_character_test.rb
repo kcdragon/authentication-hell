@@ -10,7 +10,7 @@ class PasswordCharacterTest < Minitest::Test
   def test_carries_a_glyph_from_its_class
     PasswordCharacter::CLASSES.each do |klass|
       char = PasswordCharacter.new(x: 100, klass: klass)
-      assert_includes PasswordCharacter::GLYPHS.fetch(klass), char.glyph
+      assert_includes PasswordCharacter::UNAMBIGUOUS_GLYPHS.fetch(klass), char.glyph
     end
   end
 
@@ -37,7 +37,7 @@ class PasswordCharacterTest < Minitest::Test
     char = PasswordCharacter.new(x: 100, klass: :symbol, glyph: "#")
     char.on_collision(Player.new, @args)
     refute char.alive?
-    assert char.pickup_order # the retired padlock carries the level's record
+    assert char.pickup_order
   end
 
   def test_on_collision_stamps_grabs_in_order
@@ -58,7 +58,7 @@ class PasswordCharacterTest < Minitest::Test
 
   def test_klass_of_recovers_a_glyphs_class
     PasswordCharacter::CLASSES.each do |klass|
-      glyph = PasswordCharacter::GLYPHS.fetch(klass).chars.first
+      glyph = PasswordCharacter::UNAMBIGUOUS_GLYPHS.fetch(klass).chars.first
       assert_equal klass, PasswordCharacter.klass_of(glyph)
     end
   end

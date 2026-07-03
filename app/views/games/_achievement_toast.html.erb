@@ -1,9 +1,5 @@
 <%# locals: (achievement:) %>
 
-<%# An "achievement unlocked" toast, appended into the #toasts container via Turbo
-    Streams when a player earns an achievement for the first time. Reuses the
-    ephemeral game-toast fade/auto-dismiss styling (toast-fade keyframes in the
-    Tailwind build) — no JS controller. `achievement` is an Achievement value object. %>
 <div id="<%= achievement_toast_id(achievement) %>"
      class="game-toast w-max max-w-[90vw] border-[3px] border-ink rounded-[3px] bg-password text-ink px-3.5 py-3 shadow-brut pointer-events-none">
   <div class="flex items-center gap-3">

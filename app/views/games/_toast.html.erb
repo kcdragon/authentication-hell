@@ -1,10 +1,5 @@
 <%# locals: (toast:) %>
 
-<%# One collision toast, appended into the #toasts container via Turbo Streams.
-    The container (in show.html.erb) is the fixed, bottom-right flex column that
-    stacks these; each toast just needs a unique DOM id and its styling. The
-    fade-in + auto-dismiss is pure CSS (toast-fade/toast-collapse keyframes in the
-    Tailwind build) — no JS controller. `toast` is a hash with :id and :message. %>
 <div id="toast_<%= toast.fetch(:id) %>"
      class="game-toast w-[346px] max-w-[90vw] border-[3px] border-ink rounded-[3px] bg-totp text-white px-3.5 py-3 font-bold shadow-brut pointer-events-none">
   ↯ <%= toast.fetch(:message) %>

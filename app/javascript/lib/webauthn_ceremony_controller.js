@@ -1,10 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Base for the two passkey ceremony controllers. Subclasses call runCeremony() from
-// their action handler, supplying the authenticator step (create/get from
-// @github/webauthn-json) and the per-flow request bodies and error copy. This base
-// owns the shared shape: POST to Rails for options → run the authenticator → POST the
-// result back → follow the returned redirect, or surface an error.
 export default class extends Controller {
   static values = { optionsUrl: String, callbackUrl: String }
   static targets = ["error"]

@@ -3,8 +3,6 @@ class Totp::RecoveryCodesController < ApplicationController
 
   before_action :require_otp_enabled
 
-  # Regenerate the recovery codes (invalidating the old set). Require re-confirmation
-  # with a current code or the account password before issuing a fresh batch.
   def create
     if reauthenticated?
       @recovery_codes = Current.user.generate_recovery_codes!

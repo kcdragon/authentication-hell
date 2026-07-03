@@ -7,7 +7,6 @@ class Users::PasswordsController < ApplicationController
   def update
     user = Current.user
 
-    # A passwordless (passkey-only) user has nothing to verify; everyone else must prove the current one.
     unless user.passwordless? || user.authenticate(params[:current_password])
       flash.now[:alert] = "Current password is incorrect."
       return render :show, status: :unprocessable_entity

@@ -1,7 +1,3 @@
-# Grants an achievement to a user and, only the first time it's earned,
-# broadcasts the unlock toast over the same per-user :toasts stream the game
-# page already subscribes to — out-of-band, so it composes with whatever the
-# caller renders.
 class Achievement::Awarder
   def self.call(user, key)
     new(user, key).call

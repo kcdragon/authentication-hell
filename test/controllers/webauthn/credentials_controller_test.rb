@@ -3,8 +3,8 @@ require "test_helper"
 class Webauthn::CredentialsControllerTest < ActionDispatch::IntegrationTest
   setup { @user = users(:one) }
 
-  test "a signed-in user can register a passkey" do
-    enable_2fa_for(@user) # already set up otherwise, so this completes onboarding → settings redirect
+  test "a fully onboarded user registering a passkey is sent to passkey settings" do
+    enable_2fa_for(@user)
     sign_in_as @user
 
     assert_difference -> { @user.webauthn_credentials.count }, 1 do
@@ -17,7 +17,7 @@ class Webauthn::CredentialsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "registering a passkey mid-onboarding returns to the checklist" do
-    sign_in_as @user # password fixture, no TOTP yet — still incomplete after adding a passkey
+    sign_in_as @user
 
     response = register_passkey_over_http(nickname: "My Laptop")
 

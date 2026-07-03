@@ -37,8 +37,7 @@ class TotpLevelTest < Minitest::Test
 
   def test_keys_are_laid_out_like_a_phone_number_pad
     at = @level.keypad.to_h { |pad| [ pad.digit, [ pad.x, pad.y ] ] }
-    # 1-2-3 share a row, left→right; 7-8-9 sit above them; 0 is centered below.
-    assert_equal at[1][1], at[2][1]
+    assert_equal at[1][1], at[2][1], "1-2-3 share a row"
     assert_equal at[2][1], at[3][1]
     assert_operator at[1][0], :<, at[2][0]
     assert_operator at[2][0], :<, at[3][0]
@@ -49,10 +48,10 @@ class TotpLevelTest < Minitest::Test
   end
 
   def test_rows_are_within_a_single_hop_of_each_other
-    reach = Platform::TIERS.first - GROUND_Y # the proven ground→first-ledge jump
+    proven_jump_reach = Platform::TIERS.first - GROUND_Y
     tops = (@level.keypad.map(&:y) + [ GROUND_Y ]).uniq.sort
     steps = tops.each_cons(2).map { |a, b| b - a }
-    assert(steps.all? { |s| s <= reach }, "each row is a reachable hop above the last: #{steps.inspect}")
+    assert(steps.all? { |s| s <= proven_jump_reach }, "each row is a reachable hop above the last: #{steps.inspect}")
   end
 
   def test_setup_starts_with_no_enemies_and_a_fresh_challenge
@@ -73,7 +72,7 @@ class TotpLevelTest < Minitest::Test
     register!
     pad = pad_for(5)
     stand_on(pad)
-    @level.update(@args) # moving/standing, but E not pressed
+    @level.update(@args)
 
     assert_empty @level.totp[:entered], "navigation must never type a digit"
   end
@@ -105,11 +104,9 @@ class TotpLevelTest < Minitest::Test
 
   def test_spawns_a_capped_wave_of_enemies_over_time
     register!
-    # No enemy yet at tick 0...
     @level.update(@args)
-    assert_empty @level.enemies
+    assert_empty @level.enemies, "no enemy yet at tick 0"
 
-    # ...one arrives a wave-interval later, and the floor never packs past the cap.
     20.times do |i|
       @args.state.tick_count += TotpLevel::WAVE_INTERVAL
       @level.update(@args)
@@ -134,7 +131,6 @@ class TotpLevelTest < Minitest::Test
     @args.state.player.y = pad.y
   end
 
-  # Stand on a key and tap E for one frame — one deliberate entry.
   def press(pad)
     stand_on(pad)
     @args.inputs.keyboard.key_down.e = true

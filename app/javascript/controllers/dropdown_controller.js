@@ -1,8 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 
-// A presentation-agnostic dropdown: the trigger toggles the menu target, and the
-// menu closes on an outside click or Escape. The view supplies all styling and
-// marks the menu hidden initially.
 export default class extends Controller {
   static targets = ["menu"]
 

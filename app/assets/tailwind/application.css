@@ -1,19 +1,9 @@
-/* =========================================================================
-   AUTHENTICATION HELL — "HARD MODE" design system
-   app/assets/tailwind/application.css  (Tailwind CSS v4 + tailwindcss-rails)
-   =========================================================================
-   Fonts are self-hosted (app/assets/fonts/*.woff2) and served through
-   Propshaft — no external font CDN, matching the app's no-dependency stance.
-   tailwindcss-rails compiles this file to app/assets/builds/tailwind.css,
-   whose Propshaft logical_path is the root "tailwind.css" (logical dir "."),
-   NOT "builds/...". So @font-face url() refs are bare filenames
-   ("space-mono-400.woff2"), which resolve against the font on the load-path
-   root; a "../" prefix would point above root and silently fail to rewrite.
-   ========================================================================= */
-
 @import "tailwindcss";
 
-/* ---- 0. SELF-HOSTED FONTS -------------------------------------------- */
+/* ---- 0. SELF-HOSTED FONTS ---------------------------------------------
+   url() refs must stay bare filenames: the built tailwind.css has the root
+   logical dir under Propshaft, so a "../" prefix would silently fail to
+   rewrite to a digested path. */
 @font-face {
   font-family: "Archivo Black";
   font-style: normal;
@@ -22,7 +12,6 @@
   src: url("archivo-black-400.woff2") format("woff2");
 }
 @font-face {
-  /* variable font — one file covers the 400–700 range */
   font-family: "Space Grotesk";
   font-style: normal;
   font-weight: 400 700;
@@ -46,28 +35,24 @@
 
 /* ---- 1. TOKENS -------------------------------------------------------- */
 @theme {
-  /* surfaces / ink */
-  --color-paper:      #f5f2e9;  /* page background (warm) */
-  --color-card:       #ffffff;  /* raised surfaces */
-  --color-ink:        #111111;  /* borders, text, the "frame" */
-  --color-muted:      #5b5750;  /* secondary text */
-  --color-faint:      #e7e3d7;  /* hairline dividers inside cards */
-  --color-locked:     #efece3;  /* disabled/locked surface */
-  --color-locked-ink: #a7a297;  /* disabled/locked text */
+  --color-paper:      #f5f2e9;
+  --color-card:       #ffffff;
+  --color-ink:        #111111;
+  --color-muted:      #5b5750;
+  --color-faint:      #e7e3d7;
+  --color-locked:     #efece3;
+  --color-locked-ink: #a7a297;
 
-  /* 5 SEMANTIC ROLES — kept distinct (remapped from the stock palette) */
-  --color-totp:       #8b5cf6;  /* TOTP / 2FA            (was purple) */
-  --color-password:   #f5a623;  /* password & achievements (was amber) */
-  --color-passkey:    #2f6bff;  /* passkey  + primary CTA  (was blue) */
-  --color-success:    #16a34a;  /* enabled / success       (green) */
-  --color-error:      #e5342a;  /* error / destructive     (red) */
+  --color-totp:       #8b5cf6;
+  --color-password:   #f5a623;
+  --color-passkey:    #2f6bff;
+  --color-success:    #16a34a;
+  --color-error:      #e5342a;
 
-  /* type */
-  --font-display: "Archivo Black", system-ui, sans-serif; /* headings, labels */
-  --font-sans:    "Space Grotesk", system-ui, sans-serif; /* body / UI */
-  --font-mono:    "Space Mono", ui-monospace, monospace;  /* codes, secrets */
+  --font-display: "Archivo Black", system-ui, sans-serif;
+  --font-sans:    "Space Grotesk", system-ui, sans-serif;
+  --font-mono:    "Space Mono", ui-monospace, monospace;
 
-  /* brutalist geometry */
   --radius-brut: 3px;
   --shadow-brut-sm: 3px 3px 0 var(--color-ink);
   --shadow-brut:    6px 6px 0 var(--color-ink);
@@ -81,21 +66,16 @@
 }
 
 /* ---- 3. COMPONENT PATTERNS ------------------------------------------- */
-/* Use the class names below straight in your ERB. Variants compose:
-   class="ah-btn ah-btn--primary"  /  class="ah-input ah-input--error"      */
 @layer components {
 
-  /* CARD / CALLOUT --------------------------------------------------- */
   .ah-card {
     @apply bg-card border-[3px] border-ink rounded-[3px] shadow-brut;
   }
-  .ah-card--flush { @apply shadow-none; }            /* nested, no lift */
+  .ah-card--flush { @apply shadow-none; }
 
-  /* the two-column SECTION DIVIDER used on settings pages */
   .ah-split { @apply grid grid-cols-2 border-t-[3px] border-ink; }
   .ah-split > * + * { @apply border-l-[3px] border-ink; }
 
-  /* BUTTONS ---------------------------------------------------------- */
   .ah-btn {
     @apply inline-flex items-center justify-center gap-2 whitespace-nowrap
            font-sans font-bold text-[15px] leading-none cursor-pointer
@@ -109,7 +89,6 @@
   .ah-btn--outline     { @apply bg-card text-ink border-dashed; }
   .ah-btn--ghost       { @apply bg-ink text-white border-ink shadow-[3px_3px_0_var(--color-muted)]; }
 
-  /* INPUTS ----------------------------------------------------------- */
   .ah-input {
     @apply w-full font-sans font-medium text-[15px] text-ink bg-card
            border-[3px] border-ink rounded-[3px] px-3 py-2.5 outline-none
@@ -123,14 +102,12 @@
   .ah-hint   { @apply font-sans font-medium text-[13px] text-muted; }
   .ah-error  { @apply font-sans font-semibold text-[13px] text-error; }
 
-  /* a single OTP / 6-digit cell (render 6 of them in a flex row, gap-2) */
   .ah-otp {
     @apply flex-1 h-12 grid place-items-center bg-card border-[3px] border-ink
            font-display text-lg text-ink;
   }
-  .ah-otp--active { @apply border-totp; }            /* tint to the challenge color */
+  .ah-otp--active { @apply border-totp; }
 
-  /* STATUS BADGES ---------------------------------------------------- */
   .ah-badge {
     @apply inline-flex items-center gap-1.5 font-sans font-bold text-xs
            uppercase tracking-wide border-2 border-ink rounded-[3px]
@@ -142,7 +119,6 @@
   .ah-badge--password{ @apply bg-password text-ink; }
   .ah-badge--passkey { @apply bg-passkey text-white; }
 
-  /* FLASH MESSAGES (thick left rule = role color) -------------------- */
   .ah-flash {
     @apply font-sans font-semibold text-sm text-ink bg-card
            border-[3px] border-ink border-l-[9px] rounded-[3px]
@@ -153,9 +129,7 @@
   .ah-flash--notice  { @apply border-l-password; }
 }
 
-/* ---- 4. GAME CHALLENGE TOASTS (the centerpiece) ----------------------- */
-/* Fixed bottom-right over the 1280x720 canvas. Tint the header + OTP cells
-   to the challenge color: --tone is set per variant below.                */
+/* ---- 4. GAME CHALLENGE TOASTS ----------------------------------------- */
 @layer components {
   .toast {
     @apply fixed bottom-6 right-6 z-50 w-[346px] bg-card
@@ -167,12 +141,11 @@
            px-4 py-2.5 font-display text-[13px] uppercase tracking-tight;
     background: var(--tone);
   }
-  .toast--totp     { --tone: var(--color-totp);     }  /* header text white */
-  .toast--password { --tone: var(--color-password); }  /* header text ink   */
-  .toast--passkey  { --tone: var(--color-passkey);  }  /* header text white */
+  .toast--totp     { --tone: var(--color-totp);     }
+  .toast--password { --tone: var(--color-password); }
+  .toast--passkey  { --tone: var(--color-passkey);  }
   .toast__body { @apply p-4; }
 
-  /* ephemeral toasts (generic collision = totp tone, achievement = gold) */
   .toast-ephemeral {
     @apply fixed bottom-6 right-6 z-50 border-[3px] border-ink
            rounded-[3px] p-3.5 shadow-brut;

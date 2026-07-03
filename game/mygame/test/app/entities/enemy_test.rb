@@ -1,9 +1,5 @@
 require_relative "../../test_helper"
 
-# Exercises Enemy#on_collision — the enemy's own side of a contact (its fate + the
-# kill count). The player's reaction lives in Player#on_collision (player_test.rb);
-# here we only assert what the enemy decides about itself. The player is placed at the
-# enemy's x so their bodies overlap; the vertical setup picks the outcome.
 class EnemyTest < Minitest::Test
   include GameTest
 
@@ -11,7 +7,6 @@ class EnemyTest < Minitest::Test
     @player = Player.new
   end
 
-  # Feet just below the enemy's head, descending: a stomp.
   def stomp_the(enemy)
     @player.y = enemy.y + enemy.h - 6
     @player.vy = -5
@@ -31,19 +26,19 @@ class EnemyTest < Minitest::Test
   end
 
   def test_a_buffering_enemy_is_spent_on_a_side_hit
-    enemy = BufferingEnemy.new(x: @player.x, level: enemy_level) # feet on the ground
+    enemy = BufferingEnemy.new(x: @player.x, level: enemy_level)
     enemy.on_collision(@player, build_args(tick_count: 0))
     refute enemy.alive
   end
 
   def test_a_side_hit_defeats_it
-    enemy = TotpEnemy.new(x: @player.x, level: enemy_level) # feet on the ground, not descending
+    enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
     enemy.on_collision(@player, build_args(tick_count: 0))
     refute enemy.alive
   end
 
   def test_survives_a_hit_while_the_player_is_invincible
-    @player.hurt(build_args(tick_count: 0)) # blink window open
+    @player.hurt(build_args(tick_count: 0))
     enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
     enemy.on_collision(@player, build_args(tick_count: 1))
     assert enemy.alive
@@ -58,7 +53,7 @@ class EnemyTest < Minitest::Test
 
   def test_ignores_a_non_player_partner
     enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
-    other = TotpEnemy.new(x: @player.x, level: enemy_level) # two enemies overlapping
+    other = TotpEnemy.new(x: @player.x, level: enemy_level)
     enemy.on_collision(other, build_args(tick_count: 0))
     assert enemy.alive, "enemies don't collide with each other"
     assert other.alive
@@ -70,7 +65,7 @@ class EnemyTest < Minitest::Test
     level.define_singleton_method(:loot_for) { |_e| drop }
     enemy = TotpEnemy.new(x: @player.x, level: level)
 
-    enemy.on_collision(@player, build_args(tick_count: 0)) # side hit → dies
+    enemy.on_collision(@player, build_args(tick_count: 0))
     refute enemy.alive
     assert_includes level.collectables, drop
   end
@@ -78,10 +73,10 @@ class EnemyTest < Minitest::Test
   def test_a_surviving_enemy_drops_no_loot
     level = Level.new
     level.define_singleton_method(:loot_for) { |_e| flunk "no drop unless it dies" }
-    @player.hurt(build_args(tick_count: 0)) # invincibility window open
+    @player.hurt(build_args(tick_count: 0))
     enemy = TotpEnemy.new(x: @player.x, level: level)
 
-    enemy.on_collision(@player, build_args(tick_count: 1)) # player invincible → survives
+    enemy.on_collision(@player, build_args(tick_count: 1))
     assert enemy.alive
     assert_empty level.collectables
   end

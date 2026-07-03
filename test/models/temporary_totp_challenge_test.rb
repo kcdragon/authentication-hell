@@ -37,7 +37,6 @@ class TemporaryTotpChallengeTest < ActiveSupport::TestCase
 
     travel_to(Time.at(base))      { @challenge.submit!(@challenge.totp.now) }
     assert_equal 1, @challenge.streak
-    # Skip base+30 entirely; the next valid code is two windows on.
     travel_to(Time.at(base + 90)) { @challenge.submit!(@challenge.totp.now) }
     assert_equal 1, @challenge.streak
     refute @challenge.complete?
@@ -100,7 +99,5 @@ class TemporaryTotpChallengeTest < ActiveSupport::TestCase
     Rails.env = original
   end
 
-  # A unix time aligned to a 30s TOTP window so successive +30s steps land in
-  # consecutive windows.
   def window_boundary = 1_700_000_000 - (1_700_000_000 % TemporaryTotpChallenge::INTERVAL)
 end

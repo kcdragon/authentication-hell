@@ -1,5 +1,3 @@
-# Source of truth for the game's levels. Each level's completion grants a matching
-# achievement (generated into Achievement::ALL). Adding a level is one entry here.
 class GameLevel
   attr_reader :number, :name, :emoji, :achievement_description
 

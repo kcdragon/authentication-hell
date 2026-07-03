@@ -3,26 +3,15 @@ class GamesController < ApplicationController
 
   layout "game_page"
 
-  # Served path of the static game bundle, namespaced per environment so a dev
-  # build (baked for localhost) and a production build (baked for the live
-  # domain) never overwrite each other, then by a content digest so each build
-  # is served under a fresh, immutable URL — busting stale browser/CDN caches on
-  # deploy. bin/build-game writes public/<env>_game_assets/<digest>/.
   helper_method def game_assets_path = "/#{Rails.env}_game_assets/#{game_assets_version}/"
 
-  # The DragonRuby game runs WASM with worker threads, which needs
-  # SharedArrayBuffer and therefore a cross-origin-isolated page. Set COOP/COEP
-  # here for the game page itself; the matching headers for the static bundle
-  # are added by GameCrossOriginIsolation middleware.
+  # The game's WASM worker threads need SharedArrayBuffer, which requires a
+  # cross-origin-isolated page.
   before_action :set_cross_origin_isolation_headers, only: %i[ show frame ]
 
   def show
   end
 
-  # The bare canvas + DragonRuby loader, with no app chrome, rendered into an
-  # <iframe> by show. The engine's HTML5 build fills its document, so giving it a
-  # frame whose viewport is exactly 16:9 makes its render fill the frame with no
-  # letterbox. Uses the "game_frame" layout (just <base href> + the canvas shell).
   def frame
     if params[:level].present? && (level = GameLevel.find(params[:level].to_i))
       frontier = Current.user.current_level&.number
@@ -50,9 +39,7 @@ class GamesController < ApplicationController
     AwardActiveAchievementsJob.perform_later(Current.user, Time.current)
   end
 
-  # The single content-digest subdir bin/build-game leaves under the bundle root.
-  # Not memoized in development since bin/watch-game rebuilds (new digest) under a
-  # running server; cached elsewhere because the dir is immutable within a deploy.
+  # Not memoized in development: bin/watch-game rebuilds (new digest) under a running server.
   def game_assets_version
     return @game_assets_version if defined?(@game_assets_version) && !Rails.env.development?
 

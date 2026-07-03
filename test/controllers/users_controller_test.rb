@@ -13,8 +13,7 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     fixture_file_upload(Rails.root.join("Gemfile"), "text/plain")
   end
 
-  # A real PNG (so it sniffs as image/png and is variant-able) padded past the size
-  # limit, to exercise the failed-update re-render with a still-unpersisted blob.
+  # A real PNG (so it sniffs as an image) padded past the size limit.
   def oversized_image_upload
     file = Tempfile.new([ "big", ".png" ], binmode: true)
     file.write(Rails.root.join("public/icon.png").binread)
@@ -42,8 +41,8 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_select "h2", text: "Achievements"
-    assert_select "div", text: /Code Cracker/      # earned
-    assert_select "span", text: /Locked/           # an unearned one's badge
+    assert_select "div", text: /Code Cracker/
+    assert_select "span", text: /Locked/
   end
 
   test "show displays the player's current level" do

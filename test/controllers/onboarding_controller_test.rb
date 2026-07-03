@@ -9,14 +9,13 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "shows the checklist with the right step states for an incomplete account" do
-    sign_in_as(@user) # password fixture, no TOTP or passkey
+    sign_in_as(@user)
     enable_2fa_for(@user)
 
     get onboarding_path
 
     assert_response :success
     assert_select "h1", /Security/
-    # Password and TOTP are done; the passkey step still offers to register one.
     assert_select "[data-controller=webauthn-registration]"
     assert_select "a[href=?]", new_totp_enrollment_path, false
   end
@@ -39,7 +38,6 @@ class OnboardingControllerTest < ActionDispatch::IntegrationTest
     get onboarding_path
 
     assert_response :success
-    # Every method is configured, so each card links out to manage it.
     assert_select "a[href=?]", password_change_path
     assert_select "a[href=?]", webauthn_settings_path
     assert_select "a[href=?]", totp_settings_path

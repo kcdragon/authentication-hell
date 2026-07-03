@@ -5,7 +5,6 @@ class PlatformTest < Minitest::Test
 
   def test_scatter_builds_a_reachable_staircase_per_slot
     platforms = Platform.scatter
-    # One staircase per slot, each topped by a single padlock-bearing ledge.
     assert_equal Platform::COUNT, platforms.count(&:holds_password)
     platforms.each do |plat|
       assert_includes Platform::TIERS, plat.y + plat.h
@@ -23,13 +22,10 @@ class PlatformTest < Minitest::Test
     platform = Platform.new(x: 500, y: 220, w: 200, h: 30)
     args = build_args
     platform.render(args, 100)
-    # First two solids: the ink border/underside, then the inset dark caption face
-    # (the "CC" tab + subtitle ticks follow). Both are camera-offset; the face sits
-    # at the ledge top (inset 3px).
     border, face = args.outputs.solids
-    assert_equal 400, border[:x]                    # world x minus camera
+    assert_equal 400, border[:x]
     assert_equal 220 - Platform::UNDERSIDE_H, border[:y]
-    assert_equal 403, face[:x]                       # inset 3px
+    assert_equal 403, face[:x]
     assert_equal 223, face[:y]
   end
 
