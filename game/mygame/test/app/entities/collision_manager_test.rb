@@ -3,9 +3,6 @@ require_relative "../../test_helper"
 class CollisionManagerTest < Minitest::Test
   include GameTest
 
-  # A minimal collidable: the manager only needs x/y/w/h + on_collision, so a plain
-  # rect double stands in for any entity and proves the manager is type-agnostic. It
-  # records who it was alerted about so we can count the alerts.
   class Rect
     attr_accessor :x, :y, :w, :h, :alerts
 
@@ -32,7 +29,7 @@ class CollisionManagerTest < Minitest::Test
 
   def test_alerts_both_objects_of_an_overlapping_pair
     a = Rect.new(x: 0)
-    b = Rect.new(x: 5) # overlaps a (0..10 vs 5..15)
+    b = Rect.new(x: 5)
     resolve(a, b)
     assert_equal [ b ], a.alerts
     assert_equal [ a ], b.alerts
@@ -50,8 +47,8 @@ class CollisionManagerTest < Minitest::Test
     a = Rect.new(x: 0)
     b = Rect.new(x: 5)
     resolve(a, b)
-    resolve(a, b) # still overlapping — alerts again (a resting contact must re-settle)
-    assert_equal 2, a.alerts.length
+    resolve(a, b)
+    assert_equal 2, a.alerts.length, "a resting contact must re-settle every frame"
   end
 
   def test_reset_empties_the_registry
@@ -64,12 +61,11 @@ class CollisionManagerTest < Minitest::Test
     assert_empty a.alerts
   end
 
-  # End-to-end against real entities: both sides react. Enemies are registered before
-  # the player (as Main does), so the enemy classifies the contact before the player's
-  # reaction mutates the state it reads.
+  # Enemies are registered before the player (as Main does), so the enemy classifies
+  # the contact before the player's reaction mutates the state it reads.
   def test_a_side_hit_defeats_the_enemy_and_docks_the_player
     player = Player.new
-    enemy = TotpEnemy.new(x: player.x, level: enemy_level) # bodies overlap; feet on the ground → side hit
+    enemy = TotpEnemy.new(x: player.x, level: enemy_level)
     @manager.add(enemy)
     @manager.add(player)
     @manager.resolve(build_args(player: player, tick_count: 0))
@@ -82,7 +78,7 @@ class CollisionManagerTest < Minitest::Test
   def test_a_stomp_defeats_the_enemy_and_bounces_the_player
     player = Player.new
     enemy = PasswordEnemy.new(x: player.x, level: enemy_level)
-    player.y = enemy.y + enemy.h - 6 # descending onto its head
+    player.y = enemy.y + enemy.h - 6
     player.vy = -5
     player.grounded = false
     args = build_args(player: player)
@@ -95,18 +91,16 @@ class CollisionManagerTest < Minitest::Test
     assert_equal Player::MAX_HEARTS, player.hearts
   end
 
-  # Landing on two enemies in one frame stomps both: the first bounce flips @vy positive,
-  # but the player must still classify the second as a stomp, not take a hit from it.
   def test_stomping_two_enemies_at_once_defeats_both_without_docking_the_player
     player = Player.new
     e1 = PasswordEnemy.new(x: player.x, level: enemy_level)
-    e2 = PasswordEnemy.new(x: player.x, level: enemy_level) # both overlap the player
-    player.y = e1.y + e1.h - 6 # descending onto their heads
+    e2 = PasswordEnemy.new(x: player.x, level: enemy_level)
+    player.y = e1.y + e1.h - 6
     player.vy = -5
     player.grounded = false
     @manager.add(e1)
     @manager.add(e2)
-    @manager.add(player) # player last, as Main does
+    @manager.add(player)
     @manager.resolve(build_args(player: player))
 
     refute e1.alive
@@ -116,8 +110,6 @@ class CollisionManagerTest < Minitest::Test
     assert_equal Player::STOMP_BOUNCE, player.vy
   end
 
-  # Collectables ride the same path: the player walking over one retires it and applies
-  # its effect via the shared Collectable#on_collision.
   def test_a_heart_pickup_heals_and_retires_when_the_player_reaches_it
     player = Player.new
     player.hearts = 1
@@ -138,7 +130,7 @@ class CollisionManagerTest < Minitest::Test
     @manager.resolve(build_args(player: player))
 
     refute char.alive?
-    assert char.pickup_order # the level rebuilds the password from stamped, retired padlocks
+    assert char.pickup_order, "stamped so the level can rebuild the password from retired padlocks"
   end
 
   def test_a_certificate_retires_when_the_player_reaches_it
@@ -149,19 +141,17 @@ class CollisionManagerTest < Minitest::Test
     @manager.resolve(build_args(player: player))
 
     refute cert.alive?
-    assert_equal Player::MAX_HEARTS, player.hearts # the pickup leaves the player otherwise untouched
+    assert_equal Player::MAX_HEARTS, player.hearts, "the pickup leaves the player otherwise untouched"
   end
 
-  # A descending player overlapping a platform is settled onto it — the manager stays
-  # type-agnostic; Player#on_collision owns the landing (the platform is passive).
   def test_settles_a_descending_player_onto_a_platform
-    platform = Platform.new(x: 180, y: 250, w: 200, h: 30) # top edge at y = 280
+    platform = Platform.new(x: 180, y: 250, w: 200, h: 30)
     player = Player.new
     player.x = 200
-    player.y = 275 # feet dipped below the top this frame
+    player.y = 275
     player.vy = -10
     player.grounded = false
-    player.instance_variable_set(:@prev_y, 285) # was above the top last frame
+    player.instance_variable_set(:@prev_y, 285)
     @manager.add(platform)
     @manager.add(player)
     @manager.resolve(build_args(player: player))

@@ -134,8 +134,6 @@ class Games::PasskeyChallengeControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "complete cannot clear the lock for a player without a registered passkey" do
-    # A parseable assertion from someone else's authenticator: it won't match any
-    # of @user's (zero) credentials, so verification is refused.
     other_client = enable_passkey_for(users(:two))
     sign_in_as(@user)
     post games_passkey_start_url

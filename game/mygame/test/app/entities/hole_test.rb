@@ -3,8 +3,6 @@ require_relative "../../test_helper"
 class HoleTest < Minitest::Test
   include GameTest
 
-  # --- scatter ---
-
   def test_scatter_returns_the_requested_count
     assert_equal Hole::COUNT, Hole.scatter.length
     assert_equal 6, Hole.scatter(count: 6).length
@@ -28,11 +26,10 @@ class HoleTest < Minitest::Test
     end
   end
 
-  # --- geometry & rendering ---
-
   def test_holes_are_wide_enough_to_swallow_the_player_but_jumpable
-    assert_operator Hole::W, :>, Player::WIDTH        # the player can fully clear the edge
-    assert_operator Hole::W, :<, 320                  # under a jump's horizontal reach
+    jump_horizontal_reach = 320
+    assert_operator Hole::W, :>, Player::WIDTH
+    assert_operator Hole::W, :<, jump_horizontal_reach
   end
 
   def test_render_emits_solids_and_no_sprites

@@ -1,6 +1,3 @@
-# Type-agnostic contact detector: each tick, callers refill its bag (reset + add) and
-# it alerts both sides of every overlapping pair, leaving each object's #on_collision
-# to own its reaction — it knows nothing about what the objects are.
 class CollisionManager
   def initialize
     @collidables = []
@@ -15,9 +12,8 @@ class CollisionManager
     @collidables = []
   end
 
-  # Alert both sides of every overlapping pair, every frame they overlap — a player
-  # resting on a platform must re-settle each tick, and a once-only reactor (an enemy)
-  # opts out by removing itself from the bag after its hit.
+  # Must fire every frame a pair still overlaps — the player re-settles onto
+  # platforms each tick; skipping repeat pairs silently breaks landing.
   def resolve(args)
     @collidables.each_with_index do |a, i|
       @collidables.each_with_index do |b, j|

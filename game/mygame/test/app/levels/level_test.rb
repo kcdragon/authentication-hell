@@ -17,18 +17,15 @@ class LevelTest < Minitest::Test
     [ 0, 1, 2 ].each { |n| assert_equal n, Level.build(n).number }
   end
 
-  # --- over_hole?: the pit query the player asks instead of reading holes ---
-
   def hole_level
     level = Level.new
-    # gap spans x 200..350; seeded directly since #holes is read-only.
     level.instance_variable_set(:@holes, [ Hole.new(x: 200, w: 150) ])
     level
   end
 
   def test_over_hole_is_true_when_most_of_the_body_overhangs_the_gap
     player = Player.new
-    player.x = 200 # fully over the gap's left side
+    player.x = 200
     assert hole_level.over_hole?(player)
   end
 

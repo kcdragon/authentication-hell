@@ -90,7 +90,7 @@ class UserTest < ActiveSupport::TestCase
   end
 
   test "onboarding_complete? requires a password, TOTP, and a passkey" do
-    user = users(:one) # password fixture
+    user = users(:one)
     assert_not user.onboarding_complete?
 
     user.enable_totp!(ROTP::Base32.random)

@@ -41,18 +41,18 @@ class WelcomeLevelTest < Minitest::Test
 
     assert_equal 1, @level.enemies.length
     enemy = @level.enemies.first
-    assert_instance_of TutorialEnemy, enemy  # the gate you must re-auth past, not stomp
+    assert_instance_of TutorialEnemy, enemy
     assert_equal :password, enemy.auth
-    assert_equal SCREEN_W, enemy.x          # enters at the right edge of the view
-    assert_operator enemy.vx, :<, 0          # marching left
-    assert_equal enemy.x, enemy.patrol_max_x # won't wander back past its entry
+    assert_equal SCREEN_W, enemy.x
+    assert_operator enemy.vx, :<, 0
+    assert_equal enemy.x, enemy.patrol_max_x, "won't wander back past its entry"
   end
 
   def test_update_spawns_the_enemy_only_once
     @level.setup(@args)
     @args.state.player.reached_platform = true
     @level.update(@args)
-    @level.enemies.first.alive = false  # player defeated/passed it
+    @level.enemies.first.alive = false
     @level.update(@args)
     assert_equal 1, @level.enemies.length
   end
@@ -71,18 +71,18 @@ class WelcomeLevelTest < Minitest::Test
 
     assert_equal 1, @level.enemies.length
     enemy = @level.enemies.first
-    assert_instance_of PasswordEnemy, enemy  # an ordinary enemy — meant to be stomped
-    assert_equal(-Enemy::WIDTH, enemy.x)     # enters just off the left edge
-    assert_operator enemy.vx, :>, 0          # marching right
-    assert_equal enemy.x, enemy.patrol_min_x # won't wander back past its entry
-    assert_equal SCREEN_W, enemy.patrol_max_x # bounded to the screen, can't escape right
+    assert_instance_of PasswordEnemy, enemy
+    assert_equal(-Enemy::WIDTH, enemy.x)
+    assert_operator enemy.vx, :>, 0
+    assert_equal enemy.x, enemy.patrol_min_x, "won't wander back past its entry"
+    assert_equal SCREEN_W, enemy.patrol_max_x, "bounded to the screen, can't escape right"
   end
 
   def test_defeating_the_combat_enemy_drops_a_certificate_but_does_not_complete
     @level.setup(@args)
     heal
-    @level.update(@args)                     # spawns the combat enemy
-    @level.enemies.first.alive = false  # player stomped it
+    @level.update(@args)
+    @level.enemies.first.alive = false
     @level.update(@args)
 
     certs = @level.collectables.select { |c| c.is_a?(Certificate) }
@@ -95,7 +95,7 @@ class WelcomeLevelTest < Minitest::Test
     heal
     @level.update(@args)
     @level.enemies.first.alive = false
-    @level.update(@args)                     # drops the certificate
+    @level.update(@args)
 
     @level.collectables.find { |c| c.is_a?(Certificate) }.alive = false
     @level.update(@args)
@@ -108,7 +108,7 @@ class WelcomeLevelTest < Minitest::Test
     heal
     @level.update(@args)
     @level.enemies.first.alive = false
-    @args.state.player.locked = true         # bumped it — re-auth in progress
+    @args.state.player.locked = true
     @level.update(@args)
 
     refute @level.complete?
@@ -122,12 +122,12 @@ class WelcomeLevelTest < Minitest::Test
 
   def test_jump_hint_waits_until_the_player_has_moved
     @level.setup(@args)
-    @level.advance_dialogue                  # dismiss the move hint
-    refute @level.dialogue_ready?(@args)     # hasn't moved yet — the world plays on
+    @level.advance_dialogue
+    refute @level.dialogue_ready?(@args)
     assert_nil @level.current_dialogue(@args)
 
     @args.state.player.moved = true
-    @level.dialogue_ready?(@args)            # eligible now — stamps the delay start
+    @level.dialogue_ready?(@args) # eligible now — stamps the delay start
     @args.state.tick_count += WelcomeLevel::DIALOGUE_DELAY
     assert @level.dialogue_ready?(@args)
     assert_equal [ "Press Space to jump onto the ledge" ], @level.current_dialogue(@args)
@@ -135,9 +135,9 @@ class WelcomeLevelTest < Minitest::Test
 
   def test_a_reached_beat_waits_a_short_delay_before_its_card_shows
     @level.setup(@args)
-    @level.advance_dialogue                  # dismiss the move hint
-    @args.state.player.moved = true          # milestone reached this tick...
-    refute @level.dialogue_ready?(@args)     # ...but the card holds back briefly
+    @level.advance_dialogue
+    @args.state.player.moved = true
+    refute @level.dialogue_ready?(@args), "the card holds back briefly after the milestone"
     assert_nil @level.current_dialogue(@args)
 
     @args.state.tick_count += WelcomeLevel::DIALOGUE_DELAY
@@ -169,11 +169,9 @@ class WelcomeLevelTest < Minitest::Test
 
   private
 
-  # Simulate the player grabbing the heal heart: drop a retired one onto the level's
-  # collectables, the way a real pickup leaves it. #healed? reads it back.
   def heal
-    heart = HeartPickup.new(x: 0, y: GROUND_Y)
-    heart.alive = false
-    @level.collectables << heart
+    retired_heart = HeartPickup.new(x: 0, y: GROUND_Y)
+    retired_heart.alive = false
+    @level.collectables << retired_heart
   end
 end

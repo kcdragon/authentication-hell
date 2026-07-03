@@ -1,8 +1,7 @@
 <%# locals: (size: "1.5rem", tone: :default, digits: true, shadow: false, label: "AUTHHELL") %>
 
-<%# The AUTHHELL "The Code" mark: a 2×2 grid of OTP cells reading 6 6 6 / red 0.
-    Fixed brand colours (ink / white / red) per tone — never recolour with the
-    accent palette. Favicons are generated from the same geometry by bin/build-favicons. %>
+<%# Fixed brand colours per tone — never recolour with the accent palette.
+    Favicons are generated from this same geometry by bin/build-favicons. %>
 <%
   ink, paper, white, red, ink_cell = "#111111", "#f5f2e9", "#ffffff", "#e5342a", "#1c1c22"
   container, cell_fill, digit_fill =
@@ -23,8 +22,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 <%= span %> <%= span %>"
      style="width:<%= size %>;height:<%= size %>;display:inline-block;vertical-align:middle"
      <% if label.present? %>role="img" aria-label="<%= label %>"<% else %>aria-hidden="true"<% end %>>
-  <%# Cells clip to a rect inset by the frame width so the ink border stays even
-      around the rounded corners and the cells round concentrically inside it. %>
   <defs><clipPath id="<%= cid %>"><rect x="<%= b %>" y="<%= b %>" width="<%= 100 - 2 * b %>" height="<%= 100 - 2 * b %>" rx="<%= rx - b %>"/></clipPath></defs>
   <% if shadow %><rect x="<%= off %>" y="<%= off %>" width="100" height="100" rx="<%= rx %>" fill="<%= ink %>"/><% end %>
   <rect width="100" height="100" rx="<%= rx %>" fill="<%= container %>"/>

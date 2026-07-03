@@ -11,7 +11,6 @@ class Webauthn::AuthenticationsControllerTest < ActionDispatch::IntegrationTest
       user_handle: @user.webauthn_id)
 
     assert_response :success
-    # A passkey-only account still lacks a password and TOTP, so it's nudged to finish setup.
     assert_equal onboarding_url, response.parsed_body["redirect"]
     assert cookies[:session_id].present?
   end
@@ -34,7 +33,6 @@ class Webauthn::AuthenticationsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "an unknown credential is rejected" do
-    # A device that registered with itself but was never stored in our database.
     stranger = WebAuthn::FakeClient.new(SessionTestHelper::WEBAUTHN_TEST_ORIGIN)
     create_opts = WebAuthn::Credential.options_for_create(
       user: { id: WebAuthn.generate_user_id, name: "x", display_name: "x" }

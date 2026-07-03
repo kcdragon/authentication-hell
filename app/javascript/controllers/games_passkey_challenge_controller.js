@@ -1,11 +1,8 @@
 import { get } from "@github/webauthn-json"
 import WebauthnCeremonyController from "lib/webauthn_ceremony_controller"
 
-// Step-up passkey re-auth for the in-game collision toast. Reuses the shared
-// ceremony helpers (postJson + error display) and the optionsUrl/callbackUrl
-// values from the base. Unlike sign-in there's no redirect on success — the
-// server broadcasts the toast removal over Turbo Streams, so we only surface
-// errors here.
+// No redirect on success — the server broadcasts the toast removal over Turbo
+// Streams, so only errors surface here.
 export default class extends WebauthnCeremonyController {
   async verify(event) {
     event.preventDefault()

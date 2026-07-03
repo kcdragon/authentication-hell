@@ -1,8 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Lets the user save their one-time recovery codes in a single click: copy them
-// all to the clipboard or download them as a text file. The codes arrive as a
-// value so neither action depends on scraping the rendered list.
 export default class extends Controller {
   static targets = ["status"]
   static values = { codes: Array }

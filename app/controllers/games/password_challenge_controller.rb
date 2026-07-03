@@ -17,7 +17,6 @@ class Games::PasswordChallengeController < ApplicationController
     head :no_content
   end
 
-  # A correct password clears the lock; anything else re-renders the toast with an error.
   def complete
     if Current.session.game_challenges.exists?(kind: "password") && Current.user.authenticate(params[:password])
       Current.session.game_challenges.where(kind: "password").delete_all

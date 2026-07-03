@@ -4,8 +4,6 @@ class Totp::SettingsController < ApplicationController
   def show
   end
 
-  # Disable 2FA. Require re-confirmation with a current code or the account password
-  # so an attacker at an unlocked session can't silently remove the second factor.
   def destroy
     if reauthenticated?
       Current.user.disable_totp!

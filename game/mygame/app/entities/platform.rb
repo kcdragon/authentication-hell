@@ -1,21 +1,13 @@
-# A one-way ledge the player lands on from below — owns its rect, rendering, layout
-# constants, and a scatter factory, and is registered with the CollisionManager, which
-# alerts Player#on_collision to settle onto it (reading x/y/w/h duck-typed).
 class Platform
   H = 30
 
-  # One-way ledge tops: only the low tier is reachable from the ground; higher tiers
-  # need a hop up off a lower ledge (see #scatter).
   TIERS = [ 250, 330, 410 ]
   COUNT = 9
-  STEP_DX = 180 # horizontal stagger between stacked steps (inside a one-tier hop's reach)
+  STEP_DX = 180 # within a one-tier hop's reach, so every stacked step stays climbable
 
   attr_accessor :x, :y, :w, :h
   attr_reader :holds_password
 
-  # One staircase per evenly spaced slot, climbing from the low tier to a random target
-  # tier — each step a single hop above the one below, so every ledge is reachable. Only
-  # the top step holds a padlock; the rest are bare footholds.
   def self.scatter(count: COUNT)
     slot = (WORLD_W - 400) / count
     count.times.flat_map do |i|
@@ -36,14 +28,8 @@ class Platform
     @holds_password = holds_password
   end
 
-  # A ledge drawn as the video's closed-caption bar: an ink border with an ink
-  # "underside" band flush below for built-in thickness (part of the object, so it
-  # scrolls with the platform — no offset drop-shadow that would crawl against the
-  # parallax), a dark INDIGO caption face inset 3px, a BLUE "CC" indicator tab, and
-  # light "subtitle word" ticks across the face. The dark face keeps the semantic
-  # colors reserved for enemies/HUD.
-  UNDERSIDE_H = 7
-  WORD_TICKS = [ 40, 24, 52, 30, 18 ].freeze # subtitle "word" widths, drawn until the face runs out
+  UNDERSIDE_H = 7 # part of the platform rect, not an offset shadow — a shadow would crawl against scroll
+  WORD_TICKS = [ 40, 24, 52, 30, 18 ].freeze
 
   def render(args, camera_x = 0)
     sx = @x - camera_x
@@ -73,8 +59,6 @@ class Platform
 
   public
 
-  # DragonRuby exports args.state for its dev tools; give it a plain-hash view (see
-  # the same pattern on Enemy).
   def serialize = { x: @x, y: @y, w: @w, h: @h }
   def inspect = serialize.to_s
   def to_s = serialize.to_s

@@ -1,7 +1,6 @@
-# A key on the TOTP level's number pad
 class DigitPad
-  SIZE = 52          # the keycap square
-  FLASH_TICKS = 12   # how long the green press-flash lasts
+  SIZE = 52
+  FLASH_TICKS = 12
 
   attr_accessor :x, :y, :w, :h, :digit
 
@@ -20,7 +19,6 @@ class DigitPad
 
   def flashing?(tick) = @pressed_at && tick - @pressed_at < FLASH_TICKS
 
-  # A purple keycap (ink border + face) with the digit; flashes green for a beat on press.
   def render(args, camera_x = 0)
     sx = @x - camera_x
     face = flashing?(args.state.tick_count) ? GREEN : PURPLE

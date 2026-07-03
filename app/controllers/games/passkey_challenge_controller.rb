@@ -19,8 +19,6 @@ class Games::PasskeyChallengeController < ApplicationController
     head :no_content
   end
 
-  # Re-auth (step-up): the player is already signed in, so scope the allow list to
-  # their own registered passkeys.
   def options
     get_options = WebAuthn::Credential.options_for_get(
       allow: Current.user.webauthn_credentials.pluck(:external_id),
@@ -30,8 +28,6 @@ class Games::PasskeyChallengeController < ApplicationController
     render json: get_options
   end
 
-  # A verified assertion clears the lock and broadcasts the toast removal; anything
-  # else surfaces an error. Mirrors webauthn/challenges#create, for Current.user.
   def complete
     raise WebAuthn::Error unless Current.session.game_challenges.exists?(kind: "passkey")
 

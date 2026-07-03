@@ -17,7 +17,6 @@ class Games::TotpChallengeController < ApplicationController
     head :no_content
   end
 
-  # A correct code clears the lock; anything else re-renders the toast with an error.
   def complete
     if Current.session.game_challenges.exists?(kind: "totp") && Current.user.verify_totp(params[:code])
       Current.session.game_challenges.where(kind: "totp").delete_all

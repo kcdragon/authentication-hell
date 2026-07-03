@@ -6,8 +6,6 @@ class Totp::EnrollmentsController < ApplicationController
     @provisioning_uri = Totp.new(@secret).provisioning_uri(Current.user.email_address)
   end
 
-  # Confirm enrollment by verifying a code against the candidate secret held in the
-  # session, then persist the secret and generate recovery codes (shown once).
   def create
     secret = session[:totp_setup_secret]
 

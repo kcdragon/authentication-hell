@@ -1,15 +1,9 @@
-# The closed captions: the prompt a level passes in, drawn as a neo-brutalist card
-# (hard offset ink shadow, ink border, white face, dark mono text) at the top of the
-# screen. Shown only while CC is toggled on (args.state.captions_on) and persistent
-# while it is — the CC toggle is the only thing that shows or hides it. Engine-free
-# (only touches args.outputs / args.state), so it loads under plain MRI like the levels.
 class Caption
   def initialize(args, lines)
     @args = args
     @lines = lines
   end
 
-  # Draw the caption box and its lines — a no-op when CC is off or there's no copy.
   def draw
     return unless @args.state.captions_on
     return if @lines.nil? || @lines.empty?
@@ -18,7 +12,6 @@ class Caption
     left = SCREEN_W / 2 - CAPTION_W / 2
     bottom = SCREEN_H - CAPTION_MARGIN - card_h
 
-    # Hard offset ink shadow, then the ink border, then the white face.
     @args.outputs.solids << { x: left + 8, y: bottom - 8, w: CAPTION_W, h: card_h,
                               r: INK[0], g: INK[1], b: INK[2] }
     @args.outputs.solids << { x: left, y: bottom, w: CAPTION_W, h: card_h,

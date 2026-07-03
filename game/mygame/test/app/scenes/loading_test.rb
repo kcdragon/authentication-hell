@@ -1,8 +1,5 @@
 require_relative "../../test_helper"
 
-# Exercises the loading scene's engine-free responsibility: polling /game/start and
-# resolving the starting level. The drawing path needs the engine, so it's left to
-# the build/native run.
 class LoadingSceneTest < Minitest::Test
   State = Struct.new(:start_request, :start_level, :level)
   Args = Struct.new(:state)
@@ -23,8 +20,7 @@ class LoadingSceneTest < Minitest::Test
 
     assert_equal "http://test/game/start", DR.last_url
     assert_equal({ complete: false }, state.start_request)
-    # Still in flight → no level resolved yet.
-    assert_nil state.level
+    assert_nil state.level, "still in flight — no level resolved yet"
   end
 
   def test_resolves_the_server_start_level_once_the_request_completes

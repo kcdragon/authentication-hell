@@ -1,9 +1,6 @@
 class Webauthn::CredentialsController < ApplicationController
   include WebauthnCeremony
 
-  # options/create run in two contexts: a signed-in user adding a passkey, or a
-  # passwordless signup attaching its first passkey (identified by a session handle,
-  # before any account is persisted). destroy is always for the signed-in user.
   allow_unauthenticated_access only: %i[ options create ]
   before_action :set_enrolling_user, only: %i[ options create ]
 
@@ -51,14 +48,12 @@ class Webauthn::CredentialsController < ApplicationController
   private
 
   def set_enrolling_user
-    resume_session # populate Current.session from the cookie (require_authentication is skipped here)
+    resume_session # require_authentication is skipped here, so Current.session isn't populated yet
 
     @enrolling_user = Current.user || pending_registration_user
     head :unauthorized unless @enrolling_user
   end
 
-  # An unsaved User carrying the username/email/handle stashed by RegistrationsController
-  # during a passwordless signup, so we can build creation options before persisting.
   def pending_registration_user
     reg = session[:passwordless_registration]
     return unless reg

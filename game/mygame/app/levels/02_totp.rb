@@ -1,17 +1,3 @@
-# The level the password level hands off to: time-based one-time passwords. On entry
-# the player links a *temporary* authenticator (separate from their real 2FA) by
-# scanning the QR in the toast and entering one code. Then they clear the level by
-# entering three codes from three consecutive 30-second windows, "typing" each
-# six-digit code on a giant number pad while a wave of enemies marches in. All the
-# TOTP verification lives server-side; this level owns the keypad + the @totp state
-# machine that Network::LevelTotp drives over /games/level_totp (start the QR toast,
-# poll status, submit a code).
-#
-# The keypad is a phone number pad — 1–9 in a 3×3 grid with 0 below — of climbable
-# ledges floating above the floor. Crucially, *moving over a key never enters it*: the
-# player climbs the pad freely and punches in whichever key they're standing on with
-# the E key, so a digit is only ever typed on purpose (collision-based entry made every
-# jump a misfire). Single-screen arena (world_w = SCREEN_W) so the whole pad is in view.
 class TotpLevel < Level
   attr_reader :totp, :keypad
   attr_accessor :totp_start_request, :totp_status_request,
@@ -20,20 +6,17 @@ class TotpLevel < Level
   CODE_LENGTH = 6
   REQUIRED_STREAK = 3
 
-  WAVE_INTERVAL = 150 # ticks between enemy spawns (~2.5s)
-  WAVE_CAP = 5        # most enemies alive at once
+  WAVE_INTERVAL = 150
+  WAVE_CAP = 5
   WAVE_KINDS = [ TotpEnemy, PasswordEnemy, PasskeyEnemy, BufferingEnemy ]
   ENEMY_SPEED = 3
 
-  # Number-pad layout: rows top→bottom, then 0 on its own row below the middle column.
-  # Each key is a one-way ledge a single hop above the one below; 0 is the doorstep off
-  # the floor (the player starts centered right under it), and the pad climbs up from
-  # there — middle column then sideways hops to the side keys.
   NUMPAD_ROWS = [ %w[7 8 9], %w[4 5 6], %w[1 2 3] ].freeze
   PAD_W = 124
-  COL_X = [ 338, 578, 818 ].freeze    # three columns centered on the screen, ~116px gaps
-  ROW_TOPS = [ 560, 430, 320 ].freeze # tops for 7-8-9 / 4-5-6 / 1-2-3, ~120px apart
-  ZERO_TOP = 200                      # 0 sits a wide hop below the 1-2-3 row, off the floor
+  COL_X = [ 338, 578, 818 ].freeze
+  # Key rows sit one hop apart (and 0 one hop off the floor) — spread them further and the pad becomes unclimbable.
+  ROW_TOPS = [ 560, 430, 320 ].freeze
+  ZERO_TOP = 200
 
   def number = 2
 
@@ -61,8 +44,6 @@ class TotpLevel < Level
 
   def update(args)
     lt = @totp
-    # Drain the server conversation first (registration, streak, submit results), then
-    # act on this tick's input. Stops once the run is over — nothing left to unlock.
     Network::LevelTotp.new(self).poll(args.state.tick_count) unless args.state.player.game_over
     read_keypad_presses(args) if lt[:registered] && !lt[:complete]
     spawn_waves(args) if lt[:registered] && !lt[:complete]
@@ -75,13 +56,10 @@ class TotpLevel < Level
 
   def complete? = @cleared == true
 
-  # The TOTP keypad lives on the level, not args.state, so Main's generic render loop
-  # can't reach it — draw it here in the camera-offset pass.
   def render_world(args, cam)
     @keypad.each { |pad| pad.render(args, cam) }
   end
 
-  # The code-entry tray (six digit slots) and the three streak pips, under the hearts.
   def draw_hud(args)
     lt = @totp
     CODE_LENGTH.times { |slot| draw_digit_slot(args, slot, lt[:entered][slot]) }
@@ -107,10 +85,6 @@ class TotpLevel < Level
     pads << DigitPad.new(x: x + (PAD_W - DigitPad::SIZE) / 2, y: top, digit: digit)
   end
 
-  # Deliberate entry: E punches in the key the player is standing on (the one their feet
-  # overlap most), and nothing else does — so climbing the pad can't type a digit. When
-  # the sixth lands, hand the code to Main's tick to POST and freeze entry until the
-  # server answers.
   def read_keypad_presses(args)
     return unless args.inputs.keyboard.key_down.e
 
@@ -131,10 +105,8 @@ class TotpLevel < Level
     lt[:submitting] = true
   end
 
-  # The key the player is standing on: of the keys their body overlaps, the one nearest
-  # their feet (rows are closer than the player is tall, so a lower key's tile reaches up
-  # into the one above — feet, not the body, decide which they're on), ties going to the
-  # one they're most squarely over. Nil if they're clear of every key.
+  # Key rows are closer together than the player is tall, so overlapping keys are
+  # decided by the feet: nearest key vertically, ties to the squarest overlap.
   def key_under(player, keypad)
     keypad.select { |pad| overlaps?(player, pad.hitbox) }
           .min_by { |pad| [ (pad.y - player.y).abs, -overlap_width(player, pad.hitbox) ] }
@@ -149,9 +121,6 @@ class TotpLevel < Level
     [ player.x + player.w, box[:x] + box[:w] ].min - [ player.x, box[:x] ].max
   end
 
-  # A steady trickle of enemies marching in from alternating edges, capped so the floor
-  # doesn't pack solid. Collisions raise the usual re-auth toasts (Main's tick handles
-  # them), so the player fights/dodges while typing codes.
   def spawn_waves(args)
     @last_wave_at ||= args.state.tick_count
     return if args.state.tick_count - @last_wave_at < WAVE_INTERVAL

@@ -1,9 +1,6 @@
 import { create } from "@github/webauthn-json"
 import WebauthnCeremonyController from "lib/webauthn_ceremony_controller"
 
-// Drives a passkey *registration* ceremony: fetch creation options from Rails, hand
-// them to the authenticator via @github/webauthn-json, then POST the new credential
-// back. Used on the settings "Add a passkey" form and passwordless signup.
 export default class extends WebauthnCeremonyController {
   static targets = ["nickname", "submit"]
 

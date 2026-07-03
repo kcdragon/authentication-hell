@@ -17,7 +17,7 @@ class HeartPickupTest < Minitest::Test
   end
 
   def test_healing_is_capped_at_the_max
-    player = Player.new # starts at MAX_HEARTS
+    player = Player.new
     heart = HeartPickup.new(x: player.x, y: player.y)
     heart.on_collision(player, build_args(player: player))
     assert_equal Player::MAX_HEARTS, player.hearts

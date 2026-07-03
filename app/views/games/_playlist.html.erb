@@ -1,9 +1,7 @@
 <%# locals: (user:) %>
 
-<%# The "Up Next" playlist: the game's levels dressed as training videos in a
-    video-player sidebar. Takes a `user` local (not Current.user) so it renders
-    the same way from a request and from a Turbo broadcast (see
-    Games::LevelsController#complete). The outer id is the broadcast target. %>
+<%# Takes a `user` local (not Current.user) so it renders identically from a
+    request and from a Turbo broadcast, where Current isn't set. %>
 <% hlc = user.highest_level_completed
    levels = GameLevel.all
    now_playing = user.now_playing

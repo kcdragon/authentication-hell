@@ -1,37 +1,29 @@
-# The player character: owns its own state, input-driven movement (simple
-# platformer physics), and rendering. Lives in args.state.player.
 class Player
   WIDTH = 64
   HEIGHT = 96
   MOVE_SPEED = 8
-  SLOW_MOVE_SPEED = 3  # crawl speed while a buffering enemy is lagging the player
-  SLOW_TICKS = 180     # how long that lag lasts (~3s at 60fps)
+  SLOW_MOVE_SPEED = 3
+  SLOW_TICKS = 180
   JUMP_SPEED = 20
-  STOMP_BOUNCE = 12  # small hop after stomping an enemy (less than a full jump)
+  STOMP_BOUNCE = 12
   GRAVITY = 1
   MAX_HEARTS = 3
-  BLINK_TICKS = 60     # how long the figure flickers after a hit (~1s at 60fps)
-  BLINK_INTERVAL = 4   # toggle visibility every 4 ticks (~7-8 Hz flicker)
+  BLINK_TICKS = 60
+  BLINK_INTERVAL = 4
 
-  # Brutalist "new-hire" figure, drawn from solid primitives inside the 64x96
-  # hitbox (feet at @y): INK legs, an INK-bordered INDIGO torso (the platform card
-  # treatment, so it sits in the same visual language), then a tan neck and head
-  # with a hair band and two eyes that slide toward @facing. Geometry tuned here so
-  # render stays readable; all dimensions are px within the hitbox, feet-up.
   BORDER     = 3
-  LEG_H      = 14   # short INK leg blocks at the base
+  LEG_H      = 14
   LEG_W      = 18
-  TORSO_H    = 46   # body card height, stacked above the legs
-  NECK_H     = 4    # skin strip between torso and head
+  TORSO_H    = 46
+  NECK_H     = 4
   NECK_W     = 12
-  HEAD_H     = 30   # head block, stacked above the neck
-  HEAD_INSET = 14   # head is narrower than the torso by this much each side
-  HAIR_H     = 8    # hair band across the top of the face
-  EYE        = 4    # small square eyes
-  EYE_GAP    = 8    # space between the eyes
-  FACE_SHIFT = 5    # how far the eyes slide toward @facing (0 when idle/:south)
+  HEAD_H     = 30
+  HEAD_INSET = 14
+  HAIR_H     = 8
+  EYE        = 4
+  EYE_GAP    = 8
+  FACE_SHIFT = 5
 
-  # Figure colors beyond the shared palette: a warm tan face and dark-brown hair.
   SKIN = [ 222, 184, 135 ]
   HAIR = [ 74, 52, 36 ]
 
@@ -41,7 +33,7 @@ class Player
                 :reached_platform
 
   def initialize
-    @x = 200            # near the left of the world; the scene extends right
+    @x = 200
     @y = GROUND_Y
     @w = WIDTH
     @h = HEIGHT
@@ -65,8 +57,6 @@ class Player
     @drop_floor_y = 0
   end
 
-  # Move left/right with the arrow keys (no wrapping — clamp to screen); space
-  # jumps when grounded. Frozen while locked, until the player re-authenticates.
   def update(args)
     @stomped_this_tick = false
     return if @locked || @game_over
@@ -86,7 +76,6 @@ class Player
 
     @x = @x.clamp(0, args.state.level.world_w - WIDTH)
 
-    # Jump on the press edge so holding space doesn't re-launch every frame.
     if args.inputs.keyboard.key_down.space && @grounded
       @vy = JUMP_SPEED
       @grounded = false
@@ -115,13 +104,10 @@ class Player
     end
   end
 
-  # A Mario-style stomp: coming down onto an enemy's head (descending, or already
-  # bounced this tick so two-at-once both stomp), not into its side or the ground.
   def stomping?(enemy)
     (@vy < 0 || @stomped_this_tick) && @y > enemy.y + enemy.h / 2
   end
 
-  # Hop up off a stomped enemy and leave the ground.
   def bounce
     @vy = STOMP_BOUNCE
     @grounded = false
@@ -149,7 +135,6 @@ class Player
     end
   end
 
-  # A buffering enemy lagged the player: crawl their move speed for SLOW_TICKS frames.
   def slow(args)
     @slow_until_tick = args.state.tick_count + SLOW_TICKS
   end
@@ -162,15 +147,9 @@ class Player
     args.state.tick_count < @blink_until_tick
   end
 
-  # Draw the figure as stacked brutalist primitives within the 64x96 hitbox: two
-  # INK legs, an INK-bordered INDIGO torso (platform card treatment), a tan neck,
-  # then a tan head with a dark hair band and two eyes that slide toward @facing as
-  # the directional cue (centered when idle/:south). World x is shifted by the
-  # camera offset to screen space.
   def render(args, camera_x = 0)
     sx = @x - camera_x
 
-    # Damage flicker: skip the whole figure on the "off" half of the blink.
     return if invincible?(args) &&
               args.state.tick_count % (BLINK_INTERVAL * 2) >= BLINK_INTERVAL
 
@@ -191,11 +170,9 @@ class Player
     head_w = @w - 2 * HEAD_INSET
     card(args, head_x, head_y, head_w, HEAD_H, SKIN)
 
-    # Hair band across the top of the face, inside the ink border.
     args.outputs.solids << { x: head_x + BORDER, y: head_y + HEAD_H - BORDER - HAIR_H,
                              w: head_w - 2 * BORDER, h: HAIR_H, r: HAIR[0], g: HAIR[1], b: HAIR[2] }
 
-    # Two eyes that slide toward @facing (centered when idle), the directional cue.
     shift = @facing == :west ? -FACE_SHIFT : (@facing == :east ? FACE_SHIFT : 0)
     eye_cx = sx + @w / 2
     [ eye_cx - EYE_GAP / 2 - EYE, eye_cx + EYE_GAP / 2 ].each do |ex|
@@ -204,9 +181,6 @@ class Player
     end
   end
 
-  # A brutalist card like the platforms (entities/platform.rb): an INK rect with a
-  # fill inset by BORDER (INDIGO by default; the head passes SKIN). Coords are
-  # already screen-space.
   def card(args, x, y, w, h, fill = INDIGO)
     args.outputs.solids << { x: x, y: y, w: w, h: h, r: INK[0], g: INK[1], b: INK[2] }
     args.outputs.solids << { x: x + BORDER, y: y + BORDER, w: w - 2 * BORDER, h: h - 2 * BORDER,
@@ -226,8 +200,6 @@ class Player
 
   private
 
-  # Crossing the world floor from above onto solid ground — not rising up through it,
-  # and not over a pit we should drop into.
   def landing_on_floor?(args)
     @y <= GROUND_Y && @prev_y >= GROUND_Y && !args.state.level.over_hole?(self)
   end

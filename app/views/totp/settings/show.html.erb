@@ -14,8 +14,8 @@
       <div class="border-[3px] border-ink rounded-[3px] bg-paper p-5 shadow-brut-sm">
         <h2 class="font-display text-base uppercase tracking-tight">Regenerate recovery codes</h2>
         <p class="ah-hint mt-1">Generates a new set and invalidates your old codes.</p>
-        <%# turbo: false — on success this renders a full page of new one-time codes
-            rather than redirecting, which Turbo rejects (and would otherwise cache). %>
+        <%# turbo: false — success renders the new one-time codes as a full page,
+            not a redirect, which Turbo rejects (and would otherwise cache). %>
         <%= form_with url: totp_recovery_codes_path, method: :post, class: "mt-4 space-y-3", data: { turbo: false } do |form| %>
           <%= form.text_field :code, autocomplete: "off", inputmode: "text", placeholder: "Current 6-digit or recovery code", class: "ah-input" %>
           <%= form.submit "Regenerate codes", class: "ah-btn ah-btn--secondary cursor-pointer" %>

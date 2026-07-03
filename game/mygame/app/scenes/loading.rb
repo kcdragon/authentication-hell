@@ -13,9 +13,6 @@ class LoadingScene
 
   private
 
-  # Fetch the starting level once from the Rails app; the same request marks it as
-  # the user's now-playing level server-side. Same-origin, so the session cookie
-  # rides along and /game/start answers as the current user.
   def poll_start_request
     args = @args
     if !args.state.start_request
@@ -29,11 +26,9 @@ class LoadingScene
       data = DR.parse_json(request[:response_data])
       args.state.start_level = data["start_level"] if data && data["start_level"]
     end
-    # Resolve the starting level now that the request is done, defaulting to the
-    # welcome level if it didn't answer; start_run seeds it before play begins.
     args.state.level = Level.build(args.state.start_level || 0)
-    # Replace the (non-serializable) response object with a plain marker so the
-    # per-tick state export doesn't choke on it and we don't re-fetch.
+    # A plain marker replaces the non-serializable response so DragonRuby's per-tick
+    # state export doesn't choke on it.
     args.state.start_request = :done
   end
 

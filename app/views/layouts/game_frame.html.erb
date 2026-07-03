@@ -10,22 +10,16 @@
         static bundle. No importmap here — nothing else runs in this frame. %>
     <base href="<%= game_assets_path %>">
 
-    <%# This document IS the iframe contents: make it edge-to-edge and let the
-        engine fill it. The parent sizes the iframe to 16:9, so the engine's
-        FILL_DOCUMENT render matches the frame exactly with no letterbox. %>
     <style>
       html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; }
       .emscripten_border { border: 0; }
       canvas.emscripten { display: block; border: 0; background: #000; }
     </style>
 
-    <%# Re-skins the loader splash to match the in-game poster (see the stylesheet);
-        absolute /assets/ href, so the <base href> above leaves it alone. %>
     <%= stylesheet_link_tag "game_splash" %>
   </head>
 
-  <%# DragonRuby's loader routes canvas clicks through getElementById("toplevel").
-      game-splash watches the body for the loader's splash node to re-brand it. %>
+  <%# DragonRuby's loader routes canvas clicks through getElementById("toplevel"). %>
   <body id="toplevel" data-controller="game-splash">
     <%= yield %>
   </body>

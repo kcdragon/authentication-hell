@@ -16,9 +16,8 @@
     <code class="inline-block mt-2 font-mono font-bold text-sm border-2 border-ink rounded-[3px] bg-paper px-2.5 py-1.5 tracking-wider whitespace-nowrap"><%= @secret %></code>
   </div>
 
-  <%# turbo: false — on success this submits to a full-page render of the one-time
-      recovery codes (not a redirect), which Turbo rejects; a normal navigation also
-      keeps the secret codes out of Turbo's page cache. %>
+  <%# turbo: false — success renders the one-time recovery codes as a full page,
+      which Turbo rejects, and a plain navigation keeps them out of Turbo's cache. %>
   <%= form_with url: totp_enrollment_path, method: :post, class: "mt-5 space-y-3.5", data: { turbo: false } do |form| %>
     <div class="space-y-1.5">
       <%= form.label :code, "Verification code", class: "ah-label" %>

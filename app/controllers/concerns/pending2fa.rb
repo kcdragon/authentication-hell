@@ -1,6 +1,3 @@
-# Shared state for the post-password second-factor step. After a correct password,
-# SessionsController parks a signed, self-expiring token in the session and redirects
-# to a challenge (TOTP code or passkey assertion); these helpers gate those controllers.
 module Pending2fa
   extend ActiveSupport::Concern
 

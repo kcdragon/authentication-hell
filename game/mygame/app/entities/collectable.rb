@@ -1,5 +1,3 @@
-# Shared pickup behavior: when the player walks into a collectable it retires, stamps
-# its pickup order, and applies its own #collect effect to the collector.
 module Collectable
   attr_reader :pickup_order
   attr_writer :alive

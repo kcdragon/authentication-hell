@@ -1,6 +1,3 @@
-# Re-renders the /game playlist rail for a user and broadcasts it over the
-# per-user :playlist stream the game page subscribes to, advancing the rail
-# (cleared level → "Watched", next → "Now playing") without a page reload.
 class Game::PlaylistBroadcaster
   def self.call(user)
     new(user).call

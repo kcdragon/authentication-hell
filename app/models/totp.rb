@@ -16,7 +16,6 @@ class Totp
 
   def at(time) = rotp.at(time)
 
-  # Returns the matched timestamp (for replay tracking) or nil.
   def verify(code, after: nil)
     return nil if code.blank?
 

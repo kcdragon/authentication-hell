@@ -52,8 +52,6 @@ class User < ApplicationRecord
     email_address
   end
 
-  # Signed, self-expiring handle for the post-password second-factor step, so the
-  # session carries a token (not a raw id) and the timeout is enforced by the token.
   generates_token_for :pending_2fa, expires_in: 10.minutes
 
   def passwordless?
@@ -72,7 +70,6 @@ class User < ApplicationRecord
     totp_enabled
   end
 
-  # Whether logging in with a password should be followed by a second-factor step.
   def second_factor?
     totp_enabled? || webauthn_credentials.exists?
   end
@@ -87,8 +84,6 @@ class User < ApplicationRecord
 
   def provisioning_uri = totp&.provisioning_uri(email_address)
 
-  # Verifies a TOTP code and persists the matched timestamp so a code (or any
-  # earlier one) cannot be replayed.
   def verify_totp(code)
     return false unless totp
 
@@ -110,8 +105,6 @@ class User < ApplicationRecord
     end
   end
 
-  # Replaces any existing recovery codes with a fresh set, storing only bcrypt
-  # digests. Returns the plaintext codes for one-time display to the user.
   def generate_recovery_codes!(count = RECOVERY_CODE_COUNT)
     codes = Array.new(count) { SecureRandom.alphanumeric(10).downcase }
     transaction do
@@ -121,7 +114,6 @@ class User < ApplicationRecord
     codes
   end
 
-  # Consumes a matching unused recovery code, marking it used. Returns true on success.
   def consume_recovery_code(code)
     return false if code.blank?
 
