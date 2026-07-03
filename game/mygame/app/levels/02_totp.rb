@@ -88,6 +88,7 @@ class TotpLevel < Level
     lt = @totp
     CODE_LENGTH.times { |slot| draw_digit_slot(args, slot, lt[:entered][slot]) }
     REQUIRED_STREAK.times { |i| draw_streak_pip(args, i, i < lt[:streak].to_i) }
+    draw_pickup_hint(args)
   end
 
   private
@@ -197,5 +198,12 @@ class TotpLevel < Level
     face = filled ? GREEN : PAPER
     args.outputs.solids << { x: x + 2, y: y + 2, w: PIP - 4, h: PIP - 4,
                              r: face[0], g: face[1], b: face[2] }
+  end
+
+  def draw_pickup_hint(args)
+    args.outputs.labels << { x: SLOT_X, y: SLOT_Y - 46, text: "press E to pick up a number",
+                             size_px: 20, font: FONT_MONO,
+                             r: MUTED[0], g: MUTED[1], b: MUTED[2],
+                             anchor_x: 0, anchor_y: 0.5 }
   end
 end
