@@ -169,7 +169,10 @@ class User < ApplicationRecord
   end
 
   def current_level
-    GameLevel.find((highest_level_completed || -1) + 1) || GameLevel.find(highest_level_completed)
+    last_level = GameLevel.all.last
+    return last_level if highest_level_completed && highest_level_completed >= last_level.number
+
+    GameLevel.find((highest_level_completed || -1) + 1)
   end
 
   def now_playing
