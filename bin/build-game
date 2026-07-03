@@ -66,4 +66,18 @@ index = File.join(dest, "index.html")
 abort "index.html missing — check zip layout!" unless File.exist?(index)
 FileUtils.rm_f(index)
 
+# DragonRuby's HTML5 loader refuses to boot inside an <iframe> on Safari/Firefox,
+# swapping the frame for a "Click Here to Load Game" link that escapes into the top
+# window (its "only chrome works in iFrames" assumption predates Safari's
+# SharedArrayBuffer support). We embed the game in a same-origin, cross-origin-isolated
+# iframe on purpose (/game/frame inside /play), so disable that guard's browser check —
+# every browser then takes the loader's normal loadLoadMainModule() path.
+loader   = File.join(dest, "dragonruby-html5-loader.js")
+original = File.read(loader)
+guard    = "if (isSafari() || isMobileSafari() || isAndroid() || isNestedIFrame() || isFirefox()) {"
+patched  = original.sub(guard, "if (false) { // authentication-hell: always boot inside our isolated iframe")
+abort "Loader iframe guard not found — DragonRuby loader changed; re-check bin/build-game patch" if patched == original
+File.write(loader, patched)
+puts "== Patched loader to boot inside the iframe on all browsers =="
+
 puts "== Done. Game assets in public/#{RAILS_ENV}_game_assets/#{version}/, Rails page at /play =="
