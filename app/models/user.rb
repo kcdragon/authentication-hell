@@ -184,7 +184,6 @@ class User < ApplicationRecord
     certificate_token.presence || update!(certificate_token: SecureRandom.urlsafe_base64(24)) && certificate_token
   end
 
-  # Stamp the moment the game was beaten (once), so the certificate bears a stable date.
   def mark_certified!
     update!(certificate_awarded_at: Time.current) unless certificate_awarded_at
   end

@@ -50,11 +50,15 @@ Rails.application.routes.draw do
   get "leaderboard" => "leaderboard#index", as: :leaderboard
 
   # The "you beat the game" certificate: the owner's page (HTML + .pdf download) and
-  # share hook (grants Influencer), plus a public, token-gated verification page that
-  # anyone can view — the URL the certificate's QR and share links point at.
-  get  "certificate"        => "certificates#show",   as: :certificate
-  post "certificate/share"  => "certificates#share",  as: :certificate_share
-  get  "certificate/:token" => "certificates#verify", as: :certificate_verify
+  # share hook (grants Influencer).
+  get  "certificate"       => "certificates#show",  as: :certificate
+  post "certificate/share" => "certificates#share", as: :certificate_share
+
+  # Public, token-gated certificate page anyone can view — the URL the certificate's
+  # QR and share links point at.
+  namespace :public do
+    resources :certificates, only: :show, param: :token
+  end
 
   namespace :games do
     get  "totp/status"   => "totp_challenge#status",   as: :totp_status

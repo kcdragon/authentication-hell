@@ -1,9 +1,8 @@
-# The "you beat Authentication Hell" certificate. #show and #share are the owner's
-# (auth-gated, reachable only once the final level is cleared); #verify is a public,
-# token-gated page anyone can view — the URL the QR and share links point at.
+# The owner's "you beat Authentication Hell" certificate — auth-gated, reachable only
+# once the final level is cleared. The public, shareable view lives in
+# Public::CertificatesController.
 class CertificatesController < ApplicationController
-  allow_unauthenticated_access only: :verify
-  before_action :require_completed_game, except: :verify
+  before_action :require_completed_game
 
   def show
     respond_to do |format|
@@ -15,14 +14,6 @@ class CertificatesController < ApplicationController
           disposition: params[:download] ? "attachment" : "inline"
       end
     end
-  end
-
-  # Public proof of completion. Unguessable token ⇒ no enumeration; a token only exists
-  # once its owner has beaten the game (cleared on progress reset), so it always points
-  # at a real completion.
-  def verify
-    @user = User.find_by!(certificate_token: params[:token])
-    @verify_url = certificate_verify_url(token: params[:token])
   end
 
   def share
@@ -43,7 +34,7 @@ class CertificatesController < ApplicationController
   end
 
   def verify_url
-    certificate_verify_url(token: Current.user.ensure_certificate_token!)
+    public_certificate_url(Current.user.ensure_certificate_token!)
   end
 
   def require_completed_game

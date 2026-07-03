@@ -95,22 +95,6 @@ class CertificatesControllerTest < ActionDispatch::IntegrationTest
     end
   end
 
-  test "verify renders a public certificate for a valid token without signing in" do
-    token = @user.ensure_certificate_token!
-
-    get certificate_verify_url(token: token)
-
-    assert_response :success
-    assert_select "h1", /#{@user.username} beat Authentication Hell/i
-    assert_select "span", /Verified/i
-  end
-
-  test "verify 404s on an unknown token" do
-    get certificate_verify_url(token: "not-a-real-token")
-
-    assert_response :not_found
-  end
-
   test "viewing the certificate mints the verification token" do
     assert_nil @user.certificate_token
     sign_in_as(@user)
