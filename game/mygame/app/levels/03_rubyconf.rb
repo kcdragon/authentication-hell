@@ -5,9 +5,12 @@ class RubyConfLevel < Level
   GROUND_RUBY_COUNT = 5
   PLATFORM_RUBY_COUNT = RUBY_COUNT - GROUND_RUBY_COUNT
 
-  PLANT_COUNT = 14
-  PLANT_START_X = 500
-  PLANT_END_X = 6000
+  PLANT_START_X = 100
+  PLANT_END_X = 5900
+  GROUND_PLANT_PITCH = 100
+  GROUND_PLANT_SCALES = [ 1.0, 0.8, 1.15, 0.9 ].freeze
+  PLATFORM_PLANT_SCALE = 0.7
+  PLATFORM_PLANT_INSET = 8
   HOLE_MARGIN = 20
 
   WAVE_INTERVAL = 150
@@ -35,7 +38,7 @@ class RubyConfLevel < Level
   def setup(_args)
     @platforms = Platform.scatter
     @holes = Hole.scatter
-    @plants = scatter_plants
+    @plants = ground_plants + platform_plants
     @collectables = ground_rubies + platform_rubies
     @enemies = []
     @wave_count = 0
@@ -69,38 +72,64 @@ class RubyConfLevel < Level
 
   private
 
-  def scatter_plants
+  def ground_plants
     kinds = Plant::KINDS.keys
-    pitch = (PLANT_END_X - PLANT_START_X).fdiv(PLANT_COUNT - 1)
-    PLANT_COUNT.times.map do |i|
-      kind = kinds[i % kinds.length]
-      width = Plant::KINDS.fetch(kind)[:w]
-      x = clear_of_holes(PLANT_START_X + (i * pitch).to_i, width)
-      Plant.new(x: x, kind: kind)
+    count = (PLANT_END_X - PLANT_START_X).fdiv(GROUND_PLANT_PITCH).floor
+    (0..count).map do |i|
+      plant = Plant.new(x: PLANT_START_X + i * GROUND_PLANT_PITCH,
+                        kind: kinds[i % kinds.length],
+                        scale: GROUND_PLANT_SCALES[i % GROUND_PLANT_SCALES.length])
+      plant unless over_pit?(plant)
+    end.compact
+  end
+
+  def over_pit?(plant)
+    @holes.any? do |hole|
+      plant.x < hole.x + hole.w + HOLE_MARGIN && plant.x + plant.w > hole.x - HOLE_MARGIN
     end
   end
 
-  def clear_of_holes(x, width)
-    blocking = @holes.find do |hole|
-      x < hole.x + hole.w + HOLE_MARGIN && x + width > hole.x - HOLE_MARGIN
-    end
-    return x unless blocking
+  def platform_plants
+    kinds = Plant::KINDS.keys
+    index = 0
+    @platforms.flat_map do |plat|
+      plants = []
+      x = plat.x + PLATFORM_PLANT_INSET
+      loop do
+        plant = Plant.new(x: x, y: plat.y + plat.h, kind: kinds[index % kinds.length],
+                          scale: PLATFORM_PLANT_SCALE)
+        break if plant.x + plant.w > plat.x + plat.w - PLATFORM_PLANT_INSET
 
-    clear_of_holes((blocking.x + blocking.w + HOLE_MARGIN).to_i, width)
+        plants << plant
+        index += 1
+        x += (plant.w * 0.7).to_i
+      end
+      plants
+    end
   end
 
   def ground_rubies
-    hiding_spots(@plants, GROUND_RUBY_COUNT).map do |plant|
-      RubyPickup.new(x: plant.x + (plant.w - RubyPickup::SIZE) / 2,
-                     y: GROUND_Y + RubyPickup::LIFT)
+    grounded = @plants.select { |p| p.y == GROUND_Y }
+    hiding_spots(grounded, GROUND_RUBY_COUNT).map do |plant|
+      RubyPickup.new(x: centered_in(plant), y: GROUND_Y + RubyPickup::LIFT)
     end
   end
 
   def platform_rubies
     perches = @platforms.select(&:holds_password).sort_by(&:x)
     hiding_spots(perches, PLATFORM_RUBY_COUNT).map do |plat|
-      RubyPickup.new(x: plat.x + (plat.w - RubyPickup::SIZE) / 2, y: plat.y + plat.h)
+      plant = plants_on(plat).first
+      RubyPickup.new(x: centered_in(plant), y: plat.y + plat.h)
     end
+  end
+
+  def plants_on(plat)
+    top = plat.y + plat.h
+    @plants.select { |p| p.y == top && p.x >= plat.x && p.x + p.w <= plat.x + plat.w }
+  end
+
+  def centered_in(plant)
+    plant.x + (plant.w - RubyPickup::SIZE) / 2
   end
 
   def hiding_spots(spots, count)

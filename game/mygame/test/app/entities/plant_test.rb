@@ -22,6 +22,22 @@ class PlantTest < Minitest::Test
     assert_equal GROUND_Y, sprite[:y]
   end
 
+  def test_can_root_on_a_platform_top
+    plant = Plant.new(x: 0, kind: :pink_bush, y: 250)
+    args = build_args
+    plant.render(args, 0)
+
+    assert_equal 250, args.outputs.sprites.first[:y]
+  end
+
+  def test_scale_shrinks_the_render_size
+    full = Plant.new(x: 0, kind: :poppy_bush)
+    small = Plant.new(x: 0, kind: :poppy_bush, scale: 0.5)
+
+    assert_equal full.w / 2, small.w
+    assert_equal full.h / 2, small.h
+  end
+
   def test_an_unknown_kind_raises
     assert_raises(KeyError) { Plant.new(x: 0, kind: :tumbleweed) }
   end

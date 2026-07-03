@@ -31,32 +31,57 @@ class RubyConfLevelTest < Minitest::Test
     assert_equal RubyConfLevel::RUBY_COUNT, rubies.length
   end
 
-  def test_ground_rubies_hide_inside_a_wildflower
+  def test_ground_rubies_hide_inside_a_grounded_wildflower
     @level.setup(@args)
     ground = @level.collectables.select { |c| c.is_a?(RubyPickup) && c.y == GROUND_Y + RubyPickup::LIFT }
 
     assert_equal RubyConfLevel::GROUND_RUBY_COUNT, ground.length
     ground.each do |ruby|
-      concealed = @level.plants.any? { |p| ruby.x >= p.x && ruby.x + ruby.w <= p.x + p.w }
-      assert concealed, "ruby at #{ruby.x} sits inside a plant's silhouette"
+      concealed = grounded_plants.any? { |p| ruby.x >= p.x && ruby.x + ruby.w <= p.x + p.w }
+      assert concealed, "ruby at #{ruby.x} sits inside a grounded plant's silhouette"
     end
   end
 
-  def test_platform_rubies_perch_on_staircase_tops
+  def test_platform_rubies_perch_on_staircase_tops_behind_a_plant
     @level.setup(@args)
     perch_tops = @level.platforms.select(&:holds_password).map { |p| p.y + p.h }
     perched = @level.collectables.select { |c| c.is_a?(RubyPickup) && perch_tops.include?(c.y) }
 
     assert_equal RubyConfLevel::PLATFORM_RUBY_COUNT, perched.length
+    perched.each do |ruby|
+      concealed = @level.plants.any? { |p| p.y == ruby.y && ruby.x >= p.x && ruby.x + ruby.w <= p.x + p.w }
+      assert concealed, "ruby at #{ruby.x} sits inside a plant on its platform"
+    end
   end
 
-  def test_plants_never_straddle_a_pit
+  def test_the_ground_is_a_dense_meadow
     @level.setup(@args)
-    refute_empty @level.plants
-    @level.plants.each do |plant|
+    assert_operator grounded_plants.length, :>=, 40, "the floor should be thick with wildflowers"
+  end
+
+  def test_every_platform_carries_at_least_one_plant
+    @level.setup(@args)
+    @level.platforms.each do |plat|
+      top = plat.y + plat.h
+      planted = @level.plants.any? { |p| p.y == top && p.x >= plat.x && p.x + p.w <= plat.x + plat.w }
+      assert planted, "platform at #{plat.x} has no plant"
+    end
+  end
+
+  def test_grounded_plants_never_straddle_a_pit
+    @level.setup(@args)
+    refute_empty grounded_plants
+    grounded_plants.each do |plant|
       overlapping = @level.holes.any? { |hole| plant.x < hole.x + hole.w && plant.x + plant.w > hole.x }
       refute overlapping, "plant at #{plant.x} floats over a pit"
     end
+  end
+
+  def test_plants_leave_the_exit_certificate_uncovered
+    @level.setup(@args)
+    cert_x = @level.world_w - Level::CERTIFICATE_INSET
+    covering = @level.plants.select { |p| p.y == GROUND_Y && p.x + p.w > cert_x }
+    assert_empty covering, "the exit must stay visible through the meadow"
   end
 
   def test_setup_starts_with_no_enemies
@@ -156,5 +181,9 @@ class RubyConfLevelTest < Minitest::Test
 
   def collect_all_rubies
     @level.collectables.each { |c| c.alive = false if c.is_a?(RubyPickup) }
+  end
+
+  def grounded_plants
+    @level.plants.select { |p| p.y == GROUND_Y }
   end
 end
