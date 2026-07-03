@@ -49,14 +49,10 @@ Rails.application.routes.draw do
 
   get "leaderboard" => "leaderboard#index", as: :leaderboard
 
-  # The "you beat the game" certificate: the owner's own page (HTML + .pdf download)
-  # and share hook (grants Influencer).
   resource :certificate, only: :show do
     post :share
   end
 
-  # Public, token-gated certificate page anyone can view — the URL the certificate's
-  # QR and share links point at.
   namespace :public do
     resources :certificates, only: :show, param: :token
   end
