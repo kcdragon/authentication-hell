@@ -41,6 +41,7 @@
         "lib/webauthn_ceremony_controller": "<%= asset_path("lib/webauthn_ceremony_controller.js") %>",
         "controllers/games_passkey_challenge_controller": "<%= asset_path("controllers/games_passkey_challenge_controller.js") %>",
         "controllers/dropdown_controller": "<%= asset_path("controllers/dropdown_controller.js") %>",
+        "controllers/collapsible_controller": "<%= asset_path("controllers/collapsible_controller.js") %>",
         "controllers/game_frame_controller": "<%= asset_path("controllers/game_frame_controller.js") %>"
       }
     }
@@ -50,11 +51,13 @@
     import { Application } from "@hotwired/stimulus"
     import GamesPasskeyChallengeController from "controllers/games_passkey_challenge_controller"
     import DropdownController from "controllers/dropdown_controller"
+    import CollapsibleController from "controllers/collapsible_controller"
     import GameFrameController from "controllers/game_frame_controller"
 
     const application = Application.start()
     application.register("games-passkey-challenge", GamesPasskeyChallengeController)
     application.register("dropdown", DropdownController)
+    application.register("collapsible", CollapsibleController)
     application.register("game-frame", GameFrameController)
   </script>
 </div>
