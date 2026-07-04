@@ -37,7 +37,7 @@ class PasswordLevel < Level
   end
 
   def update(args)
-    validate_password(args) if password_full? && !@certificate_spawned
+    validate_password(args) if password_full? && !certificate_spawned?
     @cleared = true if certificate_collected?(args)
   end
 
@@ -108,11 +108,6 @@ class PasswordLevel < Level
 
   def validate_password(args)
     all_collected? ? spawn_exit_certificate : fail_validation(args)
-  end
-
-  def spawn_exit_certificate
-    @collectables << certificate_at_exit
-    @certificate_spawned = true
   end
 
   def fail_validation(args)

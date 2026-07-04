@@ -47,8 +47,4 @@ class PasswordCharacter
                              size_px: 32, font: FONT_MONO_B, r: ink[0], g: ink[1], b: ink[2],
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
-
-  def serialize = { x: @x, y: @y, w: @w, h: @h, alive: @alive, klass: @klass, glyph: @glyph }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
 end

@@ -221,17 +221,6 @@ class Player
                              r: fill[0], g: fill[1], b: fill[2] }
   end
 
-  def serialize
-    { x: @x, y: @y, w: @w, h: @h, vy: @vy, grounded: @grounded, facing: @facing,
-      locked: @locked, colliding: @colliding, lock_confirmed: @lock_confirmed,
-      pending_challenge: @pending_challenge, hearts: @hearts, game_over: @game_over,
-      moved: @moved, blink_until_tick: @blink_until_tick, slow_until_tick: @slow_until_tick,
-      reached_platform: @reached_platform }
-  end
-
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
-
   private
 
   def landing_on_floor?(level)

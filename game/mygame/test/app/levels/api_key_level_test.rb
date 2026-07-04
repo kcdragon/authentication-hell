@@ -118,8 +118,4 @@ class ApiKeyLevelTest < Minitest::Test
     fresh.render_floor(args, 0)
     assert_empty args.outputs.solids, "the control bar draws during loading, before setup runs"
   end
-
-  def test_serialize_names_the_level
-    assert_equal "ApiKeyLevel", @level.serialize[:level]
-  end
 end

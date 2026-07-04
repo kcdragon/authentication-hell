@@ -28,8 +28,4 @@ class Hole
                                r: INK[0], g: INK[1], b: INK[2] }
     end
   end
-
-  def serialize = { x: @x, w: @w }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
 end

@@ -179,9 +179,6 @@ class PasswordLevelTest < Minitest::Test
     assert(@args.outputs.labels.any? { |l| l[:text] == "INVALID PASSWORD" })
   end
 
-  def test_serialize_names_the_level
-    assert_equal "PasswordLevel", @level.serialize[:level]
-  end
 
   private
 

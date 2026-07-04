@@ -26,7 +26,7 @@ class QrPiece
   def sprite_path = "sprites/ui/qr_piece_#{@index}.png"
 
   def render(args, camera_x = 0)
-    bob = Math.sin(args.state.tick_count / 15.0) * BOB
+    bob = bob_offset(args.state.tick_count)
     left = @x - camera_x
     bottom = @y + bob
     args.outputs.solids << { x: left - BORDER, y: bottom - BORDER,
@@ -34,8 +34,4 @@ class QrPiece
                              r: INK[0], g: INK[1], b: INK[2] }
     args.outputs.sprites << { x: left, y: bottom, w: SIZE, h: SIZE, path: sprite_path }
   end
-
-  def serialize = { x: @x, y: @y, w: @w, h: @h, index: @index, alive: @alive }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
 end

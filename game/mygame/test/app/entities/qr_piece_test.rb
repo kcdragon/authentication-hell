@@ -51,11 +51,6 @@ class QrPieceTest < Minitest::Test
     assert_equal "sprites/ui/qr_piece_1.png", sprite[:path]
   end
 
-  def test_serialize_names_the_index
-    data = piece(index: 3).serialize
-    assert_equal 3, data[:index]
-    assert_equal true, data[:alive]
-  end
 
   private
 

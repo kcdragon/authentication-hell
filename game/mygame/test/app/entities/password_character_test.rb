@@ -62,11 +62,4 @@ class PasswordCharacterTest < Minitest::Test
       assert_equal klass, PasswordCharacter.klass_of(glyph)
     end
   end
-
-  def test_serialize_describes_the_pickup
-    data = PasswordCharacter.new(x: 100, klass: :lower, glyph: "m").serialize
-    assert_equal :lower, data[:klass]
-    assert_equal "m", data[:glyph]
-    assert_equal true, data[:alive]
-  end
 end

@@ -194,9 +194,6 @@ class TotpLevelTest < Minitest::Test
     refute_empty @level.enemies, "enemies harass the hunt before any registration"
   end
 
-  def test_serialize_names_the_level
-    assert_equal "TotpLevel", @level.serialize[:level]
-  end
 
   private
 

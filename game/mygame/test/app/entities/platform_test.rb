@@ -28,9 +28,4 @@ class PlatformTest < Minitest::Test
     assert_equal 403, face[:x]
     assert_equal 223, face[:y]
   end
-
-  def test_serialize_exposes_the_rect
-    data = Platform.new(x: 1, y: 2, w: 3, h: 4).serialize
-    assert_equal({ x: 1, y: 2, w: 3, h: 4 }, data)
-  end
 end

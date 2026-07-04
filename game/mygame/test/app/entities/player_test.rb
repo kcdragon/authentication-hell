@@ -401,12 +401,4 @@ class PlayerTest < Minitest::Test
     assert_equal 10, args.outputs.solids.length,
                  "2 legs + torso card (ink + indigo) + neck + head card (ink + skin) + hair + 2 eyes"
   end
-
-  def test_serialize_includes_core_fields
-    data = @player.serialize
-    assert_equal Player::MAX_HEARTS, data[:hearts]
-    assert_equal @player.x, data[:x]
-    assert_equal false, data[:moved]
-    assert_equal false, data[:reached_platform]
-  end
 end

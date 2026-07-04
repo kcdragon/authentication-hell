@@ -22,8 +22,4 @@ class Plant
   def render(args, camera_x = 0)
     args.outputs.sprites << { x: @x - camera_x, y: @y - ROOT_SINK, w: @w, h: @h, path: @path }
   end
-
-  def serialize = { x: @x, y: @y, w: @w, h: @h, path: @path }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
 end

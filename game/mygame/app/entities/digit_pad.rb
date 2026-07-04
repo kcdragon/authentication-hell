@@ -29,8 +29,4 @@ class DigitPad
                              size_px: 28, font: FONT_MONO_B, r: PAPER[0], g: PAPER[1], b: PAPER[2],
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
-
-  def serialize = { x: @x, y: @y, w: @w, h: @h, digit: @digit }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
 end

@@ -44,10 +44,4 @@ class RewindPickupTest < Minitest::Test
     pickup.on_collision(Object.new, build_args)
     assert pickup.alive?
   end
-
-  def test_serialize_describes_the_pickup
-    data = RewindPickup.new(x: 100, y: GROUND_Y, level: TotpLevel.new).serialize
-    assert_equal 100, data[:x]
-    assert_equal true, data[:alive]
-  end
 end

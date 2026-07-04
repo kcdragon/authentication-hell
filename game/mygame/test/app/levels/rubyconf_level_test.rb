@@ -138,9 +138,6 @@ class RubyConfLevelTest < Minitest::Test
     assert_equal @level.plants.length, plant_paths.grep(/plants/).length
   end
 
-  def test_serialize_names_the_level
-    assert_equal "RubyConfLevel", @level.serialize[:level]
-  end
 
   private
 

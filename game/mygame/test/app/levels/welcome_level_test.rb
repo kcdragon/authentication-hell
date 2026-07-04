@@ -153,9 +153,6 @@ class WelcomeLevelTest < Minitest::Test
     assert_nil @level.current_dialogue(@args)
   end
 
-  def test_serialize_names_the_level
-    assert_equal "WelcomeLevel", @level.serialize[:level]
-  end
 
   def test_number_is_zero
     assert_equal 0, @level.number

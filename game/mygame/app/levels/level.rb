@@ -105,13 +105,17 @@ class Level
 
   def render_floor(_args, _cam) = nil
 
-  def serialize = { level: self.class.name }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
-
   private
 
   attr_reader :game
+
+  def spawn_exit_certificate
+    return if @certificate_spawned
+    @collectables << certificate_at_exit
+    @certificate_spawned = true
+  end
+
+  def certificate_spawned? = @certificate_spawned == true
 
   def loot_for(enemy)
     roll = rand

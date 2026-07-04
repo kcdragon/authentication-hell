@@ -71,17 +71,6 @@ class Enemy
     args.outputs.solids << { x: @x - camera_x, y: @y, w: @w, h: @h, r: @r, g: @g, b: @b }
   end
 
-  # DragonRuby exports args.state for its dev tools; a plain object without a
-  # serialize method can choke that export (see the http-handle nils in main.rb).
-  def serialize
-    { x: @x, y: @y, w: @w, h: @h, auth: @auth, alive: @alive,
-      r: @r, g: @g, b: @b, vx: @vx,
-      patrol_min_x: @patrol_min_x, patrol_max_x: @patrol_max_x }
-  end
-
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
-
   private
 
   def die

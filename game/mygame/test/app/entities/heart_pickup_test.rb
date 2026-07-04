@@ -28,10 +28,4 @@ class HeartPickupTest < Minitest::Test
     heart.on_collision(Object.new, build_args)
     assert heart.alive?
   end
-
-  def test_serialize_describes_the_pickup
-    data = HeartPickup.new(x: 100, y: GROUND_Y).serialize
-    assert_equal 100, data[:x]
-    assert_equal true, data[:alive]
-  end
 end

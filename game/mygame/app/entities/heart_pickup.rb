@@ -22,13 +22,9 @@ class HeartPickup
   def collect(player) = player.heal
 
   def render(args, camera_x = 0)
-    bob = Math.sin(args.state.tick_count / 15.0) * BOB
+    bob = bob_offset(args.state.tick_count)
     sprite_h = @w * SPRITE_NATIVE_H / SPRITE_NATIVE_W
     args.outputs.sprites << { x: @x - camera_x, y: @y + bob, w: @w, h: sprite_h,
                               path: "sprites/ui/heart_hardmode.png" }
   end
-
-  def serialize = { x: @x, y: @y, w: @w, h: @h, alive: @alive }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
 end

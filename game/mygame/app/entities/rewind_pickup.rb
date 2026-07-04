@@ -33,7 +33,7 @@ class RewindPickup
   def collect(_player) = nil
 
   def render(args, camera_x = 0)
-    bob = Math.sin(args.state.tick_count / 15.0) * BOB
+    bob = bob_offset(args.state.tick_count)
     x = @x - camera_x
     y = @y + bob
     args.outputs.solids << { x: x, y: y, w: SIZE, h: SIZE, r: INK[0], g: INK[1], b: INK[2] }
@@ -42,10 +42,6 @@ class RewindPickup
     rewind_triangle(args, x + GLYPH_INSET, y)
     rewind_triangle(args, x + GLYPH_INSET + GLYPH_TRIANGLE_W - 2, y)
   end
-
-  def serialize = { x: @x, y: @y, w: @w, h: @h, alive: @alive }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
 
   private
 

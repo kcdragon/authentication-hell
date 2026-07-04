@@ -20,12 +20,8 @@ class RubyPickup
   def collect(_player) = nil
 
   def render(args, camera_x = 0)
-    bob = Math.sin(args.state.tick_count / 15.0) * BOB
+    bob = bob_offset(args.state.tick_count)
     args.outputs.sprites << { x: @x - camera_x, y: @y + bob, w: @w, h: @h,
                               path: "sprites/ui/ruby.png" }
   end
-
-  def serialize = { x: @x, y: @y, w: @w, h: @h, alive: @alive }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
 end

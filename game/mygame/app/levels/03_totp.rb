@@ -137,17 +137,8 @@ class TotpLevel < Level
   # Key rows are closer together than the player is tall, so overlapping keys are
   # decided by the feet: nearest key vertically, ties to the squarest overlap.
   def key_under(player, keypad)
-    keypad.select { |pad| overlaps?(player, pad.hitbox) }
-          .min_by { |pad| [ (pad.y - player.y).abs, -overlap_width(player, pad.hitbox) ] }
-  end
-
-  def overlaps?(player, box)
-    player.x < box[:x] + box[:w] && player.x + player.w > box[:x] &&
-      player.y < box[:y] + box[:h] && player.y + player.h > box[:y]
-  end
-
-  def overlap_width(player, box)
-    [ player.x + player.w, box[:x] + box[:w] ].min - [ player.x, box[:x] ].max
+    keypad.select { |pad| Aabb.overlap?(player, pad) }
+          .min_by { |pad| [ (pad.y - player.y).abs, -Aabb.overlap_width(player, pad) ] }
   end
 
   SLOT_W = 30

@@ -20,10 +20,6 @@ class WaveSpawner
     @wave_count += 1
   end
 
-  def serialize = { wave_count: @wave_count, last_wave_at: @last_wave_at }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
-
   private
 
   def next_kind = KINDS[@wave_count % KINDS.length]

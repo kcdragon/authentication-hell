@@ -38,10 +38,4 @@ class CertificateTest < Minitest::Test
     assert_equal 1, @args.outputs.sprites.length
     assert_equal "sprites/ui/certificate.png", @args.outputs.sprites.first[:path]
   end
-
-  def test_serialize_describes_the_pickup
-    data = Certificate.new(x: 100).serialize
-    assert_equal 100, data[:x]
-    assert_equal true, data[:alive]
-  end
 end
