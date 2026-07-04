@@ -21,8 +21,8 @@ class TotpLevelTest < Minitest::Test
     assert_equal 60, @level.time_limit
   end
 
-  def test_is_the_final_level
-    assert_nil @level.next_level, "no next level marks the terminal stage — clearing it beats the game"
+  def test_hands_off_to_the_bonus_chapter
+    assert_instance_of RubyConfLevel, @level.next_level, "clearing TOTP graduates into the RubyConf bonus"
   end
 
   def test_setup_lays_ten_keypad_platforms_with_a_pad_on_each

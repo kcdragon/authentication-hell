@@ -70,7 +70,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "start's start_level honors a one-shot playlist selection, then clears it" do
-    @user.update!(highest_level_completed: 2)
+    @user.update!(highest_level_completed: GameLevel.all.last.number)
     sign_in_as(@user)
 
     get game_frame_url(level: 0)
@@ -80,7 +80,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, response.parsed_body["start_level"]
 
     get game_start_url
-    assert_equal 2, response.parsed_body["start_level"]
+    assert_equal GameLevel.all.last.number, response.parsed_body["start_level"]
   end
 
   test "frame honors selecting the frontier (the next, not-yet-cleared level)" do

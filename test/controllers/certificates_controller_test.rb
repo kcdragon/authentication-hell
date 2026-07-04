@@ -21,7 +21,7 @@ class CertificatesControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "show sends players who haven't beaten the game back to the game" do
-    @user.update!(highest_level_completed: GameLevel.all.last.number - 1)
+    @user.update!(highest_level_completed: GameLevel.graduation.number - 1)
     sign_in_as(@user)
 
     get certificate_url

@@ -56,6 +56,8 @@ class TotpLevel < Level
 
   def complete? = @cleared == true
 
+  def next_level = RubyConfLevel.new
+
   def render_world(args, cam)
     @keypad.each { |pad| pad.render(args, cam) }
   end

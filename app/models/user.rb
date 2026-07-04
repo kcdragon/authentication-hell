@@ -172,7 +172,7 @@ class User < ApplicationRecord
   end
 
   def beat_game?
-    highest_level_completed.to_i >= GameLevel.all.last.number
+    highest_level_completed.to_i >= GameLevel.graduation.number
   end
 
   def ensure_certificate_token!
