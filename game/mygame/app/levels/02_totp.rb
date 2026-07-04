@@ -6,10 +6,10 @@ class TotpLevel < Level
   CODE_LENGTH = 6
   REQUIRED_STREAK = 3
 
-  WAVE_INTERVAL = 150
-  WAVE_CAP = 5
-  WAVE_KINDS = [ TotpEnemy, PasswordEnemy, PasskeyEnemy, BufferingEnemy ]
-  ENEMY_SPEED = 3
+  QR_PIECE_COUNT = 4
+  GROUND_PIECE_XS = [ 600, 1120 ].freeze
+  COLLECT_PLATFORMS = [ [ 300, 220 ], [ 860, 220 ] ].freeze
+  COLLECT_PLATFORM_TOP = Platform::TIERS.first
 
   NUMPAD_ROWS = [ %w[7 8 9], %w[4 5 6], %w[1 2 3] ].freeze
   PAD_W = 124
@@ -24,9 +24,9 @@ class TotpLevel < Level
 
   def accent = PURPLE
 
-  def world_w = SCREEN_W
+  def world_w = SCREEN_W * 2
 
-  def start_x = SCREEN_W / 2 - Player::WIDTH / 2
+  def start_x = 80
 
   def time_limit = 60
 
@@ -34,19 +34,21 @@ class TotpLevel < Level
     @holes = []
     @collectables = []
     @enemies = []
+    @platforms = []
+    build_collection_zone
     build_keypad
-    @totp = { active: true, started: false, registered: false,
+    @totp = { active: false, started: false, registered: false,
               streak: 0, entered: [], pending_code: nil,
               submitting: false, complete: false }
-    @wave_count = 0
-    @last_wave_at = nil
+    @waves = WaveSpawner.new(self)
   end
 
   def update(args)
     lt = @totp
+    activate_totp(lt) if !lt[:started] && all_pieces_collected?
     Network::LevelTotp.new(self).poll(args.state.tick_count) unless args.state.player.game_over
     read_keypad_presses(args) if lt[:registered] && !lt[:complete]
-    spawn_waves(args) if lt[:registered] && !lt[:complete]
+    @waves.update(args) unless lt[:complete]
 
     if lt[:complete]
       @cleared = true
@@ -62,8 +64,21 @@ class TotpLevel < Level
     @keypad.each { |pad| pad.render(args, cam) }
   end
 
+  def draw(args)
+    return if @totp[:registered]
+
+    lines = if all_pieces_collected?
+      [ "QR code assembled!", "scan the toast with your authenticator →" ]
+    else
+      [ "#{collected_pieces}/#{QR_PIECE_COUNT} QR code pieces" ]
+    end
+    Caption.new(args, lines).draw
+  end
+
   def draw_hud(args)
     lt = @totp
+    return unless lt[:registered]
+
     CODE_LENGTH.times { |slot| draw_digit_slot(args, slot, lt[:entered][slot]) }
     REQUIRED_STREAK.times { |i| draw_streak_pip(args, i, i < lt[:streak].to_i) }
     draw_pickup_hint(args)
@@ -71,14 +86,43 @@ class TotpLevel < Level
 
   private
 
+  def activate_totp(lt)
+    lt[:active] = true
+  end
+
+  def all_pieces_collected? = @collectables.none? { |c| c.is_a?(QrPiece) && c.alive? }
+
+  def collected_pieces = @collectables.count { |c| c.is_a?(QrPiece) && !c.alive? }
+
+  def build_collection_zone
+    COLLECT_PLATFORMS.each do |x, w|
+      @platforms << Platform.new(x: x, y: COLLECT_PLATFORM_TOP - Platform::H, w: w, h: Platform::H,
+                                 holds_password: false)
+    end
+    @collectables.concat(ground_pieces + platform_pieces)
+  end
+
+  def ground_pieces
+    GROUND_PIECE_XS.each_with_index.map do |x, i|
+      QrPiece.new(x: x, y: GROUND_Y + QrPiece::LIFT, index: i)
+    end
+  end
+
+  def platform_pieces
+    COLLECT_PLATFORMS.each_with_index.map do |(x, w), i|
+      QrPiece.new(x: x + (w - QrPiece::SIZE) / 2, y: COLLECT_PLATFORM_TOP + QrPiece::LIFT,
+                  index: GROUND_PIECE_XS.length + i)
+    end
+  end
+
+  def keypad_origin = world_w - SCREEN_W
+
   def build_keypad
-    platforms = []
     pads = []
     NUMPAD_ROWS.each_with_index do |row, r|
-      row.each_with_index { |digit, c| add_key(platforms, pads, COL_X[c], ROW_TOPS[r], digit.to_i) }
+      row.each_with_index { |digit, c| add_key(@platforms, pads, keypad_origin + COL_X[c], ROW_TOPS[r], digit.to_i) }
     end
-    add_key(platforms, pads, COL_X[1], ZERO_TOP, 0)
-    @platforms = platforms
+    add_key(@platforms, pads, keypad_origin + COL_X[1], ZERO_TOP, 0)
     @keypad = pads
   end
 
@@ -121,24 +165,6 @@ class TotpLevel < Level
 
   def overlap_width(player, box)
     [ player.x + player.w, box[:x] + box[:w] ].min - [ player.x, box[:x] ].max
-  end
-
-  def spawn_waves(args)
-    @last_wave_at ||= args.state.tick_count
-    return if args.state.tick_count - @last_wave_at < WAVE_INTERVAL
-    return if @enemies.count(&:alive) >= WAVE_CAP
-
-    @last_wave_at = args.state.tick_count
-    kind = WAVE_KINDS[@wave_count % WAVE_KINDS.length]
-    if @wave_count.even?
-      enemy = kind.new(x: -Enemy::WIDTH, level: self)
-      enemy.march_right(ENEMY_SPEED, max: world_w)
-    else
-      enemy = kind.new(x: world_w, level: self)
-      enemy.march_left(ENEMY_SPEED)
-    end
-    @enemies << enemy
-    @wave_count += 1
   end
 
   SLOT_W = 30

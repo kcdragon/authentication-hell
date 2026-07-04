@@ -13,8 +13,8 @@ class TotpLevelTest < Minitest::Test
     assert_equal 2, @level.number
   end
 
-  def test_world_is_a_single_screen
-    assert_equal SCREEN_W, @level.world_w
+  def test_world_is_two_screens_wide
+    assert_equal SCREEN_W * 2, @level.world_w
   end
 
   def test_allows_only_sixty_seconds
@@ -26,9 +26,33 @@ class TotpLevelTest < Minitest::Test
   end
 
   def test_setup_lays_ten_keypad_platforms_with_a_pad_on_each
-    assert_equal 10, @level.platforms.length
+    assert_equal 10 + TotpLevel::COLLECT_PLATFORMS.length, @level.platforms.length
     assert_equal 10, @level.keypad.length
     assert(@level.keypad.all? { |pad| pad.is_a?(DigitPad) })
+  end
+
+  def test_setup_scatters_four_qr_pieces
+    assert_equal TotpLevel::QR_PIECE_COUNT, pieces.length
+    assert_equal (0...TotpLevel::QR_PIECE_COUNT).to_a, pieces.map(&:index).sort
+  end
+
+  def test_pieces_all_sit_in_the_collection_screen
+    assert(pieces.all? { |piece| piece.x + piece.w <= @level.world_w - SCREEN_W })
+  end
+
+  def test_no_piece_waits_at_the_player_spawn
+    assert(pieces.all? { |piece| piece.x > @level.start_x + Player::WIDTH * 3 },
+           "every piece takes a deliberate walk to reach")
+  end
+
+  def test_keypad_sits_in_the_right_hand_screen
+    assert(@level.keypad.all? { |pad| pad.x >= @level.world_w - SCREEN_W })
+  end
+
+  def test_collection_platforms_are_one_hop_up
+    proven_jump_reach = Platform::TIERS.first - GROUND_Y
+    collection = @level.platforms.reject { |plat| plat.x >= @level.world_w - SCREEN_W }
+    assert(collection.all? { |plat| plat.y + plat.h - GROUND_Y <= proven_jump_reach })
   end
 
   def test_setup_places_every_digit_zero_through_nine
@@ -54,13 +78,39 @@ class TotpLevelTest < Minitest::Test
     assert(steps.all? { |s| s <= proven_jump_reach }, "each row is a reachable hop above the last: #{steps.inspect}")
   end
 
-  def test_setup_starts_with_no_enemies_and_a_fresh_challenge
+  def test_setup_starts_with_no_enemies_and_a_dormant_challenge
     assert_empty @level.enemies
     lt = @level.totp
-    assert lt[:active]
+    refute lt[:active], "the QR only exists once its pieces are collected"
     refute lt[:registered]
     assert_equal 0, lt[:streak]
     assert_equal [], lt[:entered]
+  end
+
+  def test_totp_stays_dormant_while_pieces_remain
+    @level.update(@args)
+
+    refute @level.totp[:active]
+    refute @level.totp[:started]
+    assert_nil @level.totp_start_request, "no start call before the QR is assembled"
+  end
+
+  def test_collecting_every_piece_activates_the_totp_challenge
+    collect_pieces!
+    @level.update(@args)
+
+    lt = @level.totp
+    assert lt[:active]
+    assert lt[:started]
+    refute_nil @level.totp_start_request, "assembling the QR fires the start call"
+  end
+
+  def test_completion_does_not_rearm_the_challenge
+    register!
+    @level.totp[:complete] = true
+    2.times { @level.update(@args) }
+
+    refute @level.totp[:active]
   end
 
   def test_keypad_is_inert_until_the_authenticator_is_registered
@@ -102,18 +152,46 @@ class TotpLevelTest < Minitest::Test
     refute @level.totp[:active], "stops polling once cleared"
   end
 
-  def test_spawns_a_capped_wave_of_enemies_over_time
+  def test_hud_hides_the_keypad_chrome_until_registered
+    @level.draw_hud(@args)
+    assert_empty @args.outputs.solids
+
     register!
+    @level.draw_hud(@args)
+    refute_empty @args.outputs.solids
+  end
+
+  def test_draw_captions_the_piece_tally
+    @args.state.captions_on = true
+    @level.draw(@args)
+
+    tally = "0/#{TotpLevel::QR_PIECE_COUNT} QR code pieces"
+    assert(@args.outputs.labels.any? { |label| label[:text] == tally })
+  end
+
+  def test_draw_prompts_the_scan_once_assembled
+    collect_pieces!
+    @args.state.captions_on = true
+    @level.draw(@args)
+
+    assert(@args.outputs.labels.any? { |label| label[:text].include?("scan") })
+  end
+
+  def test_draw_goes_quiet_once_registered
+    register!
+    @args.state.captions_on = true
+    @level.draw(@args)
+
+    assert_empty @args.outputs.labels
+  end
+
+  def test_waves_spawn_during_the_collection_phase
     @level.update(@args)
     assert_empty @level.enemies, "no enemy yet at tick 0"
 
-    20.times do |i|
-      @args.state.tick_count += TotpLevel::WAVE_INTERVAL
-      @level.update(@args)
-    end
-    refute_empty @level.enemies
-    assert_operator @level.enemies.count(&:alive), :<=, TotpLevel::WAVE_CAP
-    assert(@level.enemies.all? { |e| [ TotpEnemy, PasswordEnemy, PasskeyEnemy, BufferingEnemy ].include?(e.class) })
+    @args.state.tick_count += WaveSpawner::INTERVAL
+    @level.update(@args)
+    refute_empty @level.enemies, "enemies harass the hunt before any registration"
   end
 
   def test_serialize_names_the_level
@@ -122,7 +200,15 @@ class TotpLevelTest < Minitest::Test
 
   private
 
-  def register! = @level.totp[:registered] = true
+  def pieces = @level.collectables.select { |c| c.is_a?(QrPiece) }
+
+  def collect_pieces! = pieces.each { |piece| piece.alive = false }
+
+  def register!
+    collect_pieces!
+    @level.update(@args)
+    @level.totp[:registered] = true
+  end
 
   def pad_for(digit) = @level.keypad.find { |pad| pad.digit == digit }
 

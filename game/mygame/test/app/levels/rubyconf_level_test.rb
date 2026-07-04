@@ -94,38 +94,8 @@ class RubyConfLevelTest < Minitest::Test
     @level.update(at_tick(0))
     assert_empty @level.enemies
 
-    @level.update(at_tick(RubyConfLevel::WAVE_INTERVAL - 1))
-    assert_empty @level.enemies
-
-    @level.update(at_tick(RubyConfLevel::WAVE_INTERVAL))
+    @level.update(at_tick(WaveSpawner::INTERVAL))
     assert_equal 1, @level.enemies.length
-  end
-
-  def test_waves_stop_at_the_alive_cap
-    @level.setup(@args)
-    12.times { |i| @level.update(at_tick(i * RubyConfLevel::WAVE_INTERVAL)) }
-    assert_equal RubyConfLevel::WAVE_CAP, @level.enemies.count(&:alive)
-  end
-
-  def test_first_wave_marches_in_from_the_right_edge_of_the_screen
-    @level.setup(@args)
-    @level.update(at_tick(0))
-    @level.update(at_tick(RubyConfLevel::WAVE_INTERVAL))
-
-    enemy = @level.enemies.first
-    assert_equal SCREEN_W, enemy.x
-    assert_operator enemy.vx, :<, 0
-  end
-
-  def test_second_wave_flanks_from_the_left_once_the_camera_has_moved
-    @level.setup(@args)
-    @level.update(at_tick(0))
-    @level.update(at_tick(RubyConfLevel::WAVE_INTERVAL))
-    @level.update(at_tick(RubyConfLevel::WAVE_INTERVAL * 2, camera_x: 1000))
-
-    enemy = @level.enemies.last
-    assert_equal 1000 - Enemy::WIDTH, enemy.x
-    assert_operator enemy.vx, :>, 0
   end
 
   def test_no_certificate_and_no_completion_while_rubies_remain

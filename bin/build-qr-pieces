@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+require "bundler/setup"
+require "rqrcode"
+require "securerandom"
+
+# Regenerates the TOTP level's QR-piece sprites: one throwaway QR, quartered.
+# Re-runnable; commit its outputs under game/mygame/sprites/ui/.
+
+APP_ROOT = File.expand_path("..", __dir__)
+OUT_DIR = File.join(APP_ROOT, "game/mygame/sprites/ui")
+QR_SIZE = 480
+
+CRITICAL_CHUNKS = %w[IHDR PLTE tRNS IDAT IEND].freeze
+PNG_SIGNATURE = "\x89PNG\r\n\x1a\n".b
+
+def one_time_secret
+  base32 = ("A".."Z").to_a + ("2".."7").to_a
+  Array.new(32) { base32[SecureRandom.random_number(base32.length)] }.join
+end
+
+def provisioning_uri
+  "otpauth://totp/Authentication%20Hell:new-hire?secret=#{one_time_secret}&issuer=Authentication%20Hell"
+end
+
+def bare_png(blob)
+  chunks = []
+  offset = PNG_SIGNATURE.length
+  while offset < blob.length
+    length = blob[offset, 4].unpack1("N")
+    type = blob[offset + 4, 4]
+    chunk = blob[offset, length + 12]
+    chunks << chunk if CRITICAL_CHUNKS.include?(type)
+    offset += length + 12
+  end
+  PNG_SIGNATURE + chunks.join
+end
+
+qr = RQRCode::QRCode.new(provisioning_uri).as_png(size: QR_SIZE, border_modules: 0)
+half = QR_SIZE / 2
+quadrants = [ [ 0, 0 ], [ half, 0 ], [ 0, half ], [ half, half ] ]
+
+quadrants.each_with_index do |(x, y), index|
+  path = File.join(OUT_DIR, "qr_piece_#{index}.png")
+  blob = qr.crop(x, y, half, half).to_blob(:fast_rgba)
+  File.binwrite(path, bare_png(blob))
+  puts "wrote #{path}"
+end
