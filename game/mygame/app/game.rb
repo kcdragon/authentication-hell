@@ -167,25 +167,34 @@ class Game
     end
 
     Ui::ControlBar.new(@args, self).draw
-    draw_hearts
+    Ui::Hearts.new(@args, @player.hearts).draw
     @level.draw_hud(@args)
+    draw_overlay
+  end
 
-    if @beaten
-      Ui::CourseComplete.new(@args).draw
-    elsif @player.game_over
-      draw_video_ended
-    elsif @player.locked
-      draw_buffering
-    elsif @paused
-      draw_paused
-    elsif intro_active?
-      draw_level_intro
-    elsif dialogue_active?
-      Dialogue.new(@args, @level.current_dialogue(@args), @level.accent).draw
+  def draw_overlay
+    case phase
+    when :beaten then Ui::CourseComplete.new(@args).draw
+    when :ended then Ui::VideoEnded.new(@args).draw
+    when :buffering then Ui::BufferingOverlay.new(@args, @player.pending_challenge).draw
+    when :paused then Ui::PausedOverlay.new(@args).draw
+    when :intro then Ui::LevelIntro.new(@args, @level).draw
+    when :dialogue then Dialogue.new(@args, @level.current_dialogue(@args), @level.accent).draw
     else
       draw_lag_indicator if @player.slowed?(tick_count)
       @level.draw(@args)
     end
+  end
+
+  def phase
+    return :loading unless @booted
+    return :beaten if @beaten
+    return :ended if @player.game_over
+    return :buffering if @player.locked
+    return :paused if @paused
+    return :intro if intro_active?
+    return :dialogue if dialogue_active?
+    :playing
   end
 
   def draw_lag_indicator
@@ -197,129 +206,6 @@ class Game
 
   def out_of_time?
     !@player.game_over && progress >= 1.0
-  end
-
-  def draw_hearts
-    Player::MAX_HEARTS.times do |i|
-      have = i < @player.hearts
-      @args.outputs.sprites << { x: 24 + i * 42,
-                                 y: SCREEN_H - 60,
-                                 w: 36,
-                                 h: 33,
-                                 path: have ? "sprites/ui/heart_hardmode.png" : "sprites/ui/heart_empty.png" }
-    end
-  end
-
-  def draw_level_intro
-    elapsed = @level.intro_elapsed(tick_count)
-    alpha = if elapsed < LEVEL_INTRO_FADE_IN
-              255 * elapsed / LEVEL_INTRO_FADE_IN
-    elsif elapsed > LEVEL_INTRO_TICKS - LEVEL_INTRO_FADE_OUT
-              255 * (LEVEL_INTRO_TICKS - elapsed) / LEVEL_INTRO_FADE_OUT
-    else
-              255
-    end
-    alpha = alpha.clamp(0, 255)
-
-    cx = 640
-    cy = 392
-    h = 152
-    accent = @level.accent
-
-    # 0.6 px per point of font size estimates the title width; there's no way to
-    # measure a string without the engine.
-    title = @level.title
-    title_size = 40
-    pad_x = 48
-    est_w = title.length * title_size * 0.6
-    w = (est_w + 2 * pad_x).clamp(520, SCREEN_W - 120).to_i
-    title_size = ((w - 2 * pad_x) * title_size / est_w).to_i if est_w > w - 2 * pad_x
-    left = cx - w / 2
-    bottom = cy - h / 2
-
-    @args.outputs.solids << { x: left + 8, y: bottom - 8, w: w, h: h,
-                              r: INK[0], g: INK[1], b: INK[2], a: alpha }
-    @args.outputs.solids << { x: left, y: bottom, w: w, h: h,
-                              r: INK[0], g: INK[1], b: INK[2], a: alpha }
-    @args.outputs.solids << { x: left + 4, y: bottom + 4, w: w - 8, h: h - 8,
-                              r: CARD[0], g: CARD[1], b: CARD[2], a: alpha }
-
-    @args.outputs.labels << { x: cx, y: cy + 44, text: @level.chapter_label.upcase,
-                              size_px: 18, font: FONT_MONO_B,
-                              r: accent[0], g: accent[1], b: accent[2], a: alpha,
-                              anchor_x: 0.5, anchor_y: 0.5 }
-    @args.outputs.solids << { x: cx - 28, y: cy + 26, w: 56, h: 4,
-                              r: accent[0], g: accent[1], b: accent[2], a: alpha }
-    @args.outputs.labels << { x: cx, y: cy - 18, text: title,
-                              size_px: title_size, font: FONT_DISPLAY,
-                              r: INK[0], g: INK[1], b: INK[2], a: alpha,
-                              anchor_x: 0.5, anchor_y: 0.5 }
-  end
-
-  def draw_paused
-    @args.outputs.solids << { x: 0, y: BAR_TOP, w: SCREEN_W, h: SCREEN_H - BAR_TOP,
-                              r: PAPER[0], g: PAPER[1], b: PAPER[2], a: 90 }
-    cx = 640
-    cy = 440
-    @args.outputs.solids << { x: cx - 16, y: cy + 26, x2: cx - 16, y2: cy - 26,
-                              x3: cx + 30, y3: cy,
-                              r: INK[0], g: INK[1], b: INK[2] }
-    @args.outputs.labels << { x: cx, y: cy - 64, text: "PAUSED",
-                              size_px: 24, font: FONT_MONO_B,
-                              r: INK[0], g: INK[1], b: INK[2],
-                              anchor_x: 0.5, anchor_y: 0.5 }
-    @args.outputs.labels << { x: cx, y: cy - 96, text: "press play or escape to resume",
-                              size_px: 16, font: FONT_MONO,
-                              r: MUTED[0], g: MUTED[1], b: MUTED[2],
-                              anchor_x: 0.5, anchor_y: 0.5 }
-
-    controls = [ "A / D  or  ← →    move",
-                 "Space    jump" ]
-    controls.each_with_index do |line, i|
-      @args.outputs.labels << { x: cx, y: cy - 148 - i * 30, text: line,
-                                size_px: 16, font: FONT_MONO,
-                                r: MUTED[0], g: MUTED[1], b: MUTED[2],
-                                anchor_x: 0.5, anchor_y: 0.5 }
-    end
-  end
-
-  def draw_buffering
-    color = challenge_color(@player.pending_challenge)
-
-    Ui::Spinner.new(@args).draw(640, 470, color)
-
-    label = case @player.pending_challenge
-    when :passkey then "BUFFERING — approve the passkey toast to resume →"
-    when :password then "BUFFERING — enter your password in the toast to resume →"
-    else "BUFFERING — enter your TOTP code in the toast to resume →"
-    end
-    @args.outputs.labels << { x: 640, y: 420, text: label,
-                              size_px: 22, font: FONT_MONO_B,
-                              r: color[0], g: color[1], b: color[2],
-                              anchor_x: 0.5, anchor_y: 0.5 }
-  end
-
-  def draw_video_ended
-    @args.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H,
-                              r: INDIGO[0], g: INDIGO[1], b: INDIGO[2], a: 184 }
-    @args.outputs.labels << { x: 640, y: 408, text: "Video Ended",
-                              size_px: 96, font: FONT_DISPLAY,
-                              r: PAPER[0], g: PAPER[1], b: PAPER[2],
-                              anchor_x: 0.5, anchor_y: 0.5 }
-    @args.outputs.solids << { x: 640 - 210, y: 350, w: 420, h: 5,
-                              r: RED[0], g: RED[1], b: RED[2] }
-    @args.outputs.labels << { x: 640, y: 318, text: "↺ Replay · press R",
-                              size_px: 22, font: FONT_MONO,
-                              r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2],
-                              anchor_x: 0.5, anchor_y: 0.5 }
-  end
-
-  def challenge_color(kind)
-    case kind
-    when :passkey then BLUE
-    when :password then AMBER
-    else PURPLE
-    end
   end
 
   def end_run

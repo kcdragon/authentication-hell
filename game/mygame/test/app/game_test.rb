@@ -54,6 +54,56 @@ class GameBootTest < Minitest::Test
   end
 end
 
+class GamePhaseTest < Minitest::Test
+  include GameTest
+
+  def setup
+    @game = Game.new
+    @game.instance_variable_set(:@args, build_args(player: @game.player, level: @game.level))
+    @game.instance_variable_set(:@booted, true)
+    @game.instance_variable_set(:@started, true)
+  end
+
+  def phase = @game.send(:phase)
+
+  def test_loading_until_the_boot_request_resolves
+    @game.instance_variable_set(:@booted, false)
+    assert_equal :loading, phase
+  end
+
+  def test_the_welcome_dialogue_owns_the_opening_frame
+    assert_equal :dialogue, phase
+  end
+
+  def test_intro_outranks_dialogue
+    @game.level.begin_clock(0)
+    assert_equal :intro, phase
+  end
+
+  def test_buffering_while_locked
+    @game.player.lock!(:totp)
+    assert_equal :buffering, phase
+  end
+
+  def test_paused_outranks_the_intro
+    @game.instance_variable_set(:@paused, true)
+    @game.level.begin_clock(0)
+    assert_equal :paused, phase
+  end
+
+  def test_a_dead_player_ends_the_video_even_while_locked
+    @game.player.lock!(:totp)
+    @game.player.die!
+    assert_equal :ended, phase
+  end
+
+  def test_beating_the_game_outranks_everything
+    @game.player.die!
+    @game.instance_variable_set(:@beaten, true)
+    assert_equal :beaten, phase
+  end
+end
+
 class GameUnlockTest < Minitest::Test
   include GameTest
 
