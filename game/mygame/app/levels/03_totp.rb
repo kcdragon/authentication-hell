@@ -18,7 +18,7 @@ class TotpLevel < Level
   ROW_TOPS = [ 560, 430, 320 ].freeze
   ZERO_TOP = 200
 
-  def number = 2
+  def number = 3
 
   def title = "Time-Based One-Time Passwords"
 

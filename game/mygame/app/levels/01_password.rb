@@ -49,7 +49,7 @@ class PasswordLevel < Level
 
   def complete? = @cleared == true
 
-  def next_level = TotpLevel.new
+  def next_level = ApiKeyLevel.new
 
   def draw_hud(args)
     PASSWORD_LENGTH.times { |slot| draw_password_slot(args, slot, collected[slot]) }

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_02_010000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_03_010000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -83,6 +83,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_010000) do
     t.index ["user_id"], name: "index_sessions_on_user_id"
   end
 
+  create_table "temporary_api_key_challenges", force: :cascade do |t|
+    t.integer "session_id", null: false
+    t.string "token"
+    t.datetime "opened_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["session_id"], name: "index_temporary_api_key_challenges_on_session_id", unique: true
+    t.index ["token"], name: "index_temporary_api_key_challenges_on_token", unique: true
+  end
+
   create_table "temporary_totp_challenges", force: :cascade do |t|
     t.integer "session_id", null: false
     t.string "secret", null: false
@@ -136,6 +146,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_02_010000) do
   add_foreign_key "game_challenges", "sessions"
   add_foreign_key "recovery_codes", "users"
   add_foreign_key "sessions", "users"
+  add_foreign_key "temporary_api_key_challenges", "sessions"
   add_foreign_key "temporary_totp_challenges", "sessions"
   add_foreign_key "webauthn_credentials", "users"
 end

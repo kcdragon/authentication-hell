@@ -57,6 +57,10 @@ Rails.application.routes.draw do
     resources :certificates, only: :show, param: :token
   end
 
+  namespace :api do
+    post "bridge" => "bridge#create", as: :bridge
+  end
+
   namespace :games do
     get  "totp/status"   => "totp_challenge#status",   as: :totp_status
     post "totp/start"    => "totp_challenge#start",    as: :totp_start
@@ -75,6 +79,10 @@ Rails.application.routes.draw do
     post "level_totp/start"    => "level_totp_challenge#start",    as: :level_totp_start
     post "level_totp/register" => "level_totp_challenge#register", as: :level_totp_register
     post "level_totp/submit"   => "level_totp_challenge#submit",   as: :level_totp_submit
+
+    get  "level_api_key/status" => "level_api_key_challenge#status", as: :level_api_key_status
+    post "level_api_key/start"  => "level_api_key_challenge#start",  as: :level_api_key_start
+    post "level_api_key/create" => "level_api_key_challenge#create", as: :level_api_key_create
 
     post "levels/complete" => "levels#complete", as: :levels_complete
     post "levels/playing"  => "levels#playing",  as: :levels_playing
