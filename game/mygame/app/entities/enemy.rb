@@ -4,8 +4,8 @@ class Enemy
   PATROL_RANGE = 220
   SAFE_GAP = PATROL_RANGE + WIDTH + 64
 
-  attr_accessor :x, :y, :w, :h, :alive, :auth, :r, :g, :b,
-                :vx, :patrol_min_x, :patrol_max_x
+  attr_reader :x, :y, :w, :h, :auth, :vx, :patrol_min_x, :patrol_max_x
+  attr_accessor :alive
 
   def initialize(x:, level:)
     @x = x

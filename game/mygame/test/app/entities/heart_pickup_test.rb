@@ -9,7 +9,7 @@ class HeartPickupTest < Minitest::Test
 
   def test_on_collision_with_the_player_heals_one_heart_and_retires
     player = Player.new
-    player.hearts = 1
+    player.instance_variable_set(:@hearts, 1)
     heart = HeartPickup.new(x: player.x, y: player.y)
     heart.on_collision(player, build_args(player: player))
     assert_equal 2, player.hearts

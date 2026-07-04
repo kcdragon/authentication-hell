@@ -1,36 +1,16 @@
 class LoadingScene
-  def initialize(args)
+  def initialize(args, game)
     @args = args
+    @game = game
   end
 
-  def tick
-    poll_start_request
-    Handlers.caption_input(@args)
+  def draw
     Ui::Background.new(@args).draw
-    Ui::ControlBar.new(@args).draw
+    Ui::ControlBar.new(@args, @game).draw
     draw_loading
   end
 
   private
-
-  def poll_start_request
-    args = @args
-    if !args.state.start_request
-      args.state.start_request = DR.http_get(Network::Start.url(args))
-    end
-
-    return unless args.state.start_request[:complete]
-
-    request = args.state.start_request
-    if request[:http_response_code] == 200
-      data = DR.parse_json(request[:response_data])
-      args.state.start_level = data["start_level"] if data && data["start_level"]
-    end
-    args.state.level = Level.build(args.state.start_level || 0)
-    # A plain marker replaces the non-serializable response so DragonRuby's per-tick
-    # state export doesn't choke on it.
-    args.state.start_request = :done
-  end
 
   def draw_loading
     args = @args

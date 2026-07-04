@@ -7,6 +7,10 @@ class PlayerTest < Minitest::Test
     @player = Player.new
   end
 
+  def move(args)
+    @player.update(args, args.state.level)
+  end
+
   def test_starts_with_full_hearts_grounded_and_facing_camera
     assert_equal Player::MAX_HEARTS, @player.hearts
     assert_equal :south, @player.facing
@@ -25,14 +29,14 @@ class PlayerTest < Minitest::Test
 
   def test_moves_right_and_faces_east
     start_x = @player.x
-    @player.update(build_args(right: true))
+    move(build_args(right: true))
     assert_equal start_x + Player::MOVE_SPEED, @player.x
     assert_equal :east, @player.facing
   end
 
   def test_moves_left_and_faces_west
     start_x = @player.x
-    @player.update(build_args(left: true))
+    move(build_args(left: true))
     assert_equal start_x - Player::MOVE_SPEED, @player.x
     assert_equal :west, @player.facing
   end
@@ -40,57 +44,57 @@ class PlayerTest < Minitest::Test
   def test_crawls_while_buffering_then_recovers
     @player.slow(build_args(tick_count: 0))
     start_x = @player.x
-    @player.update(build_args(right: true, tick_count: 0))
+    move(build_args(right: true, tick_count: 0))
     assert_equal start_x + Player::SLOW_MOVE_SPEED, @player.x, "moves at crawl speed while lagged"
 
     after = @player.x
-    @player.update(build_args(right: true, tick_count: Player::SLOW_TICKS))
+    move(build_args(right: true, tick_count: Player::SLOW_TICKS))
     assert_equal after + Player::MOVE_SPEED, @player.x, "back to full speed once the lag expires"
   end
 
   def test_idle_faces_south
-    @player.update(build_args)
+    move(build_args)
     assert_equal :south, @player.facing
   end
 
   def test_records_the_first_movement
-    @player.update(build_args(right: true))
+    move(build_args(right: true))
     assert @player.moved
   end
 
   def test_idle_does_not_record_movement
-    @player.update(build_args)
+    move(build_args)
     refute @player.moved
   end
 
   def test_clamps_to_the_left_world_edge
     @player.x = 2
-    @player.update(build_args(left: true))
+    move(build_args(left: true))
     assert_equal 0, @player.x
   end
 
   def test_clamps_to_the_right_world_edge
     @player.x = WORLD_W - Player::WIDTH - 2
-    @player.update(build_args(right: true))
+    move(build_args(right: true))
     assert_equal WORLD_W - Player::WIDTH, @player.x
   end
 
   def test_clamps_to_the_one_screen_welcome_world
     @player.x = SCREEN_W
-    @player.update(build_args(right: true, level: WelcomeLevel.new))
+    move(build_args(right: true, level: WelcomeLevel.new))
     assert_equal SCREEN_W - Player::WIDTH, @player.x
   end
 
   def test_jumps_off_the_ground
-    @player.update(build_args(space: true))
+    move(build_args(space: true))
     refute @player.grounded
     assert_operator @player.y, :>, GROUND_Y
   end
 
   def test_cannot_launch_a_second_jump_while_airborne
-    @player.update(build_args(space: true))
+    move(build_args(space: true))
     @player.vy = 0
-    @player.update(build_args(space: true))
+    move(build_args(space: true))
     assert_equal(-Player::GRAVITY, @player.vy, "only gravity, no fresh launch")
   end
 
@@ -98,7 +102,7 @@ class PlayerTest < Minitest::Test
     @player.y = GROUND_Y + 5
     @player.vy = -10
     @player.grounded = false
-    @player.update(build_args)
+    move(build_args)
     assert_equal GROUND_Y, @player.y
     assert_equal 0, @player.vy
     assert @player.grounded
@@ -140,7 +144,7 @@ class PlayerTest < Minitest::Test
     @player.y = 280
     @player.vy = 0
     @player.grounded = true
-    @player.update(build_args(down: true, platforms: [ platform ]))
+    move(build_args(down: true, platforms: [ platform ]))
     refute @player.grounded, "pressing down releases the ledge"
     assert_operator @player.y, :<, 280, "and starts falling below it"
   end
@@ -151,7 +155,7 @@ class PlayerTest < Minitest::Test
     @player.y = 280
     @player.vy = 0
     @player.grounded = true
-    @player.update(build_args(s: true, platforms: [ platform ]))
+    move(build_args(s: true, platforms: [ platform ]))
     refute @player.grounded, "S drops just like the down arrow"
     assert_operator @player.y, :<, 280
   end
@@ -161,7 +165,7 @@ class PlayerTest < Minitest::Test
     @player.x = 200
     @player.y = 280
     @player.grounded = true
-    @player.update(build_args(down: true, platforms: [ platform ]))
+    move(build_args(down: true, platforms: [ platform ]))
     @player.on_collision(platform, build_args)
     refute @player.grounded, "the ledge underfoot no longer catches a dropping player"
     assert_operator @player.y, :<, 280
@@ -171,7 +175,7 @@ class PlayerTest < Minitest::Test
     @player.y = GROUND_Y
     @player.vy = 0
     @player.grounded = true
-    @player.update(build_args(down: true))
+    move(build_args(down: true))
     assert @player.grounded, "you can't drop through the world floor"
     assert_equal GROUND_Y, @player.y
   end
@@ -181,8 +185,8 @@ class PlayerTest < Minitest::Test
     @player.x = 200
     @player.y = 280
     @player.grounded = true
-    @player.update(build_args(down: true, platforms: [ platform ]))
-    40.times { @player.update(build_args) }
+    move(build_args(down: true, platforms: [ platform ]))
+    40.times { move(build_args) }
     assert_equal GROUND_Y, @player.y, "settles on the floor once the drop has cleared"
     assert @player.grounded
   end
@@ -194,9 +198,9 @@ class PlayerTest < Minitest::Test
     @player.x = 200
     @player.y = 280
     @player.grounded = true
-    @player.update(build_args(down: true, platforms: [ platform ]))
+    move(build_args(down: true, platforms: [ platform ]))
     @player.bounce
-    @player.update(build_args)
+    move(build_args)
     @player.vy = -10
     @player.y = 275
     descend_onto(platform, prev_y: 285)
@@ -210,7 +214,7 @@ class PlayerTest < Minitest::Test
     @player.y = GROUND_Y + 5
     @player.vy = -10
     @player.grounded = false
-    @player.update(build_args(holes: [ hole ]))
+    move(build_args(holes: [ hole ]))
     refute @player.grounded, "no ground over a gap"
     assert_operator @player.y, :<, GROUND_Y, "keeps falling past the floor line"
   end
@@ -221,7 +225,7 @@ class PlayerTest < Minitest::Test
     @player.y = GROUND_Y + 5
     @player.vy = -10
     @player.grounded = false
-    @player.update(build_args(holes: [ hole ]))
+    move(build_args(holes: [ hole ]))
     assert_equal GROUND_Y, @player.y
     assert @player.grounded
   end
@@ -232,7 +236,7 @@ class PlayerTest < Minitest::Test
     @player.y = -50
     @player.vy = -12
     @player.grounded = false
-    @player.update(build_args(holes: [ hole ], right: true))
+    move(build_args(holes: [ hole ], right: true))
     refute @player.grounded, "a player mid-fall isn't re-grounded by clearing the gap"
     assert_operator @player.y, :<, GROUND_Y
   end
@@ -243,7 +247,7 @@ class PlayerTest < Minitest::Test
     @player.y = GROUND_Y + 5
     @player.vy = -10
     @player.grounded = false
-    @player.update(build_args(holes: [ hole ]))
+    move(build_args(holes: [ hole ]))
     assert @player.grounded, "still supported until 3/4 of the body overhangs the gap"
     assert_equal GROUND_Y, @player.y
   end
@@ -254,7 +258,7 @@ class PlayerTest < Minitest::Test
     @player.y = GROUND_Y + 5
     @player.vy = -10
     @player.grounded = false
-    @player.update(build_args(holes: [ hole ]))
+    move(build_args(holes: [ hole ]))
     assert @player.grounded, "a quarter of the body still has ground under it"
     assert_equal GROUND_Y, @player.y
   end
@@ -317,7 +321,7 @@ class PlayerTest < Minitest::Test
   end
 
   def test_a_fatal_hit_drops_to_zero_hearts_without_locking
-    @player.hearts = 1
+    @player.instance_variable_set(:@hearts, 1)
     enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
     @player.on_collision(enemy, build_args(tick_count: 0))
 
@@ -362,16 +366,16 @@ class PlayerTest < Minitest::Test
   end
 
   def test_locked_player_ignores_movement
-    @player.locked = true
+    @player.lock!(:totp)
     start_x = @player.x
-    @player.update(build_args(right: true))
+    move(build_args(right: true))
     assert_equal start_x, @player.x
   end
 
   def test_game_over_player_ignores_movement
-    @player.game_over = true
+    @player.die!
     start_x = @player.x
-    @player.update(build_args(left: true))
+    move(build_args(left: true))
     assert_equal start_x, @player.x
   end
 

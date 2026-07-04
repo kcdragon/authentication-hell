@@ -5,7 +5,7 @@ class WelcomeLevelTest < Minitest::Test
 
   def setup
     @level = WelcomeLevel.new
-    @args = build_args(player: Player.new)
+    @args = build_args(player: Player.new, level: @level)
   end
 
   def test_starts_mid_screen_not_at_the_world_edge
@@ -28,15 +28,14 @@ class WelcomeLevelTest < Minitest::Test
 
   def test_update_holds_the_enemy_until_the_player_reaches_the_platform
     @level.setup(@args)
-    @args.state.player.reached_platform = false
+    @args.state.player.instance_variable_set(:@reached_platform, false)
     @level.update(@args)
     assert_empty @level.enemies
   end
 
   def test_update_sends_in_a_leftbound_password_enemy_from_the_right_edge
     @level.setup(@args)
-    @args.state.player.reached_platform = true
-    @args.state.camera_x = 0
+    @args.state.player.instance_variable_set(:@reached_platform, true)
     @level.update(@args)
 
     assert_equal 1, @level.enemies.length
@@ -50,7 +49,7 @@ class WelcomeLevelTest < Minitest::Test
 
   def test_update_spawns_the_enemy_only_once
     @level.setup(@args)
-    @args.state.player.reached_platform = true
+    @args.state.player.instance_variable_set(:@reached_platform, true)
     @level.update(@args)
     @level.enemies.first.alive = false
     @level.update(@args)
@@ -65,7 +64,6 @@ class WelcomeLevelTest < Minitest::Test
 
   def test_update_sends_a_rightbound_enemy_in_from_the_left_after_the_heal
     @level.setup(@args)
-    @args.state.camera_x = 0
     heal
     @level.update(@args)
 
@@ -108,7 +106,7 @@ class WelcomeLevelTest < Minitest::Test
     heal
     @level.update(@args)
     @level.enemies.first.alive = false
-    @args.state.player.locked = true
+    @args.state.player.lock!(:password)
     @level.update(@args)
 
     refute @level.complete?
@@ -126,7 +124,7 @@ class WelcomeLevelTest < Minitest::Test
     refute @level.dialogue_ready?(@args)
     assert_nil @level.current_dialogue(@args)
 
-    @args.state.player.moved = true
+    @args.state.player.instance_variable_set(:@moved, true)
     @level.dialogue_ready?(@args) # eligible now — stamps the delay start
     @args.state.tick_count += WelcomeLevel::DIALOGUE_DELAY
     assert @level.dialogue_ready?(@args)
@@ -136,7 +134,7 @@ class WelcomeLevelTest < Minitest::Test
   def test_a_reached_beat_waits_a_short_delay_before_its_card_shows
     @level.setup(@args)
     @level.advance_dialogue
-    @args.state.player.moved = true
+    @args.state.player.instance_variable_set(:@moved, true)
     refute @level.dialogue_ready?(@args), "the card holds back briefly after the milestone"
     assert_nil @level.current_dialogue(@args)
 

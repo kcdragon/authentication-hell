@@ -30,7 +30,7 @@ class TotpLevel < Level
 
   def time_limit = 60
 
-  def setup(args)
+  def setup(_args)
     @holes = []
     @collectables = []
     @enemies = []
@@ -46,9 +46,9 @@ class TotpLevel < Level
   def update(args)
     lt = @totp
     activate_totp(lt) if !lt[:started] && all_pieces_collected?
-    Network::LevelTotp.new(self).poll(args.state.tick_count) unless args.state.player.game_over
+    Network::LevelTotp.new(self).poll(args.state.tick_count) unless game.player.game_over
     read_keypad_presses(args) if lt[:registered] && !lt[:complete]
-    @waves.update(args) unless lt[:complete]
+    @waves.update(args.state.tick_count, game.camera_x) unless lt[:complete]
 
     if lt[:complete]
       @cleared = true
@@ -58,7 +58,7 @@ class TotpLevel < Level
 
   def complete? = @cleared == true
 
-  def next_level = RubyConfLevel.new
+  def next_level = RubyConfLevel.new(game)
 
   def render_world(args, cam)
     @keypad.each { |pad| pad.render(args, cam) }
@@ -72,7 +72,7 @@ class TotpLevel < Level
     else
       [ "#{collected_pieces}/#{QR_PIECE_COUNT} QR code pieces" ]
     end
-    Caption.new(args, lines).draw
+    Caption.new(args, lines, game).draw
   end
 
   def draw_hud(args)
@@ -137,7 +137,7 @@ class TotpLevel < Level
     lt = @totp
     return if lt[:submitting] || lt[:entered].length >= CODE_LENGTH
 
-    pad = key_under(args.state.player, @keypad)
+    pad = key_under(game.player, @keypad)
     return unless pad
 
     pad.press(args.state.tick_count)

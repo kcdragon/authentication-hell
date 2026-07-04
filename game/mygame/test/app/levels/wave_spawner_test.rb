@@ -9,27 +9,27 @@ class WaveSpawnerTest < Minitest::Test
   end
 
   def test_spawns_nothing_before_the_interval
-    @spawner.update(at_tick(0))
-    @spawner.update(at_tick(WaveSpawner::INTERVAL - 1))
+    @spawner.update(0, 0)
+    @spawner.update(WaveSpawner::INTERVAL - 1, 0)
 
     assert_empty @level.enemies
   end
 
   def test_spawns_one_enemy_per_interval
-    @spawner.update(at_tick(0))
-    @spawner.update(at_tick(WaveSpawner::INTERVAL))
+    @spawner.update(0, 0)
+    @spawner.update(WaveSpawner::INTERVAL, 0)
 
     assert_equal 1, @level.enemies.length
   end
 
   def test_stops_spawning_at_the_alive_cap
-    12.times { |i| @spawner.update(at_tick(i * WaveSpawner::INTERVAL)) }
+    12.times { |i| @spawner.update(i * WaveSpawner::INTERVAL, 0) }
 
     assert_equal WaveSpawner::CAP, @level.enemies.count(&:alive)
   end
 
   def test_cycles_through_the_enemy_kinds_in_order
-    5.times { |i| @spawner.update(at_tick(i * WaveSpawner::INTERVAL)) }
+    5.times { |i| @spawner.update(i * WaveSpawner::INTERVAL, 0) }
 
     assert_equal WaveSpawner::KINDS, @level.enemies.map(&:class)
   end
@@ -44,7 +44,7 @@ class WaveSpawnerTest < Minitest::Test
 
   def test_second_wave_flanks_from_the_left_once_the_camera_has_moved
     spawn_one
-    @spawner.update(at_tick(WaveSpawner::INTERVAL * 2, camera_x: 1000))
+    @spawner.update(WaveSpawner::INTERVAL * 2, 1000)
 
     enemy = @level.enemies.last
     assert_equal 1000 - Enemy::WIDTH, enemy.x
@@ -53,7 +53,7 @@ class WaveSpawnerTest < Minitest::Test
 
   def test_second_wave_holds_the_right_edge_while_the_camera_sits_at_the_start
     spawn_one
-    @spawner.update(at_tick(WaveSpawner::INTERVAL * 2))
+    @spawner.update(WaveSpawner::INTERVAL * 2, 0)
 
     enemy = @level.enemies.last
     assert_equal SCREEN_W, enemy.x
@@ -62,8 +62,8 @@ class WaveSpawnerTest < Minitest::Test
 
   def test_right_edge_spawns_clamp_to_the_world_edge
     cam = @level.world_w - SCREEN_W
-    @spawner.update(at_tick(0, camera_x: cam))
-    @spawner.update(at_tick(WaveSpawner::INTERVAL, camera_x: cam))
+    @spawner.update(0, cam)
+    @spawner.update(WaveSpawner::INTERVAL, cam)
 
     assert_equal @level.world_w - Enemy::WIDTH, @level.enemies.first.x
   end
@@ -71,11 +71,7 @@ class WaveSpawnerTest < Minitest::Test
   private
 
   def spawn_one
-    @spawner.update(at_tick(0))
-    @spawner.update(at_tick(WaveSpawner::INTERVAL))
-  end
-
-  def at_tick(tick, camera_x: 0)
-    build_args(level: @level, tick_count: tick, camera_x: camera_x)
+    @spawner.update(0, 0)
+    @spawner.update(WaveSpawner::INTERVAL, 0)
   end
 end

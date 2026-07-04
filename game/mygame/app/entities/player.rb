@@ -27,10 +27,9 @@ class Player
   SKIN = [ 222, 184, 135 ]
   HAIR = [ 74, 52, 36 ]
 
-  attr_accessor :x, :y, :w, :h, :vy, :grounded, :facing,
-                :locked, :colliding, :lock_confirmed, :pending_challenge,
-                :hearts, :game_over, :moved, :blink_until_tick, :slow_until_tick,
-                :reached_platform
+  attr_accessor :x, :y, :w, :h, :vy, :grounded
+  attr_reader :facing, :locked, :lock_confirmed, :pending_challenge,
+              :hearts, :game_over, :moved, :reached_platform
 
   def initialize
     @x = 200
@@ -57,7 +56,7 @@ class Player
     @drop_floor_y = 0
   end
 
-  def update(args)
+  def update(args, level)
     @stomped_this_tick = false
     return if @locked || @game_over
 
@@ -74,7 +73,7 @@ class Player
       @facing = :south
     end
 
-    @x = @x.clamp(0, args.state.level.world_w - WIDTH)
+    @x = @x.clamp(0, level.world_w - WIDTH)
 
     if args.inputs.keyboard.key_down.space && @grounded
       @vy = JUMP_SPEED
@@ -97,7 +96,7 @@ class Player
     @y += @vy
 
     @grounded = false
-    if landing_on_floor?(args)
+    if landing_on_floor?(level)
       @y = GROUND_Y
       @vy = 0
       @grounded = true
@@ -120,6 +119,41 @@ class Player
 
   def heal
     @hearts = [ @hearts + 1, MAX_HEARTS ].min
+  end
+
+  def dead? = @hearts <= 0
+
+  def die!
+    @game_over = true
+  end
+
+  def lock!(challenge)
+    @locked = true
+    @pending_challenge = challenge
+  end
+
+  def confirm_lock!
+    @lock_confirmed = true
+  end
+
+  def unlock!
+    @locked = false
+    @lock_confirmed = false
+    @pending_challenge = nil
+  end
+
+  def fall_into_hole(args, level)
+    @hearts -= 1
+    return if dead?
+
+    cx = @x + @w / 2
+    hole = level.holes.select { |h| h.x <= cx }.max_by(&:x)
+    back = (hole ? hole.x : @x) - HOLE_RESPAWN_BACK
+    @x = back.clamp(0, level.world_w - WIDTH)
+    @y = GROUND_Y
+    @vy = 0
+    @grounded = true
+    hurt(args)
   end
 
   def record_pickup
@@ -200,8 +234,8 @@ class Player
 
   private
 
-  def landing_on_floor?(args)
-    @y <= GROUND_Y && @prev_y >= GROUND_Y && !args.state.level.over_hole?(self)
+  def landing_on_floor?(level)
+    @y <= GROUND_Y && @prev_y >= GROUND_Y && !level.over_hole?(self)
   end
 
   def collide_with_enemy(enemy, args)
@@ -227,9 +261,8 @@ class Player
 
   def take_hit(args, auth)
     @hearts -= 1
-    return if @hearts <= 0
-    @locked = true
-    @pending_challenge = auth
+    return if dead?
+    lock!(auth)
     hurt(args)
   end
 end

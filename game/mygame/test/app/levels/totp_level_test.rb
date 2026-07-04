@@ -162,7 +162,6 @@ class TotpLevelTest < Minitest::Test
   end
 
   def test_draw_captions_the_piece_tally
-    @args.state.captions_on = true
     @level.draw(@args)
 
     tally = "0/#{TotpLevel::QR_PIECE_COUNT} QR code pieces"
@@ -171,7 +170,6 @@ class TotpLevelTest < Minitest::Test
 
   def test_draw_prompts_the_scan_once_assembled
     collect_pieces!
-    @args.state.captions_on = true
     @level.draw(@args)
 
     assert(@args.outputs.labels.any? { |label| label[:text].include?("scan") })
@@ -179,7 +177,6 @@ class TotpLevelTest < Minitest::Test
 
   def test_draw_goes_quiet_once_registered
     register!
-    @args.state.captions_on = true
     @level.draw(@args)
 
     assert_empty @args.outputs.labels

@@ -9,7 +9,7 @@ class RewindPickupTest < Minitest::Test
 
   def test_on_collision_rewinds_the_level_clock_and_retires_without_touching_hearts
     player = Player.new
-    player.hearts = 2
+    player.instance_variable_set(:@hearts, 2)
     level = TotpLevel.new
     level.begin_clock(0)
     forty_seconds_in = 40 * 60

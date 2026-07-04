@@ -30,17 +30,17 @@ class ApiKeyLevel < Level
     ]
   end
 
-  def setup(args)
+  def setup(_args)
     @bridge = Bridge.new(x: CHASM_X - BRIDGE_OVERHANG, span: CHASM_W + 2 * BRIDGE_OVERHANG)
     @holes = PIT_XS.map { |x| Hole.new(x: x, w: Hole::W) } + [ Hole.new(x: CHASM_X, w: CHASM_W) ]
     @platforms = scattered_platforms << @bridge
     @collectables = [ certificate_at_exit ]
-    @enemies = near_enemies(args.state.player.x) + far_enemies
+    @enemies = near_enemies(game.player.x) + far_enemies
     @api = { active: true, started: false, opened: false }
   end
 
   def update(args)
-    Network::LevelApiKey.new(self).poll(args.state.tick_count) unless args.state.player.game_over
+    Network::LevelApiKey.new(self).poll(args.state.tick_count) unless game.player.game_over
     open_bridge if @api[:opened]
     @bridge.update
     @cleared = true if certificate_collected?(args)
@@ -48,7 +48,7 @@ class ApiKeyLevel < Level
 
   def complete? = @cleared == true
 
-  def next_level = TotpLevel.new
+  def next_level = TotpLevel.new(game)
 
   def render_floor(args, cam)
     @bridge&.render(args, cam)
@@ -60,7 +60,7 @@ class ApiKeyLevel < Level
     else
       [ "Bridge retracted — authenticate", "via the API to extend it" ]
     end
-    Caption.new(args, lines).draw
+    Caption.new(args, lines, game).draw
   end
 
   private

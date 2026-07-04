@@ -127,7 +127,6 @@ class RubyConfLevelTest < Minitest::Test
 
   def test_draw_captions_the_ruby_tally
     @level.setup(@args)
-    @args.state.captions_on = true
     @level.draw(@args)
     assert(@args.outputs.labels.any? { |l| l[:text].include?("#{RubyConfLevel::RUBY_COUNT} rubies") })
   end

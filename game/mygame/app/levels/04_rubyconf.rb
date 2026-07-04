@@ -40,7 +40,7 @@ class RubyConfLevel < Level
   end
 
   def update(args)
-    @waves.update(args)
+    @waves.update(args.state.tick_count, game.camera_x)
     spawn_exit_certificate if all_rubies_collected? && !@certificate_spawned
     @cleared = true if certificate_collected?(args)
   end
@@ -57,7 +57,7 @@ class RubyConfLevel < Level
     else
       [ "#{collected_rubies}/#{RUBY_COUNT} rubies" ]
     end
-    Caption.new(args, lines).draw
+    Caption.new(args, lines, game).draw
   end
 
   def all_rubies_collected? = @collectables.none? { |c| c.is_a?(RubyPickup) && c.alive? }
