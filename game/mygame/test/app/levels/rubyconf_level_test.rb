@@ -4,7 +4,7 @@ class RubyConfLevelTest < Minitest::Test
   include GameTest
 
   def setup
-    @level = RubyConfLevel.new
+    @level = RubyConfLevel.new(build_game)
     @args = build_args(player: Player.new, level: @level)
   end
 
@@ -127,7 +127,6 @@ class RubyConfLevelTest < Minitest::Test
 
   def test_draw_captions_the_ruby_tally
     @level.setup(@args)
-    @args.state.captions_on = true
     @level.draw(@args)
     assert(@args.outputs.labels.any? { |l| l[:text].include?("#{RubyConfLevel::RUBY_COUNT} rubies") })
   end
@@ -139,9 +138,6 @@ class RubyConfLevelTest < Minitest::Test
     assert_equal @level.plants.length, plant_paths.grep(/plants/).length
   end
 
-  def test_serialize_names_the_level
-    assert_equal "RubyConfLevel", @level.serialize[:level]
-  end
 
   private
 

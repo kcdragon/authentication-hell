@@ -1,7 +1,5 @@
 class TotpLevel < Level
   attr_reader :totp, :keypad
-  attr_accessor :totp_start_request, :totp_status_request,
-                :totp_submit_request, :totp_next_poll
 
   CODE_LENGTH = 6
   REQUIRED_STREAK = 3
@@ -30,65 +28,58 @@ class TotpLevel < Level
 
   def time_limit = 60
 
-  def setup(args)
+  def setup(_args)
     @holes = []
     @collectables = []
     @enemies = []
     @platforms = []
     build_collection_zone
     build_keypad
-    @totp = { active: false, started: false, registered: false,
-              streak: 0, entered: [], pending_code: nil,
-              submitting: false, complete: false }
+    @totp = TotpChallenge.new
+    @network = Network::LevelTotp.new(@totp)
     @waves = WaveSpawner.new(self)
   end
 
   def update(args)
-    lt = @totp
-    activate_totp(lt) if !lt[:started] && all_pieces_collected?
-    Network::LevelTotp.new(self).poll(args.state.tick_count) unless args.state.player.game_over
-    read_keypad_presses(args) if lt[:registered] && !lt[:complete]
-    @waves.update(args) unless lt[:complete]
+    @totp.activate! if !@totp.started? && all_pieces_collected?
+    @network.poll(args.state.tick_count) unless game.player.game_over
+    read_keypad_presses(args) if @totp.registered? && !@totp.complete?
+    @waves.update(args.state.tick_count, game.camera_x) unless @totp.complete?
 
-    if lt[:complete]
+    if @totp.complete?
       @cleared = true
-      lt[:active] = false
+      @totp.deactivate!
     end
   end
 
   def complete? = @cleared == true
 
-  def next_level = RubyConfLevel.new
+  def next_level = RubyConfLevel.new(game)
 
   def render_world(args, cam)
     @keypad.each { |pad| pad.render(args, cam) }
   end
 
   def draw(args)
-    return if @totp[:registered]
+    return if @totp.registered?
 
     lines = if all_pieces_collected?
       [ "QR code assembled!", "scan the toast with your authenticator →" ]
     else
       [ "#{collected_pieces}/#{QR_PIECE_COUNT} QR code pieces" ]
     end
-    Caption.new(args, lines).draw
+    Caption.new(args, lines, game).draw
   end
 
   def draw_hud(args)
-    lt = @totp
-    return unless lt[:registered]
+    return unless @totp.registered?
 
-    CODE_LENGTH.times { |slot| draw_digit_slot(args, slot, lt[:entered][slot]) }
-    REQUIRED_STREAK.times { |i| draw_streak_pip(args, i, i < lt[:streak].to_i) }
+    CODE_LENGTH.times { |slot| draw_digit_slot(args, slot, @totp.entered[slot]) }
+    REQUIRED_STREAK.times { |i| draw_streak_pip(args, i, i < @totp.streak) }
     draw_pickup_hint(args)
   end
 
   private
-
-  def activate_totp(lt)
-    lt[:active] = true
-  end
 
   def all_pieces_collected? = @collectables.none? { |c| c.is_a?(QrPiece) && c.alive? }
 
@@ -133,38 +124,21 @@ class TotpLevel < Level
 
   def read_keypad_presses(args)
     return unless args.inputs.keyboard.key_down.e
+    return if @totp.submitting? || @totp.entered.length >= CODE_LENGTH
 
-    lt = @totp
-    return if lt[:submitting] || lt[:entered].length >= CODE_LENGTH
-
-    pad = key_under(args.state.player, @keypad)
+    pad = key_under(game.player, @keypad)
     return unless pad
 
     pad.press(args.state.tick_count)
-    lt[:entered] << pad.digit
-    submit_code(lt) if lt[:entered].length == CODE_LENGTH
-  end
-
-  def submit_code(lt)
-    lt[:pending_code] = lt[:entered].join
-    lt[:entered] = []
-    lt[:submitting] = true
+    @totp.enter(pad.digit)
+    @totp.submit! if @totp.entered.length == CODE_LENGTH
   end
 
   # Key rows are closer together than the player is tall, so overlapping keys are
   # decided by the feet: nearest key vertically, ties to the squarest overlap.
   def key_under(player, keypad)
-    keypad.select { |pad| overlaps?(player, pad.hitbox) }
-          .min_by { |pad| [ (pad.y - player.y).abs, -overlap_width(player, pad.hitbox) ] }
-  end
-
-  def overlaps?(player, box)
-    player.x < box[:x] + box[:w] && player.x + player.w > box[:x] &&
-      player.y < box[:y] + box[:h] && player.y + player.h > box[:y]
-  end
-
-  def overlap_width(player, box)
-    [ player.x + player.w, box[:x] + box[:w] ].min - [ player.x, box[:x] ].max
+    keypad.select { |pad| Aabb.overlap?(player, pad) }
+          .min_by { |pad| [ (pad.y - player.y).abs, -Aabb.overlap_width(player, pad) ] }
   end
 
   SLOT_W = 30

@@ -3,8 +3,11 @@ require_relative "../../test_helper"
 class TotpLevelTest < Minitest::Test
   include GameTest
 
+  START_URL = "http://test/games/level_totp/start".freeze
+
   def setup
-    @level = TotpLevel.new
+    DR.reset!
+    @level = TotpLevel.new(build_game)
     @args = build_args(player: Player.new, level: @level)
     @level.setup(@args)
   end
@@ -81,18 +84,18 @@ class TotpLevelTest < Minitest::Test
   def test_setup_starts_with_no_enemies_and_a_dormant_challenge
     assert_empty @level.enemies
     lt = @level.totp
-    refute lt[:active], "the QR only exists once its pieces are collected"
-    refute lt[:registered]
-    assert_equal 0, lt[:streak]
-    assert_equal [], lt[:entered]
+    refute lt.active?, "the QR only exists once its pieces are collected"
+    refute lt.registered?
+    assert_equal 0, lt.streak
+    assert_equal [], lt.entered
   end
 
   def test_totp_stays_dormant_while_pieces_remain
     @level.update(@args)
 
-    refute @level.totp[:active]
-    refute @level.totp[:started]
-    assert_nil @level.totp_start_request, "no start call before the QR is assembled"
+    refute @level.totp.active?
+    refute @level.totp.started?
+    refute_includes DR.urls, START_URL, "no start call before the QR is assembled"
   end
 
   def test_collecting_every_piece_activates_the_totp_challenge
@@ -100,22 +103,22 @@ class TotpLevelTest < Minitest::Test
     @level.update(@args)
 
     lt = @level.totp
-    assert lt[:active]
-    assert lt[:started]
-    refute_nil @level.totp_start_request, "assembling the QR fires the start call"
+    assert lt.active?
+    assert lt.started?
+    assert_includes DR.urls, START_URL, "assembling the QR fires the start call"
   end
 
   def test_completion_does_not_rearm_the_challenge
     register!
-    @level.totp[:complete] = true
+    @level.totp.record_status("complete" => true)
     2.times { @level.update(@args) }
 
-    refute @level.totp[:active]
+    refute @level.totp.active?
   end
 
   def test_keypad_is_inert_until_the_authenticator_is_registered
     press(pad_for(5))
-    assert_empty @level.totp[:entered]
+    assert_empty @level.totp.entered
   end
 
   def test_standing_on_a_key_without_pressing_e_enters_nothing
@@ -124,13 +127,13 @@ class TotpLevelTest < Minitest::Test
     stand_on(pad)
     @level.update(@args)
 
-    assert_empty @level.totp[:entered], "navigation must never type a digit"
+    assert_empty @level.totp.entered, "navigation must never type a digit"
   end
 
   def test_pressing_e_punches_in_the_key_underfoot
     register!
     press(pad_for(7))
-    assert_equal [ 7 ], @level.totp[:entered]
+    assert_equal [ 7 ], @level.totp.entered
   end
 
   def test_six_digits_assemble_a_pending_code_and_clear_the_tray
@@ -138,18 +141,18 @@ class TotpLevelTest < Minitest::Test
     [ 1, 2, 3, 4, 5, 6 ].each { |d| press(pad_for(d)) }
 
     lt = @level.totp
-    assert_equal "123456", lt[:pending_code]
-    assert_equal [], lt[:entered]
-    assert lt[:submitting], "entry freezes until the server answers the submit"
+    assert_equal "123456", lt.pending_code
+    assert_equal [], lt.entered
+    assert lt.submitting?, "entry freezes until the server answers the submit"
   end
 
   def test_completes_once_the_server_reports_the_streak_met
     register!
-    @level.totp[:complete] = true
+    @level.totp.record_status("complete" => true)
     @level.update(@args)
 
     assert @level.complete?
-    refute @level.totp[:active], "stops polling once cleared"
+    refute @level.totp.active?, "stops polling once cleared"
   end
 
   def test_hud_hides_the_keypad_chrome_until_registered
@@ -162,7 +165,6 @@ class TotpLevelTest < Minitest::Test
   end
 
   def test_draw_captions_the_piece_tally
-    @args.state.captions_on = true
     @level.draw(@args)
 
     tally = "0/#{TotpLevel::QR_PIECE_COUNT} QR code pieces"
@@ -171,7 +173,6 @@ class TotpLevelTest < Minitest::Test
 
   def test_draw_prompts_the_scan_once_assembled
     collect_pieces!
-    @args.state.captions_on = true
     @level.draw(@args)
 
     assert(@args.outputs.labels.any? { |label| label[:text].include?("scan") })
@@ -179,7 +180,6 @@ class TotpLevelTest < Minitest::Test
 
   def test_draw_goes_quiet_once_registered
     register!
-    @args.state.captions_on = true
     @level.draw(@args)
 
     assert_empty @args.outputs.labels
@@ -194,9 +194,6 @@ class TotpLevelTest < Minitest::Test
     refute_empty @level.enemies, "enemies harass the hunt before any registration"
   end
 
-  def test_serialize_names_the_level
-    assert_equal "TotpLevel", @level.serialize[:level]
-  end
 
   private
 
@@ -207,7 +204,7 @@ class TotpLevelTest < Minitest::Test
   def register!
     collect_pieces!
     @level.update(@args)
-    @level.totp[:registered] = true
+    @level.totp.record_status("registered" => true)
   end
 
   def pad_for(digit) = @level.keypad.find { |pad| pad.digit == digit }

@@ -9,7 +9,7 @@ class WelcomeLevel < Level
 
   def start_x = 200
 
-  def initialize
+  def initialize(game)
     super
     @combat_spawned = false
     @certificate_dropped = false
@@ -25,20 +25,20 @@ class WelcomeLevel < Level
   end
 
   def update(args)
-    if args.state.player.reached_platform && @enemies.empty? && !@combat_spawned
-      enemy = TutorialEnemy.new(x: args.state.camera_x + SCREEN_W, level: self)
+    if game.player.reached_platform && @enemies.empty? && !@combat_spawned
+      enemy = TutorialEnemy.new(x: game.camera_x + SCREEN_W, level: self)
       enemy.march_left(ENEMY_SPEED)
       @enemies = [ enemy ]
     elsif healed? && !@combat_spawned
-      enemy = PasswordEnemy.new(x: args.state.camera_x - Enemy::WIDTH, level: self)
+      enemy = PasswordEnemy.new(x: game.camera_x - Enemy::WIDTH, level: self)
       enemy.march_right(ENEMY_SPEED, max: world_w)
       @enemies = [ enemy ]
       @combat_spawned = true
     end
 
     if @combat_spawned && @enemies.none?(&:alive) &&
-       !args.state.player.locked && !args.state.player.game_over && !@certificate_dropped
-      x = (args.state.player.x + 180).clamp(0, world_w - Certificate::SIZE)
+       !game.player.locked && !game.player.game_over && !@certificate_dropped
+      x = (game.player.x + 180).clamp(0, world_w - Certificate::SIZE)
       @collectables << Certificate.new(x: x)
       @certificate_dropped = true
     end
@@ -46,14 +46,14 @@ class WelcomeLevel < Level
     @cleared = true if certificate_collected?(args)
   end
 
-  def on_unlock(args)
-    x = (args.state.player.x + 220).clamp(0, world_w - HeartPickup::SIZE)
+  def on_unlock(_args)
+    x = (game.player.x + 220).clamp(0, world_w - HeartPickup::SIZE)
     @collectables << HeartPickup.new(x: x, y: GROUND_Y + HeartPickup::LIFT)
   end
 
   def complete? = @cleared == true
 
-  def next_level = PasswordLevel.new
+  def next_level = PasswordLevel.new(game)
 
   DIALOGUE_DELAY = 36
 
@@ -74,8 +74,8 @@ class WelcomeLevel < Level
 
   def healed? = @collectables.any? { |c| c.is_a?(HeartPickup) && !c.alive? }
 
-  def beats(args)
-    player = args.state.player
+  def beats(_args)
+    player = game.player
     [
       [ true,                                          [ "Move with A / D or arrow keys" ] ],
       [ player.moved,                                  [ "Press Space to jump onto the ledge" ] ],

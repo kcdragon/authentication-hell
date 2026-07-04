@@ -13,17 +13,37 @@ module DR
   class << self
     attr_accessor :last_url
 
-    def http_get(url)
-      @last_url = url
-      { complete: false }
-    end
+    def urls = @urls ||= []
 
-    def http_post(url, _body = nil, _headers = nil)
-      @last_url = url
-      { complete: false }
-    end
+    def requests = @requests ||= {}
+
+    def http_get(url) = record(url)
+
+    def http_post(url, _body = nil, _headers = nil) = record(url)
 
     def parse_json(str) = JSON.parse(str)
+
+    def complete!(url, code: 200, body: "{}")
+      request = requests.fetch(url)
+      request[:complete] = true
+      request[:http_response_code] = code
+      request[:response_data] = body
+      request
+    end
+
+    def reset!
+      @last_url = nil
+      @urls = nil
+      @requests = nil
+    end
+
+    private
+
+    def record(url)
+      @last_url = url
+      urls << url
+      requests[url] = { complete: false }
+    end
   end
 end
 
@@ -33,21 +53,32 @@ module GameTest
   KeyDown = Struct.new(:space, :e, :down, :s)
   Keyboard = Struct.new(:left, :right, :key_down)
   Inputs = Struct.new(:keyboard)
-  State = Struct.new(:camera_x, :player, :level, :tick_count, :captions_on)
+  State = Struct.new(:player, :level, :tick_count)
   Outputs = Struct.new(:sprites, :solids, :labels)
   Args = Struct.new(:inputs, :state, :outputs)
 
-  def enemy_level = @enemy_level ||= Level.new
+  GameStub = Struct.new(:player, :level, :camera_x, :captions_on) do
+    def captions_on? = captions_on
+  end
+
+  def enemy_level = @enemy_level ||= Level.new(build_game)
+
+  def build_game(player: nil, level: nil, camera_x: 0, captions_on: true)
+    GameStub.new(player, level, camera_x, captions_on)
+  end
 
   def build_args(left: false, right: false, e: false,
                  space: false, down: false, s: false, camera_x: 0, platforms: nil, enemies: nil,
-                 collectables: nil, player: nil, level: PasswordLevel.new, tick_count: 0,
-                 holes: nil)
+                 collectables: nil, player: nil, level: nil, tick_count: 0,
+                 holes: nil, captions_on: true)
+    level ||= PasswordLevel.new(build_game)
     seed_level_collections(level, platforms: platforms, enemies: enemies,
                            collectables: collectables, holes: holes)
+    level.instance_variable_set(:@game, build_game(player: player, level: level,
+                                                   camera_x: camera_x, captions_on: captions_on))
     Args.new(
       Inputs.new(Keyboard.new(left, right, KeyDown.new(space, e, down, s))),
-      State.new(camera_x, player, level, tick_count, nil),
+      State.new(player, level, tick_count),
       Outputs.new([], [], [])
     )
   end

@@ -29,15 +29,15 @@ class PasswordLevel < Level
     ]
   end
 
-  def setup(args)
+  def setup(_args)
     @platforms = Platform.scatter
     @holes = Hole.scatter
     @collectables = scatter_chars(@platforms)
-    @enemies = hazard_enemies(args.state.player.x)
+    @enemies = hazard_enemies(game.player.x)
   end
 
   def update(args)
-    validate_password(args) if password_full? && !@certificate_spawned
+    validate_password(args) if password_full? && !certificate_spawned?
     @cleared = true if certificate_collected?(args)
   end
 
@@ -49,7 +49,7 @@ class PasswordLevel < Level
 
   def complete? = @cleared == true
 
-  def next_level = ApiKeyLevel.new
+  def next_level = ApiKeyLevel.new(game)
 
   def draw_hud(args)
     PASSWORD_LENGTH.times { |slot| draw_password_slot(args, slot, collected[slot]) }
@@ -61,7 +61,7 @@ class PasswordLevel < Level
     else
       [ "#{collected_count}/#{PASSWORD_LENGTH} characters" ]
     end
-    Caption.new(args, lines).draw
+    Caption.new(args, lines, game).draw
     draw_validation_error(args) if validation_error_active?(args)
   end
 
@@ -108,11 +108,6 @@ class PasswordLevel < Level
 
   def validate_password(args)
     all_collected? ? spawn_exit_certificate : fail_validation(args)
-  end
-
-  def spawn_exit_certificate
-    @collectables << certificate_at_exit
-    @certificate_spawned = true
   end
 
   def fail_validation(args)

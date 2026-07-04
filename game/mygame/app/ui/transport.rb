@@ -1,15 +1,16 @@
 class Ui::Transport
-  def initialize(args)
+  def initialize(args, game)
     @args = args
+    @game = game
   end
 
   def draw
     bx = PLAY_BUTTON[:x]
     by = PLAY_BUTTON[:y]
-    draw_play_button(bx, by) unless State.intro_active?(@args)
+    draw_play_button(bx, by) unless @game.intro_active?
 
-    limit = @args.state.level.time_limit
-    elapsed = State.progress(@args) * limit
+    limit = @game.level.time_limit
+    elapsed = @game.progress * limit
     @args.outputs.labels << { x: bx + 48, y: by + 26,
                               text: "#{timecode(elapsed)} / #{timecode(limit)}",
                               size_px: 22, font: FONT_MONO,
@@ -28,8 +29,8 @@ class Ui::Transport
 
   def draw_play_button(bx, by)
     @args.outputs.solids << { **PLAY_BUTTON, r: BLUE[0], g: BLUE[1], b: BLUE[2] }
-    playing = @args.state.started && !@args.state.player.game_over &&
-              !@args.state.player.locked && !@args.state.paused
+    playing = @game.started? && !@game.player.game_over &&
+              !@game.player.locked && !@game.paused?
     if playing
       @args.outputs.solids << { x: bx + 11, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
       @args.outputs.solids << { x: bx + 19, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
@@ -41,12 +42,12 @@ class Ui::Transport
   end
 
   def draw_captions(by)
-    cc_ink = @args.state.captions_on ? TS_INK : FAINT_INK
+    cc_ink = @game.captions_on? ? TS_INK : FAINT_INK
     @args.outputs.labels << { x: CC_BUTTON[:x], y: by + 26, text: "CC",
                               size_px: 20, font: FONT_MONO,
                               r: cc_ink[0], g: cc_ink[1], b: cc_ink[2],
                               anchor_x: 0, anchor_y: 1 }
-    if @args.state.captions_on
+    if @game.captions_on?
       @args.outputs.solids << { x: CC_BUTTON[:x], y: by + 6, w: 20, h: 2,
                                 r: BLUE[0], g: BLUE[1], b: BLUE[2] }
     end

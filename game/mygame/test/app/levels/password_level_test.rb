@@ -4,7 +4,7 @@ class PasswordLevelTest < Minitest::Test
   include GameTest
 
   def setup
-    @level = PasswordLevel.new
+    @level = PasswordLevel.new(build_game)
     @args = build_args(player: Player.new, level: @level)
   end
 
@@ -165,7 +165,6 @@ class PasswordLevelTest < Minitest::Test
   end
 
   def test_draw_emits_a_caption_prompt
-    @args.state.captions_on = true
     @level.draw(@args)
     refute_empty @args.outputs.labels
   end
@@ -180,9 +179,6 @@ class PasswordLevelTest < Minitest::Test
     assert(@args.outputs.labels.any? { |l| l[:text] == "INVALID PASSWORD" })
   end
 
-  def test_serialize_names_the_level
-    assert_equal "PasswordLevel", @level.serialize[:level]
-  end
 
   private
 

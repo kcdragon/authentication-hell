@@ -39,10 +39,4 @@ class RubyPickupTest < Minitest::Test
     assert_equal 300, sprite[:x]
     assert_equal "sprites/ui/ruby.png", sprite[:path]
   end
-
-  def test_serialize_describes_the_pickup
-    data = RubyPickup.new(x: 100, y: GROUND_Y).serialize
-    assert_equal 100, data[:x]
-    assert_equal true, data[:alive]
-  end
 end

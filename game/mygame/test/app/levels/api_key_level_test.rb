@@ -3,11 +3,14 @@ require_relative "../../test_helper"
 class ApiKeyLevelTest < Minitest::Test
   include GameTest
 
+  START_URL = "http://test/games/level_api_key/start".freeze
+  STATUS_URL = "http://test/games/level_api_key/status".freeze
+
   def setup
-    @level = ApiKeyLevel.new
+    @level = ApiKeyLevel.new(build_game)
     @args = build_args(player: Player.new, level: @level)
     @level.setup(@args)
-    DR.last_url = nil
+    DR.reset!
   end
 
   def test_number_is_two
@@ -58,40 +61,35 @@ class ApiKeyLevelTest < Minitest::Test
   end
 
   def test_setup_starts_a_fresh_challenge
-    api = @level.api
-    assert api[:active]
-    refute api[:started]
-    refute api[:opened]
+    assert_empty DR.urls, "no request before the first update"
+    refute @level.bridge.extended?
   end
 
   def test_first_update_posts_the_start_request_once
-    @level.api_next_poll = 9999
     @level.update(@args)
-    assert_equal "http://test/games/level_api_key/start", DR.last_url
-    assert @level.api[:started]
+    assert_includes DR.urls, START_URL
 
-    DR.last_url = nil
     @level.update(@args)
-    assert_nil DR.last_url, "start must only fire once"
+    assert_equal 1, DR.urls.count { |url| url == START_URL }, "start must only fire once"
   end
 
   def test_polls_status_while_waiting
     @level.update(@args)
-    @level.api_start_request = nil
-    @args.state.tick_count = 100
-    @level.update(@args)
-    assert_equal "http://test/games/level_api_key/status", DR.last_url
+    assert_includes DR.urls, STATUS_URL
   end
 
   def test_an_opened_status_extends_the_bridge_and_stops_polling
-    @level.api[:opened] = true
+    @level.update(@args)
+    DR.complete!(STATUS_URL, body: '{"opened":true}')
     @level.update(@args)
 
-    refute @level.api[:active], "no need to poll once the bridge is out"
     assert_operator @level.bridge.w, :>, 0
 
+    polls_so_far = DR.urls.count { |url| url == STATUS_URL }
     100.times { @level.update(@args) }
     assert @level.bridge.extended?
+    assert_equal polls_so_far, DR.urls.count { |url| url == STATUS_URL },
+                 "no need to poll once the bridge is out"
   end
 
   def test_completes_when_the_certificate_is_collected
@@ -115,13 +113,9 @@ class ApiKeyLevelTest < Minitest::Test
   end
 
   def test_render_floor_is_safe_before_setup
-    fresh = ApiKeyLevel.new
+    fresh = ApiKeyLevel.new(build_game)
     args = build_args(player: Player.new, level: fresh)
     fresh.render_floor(args, 0)
     assert_empty args.outputs.solids, "the control bar draws during loading, before setup runs"
-  end
-
-  def test_serialize_names_the_level
-    assert_equal "ApiKeyLevel", @level.serialize[:level]
   end
 end

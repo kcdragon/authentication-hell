@@ -49,8 +49,4 @@ class HoleTest < Minitest::Test
     assert_equal 0, bottoms.min, "the pit reaches the bottom of the floor band"
     assert_equal GROUND_Y, tops.max, "and up to the floor line"
   end
-
-  def test_serialize_shape
-    assert_equal({ x: 1000, w: 150 }, Hole.new(x: 1000, w: 150).serialize)
-  end
 end

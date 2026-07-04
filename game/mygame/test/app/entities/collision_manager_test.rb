@@ -112,7 +112,7 @@ class CollisionManagerTest < Minitest::Test
 
   def test_a_heart_pickup_heals_and_retires_when_the_player_reaches_it
     player = Player.new
-    player.hearts = 1
+    player.instance_variable_set(:@hearts, 1)
     heart = HeartPickup.new(x: player.x, y: player.y)
     @manager.add(heart)
     @manager.add(player)

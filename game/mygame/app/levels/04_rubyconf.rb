@@ -40,8 +40,8 @@ class RubyConfLevel < Level
   end
 
   def update(args)
-    @waves.update(args)
-    spawn_exit_certificate if all_rubies_collected? && !@certificate_spawned
+    @waves.update(args.state.tick_count, game.camera_x)
+    spawn_exit_certificate if all_rubies_collected?
     @cleared = true if certificate_collected?(args)
   end
 
@@ -57,7 +57,7 @@ class RubyConfLevel < Level
     else
       [ "#{collected_rubies}/#{RUBY_COUNT} rubies" ]
     end
-    Caption.new(args, lines).draw
+    Caption.new(args, lines, game).draw
   end
 
   def all_rubies_collected? = @collectables.none? { |c| c.is_a?(RubyPickup) && c.alive? }
@@ -129,10 +129,5 @@ class RubyConfLevel < Level
   def hiding_spots(spots, count)
     slice = [ spots.length.fdiv(count).ceil, 1 ].max
     spots.each_slice(slice).map(&:first).first(count)
-  end
-
-  def spawn_exit_certificate
-    @collectables << certificate_at_exit
-    @certificate_spawned = true
   end
 end

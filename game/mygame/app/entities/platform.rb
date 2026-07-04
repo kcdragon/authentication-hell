@@ -56,10 +56,4 @@ class Platform
       cx += ww + 10
     end
   end
-
-  public
-
-  def serialize = { x: @x, y: @y, w: @w, h: @h }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
 end

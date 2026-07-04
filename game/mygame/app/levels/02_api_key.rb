@@ -10,8 +10,7 @@ class ApiKeyLevel < Level
   HAZARD_KINDS = [ TotpEnemy, PasskeyEnemy, BufferingEnemy ]
   HAZARD_PITCH = 1100
 
-  attr_reader :api, :bridge
-  attr_accessor :api_start_request, :api_status_request, :api_next_poll
+  attr_reader :bridge
 
   def number = 2
 
@@ -30,25 +29,28 @@ class ApiKeyLevel < Level
     ]
   end
 
-  def setup(args)
+  def setup(_args)
     @bridge = Bridge.new(x: CHASM_X - BRIDGE_OVERHANG, span: CHASM_W + 2 * BRIDGE_OVERHANG)
     @holes = PIT_XS.map { |x| Hole.new(x: x, w: Hole::W) } + [ Hole.new(x: CHASM_X, w: CHASM_W) ]
     @platforms = scattered_platforms << @bridge
     @collectables = [ certificate_at_exit ]
-    @enemies = near_enemies(args.state.player.x) + far_enemies
-    @api = { active: true, started: false, opened: false }
+    @enemies = near_enemies(game.player.x) + far_enemies
+    @network = Network::LevelApiKey.new(self)
   end
 
   def update(args)
-    Network::LevelApiKey.new(self).poll(args.state.tick_count) unless args.state.player.game_over
-    open_bridge if @api[:opened]
+    @network.poll(args.state.tick_count) unless game.player.game_over
     @bridge.update
     @cleared = true if certificate_collected?(args)
   end
 
+  def open_bridge!
+    @bridge.open!
+  end
+
   def complete? = @cleared == true
 
-  def next_level = TotpLevel.new
+  def next_level = TotpLevel.new(game)
 
   def render_floor(args, cam)
     @bridge&.render(args, cam)
@@ -60,15 +62,10 @@ class ApiKeyLevel < Level
     else
       [ "Bridge retracted — authenticate", "via the API to extend it" ]
     end
-    Caption.new(args, lines).draw
+    Caption.new(args, lines, game).draw
   end
 
   private
-
-  def open_bridge
-    @bridge.open!
-    @api[:active] = false
-  end
 
   def scattered_platforms
     Platform.scatter.reject do |platform|

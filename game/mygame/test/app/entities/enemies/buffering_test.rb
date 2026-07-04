@@ -6,7 +6,8 @@ class BufferingEnemyTest < Minitest::Test
   def test_starts_alive_in_the_loading_grey
     enemy = BufferingEnemy.new(x: 1500, level: enemy_level)
     assert enemy.alive
-    assert_equal [ MUTED[0], MUTED[1], MUTED[2] ], [ enemy.r, enemy.g, enemy.b ]
+    color = %i[@r @g @b].map { |ivar| enemy.instance_variable_get(ivar) }
+    assert_equal [ MUTED[0], MUTED[1], MUTED[2] ], color
   end
 
   def test_slows_the_player_instead_of_re_authing

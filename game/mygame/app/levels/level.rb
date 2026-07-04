@@ -4,17 +4,18 @@ class Level
   HEART_DROP_CHANCE = 0.20
   REWIND_DROP_CHANCE = 0.25
 
-  def self.build(number)
+  def self.build(number, game)
     case number
-    when 1 then PasswordLevel.new
-    when 2 then ApiKeyLevel.new
-    when 3 then TotpLevel.new
-    when 4 then RubyConfLevel.new
-    else WelcomeLevel.new
+    when 1 then PasswordLevel.new(game)
+    when 2 then ApiKeyLevel.new(game)
+    when 3 then TotpLevel.new(game)
+    when 4 then RubyConfLevel.new(game)
+    else WelcomeLevel.new(game)
     end
   end
 
-  def initialize
+  def initialize(game)
+    @game = game
     @enemies = []
     @platforms = []
     @collectables = []
@@ -104,11 +105,17 @@ class Level
 
   def render_floor(_args, _cam) = nil
 
-  def serialize = { level: self.class.name }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
-
   private
+
+  attr_reader :game
+
+  def spawn_exit_certificate
+    return if @certificate_spawned
+    @collectables << certificate_at_exit
+    @certificate_spawned = true
+  end
+
+  def certificate_spawned? = @certificate_spawned == true
 
   def loot_for(enemy)
     roll = rand

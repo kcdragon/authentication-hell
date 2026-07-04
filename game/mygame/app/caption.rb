@@ -1,11 +1,12 @@
 class Caption
-  def initialize(args, lines)
+  def initialize(args, lines, game)
     @args = args
     @lines = lines
+    @game = game
   end
 
   def draw
-    return unless @args.state.captions_on
+    return unless @game.captions_on?
     return if @lines.nil? || @lines.empty?
 
     card_h = CAPTION_PAD * 2 + @lines.length * CAPTION_LINE_H

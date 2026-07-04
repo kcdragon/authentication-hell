@@ -10,19 +10,15 @@ class WaveSpawner
     @last_wave_at = nil
   end
 
-  def update(args)
-    @last_wave_at ||= args.state.tick_count
-    return if args.state.tick_count - @last_wave_at < INTERVAL
+  def update(tick, camera_x)
+    @last_wave_at ||= tick
+    return if tick - @last_wave_at < INTERVAL
     return if @level.enemies.count(&:alive) >= CAP
 
-    @last_wave_at = args.state.tick_count
-    @level.enemies << spawn_at_camera_edge(next_kind, args.state.camera_x || 0)
+    @last_wave_at = tick
+    @level.enemies << spawn_at_camera_edge(next_kind, camera_x)
     @wave_count += 1
   end
-
-  def serialize = { wave_count: @wave_count, last_wave_at: @last_wave_at }
-  def inspect = serialize.to_s
-  def to_s = serialize.to_s
 
   private
 
