@@ -81,7 +81,7 @@ class PlayerTest < Minitest::Test
 
   def test_clamps_to_the_one_screen_welcome_world
     @player.x = SCREEN_W
-    move(build_args(right: true, level: WelcomeLevel.new))
+    move(build_args(right: true, level: WelcomeLevel.new(build_game)))
     assert_equal SCREEN_W - Player::WIDTH, @player.x
   end
 

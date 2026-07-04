@@ -4,7 +4,7 @@ class RubyConfLevelTest < Minitest::Test
   include GameTest
 
   def setup
-    @level = RubyConfLevel.new
+    @level = RubyConfLevel.new(build_game)
     @args = build_args(player: Player.new, level: @level)
   end
 

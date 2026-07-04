@@ -4,7 +4,7 @@ class PasswordLevelTest < Minitest::Test
   include GameTest
 
   def setup
-    @level = PasswordLevel.new
+    @level = PasswordLevel.new(build_game)
     @args = build_args(player: Player.new, level: @level)
   end
 

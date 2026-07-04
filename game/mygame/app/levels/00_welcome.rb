@@ -9,7 +9,7 @@ class WelcomeLevel < Level
 
   def start_x = 200
 
-  def initialize(game = nil)
+  def initialize(game)
     super
     @combat_spawned = false
     @certificate_dropped = false

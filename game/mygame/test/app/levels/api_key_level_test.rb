@@ -7,7 +7,7 @@ class ApiKeyLevelTest < Minitest::Test
   STATUS_URL = "http://test/games/level_api_key/status".freeze
 
   def setup
-    @level = ApiKeyLevel.new
+    @level = ApiKeyLevel.new(build_game)
     @args = build_args(player: Player.new, level: @level)
     @level.setup(@args)
     DR.reset!
@@ -113,7 +113,7 @@ class ApiKeyLevelTest < Minitest::Test
   end
 
   def test_render_floor_is_safe_before_setup
-    fresh = ApiKeyLevel.new
+    fresh = ApiKeyLevel.new(build_game)
     args = build_args(player: Player.new, level: fresh)
     fresh.render_floor(args, 0)
     assert_empty args.outputs.solids, "the control bar draws during loading, before setup runs"

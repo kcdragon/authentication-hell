@@ -4,7 +4,7 @@ class Level
   HEART_DROP_CHANCE = 0.20
   REWIND_DROP_CHANCE = 0.25
 
-  def self.build(number, game = nil)
+  def self.build(number, game)
     case number
     when 1 then PasswordLevel.new(game)
     when 2 then ApiKeyLevel.new(game)
@@ -14,7 +14,7 @@ class Level
     end
   end
 
-  def initialize(game = nil)
+  def initialize(game)
     @game = game
     @enemies = []
     @platforms = []

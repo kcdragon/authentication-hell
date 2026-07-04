@@ -61,7 +61,7 @@ module GameTest
     def captions_on? = captions_on
   end
 
-  def enemy_level = @enemy_level ||= Level.new
+  def enemy_level = @enemy_level ||= Level.new(build_game)
 
   def build_game(player: nil, level: nil, camera_x: 0, captions_on: true)
     GameStub.new(player, level, camera_x, captions_on)
@@ -69,8 +69,9 @@ module GameTest
 
   def build_args(left: false, right: false, e: false,
                  space: false, down: false, s: false, camera_x: 0, platforms: nil, enemies: nil,
-                 collectables: nil, player: nil, level: PasswordLevel.new, tick_count: 0,
+                 collectables: nil, player: nil, level: nil, tick_count: 0,
                  holes: nil, captions_on: true)
+    level ||= PasswordLevel.new(build_game)
     seed_level_collections(level, platforms: platforms, enemies: enemies,
                            collectables: collectables, holes: holes)
     level.instance_variable_set(:@game, build_game(player: player, level: level,

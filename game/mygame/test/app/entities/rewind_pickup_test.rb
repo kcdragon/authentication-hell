@@ -4,13 +4,13 @@ class RewindPickupTest < Minitest::Test
   include GameTest
 
   def test_starts_alive
-    assert RewindPickup.new(x: 100, y: GROUND_Y, level: TotpLevel.new).alive?
+    assert RewindPickup.new(x: 100, y: GROUND_Y, level: TotpLevel.new(build_game)).alive?
   end
 
   def test_on_collision_rewinds_the_level_clock_and_retires_without_touching_hearts
     player = Player.new
     player.instance_variable_set(:@hearts, 2)
-    level = TotpLevel.new
+    level = TotpLevel.new(build_game)
     level.begin_clock(0)
     forty_seconds_in = 40 * 60
     args = build_args(player: player, level: level, tick_count: forty_seconds_in)
@@ -26,7 +26,7 @@ class RewindPickupTest < Minitest::Test
 
   def test_a_retired_rewind_does_not_rewind_again
     player = Player.new
-    level = TotpLevel.new
+    level = TotpLevel.new(build_game)
     level.begin_clock(0)
     forty_seconds_in = 40 * 60
     args = build_args(player: player, level: level, tick_count: forty_seconds_in)
@@ -40,7 +40,7 @@ class RewindPickupTest < Minitest::Test
   end
 
   def test_ignores_a_non_player_collider
-    pickup = RewindPickup.new(x: 100, y: GROUND_Y, level: TotpLevel.new)
+    pickup = RewindPickup.new(x: 100, y: GROUND_Y, level: TotpLevel.new(build_game))
     pickup.on_collision(Object.new, build_args)
     assert pickup.alive?
   end

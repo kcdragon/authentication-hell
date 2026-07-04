@@ -4,7 +4,7 @@ class WaveSpawnerTest < Minitest::Test
   include GameTest
 
   def setup
-    @level = Level.new
+    @level = Level.new(build_game)
     @spawner = WaveSpawner.new(@level)
   end
 

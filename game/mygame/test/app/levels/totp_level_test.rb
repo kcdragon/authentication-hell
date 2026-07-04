@@ -7,7 +7,7 @@ class TotpLevelTest < Minitest::Test
 
   def setup
     DR.reset!
-    @level = TotpLevel.new
+    @level = TotpLevel.new(build_game)
     @args = build_args(player: Player.new, level: @level)
     @level.setup(@args)
   end

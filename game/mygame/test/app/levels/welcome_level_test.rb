@@ -4,7 +4,7 @@ class WelcomeLevelTest < Minitest::Test
   include GameTest
 
   def setup
-    @level = WelcomeLevel.new
+    @level = WelcomeLevel.new(build_game)
     @args = build_args(player: Player.new, level: @level)
   end
 

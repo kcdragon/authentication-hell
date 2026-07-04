@@ -60,7 +60,7 @@ class EnemyTest < Minitest::Test
   end
 
   def test_a_defeated_enemy_drops_loot_into_its_level
-    level = Level.new
+    level = Level.new(build_game)
     drop = HeartPickup.new(x: 0, y: GROUND_Y)
     level.define_singleton_method(:loot_for) { |_e| drop }
     enemy = TotpEnemy.new(x: @player.x, level: level)
@@ -71,7 +71,7 @@ class EnemyTest < Minitest::Test
   end
 
   def test_a_surviving_enemy_drops_no_loot
-    level = Level.new
+    level = Level.new(build_game)
     level.define_singleton_method(:loot_for) { |_e| flunk "no drop unless it dies" }
     @player.hurt(build_args(tick_count: 0))
     enemy = TotpEnemy.new(x: @player.x, level: level)
