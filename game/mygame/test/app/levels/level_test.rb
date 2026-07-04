@@ -6,7 +6,9 @@ class LevelTest < Minitest::Test
   def test_build_maps_numbers_to_their_level_classes
     assert_instance_of WelcomeLevel, Level.build(0)
     assert_instance_of PasswordLevel, Level.build(1)
-    assert_instance_of TotpLevel, Level.build(2)
+    assert_instance_of ApiKeyLevel, Level.build(2)
+    assert_instance_of TotpLevel, Level.build(3)
+    assert_instance_of RubyConfLevel, Level.build(4)
   end
 
   def test_build_falls_back_to_the_welcome_level_for_an_unknown_number
@@ -14,7 +16,7 @@ class LevelTest < Minitest::Test
   end
 
   def test_built_levels_report_their_own_number
-    [ 0, 1, 2 ].each { |n| assert_equal n, Level.build(n).number }
+    [ 0, 1, 2, 3, 4 ].each { |n| assert_equal n, Level.build(n).number }
   end
 
   def hole_level

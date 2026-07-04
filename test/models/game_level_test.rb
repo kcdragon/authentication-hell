@@ -11,21 +11,22 @@ class GameLevelTest < ActiveSupport::TestCase
     assert_nil GameLevel.find(999)
   end
 
-  test "the levels run welcome, password, totp, then the rubyconf bonus" do
+  test "the levels run welcome, password, api keys, totp, then the rubyconf bonus" do
     assert_equal "Password Complexity", GameLevel.find(1).name
     assert_equal "level_1_complete", GameLevel.find(1).achievement_key
-    assert_equal "Time-Based One-Time Passwords", GameLevel.find(2).name
-    assert_equal "RubyConf Field Trip", GameLevel.find(3).name
-    assert_nil GameLevel.find(4)
+    assert_equal "API Keys", GameLevel.find(2).name
+    assert_equal "Time-Based One-Time Passwords", GameLevel.find(3).name
+    assert_equal "RubyConf Field Trip", GameLevel.find(4).name
+    assert_nil GameLevel.find(5)
   end
 
   test "only the rubyconf level is a bonus" do
-    assert GameLevel.find(3).bonus?
-    assert_equal [ 3 ], GameLevel.all.select(&:bonus?).map(&:number)
+    assert GameLevel.find(4).bonus?
+    assert_equal [ 4 ], GameLevel.all.select(&:bonus?).map(&:number)
   end
 
   test "graduation is the last non-bonus level" do
-    assert_equal 2, GameLevel.graduation.number
+    assert_equal 3, GameLevel.graduation.number
   end
 
   test "achievement_key is derived from the level number" do

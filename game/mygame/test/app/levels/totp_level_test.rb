@@ -9,8 +9,8 @@ class TotpLevelTest < Minitest::Test
     @level.setup(@args)
   end
 
-  def test_number_is_two
-    assert_equal 2, @level.number
+  def test_number_is_three
+    assert_equal 3, @level.number
   end
 
   def test_world_is_two_screens_wide

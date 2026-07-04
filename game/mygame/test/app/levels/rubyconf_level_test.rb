@@ -8,8 +8,8 @@ class RubyConfLevelTest < Minitest::Test
     @args = build_args(player: Player.new, level: @level)
   end
 
-  def test_number_is_three
-    assert_equal 3, @level.number
+  def test_number_is_four
+    assert_equal 4, @level.number
   end
 
   def test_presents_as_the_bonus_chapter

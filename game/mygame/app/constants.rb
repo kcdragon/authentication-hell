@@ -21,6 +21,7 @@ GREEN       = [ 22, 163, 74 ]
 RED         = [ 229, 52, 42 ]
 PURPLE      = [ 139, 92, 246 ]
 AMBER       = [ 245, 166, 35 ]
+TEAL        = [ 13, 148, 136 ]
 RUBY        = [ 155, 17, 30 ]
 TS_INK      = [ 233, 224, 203 ] # timestamp ink on the dark control bar
 

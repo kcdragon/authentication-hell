@@ -7,8 +7,9 @@ class Level
   def self.build(number)
     case number
     when 1 then PasswordLevel.new
-    when 2 then TotpLevel.new
-    when 3 then RubyConfLevel.new
+    when 2 then ApiKeyLevel.new
+    when 3 then TotpLevel.new
+    when 4 then RubyConfLevel.new
     else WelcomeLevel.new
     end
   end
@@ -100,6 +101,8 @@ class Level
   def draw_hud(_args) = nil
 
   def render_world(_args, _cam) = nil
+
+  def render_floor(_args, _cam) = nil
 
   def serialize = { level: self.class.name }
   def inspect = serialize.to_s

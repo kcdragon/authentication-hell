@@ -13,7 +13,7 @@ class RubyConfLevel < Level
   PLATFORM_PLANT_INSET = 8
   HOLE_MARGIN = 20
 
-  def number = 3
+  def number = 4
 
   def title = "RubyConf Field Trip"
 
