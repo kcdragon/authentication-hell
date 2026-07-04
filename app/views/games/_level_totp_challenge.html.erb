@@ -1,12 +1,17 @@
 <%# locals: (user:, challenge:, error: nil) %>
 
 <% toast_animation = challenge&.registered? ? "game-challenge-toast-linked" : "game-challenge-toast" %>
-<%= tag.div id: level_totp_challenge_toast_id(user), class: "#{toast_animation} w-[346px] max-w-[90vw] border-[3px] border-ink rounded-[3px] bg-card shadow-brut-lg overflow-hidden pointer-events-auto" do %>
+<%= tag.div id: level_totp_challenge_toast_id(user), class: "#{toast_animation} w-[346px] max-w-[90vw] border-[3px] border-ink rounded-[3px] bg-card shadow-brut-lg overflow-hidden pointer-events-auto", data: { controller: "collapsible" } do %>
   <div class="flex items-center justify-between border-b-[3px] border-ink px-4 py-2.5 bg-totp text-white font-display text-[13px] uppercase tracking-tight">
-    <span>Temporary 2FA</span>
+    <div class="flex items-center gap-2.5">
+      <button type="button" data-action="collapsible#toggle" data-collapsible-target="toggle"
+              aria-label="Collapse" aria-expanded="true"
+              class="ah-badge bg-card text-ink text-[13px] leading-none py-0.5 px-2 shadow-none cursor-pointer">−</button>
+      <span>Temporary 2FA</span>
+    </div>
     <span class="ah-badge bg-card text-ink text-[10px] py-1 shadow-none">TOTP</span>
   </div>
-  <div class="p-4">
+  <div class="p-4" data-collapsible-target="body">
     <% if challenge&.registered? %>
       <p class="font-bold text-base">Authenticator linked ✓</p>
       <p class="ah-hint mt-0.5">
