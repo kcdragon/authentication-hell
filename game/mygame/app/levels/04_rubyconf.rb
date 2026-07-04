@@ -18,7 +18,7 @@ class RubyConfLevel < Level
   WAVE_KINDS = [ TotpEnemy, PasswordEnemy, PasskeyEnemy, BufferingEnemy ]
   ENEMY_SPEED = 3
 
-  def number = 3
+  def number = 4
 
   def title = "RubyConf Field Trip"
 

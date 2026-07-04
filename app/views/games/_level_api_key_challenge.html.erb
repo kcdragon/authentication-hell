@@ -1,0 +1,37 @@
+<%# locals: (user:, challenge:, base_url: nil) %>
+
+<% toast_animation = challenge&.opened? ? "game-challenge-toast-linked" : "game-challenge-toast" %>
+<%= tag.div id: level_api_key_challenge_toast_id(user), class: "#{toast_animation} w-[346px] max-w-[90vw] border-[3px] border-ink rounded-[3px] bg-card shadow-brut-lg overflow-hidden pointer-events-auto" do %>
+  <div class="flex items-center justify-between border-b-[3px] border-ink px-4 py-2.5 bg-api text-white font-display text-[13px] uppercase tracking-tight">
+    <span>API Key</span>
+    <span class="ah-badge bg-card text-ink text-[10px] py-1 shadow-none">BEARER</span>
+  </div>
+  <div class="p-4">
+    <% if challenge&.opened? %>
+      <p class="font-bold text-base">Bridge extended ✓</p>
+      <p class="ah-hint mt-0.5">
+        Your request was authenticated. Cross the chasm and finish the level.
+      </p>
+    <% elsif challenge %>
+      <p class="font-bold text-base">Here's your API key — shown once</p>
+      <p class="ah-hint mt-0.5">
+        Run this from your own terminal to authenticate and extend the bridge.
+      </p>
+
+      <code class="ah-hint mt-3 block text-[11px] break-all" data-api-key="<%= challenge.token %>"><%= challenge.token %></code>
+
+      <pre class="mt-2 border-[2px] border-ink rounded-[3px] bg-paper p-2.5 text-[11px] leading-relaxed whitespace-pre-wrap break-all select-all"><code><%= challenge.curl_command(base_url) %></code></pre>
+    <% else %>
+      <p class="font-bold text-base">This level requires an API key</p>
+      <p class="ah-hint mt-0.5">
+        The bridge ahead only extends for authenticated API requests.
+        Mint a key to get started — it lasts for this run only.
+      </p>
+
+      <%= form_with url: games_level_api_key_create_path, method: :post, authenticity_token: false, class: "mt-3" do |form| %>
+        <%= form.submit "Mint API key",
+              class: "ah-btn text-white cursor-pointer w-full", style: "background: var(--color-api)" %>
+      <% end %>
+    <% end %>
+  </div>
+<% end %>

@@ -32,7 +32,7 @@ end
 # Idempotent — grant_achievement/record_level_completed are no-ops once set.
 leaderboard_players = [
   { username: "ada",      level: 1,   achievements: %w[ passkey_survivor ] },
-  { username: "mike",     level: 2,   achievements: %w[ level_0_complete level_1_complete level_2_complete password_survivor totp_survivor passkey_survivor graduate ] },
+  { username: "mike",     level: 3,   achievements: %w[ level_0_complete level_1_complete level_2_complete level_3_complete password_survivor totp_survivor passkey_survivor graduate ] },
   { username: "grace",    level: 0,   achievements: Achievement.keys },
   { username: "linus",    level: 0,   achievements: %w[ level_0_complete password_survivor totp_survivor passkey_survivor ] },
   { username: "margaret", level: nil, achievements: %w[ password_survivor totp_survivor ] }

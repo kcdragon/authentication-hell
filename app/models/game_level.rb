@@ -14,9 +14,11 @@ class GameLevel
       achievement_description: "Finish the Welcome level and step into the world."),
     new(number: 1, name: "Password Complexity", emoji: "🔑",
       achievement_description: "Collect two of every character class and forge a password."),
-    new(number: 2, name: "Time-Based One-Time Passwords", emoji: "⏱️",
+    new(number: 2, name: "API Keys", emoji: "📡",
+      achievement_description: "Mint an API key and extend the bridge with an authenticated request."),
+    new(number: 3, name: "Time-Based One-Time Passwords", emoji: "⏱️",
       achievement_description: "Link a temporary authenticator and enter three codes in a row."),
-    new(number: 3, name: "RubyConf Field Trip", emoji: "💎", bonus: true,
+    new(number: 4, name: "RubyConf Field Trip", emoji: "💎", bonus: true,
       achievement_description: "Collect every ruby hidden in the RubyConf wildflowers.")
   ].freeze
 
