@@ -12,6 +12,9 @@ class Game
     @booted = false
     @captions_on = true
     @start_level = nil
+    @collision_report = Network::OneShot.new
+    @death_report = Network::OneShot.new
+    @unlock_poller = nil
   end
 
   def tick(args)
@@ -121,8 +124,8 @@ class Game
       if @player.dead?
         end_run
       elsif @player.locked && @player.pending_challenge &&
-            !@player.lock_confirmed && @collision_request.nil?
-        report_collision(@player.pending_challenge)
+            !@player.lock_confirmed && !@collision_report.pending?
+        @collision_report.post(Network.challenge_start_url(@args, @player.pending_challenge))
       end
     end
 
@@ -132,12 +135,8 @@ class Game
 
     end_run if out_of_time?
 
-    if @collision_request && @collision_request[:complete]
-      @collision_request = nil
-      @player.confirm_lock!
-    end
-
-    @death_request = nil if @death_request && @death_request[:complete]
+    @collision_report.update { @player.confirm_lock! }
+    @death_report.update
 
     poll_unlock if @player.locked && @player.lock_confirmed
 
@@ -326,33 +325,16 @@ class Game
   def end_run
     return if @player.game_over
     @player.die!
-    @death_request = Network::Death.start(@args)
-  end
-
-  def report_collision(kind)
-    @collision_request = DR.http_post(
-      start_url(kind),
-      {},
-      [ "Content-Type: application/x-www-form-urlencoded" ]
-    )
+    @death_report.post(Network.death_url(@args))
   end
 
   def poll_unlock
-    if !@status_request
-      if tick_count >= (@next_poll_tick || 0)
-        @status_request = DR.http_get(status_url(@player.pending_challenge))
-      end
-    elsif @status_request[:complete]
-      if @status_request[:http_response_code] == 200
-        data = DR.parse_json(@status_request[:response_data])
-        unlock_player if data && data["locked"] == false
-      end
-      @status_request = nil
-      @next_poll_tick = tick_count + 30
-    end
+    @unlock_poller ||= Network::Poller.new(Network.challenge_status_url(@args, @player.pending_challenge))
+    @unlock_poller.poll(tick_count) { |data| unlock_player if data["locked"] == false }
   end
 
   def unlock_player
+    @unlock_poller = nil
     @player.unlock!
     @level.on_unlock(@args)
   end
@@ -389,11 +371,9 @@ class Game
   def restart_run
     @player = Player.new
     @level = Level.build(@start_level || 0, self)
+    @unlock_poller = nil
     setup_level
     begin_level_intro
     Network::Levels.playing(@args, @level.number)
   end
-
-  def start_url(kind) = "#{Network.base_url(@args)}/games/#{kind}/start"
-  def status_url(kind) = "#{Network.base_url(@args)}/games/#{kind}/status"
 end

@@ -1,7 +1,5 @@
 class TotpLevel < Level
   attr_reader :totp, :keypad
-  attr_accessor :totp_start_request, :totp_status_request,
-                :totp_submit_request, :totp_next_poll
 
   CODE_LENGTH = 6
   REQUIRED_STREAK = 3
@@ -37,22 +35,20 @@ class TotpLevel < Level
     @platforms = []
     build_collection_zone
     build_keypad
-    @totp = { active: false, started: false, registered: false,
-              streak: 0, entered: [], pending_code: nil,
-              submitting: false, complete: false }
+    @totp = TotpChallenge.new
+    @network = Network::LevelTotp.new(@totp)
     @waves = WaveSpawner.new(self)
   end
 
   def update(args)
-    lt = @totp
-    activate_totp(lt) if !lt[:started] && all_pieces_collected?
-    Network::LevelTotp.new(self).poll(args.state.tick_count) unless game.player.game_over
-    read_keypad_presses(args) if lt[:registered] && !lt[:complete]
-    @waves.update(args.state.tick_count, game.camera_x) unless lt[:complete]
+    @totp.activate! if !@totp.started? && all_pieces_collected?
+    @network.poll(args.state.tick_count) unless game.player.game_over
+    read_keypad_presses(args) if @totp.registered? && !@totp.complete?
+    @waves.update(args.state.tick_count, game.camera_x) unless @totp.complete?
 
-    if lt[:complete]
+    if @totp.complete?
       @cleared = true
-      lt[:active] = false
+      @totp.deactivate!
     end
   end
 
@@ -65,7 +61,7 @@ class TotpLevel < Level
   end
 
   def draw(args)
-    return if @totp[:registered]
+    return if @totp.registered?
 
     lines = if all_pieces_collected?
       [ "QR code assembled!", "scan the toast with your authenticator →" ]
@@ -76,19 +72,14 @@ class TotpLevel < Level
   end
 
   def draw_hud(args)
-    lt = @totp
-    return unless lt[:registered]
+    return unless @totp.registered?
 
-    CODE_LENGTH.times { |slot| draw_digit_slot(args, slot, lt[:entered][slot]) }
-    REQUIRED_STREAK.times { |i| draw_streak_pip(args, i, i < lt[:streak].to_i) }
+    CODE_LENGTH.times { |slot| draw_digit_slot(args, slot, @totp.entered[slot]) }
+    REQUIRED_STREAK.times { |i| draw_streak_pip(args, i, i < @totp.streak) }
     draw_pickup_hint(args)
   end
 
   private
-
-  def activate_totp(lt)
-    lt[:active] = true
-  end
 
   def all_pieces_collected? = @collectables.none? { |c| c.is_a?(QrPiece) && c.alive? }
 
@@ -133,22 +124,14 @@ class TotpLevel < Level
 
   def read_keypad_presses(args)
     return unless args.inputs.keyboard.key_down.e
-
-    lt = @totp
-    return if lt[:submitting] || lt[:entered].length >= CODE_LENGTH
+    return if @totp.submitting? || @totp.entered.length >= CODE_LENGTH
 
     pad = key_under(game.player, @keypad)
     return unless pad
 
     pad.press(args.state.tick_count)
-    lt[:entered] << pad.digit
-    submit_code(lt) if lt[:entered].length == CODE_LENGTH
-  end
-
-  def submit_code(lt)
-    lt[:pending_code] = lt[:entered].join
-    lt[:entered] = []
-    lt[:submitting] = true
+    @totp.enter(pad.digit)
+    @totp.submit! if @totp.entered.length == CODE_LENGTH
   end
 
   # Key rows are closer together than the player is tall, so overlapping keys are

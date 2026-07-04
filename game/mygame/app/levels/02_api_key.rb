@@ -10,8 +10,7 @@ class ApiKeyLevel < Level
   HAZARD_KINDS = [ TotpEnemy, PasskeyEnemy, BufferingEnemy ]
   HAZARD_PITCH = 1100
 
-  attr_reader :api, :bridge
-  attr_accessor :api_start_request, :api_status_request, :api_next_poll
+  attr_reader :bridge
 
   def number = 2
 
@@ -36,14 +35,17 @@ class ApiKeyLevel < Level
     @platforms = scattered_platforms << @bridge
     @collectables = [ certificate_at_exit ]
     @enemies = near_enemies(game.player.x) + far_enemies
-    @api = { active: true, started: false, opened: false }
+    @network = Network::LevelApiKey.new(self)
   end
 
   def update(args)
-    Network::LevelApiKey.new(self).poll(args.state.tick_count) unless game.player.game_over
-    open_bridge if @api[:opened]
+    @network.poll(args.state.tick_count) unless game.player.game_over
     @bridge.update
     @cleared = true if certificate_collected?(args)
+  end
+
+  def open_bridge!
+    @bridge.open!
   end
 
   def complete? = @cleared == true
@@ -64,11 +66,6 @@ class ApiKeyLevel < Level
   end
 
   private
-
-  def open_bridge
-    @bridge.open!
-    @api[:active] = false
-  end
 
   def scattered_platforms
     Platform.scatter.reject do |platform|

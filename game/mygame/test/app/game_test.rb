@@ -53,3 +53,41 @@ class GameBootTest < Minitest::Test
     assert game.captions_on?
   end
 end
+
+class GameUnlockTest < Minitest::Test
+  include GameTest
+
+  STATUS_URL = "http://test/games/totp/status".freeze
+
+  def setup
+    DR.reset!
+    @game = Game.new
+    @game.instance_variable_set(:@args, build_args(player: @game.player, level: @game.level))
+    @game.player.lock!(:totp)
+    @game.player.confirm_lock!
+  end
+
+  def test_polls_the_challenge_status_while_locked
+    @game.send(:poll_unlock)
+    assert_includes DR.urls, STATUS_URL
+    assert @game.player.locked, "still locked while the server has not answered"
+  end
+
+  def test_unlocks_the_player_once_the_server_clears_the_lock
+    @game.send(:poll_unlock)
+    DR.complete!(STATUS_URL, body: '{"locked":false}')
+    @game.send(:poll_unlock)
+
+    refute @game.player.locked
+    refute @game.player.lock_confirmed
+    assert_nil @game.player.pending_challenge
+  end
+
+  def test_stays_locked_while_the_server_says_so
+    @game.send(:poll_unlock)
+    DR.complete!(STATUS_URL, body: '{"locked":true}')
+    @game.send(:poll_unlock)
+
+    assert @game.player.locked
+  end
+end

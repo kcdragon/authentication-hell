@@ -13,17 +13,37 @@ module DR
   class << self
     attr_accessor :last_url
 
-    def http_get(url)
-      @last_url = url
-      { complete: false }
-    end
+    def urls = @urls ||= []
 
-    def http_post(url, _body = nil, _headers = nil)
-      @last_url = url
-      { complete: false }
-    end
+    def requests = @requests ||= {}
+
+    def http_get(url) = record(url)
+
+    def http_post(url, _body = nil, _headers = nil) = record(url)
 
     def parse_json(str) = JSON.parse(str)
+
+    def complete!(url, code: 200, body: "{}")
+      request = requests.fetch(url)
+      request[:complete] = true
+      request[:http_response_code] = code
+      request[:response_data] = body
+      request
+    end
+
+    def reset!
+      @last_url = nil
+      @urls = nil
+      @requests = nil
+    end
+
+    private
+
+    def record(url)
+      @last_url = url
+      urls << url
+      requests[url] = { complete: false }
+    end
   end
 end
 

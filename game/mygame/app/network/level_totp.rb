@@ -1,56 +1,37 @@
 class Network::LevelTotp
-  FORM_HEADERS = [ "Content-Type: application/x-www-form-urlencoded" ].freeze
+  POLL_INTERVAL = 30
 
-  def initialize(level)
-    @level = level
+  def initialize(challenge)
+    @challenge = challenge
+    @start = Network::OneShot.new
+    @submit = Network::OneShot.new
+    @status = Network::Poller.new(url("status"), interval: POLL_INTERVAL)
   end
 
   def poll(tick)
-    lt = @level.totp
-    return unless lt && lt[:active]
+    return unless @challenge.active?
 
-    unless lt[:started]
-      @level.totp_start_request = DR.http_post(url("start"), {}, FORM_HEADERS)
-      lt[:started] = true
+    unless @challenge.started?
+      @start.post(url("start"))
+      @challenge.start!
     end
+    @start.update
 
     # Code in the query string, not the body: DR.http_post sends a Hash body as
     # multipart, which Rails won't parse under our urlencoded header.
-    if lt[:pending_code] && !@level.totp_submit_request
-      @level.totp_submit_request =
-        DR.http_post("#{url("submit")}?code=#{lt[:pending_code]}", {}, FORM_HEADERS)
-      lt[:pending_code] = nil
+    if @challenge.pending_code && !@submit.pending?
+      @submit.post("#{url("submit")}?code=#{@challenge.pending_code}")
+      @challenge.code_taken!
     end
-    if @level.totp_submit_request && @level.totp_submit_request[:complete]
-      maybe_complete(@level.totp_submit_request)
-      lt[:submitting] = false
-      @level.totp_submit_request = nil
+    @submit.update do |data|
+      @challenge.record_status(data) if data
+      @challenge.submit_resolved!
     end
 
-    if !@level.totp_status_request
-      if tick >= (@level.totp_next_poll || 0)
-        @level.totp_status_request = DR.http_get(url("status"))
-      end
-    elsif @level.totp_status_request[:complete]
-      maybe_complete(@level.totp_status_request)
-      @level.totp_status_request = nil
-      @level.totp_next_poll = tick + 30
-    end
+    @status.poll(tick) { |data| @challenge.record_status(data) }
   end
 
   private
 
   def url(action) = "#{Network.server_base}/games/level_totp/#{action}"
-
-  def maybe_complete(request)
-    return unless request[:http_response_code] == 200
-
-    data = DR.parse_json(request[:response_data])
-    return unless data
-
-    lt = @level.totp
-    lt[:registered] = data["registered"] if data.key?("registered")
-    lt[:streak] = data["streak"] if data.key?("streak")
-    lt[:complete] = data["complete"] if data.key?("complete")
-  end
 end
