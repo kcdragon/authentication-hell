@@ -13,11 +13,6 @@ class RubyConfLevel < Level
   PLATFORM_PLANT_INSET = 8
   HOLE_MARGIN = 20
 
-  WAVE_INTERVAL = 150
-  WAVE_CAP = 5
-  WAVE_KINDS = [ TotpEnemy, PasswordEnemy, PasskeyEnemy, BufferingEnemy ]
-  ENEMY_SPEED = 3
-
   def number = 4
 
   def title = "RubyConf Field Trip"
@@ -41,12 +36,11 @@ class RubyConfLevel < Level
     @plants = ground_plants + platform_plants
     @collectables = ground_rubies + platform_rubies
     @enemies = []
-    @wave_count = 0
-    @last_wave_at = nil
+    @waves = WaveSpawner.new(self)
   end
 
   def update(args)
-    spawn_waves(args)
+    @waves.update(args)
     spawn_exit_certificate if all_rubies_collected? && !@certificate_spawned
     @cleared = true if certificate_collected?(args)
   end
@@ -135,30 +129,6 @@ class RubyConfLevel < Level
   def hiding_spots(spots, count)
     slice = [ spots.length.fdiv(count).ceil, 1 ].max
     spots.each_slice(slice).map(&:first).first(count)
-  end
-
-  def spawn_waves(args)
-    @last_wave_at ||= args.state.tick_count
-    return if args.state.tick_count - @last_wave_at < WAVE_INTERVAL
-    return if @enemies.count(&:alive) >= WAVE_CAP
-
-    @last_wave_at = args.state.tick_count
-    cam = args.state.camera_x || 0
-    kind = WAVE_KINDS[@wave_count % WAVE_KINDS.length]
-    @enemies << spawn_at_camera_edge(kind, cam)
-    @wave_count += 1
-  end
-
-  def spawn_at_camera_edge(kind, cam)
-    from_left = @wave_count % 2 == 1 && cam > 0
-    if from_left
-      enemy = kind.new(x: cam - Enemy::WIDTH, level: self)
-      enemy.march_right(ENEMY_SPEED, max: world_w)
-    else
-      enemy = kind.new(x: [ cam + SCREEN_W, world_w - Enemy::WIDTH ].min, level: self)
-      enemy.march_left(ENEMY_SPEED)
-    end
-    enemy
   end
 
   def spawn_exit_certificate
