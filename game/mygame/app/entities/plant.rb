@@ -5,8 +5,7 @@ class Plant
     poppy_bush: { path: "sprites/plants/poppy-bush.png", w: 152, h: 140 }
   }.freeze
 
-  # The painterly bases feather out over their last few rows, so a plant set
-  # exactly on a surface reads as hovering; sinking it buries the wispy edge.
+  # Lower the sprites a bit so the plant appears to be on the ground
   ROOT_SINK = 10
 
   attr_reader :x, :y, :w, :h, :path
