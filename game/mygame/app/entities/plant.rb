@@ -1,9 +1,13 @@
 class Plant
   KINDS = {
-    coreopsis: { path: "sprites/plants/coreopsis.png", w: 106, h: 165 },
-    pink_bush: { path: "sprites/plants/pink-bush.png", w: 130, h: 98 },
-    poppy_bush: { path: "sprites/plants/poppy-bush.png", w: 153, h: 140 }
+    coreopsis: { path: "sprites/plants/coreopsis.png", w: 107, h: 165 },
+    pink_bush: { path: "sprites/plants/pink-bush.png", w: 134, h: 98 },
+    poppy_bush: { path: "sprites/plants/poppy-bush.png", w: 152, h: 140 }
   }.freeze
+
+  # The painterly bases feather out over their last few rows, so a plant set
+  # exactly on a surface reads as hovering; sinking it buries the wispy edge.
+  ROOT_SINK = 10
 
   attr_reader :x, :y, :w, :h, :path
 
@@ -17,7 +21,7 @@ class Plant
   end
 
   def render(args, camera_x = 0)
-    args.outputs.sprites << { x: @x - camera_x, y: @y, w: @w, h: @h, path: @path }
+    args.outputs.sprites << { x: @x - camera_x, y: @y - ROOT_SINK, w: @w, h: @h, path: @path }
   end
 
   def serialize = { x: @x, y: @y, w: @w, h: @h, path: @path }

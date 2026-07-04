@@ -12,14 +12,14 @@ class PlantTest < Minitest::Test
     end
   end
 
-  def test_render_draws_on_the_ground_in_camera_space
+  def test_render_sinks_the_feathered_base_into_the_ground_in_camera_space
     plant = Plant.new(x: 700, kind: :coreopsis)
     args = build_args
     plant.render(args, 100)
 
     sprite = args.outputs.sprites.first
     assert_equal 600, sprite[:x]
-    assert_equal GROUND_Y, sprite[:y]
+    assert_equal GROUND_Y - Plant::ROOT_SINK, sprite[:y]
   end
 
   def test_can_root_on_a_platform_top
@@ -27,7 +27,7 @@ class PlantTest < Minitest::Test
     args = build_args
     plant.render(args, 0)
 
-    assert_equal 250, args.outputs.sprites.first[:y]
+    assert_equal 250 - Plant::ROOT_SINK, args.outputs.sprites.first[:y]
   end
 
   def test_scale_shrinks_the_render_size
