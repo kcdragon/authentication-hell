@@ -28,14 +28,14 @@ class Ui::Transport
   private
 
   def draw_play_button(bx, by)
-    @frame.outputs.solids << { **PLAY_BUTTON, r: BLUE[0], g: BLUE[1], b: BLUE[2] }
+    @frame.outputs.sprites << { path: :solid, **PLAY_BUTTON, r: BLUE[0], g: BLUE[1], b: BLUE[2] }
     playing = @game.started? && !@game.player.game_over &&
               !@game.player.locked && !@game.paused?
     if playing
-      @frame.outputs.solids << { x: bx + 11, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
-      @frame.outputs.solids << { x: bx + 19, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+      @frame.outputs.sprites << { path: :solid, x: bx + 11, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+      @frame.outputs.sprites << { path: :solid, x: bx + 19, y: by + 9, w: 4, h: 16, r: PAPER[0], g: PAPER[1], b: PAPER[2] }
     else
-      @frame.outputs.solids << { x: bx + 12, y: by + 9, x2: bx + 12, y2: by + 25,
+      @frame.outputs.sprites << { path: :solid, x: bx + 12, y: by + 9, x2: bx + 12, y2: by + 25,
                                 x3: bx + 26, y3: by + 17,
                                 r: PAPER[0], g: PAPER[1], b: PAPER[2] }
     end
@@ -48,7 +48,7 @@ class Ui::Transport
                               r: cc_ink[0], g: cc_ink[1], b: cc_ink[2],
                               anchor_x: 0, anchor_y: 1 }
     if @game.captions_on?
-      @frame.outputs.solids << { x: CC_BUTTON[:x], y: by + 6, w: 20, h: 2,
+      @frame.outputs.sprites << { path: :solid, x: CC_BUTTON[:x], y: by + 6, w: 20, h: 2,
                                 r: BLUE[0], g: BLUE[1], b: BLUE[2] }
     end
   end

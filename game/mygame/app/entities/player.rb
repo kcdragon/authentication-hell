@@ -192,32 +192,32 @@ class Player
     neck_y  = torso_y + TORSO_H
     head_y  = neck_y + NECK_H
     leg_gap = @w - 2 * LEG_W - 16
-    frame.outputs.solids << { x: sx + 8, y: leg_y, w: LEG_W, h: LEG_H, r: INK[0], g: INK[1], b: INK[2] }
-    frame.outputs.solids << { x: sx + 8 + LEG_W + leg_gap, y: leg_y, w: LEG_W, h: LEG_H,
+    frame.outputs.sprites << { path: :solid, x: sx + 8, y: leg_y, w: LEG_W, h: LEG_H, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.sprites << { path: :solid, x: sx + 8 + LEG_W + leg_gap, y: leg_y, w: LEG_W, h: LEG_H,
                              r: INK[0], g: INK[1], b: INK[2] }
 
     card(frame, sx, torso_y, @w, TORSO_H)
-    frame.outputs.solids << { x: sx + (@w - NECK_W) / 2, y: neck_y, w: NECK_W, h: NECK_H,
+    frame.outputs.sprites << { path: :solid, x: sx + (@w - NECK_W) / 2, y: neck_y, w: NECK_W, h: NECK_H,
                              r: SKIN[0], g: SKIN[1], b: SKIN[2] }
 
     head_x = sx + HEAD_INSET
     head_w = @w - 2 * HEAD_INSET
     card(frame, head_x, head_y, head_w, HEAD_H, SKIN)
 
-    frame.outputs.solids << { x: head_x + BORDER, y: head_y + HEAD_H - BORDER - HAIR_H,
+    frame.outputs.sprites << { path: :solid, x: head_x + BORDER, y: head_y + HEAD_H - BORDER - HAIR_H,
                              w: head_w - 2 * BORDER, h: HAIR_H, r: HAIR[0], g: HAIR[1], b: HAIR[2] }
 
     shift = @facing == :west ? -FACE_SHIFT : (@facing == :east ? FACE_SHIFT : 0)
     eye_cx = sx + @w / 2
     [ eye_cx - EYE_GAP / 2 - EYE, eye_cx + EYE_GAP / 2 ].each do |ex|
-      frame.outputs.solids << { x: ex + shift, y: head_y + 10, w: EYE, h: EYE,
+      frame.outputs.sprites << { path: :solid, x: ex + shift, y: head_y + 10, w: EYE, h: EYE,
                                r: INK[0], g: INK[1], b: INK[2] }
     end
   end
 
   def card(frame, x, y, w, h, fill = INDIGO)
-    frame.outputs.solids << { x: x, y: y, w: w, h: h, r: INK[0], g: INK[1], b: INK[2] }
-    frame.outputs.solids << { x: x + BORDER, y: y + BORDER, w: w - 2 * BORDER, h: h - 2 * BORDER,
+    frame.outputs.sprites << { path: :solid, x: x, y: y, w: w, h: h, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.sprites << { path: :solid, x: x + BORDER, y: y + BORDER, w: w - 2 * BORDER, h: h - 2 * BORDER,
                              r: fill[0], g: fill[1], b: fill[2] }
   end
 

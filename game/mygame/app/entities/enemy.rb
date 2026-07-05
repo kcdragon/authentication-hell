@@ -68,7 +68,7 @@ class Enemy
   def slows? = false
 
   def render(frame, camera_x = 0)
-    frame.outputs.solids << { x: @x - camera_x, y: @y, w: @w, h: @h, r: @r, g: @g, b: @b }
+    frame.outputs.sprites << { path: :solid, x: @x - camera_x, y: @y, w: @w, h: @h, r: @r, g: @g, b: @b }
   end
 
   private

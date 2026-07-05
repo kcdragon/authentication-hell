@@ -1,5 +1,69 @@
+* 7.13
+** [Bugfix] ~DR.write_file~ returns ~true~ instead of ~false~ if file write was successful.
+** [Support] Improved A11y emulation/VoiceOver functionality on MacOS.
+** [Support] MacOS now has release support for VoiceOver (similar to iOS).
+   See sample app: =samples/09_ui_controls/04_accessiblity_for_the_blind=
+
+   Future releases will expand support to other OS'es and include support for game pads.
+** [Support] Additional improvements to frame pacing algorithm to avoid stutter between frames.
+   - Rationale of no delta time (specifically the Decoupled Rendering section): https://medium.com/@tglaiel/how-to-make-your-game-run-at-60fps-24c61210fe75
+   - Cognative overhead with delta time: https://www.youtube.com/watch?v=yGhfUcPjXuE
+** [Support] Added ~DR.platform?(:console|:ps5|:switch|:switch2)~
+   Future releases of DR will have auditing mechanisms in place to ensure your game will
+   have the best chance of passing certification (if/when your game gets approval for release on console).
+** [Support] Improved ~String.wrapped_lines~ to handle multibyte char sets (ie Kanji character set).
+** [Support] ~args.outputs.solids~ and ~primitive_marker: :solid~ has been deprecated.
+   Warning will be shown if ~solids~ is used. Using ~sprites~ with ~path: :solid~ is comprable to
+   the ~solid~ primitive and is many multiples faster to render.
+
+   Instead of:
+
+   #+begin_src ruby
+     args.outputs.solids << {
+       x: 0,
+       y: 0,
+       w: 100,
+       h: 100,
+       r: 255,
+       g: 255,
+       b: 255,
+       a: 128
+     }
+   #+end_src
+
+   Do:
+
+   #+begin_src
+     args.outputs.sprites << {
+       x: 0,
+       y: 0,
+       w: 100,
+       h: 100,
+       path: :solid, # <-- use :solid as the path
+       r: 255,
+       g: 255,
+       b: 255,
+       a: 128
+     }
+   #+end_src
+* 7.12
+** [Support] Improvements to stutter reduction.
+* 7.11
+** [Samples] Added =samples/07_advanced_audio/04_synchronized_audio=
+   Special thanks to [[traviswattigney.com][Travis Wattigney]] [[@traviswattigney][Instagram]]
+   for providing bad ass audio tracks under MIT.
+** [Bugfix] Ensure that initial bits of audio do not cut out when played.
+   The sample =samples/07_advanced_audio/04_synchronized_audio= definitely maybe proves that this is now fixed.
+** [Bugfix] Playback of audio picks up where it left off for audio what was paused, then subsequently unpaused.
+   Ryan is banned from updating mojoAL ever again.
+* 7.10
+** [Support] Added license information to =open-source-licenses.txt= for default font used in DR.
+** [Support] Improved ~args.audio~ requeue behavior of Hash instances that have been previously used.
+** [Support] ~args.audio~ proactively throws an exception if object queued isn't a ~Hash~ (or ~nil~).
+   As opposed to segfaulting within C code when object isn't a ~Hash~
+** [Support] Improved warnings about queueing audio instances that are still in use.
 * 7.9
-** [Bugfix] ~looping~ property is respected objects sent to ~args.audio~.
+** [Bugfix] ~looping~ property is respected on objects sent to ~args.audio~.
 * 7.8
 ** [Pro] [News] Experimental release of new shader capabilities queued for the first week of July.
 ** [Support] Increased max limit of texture entries to 2048.

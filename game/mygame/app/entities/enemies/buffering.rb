@@ -18,7 +18,7 @@ class BufferingEnemy < Enemy
       angle = i * 2 * Math::PI / SEGMENTS
       dist = (i - head) % SEGMENTS
       alpha = 235 - dist * (200 / SEGMENTS)
-      frame.outputs.solids << {
+      frame.outputs.sprites << { path: :solid,
         x: cx + Math.cos(angle) * RADIUS - SEG_W / 2,
         y: cy + Math.sin(angle) * RADIUS - SEG_H / 2,
         w: SEG_W, h: SEG_H,

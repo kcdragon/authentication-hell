@@ -4,11 +4,11 @@ class Ui::PausedOverlay
   end
 
   def draw
-    @frame.outputs.solids << { x: 0, y: BAR_TOP, w: SCREEN_W, h: SCREEN_H - BAR_TOP,
+    @frame.outputs.sprites << { path: :solid, x: 0, y: BAR_TOP, w: SCREEN_W, h: SCREEN_H - BAR_TOP,
                               r: PAPER[0], g: PAPER[1], b: PAPER[2], a: 90 }
     cx = 640
     cy = 440
-    @frame.outputs.solids << { x: cx - 16, y: cy + 26, x2: cx - 16, y2: cy - 26,
+    @frame.outputs.sprites << { path: :solid, x: cx - 16, y: cy + 26, x2: cx - 16, y2: cy - 26,
                               x3: cx + 30, y3: cy,
                               r: INK[0], g: INK[1], b: INK[2] }
     @frame.outputs.labels << { x: cx, y: cy - 64, text: "PAUSED",

@@ -78,8 +78,8 @@ class PasswordLevel < Level
     face = klass ? PasswordCharacter::CLASS_FACE.fetch(klass) : PAPER
     ink = klass ? PasswordCharacter::CLASS_INK.fetch(klass) : FAINT_INK
     x = SLOT_X + index * SLOT_PITCH
-    frame.outputs.solids << { x: x, y: SLOT_Y, w: SLOT_W, h: SLOT_H, r: INK[0], g: INK[1], b: INK[2] }
-    frame.outputs.solids << { x: x + 3, y: SLOT_Y + 3, w: SLOT_W - 6, h: SLOT_H - 6,
+    frame.outputs.sprites << { path: :solid, x: x, y: SLOT_Y, w: SLOT_W, h: SLOT_H, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.sprites << { path: :solid, x: x + 3, y: SLOT_Y + 3, w: SLOT_W - 6, h: SLOT_H - 6,
                              r: face[0], g: face[1], b: face[2] }
     frame.outputs.labels << { x: x + SLOT_W / 2, y: SLOT_Y + SLOT_H / 2 + 1, text: glyph || "·",
                              size_px: 22, font: FONT_MONO_B, r: ink[0], g: ink[1], b: ink[2],
@@ -96,7 +96,7 @@ class PasswordLevel < Level
                              size_px: 30, font: FONT_MONO_B,
                              r: RED[0], g: RED[1], b: RED[2], a: alpha,
                              anchor_x: 0.5, anchor_y: 0.5 }
-    frame.outputs.solids << { x: cx - 150, y: 448, w: 300, h: 4,
+    frame.outputs.sprites << { path: :solid, x: cx - 150, y: 448, w: 300, h: 4,
                              r: RED[0], g: RED[1], b: RED[2], a: alpha }
     frame.outputs.labels << { x: cx, y: 426, text: "need 2 upper · 2 lower · 2 number · 2 symbol — try again",
                              size_px: 16, font: FONT_MONO,

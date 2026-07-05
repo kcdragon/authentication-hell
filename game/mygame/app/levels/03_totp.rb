@@ -150,8 +150,8 @@ class TotpLevel < Level
   def draw_digit_slot(frame, index, digit)
     x = SLOT_X + index * SLOT_PITCH
     face = digit ? PURPLE : PAPER
-    frame.outputs.solids << { x: x, y: SLOT_Y, w: SLOT_W, h: SLOT_H, r: INK[0], g: INK[1], b: INK[2] }
-    frame.outputs.solids << { x: x + 3, y: SLOT_Y + 3, w: SLOT_W - 6, h: SLOT_H - 6,
+    frame.outputs.sprites << { path: :solid, x: x, y: SLOT_Y, w: SLOT_W, h: SLOT_H, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.sprites << { path: :solid, x: x + 3, y: SLOT_Y + 3, w: SLOT_W - 6, h: SLOT_H - 6,
                              r: face[0], g: face[1], b: face[2] }
     frame.outputs.labels << { x: x + SLOT_W / 2, y: SLOT_Y + SLOT_H / 2 + 1, text: (digit&.to_s || "·"),
                              size_px: 20, font: FONT_MONO_B, r: PAPER[0], g: PAPER[1], b: PAPER[2],
@@ -163,9 +163,9 @@ class TotpLevel < Level
   def draw_streak_pip(frame, index, filled)
     x = SLOT_X + index * (PIP + 8)
     y = SLOT_Y - 26
-    frame.outputs.solids << { x: x, y: y, w: PIP, h: PIP, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.sprites << { path: :solid, x: x, y: y, w: PIP, h: PIP, r: INK[0], g: INK[1], b: INK[2] }
     face = filled ? GREEN : PAPER
-    frame.outputs.solids << { x: x + 2, y: y + 2, w: PIP - 4, h: PIP - 4,
+    frame.outputs.sprites << { path: :solid, x: x + 2, y: y + 2, w: PIP - 4, h: PIP - 4,
                              r: face[0], g: face[1], b: face[2] }
   end
 

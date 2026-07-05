@@ -22,8 +22,8 @@ class DigitPad
   def render(frame, camera_x = 0)
     sx = @x - camera_x
     face = flashing?(frame.tick_count) ? GREEN : PURPLE
-    frame.outputs.solids << { x: sx, y: @y, w: @w, h: @h, r: INK[0], g: INK[1], b: INK[2] }
-    frame.outputs.solids << { x: sx + 3, y: @y + 3, w: @w - 6, h: @h - 6,
+    frame.outputs.sprites << { path: :solid, x: sx, y: @y, w: @w, h: @h, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.sprites << { path: :solid, x: sx + 3, y: @y + 3, w: @w - 6, h: @h - 6,
                              r: face[0], g: face[1], b: face[2] }
     frame.outputs.labels << { x: sx + @w / 2, y: @y + @h / 2 + 1, text: @digit.to_s,
                              size_px: 28, font: FONT_MONO_B, r: PAPER[0], g: PAPER[1], b: PAPER[2],

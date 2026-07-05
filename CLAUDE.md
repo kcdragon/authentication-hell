@@ -66,7 +66,7 @@ Design tokens + chrome geometry live in `game/mygame/app/constants.rb` (palette 
 - **Hearts:** `sprites/ui/heart_hardmode.png` / `heart_empty.png` swapped per life.
 - **Fonts** (`game/mygame/fonts/`, ttf): `archivo-black-400`, `space-mono-400`/`-700`, converted from the site's woff2 via fonttools; lowercase-kebab filenames for the case-sensitive WASM lookup; referenced via the label `font:` key.
 
-Future game art must be bare PNGs (IHDR/IDAT/IEND, no ancillary chunks) or it checkerboards in WebGL — see [[reference-dragonruby-png-encoder]]. Solid triangles go on `args.outputs.solids` with `x/y,x2/y2,x3/y3` + `r/g/b`.
+Future game art must be bare PNGs (IHDR/IDAT/IEND, no ancillary chunks) or it checkerboards in WebGL — see [[reference-dragonruby-png-encoder]]. Solid fills (rects and `x/y,x2/y2,x3/y3` triangles) go on `args.outputs.sprites` with `path: :solid` + `r/g/b` — `args.outputs.solids` is deprecated as of engine 7.13.
 
 ## DragonRuby (`game/`)
 

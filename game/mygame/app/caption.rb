@@ -13,11 +13,11 @@ class Caption
     left = SCREEN_W / 2 - CAPTION_W / 2
     bottom = SCREEN_H - CAPTION_MARGIN - card_h
 
-    @frame.outputs.solids << { x: left + 8, y: bottom - 8, w: CAPTION_W, h: card_h,
+    @frame.outputs.sprites << { path: :solid, x: left + 8, y: bottom - 8, w: CAPTION_W, h: card_h,
                               r: INK[0], g: INK[1], b: INK[2] }
-    @frame.outputs.solids << { x: left, y: bottom, w: CAPTION_W, h: card_h,
+    @frame.outputs.sprites << { path: :solid, x: left, y: bottom, w: CAPTION_W, h: card_h,
                               r: INK[0], g: INK[1], b: INK[2] }
-    @frame.outputs.solids << { x: left + 4, y: bottom + 4, w: CAPTION_W - 8, h: card_h - 8,
+    @frame.outputs.sprites << { path: :solid, x: left + 4, y: bottom + 4, w: CAPTION_W - 8, h: card_h - 8,
                               r: CARD[0], g: CARD[1], b: CARD[2] }
 
     top_line_y = bottom + card_h - CAPTION_PAD - CAPTION_LINE_H / 2

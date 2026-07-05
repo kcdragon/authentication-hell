@@ -44,7 +44,7 @@ class QrPieceTest < Minitest::Test
     piece(index: 1, x: 500).render(frame, 200)
 
     backing = frame.outputs.solids.first
-    sprite = frame.outputs.sprites.first
+    sprite = frame.outputs.art_sprites.first
     assert_equal 300 - QrPiece::BORDER, backing[:x]
     assert_equal [ INK[0], INK[1], INK[2] ], [ backing[:r], backing[:g], backing[:b] ]
     assert_equal 300, sprite[:x]
