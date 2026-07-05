@@ -8,8 +8,9 @@ class TotpLevelTest < Minitest::Test
   def setup
     DR.reset!
     @level = TotpLevel.new(build_game)
-    @args = build_args(player: Player.new, level: @level)
-    @level.setup(@args)
+    @player = Player.new
+    @frame = build_frame(player: @player, level: @level)
+    @level.setup(@frame)
   end
 
   def test_number_is_three
@@ -91,7 +92,7 @@ class TotpLevelTest < Minitest::Test
   end
 
   def test_totp_stays_dormant_while_pieces_remain
-    @level.update(@args)
+    @level.update(@frame)
 
     refute @level.totp.active?
     refute @level.totp.started?
@@ -100,7 +101,7 @@ class TotpLevelTest < Minitest::Test
 
   def test_collecting_every_piece_activates_the_totp_challenge
     collect_pieces!
-    @level.update(@args)
+    @level.update(@frame)
 
     lt = @level.totp
     assert lt.active?
@@ -111,7 +112,7 @@ class TotpLevelTest < Minitest::Test
   def test_completion_does_not_rearm_the_challenge
     register!
     @level.totp.record_status("complete" => true)
-    2.times { @level.update(@args) }
+    2.times { @level.update(@frame) }
 
     refute @level.totp.active?
   end
@@ -125,7 +126,7 @@ class TotpLevelTest < Minitest::Test
     register!
     pad = pad_for(5)
     stand_on(pad)
-    @level.update(@args)
+    @level.update(@frame)
 
     assert_empty @level.totp.entered, "navigation must never type a digit"
   end
@@ -149,48 +150,48 @@ class TotpLevelTest < Minitest::Test
   def test_completes_once_the_server_reports_the_streak_met
     register!
     @level.totp.record_status("complete" => true)
-    @level.update(@args)
+    @level.update(@frame)
 
     assert @level.complete?
     refute @level.totp.active?, "stops polling once cleared"
   end
 
   def test_hud_hides_the_keypad_chrome_until_registered
-    @level.draw_hud(@args)
-    assert_empty @args.outputs.solids
+    @level.draw_hud(@frame)
+    assert_empty @frame.outputs.solids
 
     register!
-    @level.draw_hud(@args)
-    refute_empty @args.outputs.solids
+    @level.draw_hud(@frame)
+    refute_empty @frame.outputs.solids
   end
 
   def test_draw_captions_the_piece_tally
-    @level.draw(@args)
+    @level.draw(@frame)
 
     tally = "0/#{TotpLevel::QR_PIECE_COUNT} QR code pieces"
-    assert(@args.outputs.labels.any? { |label| label[:text] == tally })
+    assert(@frame.outputs.labels.any? { |label| label[:text] == tally })
   end
 
   def test_draw_prompts_the_scan_once_assembled
     collect_pieces!
-    @level.draw(@args)
+    @level.draw(@frame)
 
-    assert(@args.outputs.labels.any? { |label| label[:text].include?("scan") })
+    assert(@frame.outputs.labels.any? { |label| label[:text].include?("scan") })
   end
 
   def test_draw_goes_quiet_once_registered
     register!
-    @level.draw(@args)
+    @level.draw(@frame)
 
-    assert_empty @args.outputs.labels
+    assert_empty @frame.outputs.labels
   end
 
   def test_waves_spawn_during_the_collection_phase
-    @level.update(@args)
+    @level.update(@frame)
     assert_empty @level.enemies, "no enemy yet at tick 0"
 
-    @args.state.tick_count += WaveSpawner::INTERVAL
-    @level.update(@args)
+    @frame = build_frame(player: @player, level: @level, tick_count: WaveSpawner::INTERVAL)
+    @level.update(@frame)
     refute_empty @level.enemies, "enemies harass the hunt before any registration"
   end
 
@@ -203,21 +204,21 @@ class TotpLevelTest < Minitest::Test
 
   def register!
     collect_pieces!
-    @level.update(@args)
+    @level.update(@frame)
     @level.totp.record_status("registered" => true)
   end
 
   def pad_for(digit) = @level.keypad.find { |pad| pad.digit == digit }
 
   def stand_on(pad)
-    @args.state.player.x = pad.x
-    @args.state.player.y = pad.y
+    @player.x = pad.x
+    @player.y = pad.y
   end
 
   def press(pad)
     stand_on(pad)
-    @args.inputs.keyboard.key_down.e = true
-    @level.update(@args)
-    @args.inputs.keyboard.key_down.e = false
+    @frame.inputs.keyboard.key_down.e = true
+    @level.update(@frame)
+    @frame.inputs.keyboard.key_down.e = false
   end
 end

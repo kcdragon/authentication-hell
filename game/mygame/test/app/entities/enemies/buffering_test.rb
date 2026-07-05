@@ -35,9 +35,9 @@ class BufferingEnemyTest < Minitest::Test
   end
 
   def test_render_emits_solids_and_no_sprite
-    args = build_args(tick_count: 0)
-    BufferingEnemy.new(x: 1500, level: enemy_level).render(args, 100)
-    assert_equal 0, args.outputs.sprites.length
-    assert_equal BufferingEnemy::SEGMENTS, args.outputs.solids.length
+    frame = build_frame(tick_count: 0)
+    BufferingEnemy.new(x: 1500, level: enemy_level).render(frame, 100)
+    assert_equal 0, frame.outputs.sprites.length
+    assert_equal BufferingEnemy::SEGMENTS, frame.outputs.solids.length
   end
 end

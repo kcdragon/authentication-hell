@@ -13,11 +13,11 @@ class RewindPickupTest < Minitest::Test
     level = TotpLevel.new(build_game)
     level.begin_clock(0)
     forty_seconds_in = 40 * 60
-    args = build_args(player: player, level: level, tick_count: forty_seconds_in)
+    frame = build_frame(player: player, level: level, tick_count: forty_seconds_in)
     before = level.progress(forty_seconds_in)
 
     pickup = RewindPickup.new(x: player.x, y: player.y, level: level)
-    pickup.on_collision(player, args)
+    pickup.on_collision(player, frame)
 
     refute pickup.alive?
     assert_equal 2, player.hearts, "the rewind is a clock effect, not a heal"
@@ -29,19 +29,19 @@ class RewindPickupTest < Minitest::Test
     level = TotpLevel.new(build_game)
     level.begin_clock(0)
     forty_seconds_in = 40 * 60
-    args = build_args(player: player, level: level, tick_count: forty_seconds_in)
+    frame = build_frame(player: player, level: level, tick_count: forty_seconds_in)
 
     pickup = RewindPickup.new(x: player.x, y: player.y, level: level)
-    pickup.on_collision(player, args)
+    pickup.on_collision(player, frame)
     after_first = level.progress(forty_seconds_in)
-    pickup.on_collision(player, args)
+    pickup.on_collision(player, frame)
 
     assert_equal after_first, level.progress(forty_seconds_in)
   end
 
   def test_ignores_a_non_player_collider
     pickup = RewindPickup.new(x: 100, y: GROUND_Y, level: TotpLevel.new(build_game))
-    pickup.on_collision(Object.new, build_args)
+    pickup.on_collision(Object.new, build_frame)
     assert pickup.alive?
   end
 end

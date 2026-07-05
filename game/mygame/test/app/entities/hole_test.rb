@@ -34,18 +34,18 @@ class HoleTest < Minitest::Test
 
   def test_render_emits_solids_and_no_sprites
     hole = Hole.new(x: 1000, w: Hole::W)
-    args = build_args
-    hole.render(args, 0)
-    assert_equal 0, args.outputs.sprites.length
-    assert_operator args.outputs.solids.length, :>, 0
+    frame = build_frame
+    hole.render(frame, 0)
+    assert_equal 0, frame.outputs.sprites.length
+    assert_operator frame.outputs.solids.length, :>, 0
   end
 
   def test_render_cuts_through_the_full_control_bar_floor
     hole = Hole.new(x: 1000, w: Hole::W)
-    args = build_args
-    hole.render(args, 0)
-    bottoms = args.outputs.solids.map { |s| s[:y] }
-    tops = args.outputs.solids.map { |s| s[:y] + s[:h] }
+    frame = build_frame
+    hole.render(frame, 0)
+    bottoms = frame.outputs.solids.map { |s| s[:y] }
+    tops = frame.outputs.solids.map { |s| s[:y] + s[:h] }
     assert_equal 0, bottoms.min, "the pit reaches the bottom of the floor band"
     assert_equal GROUND_Y, tops.max, "and up to the floor line"
   end

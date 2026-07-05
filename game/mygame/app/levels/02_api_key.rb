@@ -20,7 +20,7 @@ class ApiKeyLevel < Level
 
   def time_limit = 300
 
-  def dialogue(_args)
+  def dialogue(_frame)
     [
       [ "The chasm ahead is too wide to jump —",
         "its bridge only extends for authenticated requests" ],
@@ -29,7 +29,7 @@ class ApiKeyLevel < Level
     ]
   end
 
-  def setup(_args)
+  def setup(_frame)
     @bridge = Bridge.new(x: CHASM_X - BRIDGE_OVERHANG, span: CHASM_W + 2 * BRIDGE_OVERHANG)
     @holes = PIT_XS.map { |x| Hole.new(x: x, w: Hole::W) } + [ Hole.new(x: CHASM_X, w: CHASM_W) ]
     @platforms = scattered_platforms << @bridge
@@ -38,10 +38,10 @@ class ApiKeyLevel < Level
     @network = Network::LevelApiKey.new(self)
   end
 
-  def update(args)
-    @network.poll(args.state.tick_count) unless game.player.game_over
+  def update(frame)
+    @network.poll(frame.tick_count) unless game.player.game_over
     @bridge.update
-    @cleared = true if certificate_collected?(args)
+    @cleared = true if certificate_collected?(frame)
   end
 
   def open_bridge!
@@ -52,17 +52,17 @@ class ApiKeyLevel < Level
 
   def next_level = TotpLevel.new(game)
 
-  def render_floor(args, cam)
-    @bridge&.render(args, cam)
+  def render_floor(frame, cam)
+    @bridge&.render(frame, cam)
   end
 
-  def draw(args)
+  def draw(frame)
     lines = if @bridge.extended?
       [ "Bridge extended —", "cross and finish →" ]
     else
       [ "Bridge retracted — authenticate", "via the API to extend it" ]
     end
-    Caption.new(args, lines, game).draw
+    Caption.new(frame, lines, game).draw
   end
 
   private

@@ -51,14 +51,14 @@ class Enemy
     { x: @x, y: @y, w: @w, h: @h }
   end
 
-  def on_collision(other, args)
+  def on_collision(other, frame)
     return unless other.is_a?(Player)
 
     if stompable? && other.stomping?(self)
       die
     elsif slows?
       die
-    elsif !other.invincible?(args)
+    elsif !other.invincible?(frame)
       die
     end
   end
@@ -67,8 +67,8 @@ class Enemy
 
   def slows? = false
 
-  def render(args, camera_x = 0)
-    args.outputs.solids << { x: @x - camera_x, y: @y, w: @w, h: @h, r: @r, g: @g, b: @b }
+  def render(frame, camera_x = 0)
+    frame.outputs.solids << { x: @x - camera_x, y: @y, w: @w, h: @h, r: @r, g: @g, b: @b }
   end
 
   private

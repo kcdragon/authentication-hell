@@ -4,7 +4,7 @@ class PasswordCharacterTest < Minitest::Test
   include GameTest
 
   def setup
-    @args = build_args(player: Player.new)
+    @frame = build_frame(player: Player.new)
   end
 
   def test_carries_a_glyph_from_its_class
@@ -35,7 +35,7 @@ class PasswordCharacterTest < Minitest::Test
 
   def test_on_collision_retires_the_padlock_and_stamps_pickup_order
     char = PasswordCharacter.new(x: 100, klass: :symbol, glyph: "#")
-    char.on_collision(Player.new, @args)
+    char.on_collision(Player.new, @frame)
     refute char.alive?
     assert char.pickup_order
   end
@@ -44,14 +44,14 @@ class PasswordCharacterTest < Minitest::Test
     player = Player.new
     first = PasswordCharacter.new(x: 100, klass: :upper, glyph: "A")
     second = PasswordCharacter.new(x: 200, klass: :digit, glyph: "7")
-    first.on_collision(player, @args)
-    second.on_collision(player, @args)
+    first.on_collision(player, @frame)
+    second.on_collision(player, @frame)
     assert_operator first.pickup_order, :<, second.pickup_order
   end
 
   def test_on_collision_ignores_a_non_player_collider
     char = PasswordCharacter.new(x: 100, klass: :symbol, glyph: "#")
-    char.on_collision(Object.new, @args)
+    char.on_collision(Object.new, @frame)
     assert char.alive?
     assert_nil char.pickup_order
   end

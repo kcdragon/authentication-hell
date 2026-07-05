@@ -15,7 +15,7 @@ class WelcomeLevel < Level
     @certificate_dropped = false
   end
 
-  def setup(_args)
+  def setup(_frame)
     @enemies = []
     @collectables = []
     @holes = []
@@ -24,7 +24,7 @@ class WelcomeLevel < Level
     ]
   end
 
-  def update(args)
+  def update(frame)
     if game.player.reached_platform && @enemies.empty? && !@combat_spawned
       enemy = TutorialEnemy.new(x: game.camera_x + SCREEN_W, level: self)
       enemy.march_left(ENEMY_SPEED)
@@ -43,10 +43,10 @@ class WelcomeLevel < Level
       @certificate_dropped = true
     end
 
-    @cleared = true if certificate_collected?(args)
+    @cleared = true if certificate_collected?(frame)
   end
 
-  def on_unlock(_args)
+  def on_unlock(_frame)
     x = (game.player.x + 220).clamp(0, world_w - HeartPickup::SIZE)
     @collectables << HeartPickup.new(x: x, y: GROUND_Y + HeartPickup::LIFT)
   end
@@ -57,24 +57,24 @@ class WelcomeLevel < Level
 
   DIALOGUE_DELAY = 36
 
-  def dialogue(args) = beats(args).map { |_ready, lines| lines }
+  def dialogue(frame) = beats(frame).map { |_ready, lines| lines }
 
   def dialogue_hides_scene? = false
 
-  def dialogue_ready?(args)
+  def dialogue_ready?(frame)
     i = @dialogue_index.to_i
-    return false unless beats(args)[i]&.first == true
+    return false unless beats(frame)[i]&.first == true
     return true if i.zero?
 
-    (@beat_ready_at ||= {})[i] ||= args.state.tick_count
-    args.state.tick_count - @beat_ready_at[i] >= DIALOGUE_DELAY
+    (@beat_ready_at ||= {})[i] ||= frame.tick_count
+    frame.tick_count - @beat_ready_at[i] >= DIALOGUE_DELAY
   end
 
   private
 
   def healed? = @collectables.any? { |c| c.is_a?(HeartPickup) && !c.alive? }
 
-  def beats(_args)
+  def beats(_frame)
     player = game.player
     [
       [ true,                                          [ "Move with A / D or arrow keys" ] ],

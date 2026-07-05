@@ -21,10 +21,10 @@ class HeartPickup
 
   def collect(player) = player.heal
 
-  def render(args, camera_x = 0)
-    bob = bob_offset(args.state.tick_count)
+  def render(frame, camera_x = 0)
+    bob = bob_offset(frame.tick_count)
     sprite_h = @w * SPRITE_NATIVE_H / SPRITE_NATIVE_W
-    args.outputs.sprites << { x: @x - camera_x, y: @y + bob, w: @w, h: sprite_h,
+    frame.outputs.sprites << { x: @x - camera_x, y: @y + bob, w: @w, h: sprite_h,
                               path: "sprites/ui/heart_hardmode.png" }
   end
 end

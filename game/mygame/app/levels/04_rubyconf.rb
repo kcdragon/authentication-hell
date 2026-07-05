@@ -21,7 +21,7 @@ class RubyConfLevel < Level
 
   def accent = RUBY
 
-  def dialogue(_args)
+  def dialogue(_frame)
     [
       [ "Training complete! You've earned",
         "a field trip to RubyConf" ],
@@ -30,7 +30,7 @@ class RubyConfLevel < Level
     ]
   end
 
-  def setup(_args)
+  def setup(_frame)
     @platforms = Platform.scatter
     @holes = Hole.scatter
     @plants = ground_plants + platform_plants
@@ -39,25 +39,25 @@ class RubyConfLevel < Level
     @waves = WaveSpawner.new(self)
   end
 
-  def update(args)
-    @waves.update(args.state.tick_count, game.camera_x)
+  def update(frame)
+    @waves.update(frame.tick_count, game.camera_x)
     spawn_exit_certificate if all_rubies_collected?
-    @cleared = true if certificate_collected?(args)
+    @cleared = true if certificate_collected?(frame)
   end
 
   def complete? = @cleared == true
 
-  def render_world(args, cam)
-    @plants.each { |plant| plant.render(args, cam) }
+  def render_world(frame, cam)
+    @plants.each { |plant| plant.render(frame, cam) }
   end
 
-  def draw(args)
+  def draw(frame)
     lines = if all_rubies_collected?
       [ "All rubies found —", "head right to finish →" ]
     else
       [ "#{collected_rubies}/#{RUBY_COUNT} rubies" ]
     end
-    Caption.new(args, lines, game).draw
+    Caption.new(frame, lines, game).draw
   end
 
   def all_rubies_collected? = @collectables.none? { |c| c.is_a?(RubyPickup) && c.alive? }

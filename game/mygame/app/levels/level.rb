@@ -22,11 +22,11 @@ class Level
     @holes = []
   end
 
-  def setup(_args) = nil
+  def setup(_frame) = nil
 
-  def update(_args) = nil
+  def update(_frame) = nil
 
-  def on_unlock(_args) = nil
+  def on_unlock(_frame) = nil
 
   def complete? = false
 
@@ -48,7 +48,7 @@ class Level
 
   def certificate_at_exit = Certificate.new(x: world_w - CERTIFICATE_INSET)
 
-  def certificate_collected?(_args)
+  def certificate_collected?(_frame)
     @collectables.any? { |c| c.is_a?(Certificate) && !c.alive? }
   end
 
@@ -83,27 +83,27 @@ class Level
 
   def intro_elapsed(tick) = tick - @intro_at
 
-  def draw(_args) = nil
+  def draw(_frame) = nil
 
-  def dialogue(_args) = []
+  def dialogue(_frame) = []
 
-  def dialogue_ready?(_args) = true
+  def dialogue_ready?(_frame) = true
 
-  def dialogue_remaining?(args) = @dialogue_index.to_i < dialogue(args).length
+  def dialogue_remaining?(frame) = @dialogue_index.to_i < dialogue(frame).length
 
-  def current_dialogue(args)
-    dialogue(args)[@dialogue_index.to_i] if dialogue_remaining?(args) && dialogue_ready?(args)
+  def current_dialogue(frame)
+    dialogue(frame)[@dialogue_index.to_i] if dialogue_remaining?(frame) && dialogue_ready?(frame)
   end
 
   def advance_dialogue = @dialogue_index = @dialogue_index.to_i + 1
 
   def dialogue_hides_scene? = true
 
-  def draw_hud(_args) = nil
+  def draw_hud(_frame) = nil
 
-  def render_world(_args, _cam) = nil
+  def render_world(_frame, _cam) = nil
 
-  def render_floor(_args, _cam) = nil
+  def render_floor(_frame, _cam) = nil
 
   private
 

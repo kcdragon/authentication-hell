@@ -20,10 +20,10 @@ class DigitPadTest < Minitest::Test
 
   def test_renders_two_solids_and_the_digit_label
     pad = DigitPad.new(x: 100, y: 250, digit: 4)
-    args = build_args(tick_count: 0)
-    pad.render(args)
+    frame = build_frame(tick_count: 0)
+    pad.render(frame)
 
-    assert_equal 2, args.outputs.solids.length
-    assert(args.outputs.labels.any? { |l| l[:text] == "4" })
+    assert_equal 2, frame.outputs.solids.length
+    assert(frame.outputs.labels.any? { |l| l[:text] == "4" })
   end
 end

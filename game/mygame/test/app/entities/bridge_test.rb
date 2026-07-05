@@ -33,16 +33,16 @@ class BridgeTest < Minitest::Test
   end
 
   def test_render_marks_the_anchor_stub_while_retracted
-    args = build_args
-    @bridge.render(args)
-    assert_equal 1, args.outputs.solids.length
+    frame = build_frame
+    @bridge.render(frame)
+    assert_equal 1, frame.outputs.solids.length
   end
 
   def test_render_draws_the_deck_once_extending
-    args = build_args
+    frame = build_frame
     @bridge.open!
     @bridge.update
-    @bridge.render(args)
-    assert_equal 3, args.outputs.solids.length, "stub, ink body, and teal deck"
+    @bridge.render(frame)
+    assert_equal 3, frame.outputs.solids.length, "stub, ink body, and teal deck"
   end
 end

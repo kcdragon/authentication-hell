@@ -1,21 +1,21 @@
 class Ui::PausedOverlay
-  def initialize(args)
-    @args = args
+  def initialize(frame)
+    @frame = frame
   end
 
   def draw
-    @args.outputs.solids << { x: 0, y: BAR_TOP, w: SCREEN_W, h: SCREEN_H - BAR_TOP,
+    @frame.outputs.solids << { x: 0, y: BAR_TOP, w: SCREEN_W, h: SCREEN_H - BAR_TOP,
                               r: PAPER[0], g: PAPER[1], b: PAPER[2], a: 90 }
     cx = 640
     cy = 440
-    @args.outputs.solids << { x: cx - 16, y: cy + 26, x2: cx - 16, y2: cy - 26,
+    @frame.outputs.solids << { x: cx - 16, y: cy + 26, x2: cx - 16, y2: cy - 26,
                               x3: cx + 30, y3: cy,
                               r: INK[0], g: INK[1], b: INK[2] }
-    @args.outputs.labels << { x: cx, y: cy - 64, text: "PAUSED",
+    @frame.outputs.labels << { x: cx, y: cy - 64, text: "PAUSED",
                               size_px: 24, font: FONT_MONO_B,
                               r: INK[0], g: INK[1], b: INK[2],
                               anchor_x: 0.5, anchor_y: 0.5 }
-    @args.outputs.labels << { x: cx, y: cy - 96, text: "press play or escape to resume",
+    @frame.outputs.labels << { x: cx, y: cy - 96, text: "press play or escape to resume",
                               size_px: 16, font: FONT_MONO,
                               r: MUTED[0], g: MUTED[1], b: MUTED[2],
                               anchor_x: 0.5, anchor_y: 0.5 }
@@ -23,7 +23,7 @@ class Ui::PausedOverlay
     controls = [ "A / D  or  ← →    move",
                  "Space    jump" ]
     controls.each_with_index do |line, i|
-      @args.outputs.labels << { x: cx, y: cy - 148 - i * 30, text: line,
+      @frame.outputs.labels << { x: cx, y: cy - 148 - i * 30, text: line,
                                 size_px: 16, font: FONT_MONO,
                                 r: MUTED[0], g: MUTED[1], b: MUTED[2],
                                 anchor_x: 0.5, anchor_y: 0.5 }

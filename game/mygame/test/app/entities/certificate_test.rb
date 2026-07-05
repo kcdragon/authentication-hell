@@ -4,7 +4,7 @@ class CertificateTest < Minitest::Test
   include GameTest
 
   def setup
-    @args = build_args(player: Player.new, tick_count: 0)
+    @frame = build_frame(player: Player.new, tick_count: 0)
   end
 
   def test_starts_alive
@@ -19,13 +19,13 @@ class CertificateTest < Minitest::Test
 
   def test_on_collision_retires_the_certificate
     cert = Certificate.new(x: 100)
-    cert.on_collision(Player.new, @args)
+    cert.on_collision(Player.new, @frame)
     refute cert.alive?
   end
 
   def test_on_collision_ignores_a_non_player_collider
     cert = Certificate.new(x: 100)
-    cert.on_collision(Object.new, @args)
+    cert.on_collision(Object.new, @frame)
     assert cert.alive?
   end
 
@@ -34,8 +34,8 @@ class CertificateTest < Minitest::Test
   end
 
   def test_render_draws_the_certificate_sprite
-    Certificate.new(x: 100).render(@args)
-    assert_equal 1, @args.outputs.sprites.length
-    assert_equal "sprites/ui/certificate.png", @args.outputs.sprites.first[:path]
+    Certificate.new(x: 100).render(@frame)
+    assert_equal 1, @frame.outputs.sprites.length
+    assert_equal "sprites/ui/certificate.png", @frame.outputs.sprites.first[:path]
   end
 end

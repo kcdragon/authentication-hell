@@ -1,6 +1,3 @@
-# Plain-Ruby (MRI + Minitest) harness: the DragonRuby engine binary is gitignored
-# and macOS-only, so these tests never load it — the entities' only engine
-# touchpoint is the duck-typed `args`, stubbed below.
 require "minitest/autorun"
 require "json"
 
@@ -53,9 +50,7 @@ module GameTest
   KeyDown = Struct.new(:space, :e, :down, :s)
   Keyboard = Struct.new(:left, :right, :key_down)
   Inputs = Struct.new(:keyboard)
-  State = Struct.new(:player, :level, :tick_count)
   Outputs = Struct.new(:sprites, :solids, :labels)
-  Args = Struct.new(:inputs, :state, :outputs)
 
   GameStub = Struct.new(:player, :level, :camera_x, :captions_on) do
     def captions_on? = captions_on
@@ -67,19 +62,24 @@ module GameTest
     GameStub.new(player, level, camera_x, captions_on)
   end
 
-  def build_args(left: false, right: false, e: false,
-                 space: false, down: false, s: false, camera_x: 0, platforms: nil, enemies: nil,
-                 collectables: nil, player: nil, level: nil, tick_count: 0,
-                 holes: nil, captions_on: true)
+  # The level build_frame last wired up, for entity code that needs it passed
+  # separately now that the frame no longer carries game state.
+  def built_level = @built_level
+
+  def build_frame(left: false, right: false, e: false,
+                  space: false, down: false, s: false, camera_x: 0, platforms: nil, enemies: nil,
+                  collectables: nil, player: nil, level: nil, tick_count: 0,
+                  holes: nil, captions_on: true)
     level ||= PasswordLevel.new(build_game)
     seed_level_collections(level, platforms: platforms, enemies: enemies,
                            collectables: collectables, holes: holes)
     level.instance_variable_set(:@game, build_game(player: player, level: level,
                                                    camera_x: camera_x, captions_on: captions_on))
-    Args.new(
+    @built_level = level
+    Frame.new(
       Inputs.new(Keyboard.new(left, right, KeyDown.new(space, e, down, s))),
-      State.new(player, level, tick_count),
-      Outputs.new([], [], [])
+      Outputs.new([], [], []),
+      tick_count
     )
   end
 
