@@ -28,7 +28,7 @@ class TotpLevel < Level
 
   def time_limit = 60
 
-  def setup(_args)
+  def setup(_frame)
     @holes = []
     @collectables = []
     @enemies = []
@@ -40,11 +40,11 @@ class TotpLevel < Level
     @waves = WaveSpawner.new(self)
   end
 
-  def update(args)
+  def update(frame)
     @totp.activate! if !@totp.started? && all_pieces_collected?
-    @network.poll(args.state.tick_count) unless game.player.game_over
-    read_keypad_presses(args) if @totp.registered? && !@totp.complete?
-    @waves.update(args.state.tick_count, game.camera_x) unless @totp.complete?
+    @network.poll(frame.tick_count) unless game.player.game_over
+    read_keypad_presses(frame) if @totp.registered? && !@totp.complete?
+    @waves.update(frame.tick_count, game.camera_x) unless @totp.complete?
 
     if @totp.complete?
       @cleared = true
@@ -56,11 +56,11 @@ class TotpLevel < Level
 
   def next_level = RubyConfLevel.new(game)
 
-  def render_world(args, cam)
-    @keypad.each { |pad| pad.render(args, cam) }
+  def render_world(frame, cam)
+    @keypad.each { |pad| pad.render(frame, cam) }
   end
 
-  def draw(args)
+  def draw(frame)
     return if @totp.registered?
 
     lines = if all_pieces_collected?
@@ -68,15 +68,15 @@ class TotpLevel < Level
     else
       [ "#{collected_pieces}/#{QR_PIECE_COUNT} QR code pieces" ]
     end
-    Caption.new(args, lines, game).draw
+    Caption.new(frame, lines, game).draw
   end
 
-  def draw_hud(args)
+  def draw_hud(frame)
     return unless @totp.registered?
 
-    CODE_LENGTH.times { |slot| draw_digit_slot(args, slot, @totp.entered[slot]) }
-    REQUIRED_STREAK.times { |i| draw_streak_pip(args, i, i < @totp.streak) }
-    draw_pickup_hint(args)
+    CODE_LENGTH.times { |slot| draw_digit_slot(frame, slot, @totp.entered[slot]) }
+    REQUIRED_STREAK.times { |i| draw_streak_pip(frame, i, i < @totp.streak) }
+    draw_pickup_hint(frame)
   end
 
   private
@@ -122,14 +122,14 @@ class TotpLevel < Level
     pads << DigitPad.new(x: x + (PAD_W - DigitPad::SIZE) / 2, y: top, digit: digit)
   end
 
-  def read_keypad_presses(args)
-    return unless args.inputs.keyboard.key_down.e
+  def read_keypad_presses(frame)
+    return unless frame.inputs.keyboard.key_down.e
     return if @totp.submitting? || @totp.entered.length >= CODE_LENGTH
 
     pad = key_under(game.player, @keypad)
     return unless pad
 
-    pad.press(args.state.tick_count)
+    pad.press(frame.tick_count)
     @totp.enter(pad.digit)
     @totp.submit! if @totp.entered.length == CODE_LENGTH
   end
@@ -147,30 +147,30 @@ class TotpLevel < Level
   SLOT_PITCH = 36
   SLOT_Y = SCREEN_H - 114
 
-  def draw_digit_slot(args, index, digit)
+  def draw_digit_slot(frame, index, digit)
     x = SLOT_X + index * SLOT_PITCH
     face = digit ? PURPLE : PAPER
-    args.outputs.solids << { x: x, y: SLOT_Y, w: SLOT_W, h: SLOT_H, r: INK[0], g: INK[1], b: INK[2] }
-    args.outputs.solids << { x: x + 3, y: SLOT_Y + 3, w: SLOT_W - 6, h: SLOT_H - 6,
+    frame.outputs.solids << { x: x, y: SLOT_Y, w: SLOT_W, h: SLOT_H, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.solids << { x: x + 3, y: SLOT_Y + 3, w: SLOT_W - 6, h: SLOT_H - 6,
                              r: face[0], g: face[1], b: face[2] }
-    args.outputs.labels << { x: x + SLOT_W / 2, y: SLOT_Y + SLOT_H / 2 + 1, text: (digit&.to_s || "·"),
+    frame.outputs.labels << { x: x + SLOT_W / 2, y: SLOT_Y + SLOT_H / 2 + 1, text: (digit&.to_s || "·"),
                              size_px: 20, font: FONT_MONO_B, r: PAPER[0], g: PAPER[1], b: PAPER[2],
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
 
   PIP = 14
 
-  def draw_streak_pip(args, index, filled)
+  def draw_streak_pip(frame, index, filled)
     x = SLOT_X + index * (PIP + 8)
     y = SLOT_Y - 26
-    args.outputs.solids << { x: x, y: y, w: PIP, h: PIP, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.solids << { x: x, y: y, w: PIP, h: PIP, r: INK[0], g: INK[1], b: INK[2] }
     face = filled ? GREEN : PAPER
-    args.outputs.solids << { x: x + 2, y: y + 2, w: PIP - 4, h: PIP - 4,
+    frame.outputs.solids << { x: x + 2, y: y + 2, w: PIP - 4, h: PIP - 4,
                              r: face[0], g: face[1], b: face[2] }
   end
 
-  def draw_pickup_hint(args)
-    args.outputs.labels << { x: SLOT_X, y: SLOT_Y - 46, text: "press E to pick up a number",
+  def draw_pickup_hint(frame)
+    frame.outputs.labels << { x: SLOT_X, y: SLOT_Y - 46, text: "press E to pick up a number",
                              size_px: 20, font: FONT_MONO,
                              r: MUTED[0], g: MUTED[1], b: MUTED[2],
                              anchor_x: 0, anchor_y: 0.5 }

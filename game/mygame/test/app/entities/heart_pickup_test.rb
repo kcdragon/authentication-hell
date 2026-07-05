@@ -11,7 +11,7 @@ class HeartPickupTest < Minitest::Test
     player = Player.new
     player.instance_variable_set(:@hearts, 1)
     heart = HeartPickup.new(x: player.x, y: player.y)
-    heart.on_collision(player, build_args(player: player))
+    heart.on_collision(player, build_frame(player: player))
     assert_equal 2, player.hearts
     refute heart.alive?
   end
@@ -19,13 +19,13 @@ class HeartPickupTest < Minitest::Test
   def test_healing_is_capped_at_the_max
     player = Player.new
     heart = HeartPickup.new(x: player.x, y: player.y)
-    heart.on_collision(player, build_args(player: player))
+    heart.on_collision(player, build_frame(player: player))
     assert_equal Player::MAX_HEARTS, player.hearts
   end
 
   def test_ignores_a_non_player_collider
     heart = HeartPickup.new(x: 100, y: GROUND_Y)
-    heart.on_collision(Object.new, build_args)
+    heart.on_collision(Object.new, build_frame)
     assert heart.alive?
   end
 end

@@ -8,8 +8,8 @@ class ApiKeyLevelTest < Minitest::Test
 
   def setup
     @level = ApiKeyLevel.new(build_game)
-    @args = build_args(player: Player.new, level: @level)
-    @level.setup(@args)
+    @frame = build_frame(player: Player.new, level: @level)
+    @level.setup(@frame)
     DR.reset!
   end
 
@@ -66,27 +66,27 @@ class ApiKeyLevelTest < Minitest::Test
   end
 
   def test_first_update_posts_the_start_request_once
-    @level.update(@args)
+    @level.update(@frame)
     assert_includes DR.urls, START_URL
 
-    @level.update(@args)
+    @level.update(@frame)
     assert_equal 1, DR.urls.count { |url| url == START_URL }, "start must only fire once"
   end
 
   def test_polls_status_while_waiting
-    @level.update(@args)
+    @level.update(@frame)
     assert_includes DR.urls, STATUS_URL
   end
 
   def test_an_opened_status_extends_the_bridge_and_stops_polling
-    @level.update(@args)
+    @level.update(@frame)
     DR.complete!(STATUS_URL, body: '{"opened":true}')
-    @level.update(@args)
+    @level.update(@frame)
 
     assert_operator @level.bridge.w, :>, 0
 
     polls_so_far = DR.urls.count { |url| url == STATUS_URL }
-    100.times { @level.update(@args) }
+    100.times { @level.update(@frame) }
     assert @level.bridge.extended?
     assert_equal polls_so_far, DR.urls.count { |url| url == STATUS_URL },
                  "no need to poll once the bridge is out"
@@ -95,7 +95,7 @@ class ApiKeyLevelTest < Minitest::Test
   def test_completes_when_the_certificate_is_collected
     refute @level.complete?
     @level.collectables.find { |c| c.is_a?(Certificate) }.alive = false
-    @level.update(@args)
+    @level.update(@frame)
     assert @level.complete?
   end
 
@@ -108,14 +108,14 @@ class ApiKeyLevelTest < Minitest::Test
   end
 
   def test_render_floor_paints_the_bridge_over_the_control_bar
-    @level.render_floor(@args, 0)
-    refute_empty @args.outputs.solids, "the bridge must draw after the bar and hole cutouts to stay visible"
+    @level.render_floor(@frame, 0)
+    refute_empty @frame.outputs.solids, "the bridge must draw after the bar and hole cutouts to stay visible"
   end
 
   def test_render_floor_is_safe_before_setup
     fresh = ApiKeyLevel.new(build_game)
-    args = build_args(player: Player.new, level: fresh)
-    fresh.render_floor(args, 0)
-    assert_empty args.outputs.solids, "the control bar draws during loading, before setup runs"
+    frame = build_frame(player: Player.new, level: fresh)
+    fresh.render_floor(frame, 0)
+    assert_empty frame.outputs.solids, "the control bar draws during loading, before setup runs"
   end
 end

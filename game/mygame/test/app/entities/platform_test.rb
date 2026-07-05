@@ -20,9 +20,9 @@ class PlatformTest < Minitest::Test
 
   def test_render_emits_camera_offset_solids
     platform = Platform.new(x: 500, y: 220, w: 200, h: 30)
-    args = build_args
-    platform.render(args, 100)
-    border, face = args.outputs.solids
+    frame = build_frame
+    platform.render(frame, 100)
+    border, face = frame.outputs.solids
     assert_equal 400, border[:x]
     assert_equal 220 - Platform::UNDERSIDE_H, border[:y]
     assert_equal 403, face[:x]

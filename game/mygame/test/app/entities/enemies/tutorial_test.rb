@@ -25,7 +25,7 @@ class TutorialEnemyTest < Minitest::Test
     manager = CollisionManager.new
     manager.add(@enemy)
     manager.add(@player)
-    manager.resolve(build_args(player: @player, tick_count: 0))
+    manager.resolve(build_frame(player: @player, tick_count: 0))
 
     refute @enemy.alive
     assert_equal Player::MAX_HEARTS - 1, @player.hearts, "no bounce — the stomp re-auths"

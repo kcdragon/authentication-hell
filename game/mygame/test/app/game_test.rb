@@ -59,7 +59,7 @@ class GamePhaseTest < Minitest::Test
 
   def setup
     @game = Game.new
-    @game.instance_variable_set(:@args, build_args(player: @game.player, level: @game.level))
+    @game.instance_variable_set(:@frame, build_frame(player: @game.player, level: @game.level))
     @game.instance_variable_set(:@booted, true)
     @game.instance_variable_set(:@started, true)
   end
@@ -112,7 +112,7 @@ class GameUnlockTest < Minitest::Test
   def setup
     DR.reset!
     @game = Game.new
-    @game.instance_variable_set(:@args, build_args(player: @game.player, level: @game.level))
+    @game.instance_variable_set(:@frame, build_frame(player: @game.player, level: @game.level))
     @game.player.lock!(:totp)
     @game.player.confirm_lock!
   end

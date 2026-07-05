@@ -56,16 +56,16 @@ class Player
     @drop_floor_y = 0
   end
 
-  def update(args, level)
+  def update(frame, level)
     @stomped_this_tick = false
     return if @locked || @game_over
 
-    speed = slowed?(args.state.tick_count) ? SLOW_MOVE_SPEED : MOVE_SPEED
-    if args.inputs.keyboard.left
+    speed = slowed?(frame.tick_count) ? SLOW_MOVE_SPEED : MOVE_SPEED
+    if frame.inputs.keyboard.left
       @x -= speed
       @facing = :west
       @moved = true
-    elsif args.inputs.keyboard.right
+    elsif frame.inputs.keyboard.right
       @x += speed
       @facing = :east
       @moved = true
@@ -75,7 +75,7 @@ class Player
 
     @x = @x.clamp(0, level.world_w - WIDTH)
 
-    if args.inputs.keyboard.key_down.space && @grounded
+    if frame.inputs.keyboard.key_down.space && @grounded
       @vy = JUMP_SPEED
       @grounded = false
     end
@@ -84,7 +84,7 @@ class Player
     reversed_upward = @vy > 0
     @dropping = false if @dropping && (fell_clear_of_ledge || reversed_upward)
 
-    drop_pressed = args.inputs.keyboard.key_down.down || args.inputs.keyboard.key_down.s
+    drop_pressed = frame.inputs.keyboard.key_down.down || frame.inputs.keyboard.key_down.s
     if drop_pressed && @grounded && @y > GROUND_Y
       @dropping = true
       @drop_floor_y = @y - Platform::H
@@ -113,8 +113,8 @@ class Player
     @stomped_this_tick = true
   end
 
-  def hurt(args)
-    @blink_until_tick = args.state.tick_count + BLINK_TICKS
+  def hurt(frame)
+    @blink_until_tick = frame.tick_count + BLINK_TICKS
   end
 
   def heal
@@ -142,7 +142,7 @@ class Player
     @pending_challenge = nil
   end
 
-  def fall_into_hole(args, level)
+  def fall_into_hole(frame, level)
     @hearts -= 1
     return if dead?
 
@@ -153,7 +153,7 @@ class Player
     @y = GROUND_Y
     @vy = 0
     @grounded = true
-    hurt(args)
+    hurt(frame)
   end
 
   def record_pickup
@@ -162,62 +162,62 @@ class Player
     seq
   end
 
-  def on_collision(other, args)
+  def on_collision(other, frame)
     case other
-    when Enemy then collide_with_enemy(other, args)
+    when Enemy then collide_with_enemy(other, frame)
     when Platform then land_on(other)
     end
   end
 
-  def slow(args)
-    @slow_until_tick = args.state.tick_count + SLOW_TICKS
+  def slow(frame)
+    @slow_until_tick = frame.tick_count + SLOW_TICKS
   end
 
   def slowed?(tick)
     tick < @slow_until_tick
   end
 
-  def invincible?(args)
-    args.state.tick_count < @blink_until_tick
+  def invincible?(frame)
+    frame.tick_count < @blink_until_tick
   end
 
-  def render(args, camera_x = 0)
+  def render(frame, camera_x = 0)
     sx = @x - camera_x
 
-    return if invincible?(args) &&
-              args.state.tick_count % (BLINK_INTERVAL * 2) >= BLINK_INTERVAL
+    return if invincible?(frame) &&
+              frame.tick_count % (BLINK_INTERVAL * 2) >= BLINK_INTERVAL
 
     leg_y   = @y
     torso_y = leg_y + LEG_H
     neck_y  = torso_y + TORSO_H
     head_y  = neck_y + NECK_H
     leg_gap = @w - 2 * LEG_W - 16
-    args.outputs.solids << { x: sx + 8, y: leg_y, w: LEG_W, h: LEG_H, r: INK[0], g: INK[1], b: INK[2] }
-    args.outputs.solids << { x: sx + 8 + LEG_W + leg_gap, y: leg_y, w: LEG_W, h: LEG_H,
+    frame.outputs.solids << { x: sx + 8, y: leg_y, w: LEG_W, h: LEG_H, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.solids << { x: sx + 8 + LEG_W + leg_gap, y: leg_y, w: LEG_W, h: LEG_H,
                              r: INK[0], g: INK[1], b: INK[2] }
 
-    card(args, sx, torso_y, @w, TORSO_H)
-    args.outputs.solids << { x: sx + (@w - NECK_W) / 2, y: neck_y, w: NECK_W, h: NECK_H,
+    card(frame, sx, torso_y, @w, TORSO_H)
+    frame.outputs.solids << { x: sx + (@w - NECK_W) / 2, y: neck_y, w: NECK_W, h: NECK_H,
                              r: SKIN[0], g: SKIN[1], b: SKIN[2] }
 
     head_x = sx + HEAD_INSET
     head_w = @w - 2 * HEAD_INSET
-    card(args, head_x, head_y, head_w, HEAD_H, SKIN)
+    card(frame, head_x, head_y, head_w, HEAD_H, SKIN)
 
-    args.outputs.solids << { x: head_x + BORDER, y: head_y + HEAD_H - BORDER - HAIR_H,
+    frame.outputs.solids << { x: head_x + BORDER, y: head_y + HEAD_H - BORDER - HAIR_H,
                              w: head_w - 2 * BORDER, h: HAIR_H, r: HAIR[0], g: HAIR[1], b: HAIR[2] }
 
     shift = @facing == :west ? -FACE_SHIFT : (@facing == :east ? FACE_SHIFT : 0)
     eye_cx = sx + @w / 2
     [ eye_cx - EYE_GAP / 2 - EYE, eye_cx + EYE_GAP / 2 ].each do |ex|
-      args.outputs.solids << { x: ex + shift, y: head_y + 10, w: EYE, h: EYE,
+      frame.outputs.solids << { x: ex + shift, y: head_y + 10, w: EYE, h: EYE,
                                r: INK[0], g: INK[1], b: INK[2] }
     end
   end
 
-  def card(args, x, y, w, h, fill = INDIGO)
-    args.outputs.solids << { x: x, y: y, w: w, h: h, r: INK[0], g: INK[1], b: INK[2] }
-    args.outputs.solids << { x: x + BORDER, y: y + BORDER, w: w - 2 * BORDER, h: h - 2 * BORDER,
+  def card(frame, x, y, w, h, fill = INDIGO)
+    frame.outputs.solids << { x: x, y: y, w: w, h: h, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.solids << { x: x + BORDER, y: y + BORDER, w: w - 2 * BORDER, h: h - 2 * BORDER,
                              r: fill[0], g: fill[1], b: fill[2] }
   end
 
@@ -227,13 +227,13 @@ class Player
     @y <= GROUND_Y && @prev_y >= GROUND_Y && !level.over_hole?(self)
   end
 
-  def collide_with_enemy(enemy, args)
+  def collide_with_enemy(enemy, frame)
     if enemy.stompable? && stomping?(enemy)
       bounce
     elsif enemy.slows?
-      slow(args)
-    elsif !invincible?(args)
-      take_hit(args, enemy.auth)
+      slow(frame)
+    elsif !invincible?(frame)
+      take_hit(frame, enemy.auth)
     end
   end
 
@@ -248,10 +248,10 @@ class Player
     @reached_platform = true
   end
 
-  def take_hit(args, auth)
+  def take_hit(frame, auth)
     @hearts -= 1
     return if dead?
     lock!(auth)
-    hurt(args)
+    hurt(frame)
   end
 end

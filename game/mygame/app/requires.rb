@@ -1,5 +1,6 @@
 require "app/constants.rb"
 require "app/aabb.rb"
+require "app/frame.rb"
 require "app/caption.rb"
 require "app/labels/dialogue.rb"
 require "app/entities/player.rb"

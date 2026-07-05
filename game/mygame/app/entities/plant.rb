@@ -19,7 +19,7 @@ class Plant
     @h = (spec[:h] * scale).to_i
   end
 
-  def render(args, camera_x = 0)
-    args.outputs.sprites << { x: @x - camera_x, y: @y - ROOT_SINK, w: @w, h: @h, path: @path }
+  def render(frame, camera_x = 0)
+    frame.outputs.sprites << { x: @x - camera_x, y: @y - ROOT_SINK, w: @w, h: @h, path: @path }
   end
 end

@@ -10,7 +10,7 @@ class QrPieceTest < Minitest::Test
   def test_on_collision_with_the_player_retires_and_records_pickup_order
     player = Player.new
     fragment = QrPiece.new(x: player.x, y: player.y, index: 1)
-    fragment.on_collision(player, build_args(player: player))
+    fragment.on_collision(player, build_frame(player: player))
 
     refute fragment.alive?
     refute_nil fragment.pickup_order
@@ -19,14 +19,14 @@ class QrPieceTest < Minitest::Test
   def test_collecting_leaves_the_player_untouched
     player = Player.new
     hearts_before = player.hearts
-    QrPiece.new(x: player.x, y: player.y, index: 1).on_collision(player, build_args(player: player))
+    QrPiece.new(x: player.x, y: player.y, index: 1).on_collision(player, build_frame(player: player))
 
     assert_equal hearts_before, player.hearts
   end
 
   def test_ignores_a_non_player_collider
     fragment = piece(index: 0)
-    fragment.on_collision(Object.new, build_args)
+    fragment.on_collision(Object.new, build_frame)
     assert fragment.alive?
   end
 
@@ -40,11 +40,11 @@ class QrPieceTest < Minitest::Test
   end
 
   def test_render_draws_the_quadrant_sprite_on_an_ink_backing_in_camera_space
-    args = build_args(tick_count: 0)
-    piece(index: 1, x: 500).render(args, 200)
+    frame = build_frame(tick_count: 0)
+    piece(index: 1, x: 500).render(frame, 200)
 
-    backing = args.outputs.solids.first
-    sprite = args.outputs.sprites.first
+    backing = frame.outputs.solids.first
+    sprite = frame.outputs.sprites.first
     assert_equal 300 - QrPiece::BORDER, backing[:x]
     assert_equal [ INK[0], INK[1], INK[2] ], [ backing[:r], backing[:g], backing[:b] ]
     assert_equal 300, sprite[:x]

@@ -19,13 +19,13 @@ class DigitPad
 
   def flashing?(tick) = @pressed_at && tick - @pressed_at < FLASH_TICKS
 
-  def render(args, camera_x = 0)
+  def render(frame, camera_x = 0)
     sx = @x - camera_x
-    face = flashing?(args.state.tick_count) ? GREEN : PURPLE
-    args.outputs.solids << { x: sx, y: @y, w: @w, h: @h, r: INK[0], g: INK[1], b: INK[2] }
-    args.outputs.solids << { x: sx + 3, y: @y + 3, w: @w - 6, h: @h - 6,
+    face = flashing?(frame.tick_count) ? GREEN : PURPLE
+    frame.outputs.solids << { x: sx, y: @y, w: @w, h: @h, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.solids << { x: sx + 3, y: @y + 3, w: @w - 6, h: @h - 6,
                              r: face[0], g: face[1], b: face[2] }
-    args.outputs.labels << { x: sx + @w / 2, y: @y + @h / 2 + 1, text: @digit.to_s,
+    frame.outputs.labels << { x: sx + @w / 2, y: @y + @h / 2 + 1, text: @digit.to_s,
                              size_px: 28, font: FONT_MONO_B, r: PAPER[0], g: PAPER[1], b: PAPER[2],
                              anchor_x: 0.5, anchor_y: 0.5 }
   end

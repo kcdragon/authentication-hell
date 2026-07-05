@@ -1,3 +1,3 @@
 class Network::Start
-  def self.url(args) = "#{Network.base_url(args)}/game/start"
+  def self.url = "#{Network.server_base}/game/start"
 end

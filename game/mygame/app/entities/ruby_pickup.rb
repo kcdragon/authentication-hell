@@ -19,9 +19,9 @@ class RubyPickup
 
   def collect(_player) = nil
 
-  def render(args, camera_x = 0)
-    bob = bob_offset(args.state.tick_count)
-    args.outputs.sprites << { x: @x - camera_x, y: @y + bob, w: @w, h: @h,
+  def render(frame, camera_x = 0)
+    bob = bob_offset(frame.tick_count)
+    frame.outputs.sprites << { x: @x - camera_x, y: @y + bob, w: @w, h: @h,
                               path: "sprites/ui/ruby.png" }
   end
 end

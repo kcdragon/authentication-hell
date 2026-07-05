@@ -1,13 +1,13 @@
 class Ui::Hearts
-  def initialize(args, hearts)
-    @args = args
+  def initialize(frame, hearts)
+    @frame = frame
     @hearts = hearts
   end
 
   def draw
     Player::MAX_HEARTS.times do |i|
       have = i < @hearts
-      @args.outputs.sprites << { x: 24 + i * 42,
+      @frame.outputs.sprites << { x: 24 + i * 42,
                                  y: SCREEN_H - 60,
                                  w: 36,
                                  h: 33,

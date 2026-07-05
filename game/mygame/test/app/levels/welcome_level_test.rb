@@ -5,7 +5,8 @@ class WelcomeLevelTest < Minitest::Test
 
   def setup
     @level = WelcomeLevel.new(build_game)
-    @args = build_args(player: Player.new, level: @level)
+    @player = Player.new
+    @frame = build_frame(player: @player, level: @level)
   end
 
   def test_starts_mid_screen_not_at_the_world_edge
@@ -13,7 +14,7 @@ class WelcomeLevelTest < Minitest::Test
   end
 
   def test_setup_seeds_a_reachable_ledge_and_no_enemy_yet
-    @level.setup(@args)
+    @level.setup(@frame)
     assert_empty @level.enemies
 
     assert_equal 1, @level.platforms.length
@@ -22,21 +23,21 @@ class WelcomeLevelTest < Minitest::Test
   end
 
   def test_setup_leaves_the_ground_flat_with_no_pits
-    @level.setup(@args)
+    @level.setup(@frame)
     assert_empty @level.holes
   end
 
   def test_update_holds_the_enemy_until_the_player_reaches_the_platform
-    @level.setup(@args)
-    @args.state.player.instance_variable_set(:@reached_platform, false)
-    @level.update(@args)
+    @level.setup(@frame)
+    @player.instance_variable_set(:@reached_platform, false)
+    @level.update(@frame)
     assert_empty @level.enemies
   end
 
   def test_update_sends_in_a_leftbound_password_enemy_from_the_right_edge
-    @level.setup(@args)
-    @args.state.player.instance_variable_set(:@reached_platform, true)
-    @level.update(@args)
+    @level.setup(@frame)
+    @player.instance_variable_set(:@reached_platform, true)
+    @level.update(@frame)
 
     assert_equal 1, @level.enemies.length
     enemy = @level.enemies.first
@@ -48,11 +49,11 @@ class WelcomeLevelTest < Minitest::Test
   end
 
   def test_update_spawns_the_enemy_only_once
-    @level.setup(@args)
-    @args.state.player.instance_variable_set(:@reached_platform, true)
-    @level.update(@args)
+    @level.setup(@frame)
+    @player.instance_variable_set(:@reached_platform, true)
+    @level.update(@frame)
     @level.enemies.first.alive = false
-    @level.update(@args)
+    @level.update(@frame)
     assert_equal 1, @level.enemies.length
   end
 
@@ -63,9 +64,9 @@ class WelcomeLevelTest < Minitest::Test
   end
 
   def test_update_sends_a_rightbound_enemy_in_from_the_left_after_the_heal
-    @level.setup(@args)
+    @level.setup(@frame)
     heal
-    @level.update(@args)
+    @level.update(@frame)
 
     assert_equal 1, @level.enemies.length
     enemy = @level.enemies.first
@@ -77,11 +78,11 @@ class WelcomeLevelTest < Minitest::Test
   end
 
   def test_defeating_the_combat_enemy_drops_a_certificate_but_does_not_complete
-    @level.setup(@args)
+    @level.setup(@frame)
     heal
-    @level.update(@args)
+    @level.update(@frame)
     @level.enemies.first.alive = false
-    @level.update(@args)
+    @level.update(@frame)
 
     certs = @level.collectables.select { |c| c.is_a?(Certificate) }
     assert_equal 1, certs.length, "a certificate drops once the enemy is down"
@@ -89,57 +90,57 @@ class WelcomeLevelTest < Minitest::Test
   end
 
   def test_completes_once_the_certificate_is_collected
-    @level.setup(@args)
+    @level.setup(@frame)
     heal
-    @level.update(@args)
+    @level.update(@frame)
     @level.enemies.first.alive = false
-    @level.update(@args)
+    @level.update(@frame)
 
     @level.collectables.find { |c| c.is_a?(Certificate) }.alive = false
-    @level.update(@args)
+    @level.update(@frame)
 
     assert @level.complete?
   end
 
   def test_combat_enemy_defeat_does_not_complete_while_locked
-    @level.setup(@args)
+    @level.setup(@frame)
     heal
-    @level.update(@args)
+    @level.update(@frame)
     @level.enemies.first.alive = false
-    @args.state.player.lock!(:password)
-    @level.update(@args)
+    @player.lock!(:password)
+    @level.update(@frame)
 
     refute @level.complete?
   end
 
   def test_opening_beat_prompts_movement_and_is_ready_immediately
-    @level.setup(@args)
-    assert @level.dialogue_ready?(@args)
-    assert_equal [ "Move with A / D or arrow keys" ], @level.current_dialogue(@args)
+    @level.setup(@frame)
+    assert @level.dialogue_ready?(@frame)
+    assert_equal [ "Move with A / D or arrow keys" ], @level.current_dialogue(@frame)
   end
 
   def test_jump_hint_waits_until_the_player_has_moved
-    @level.setup(@args)
+    @level.setup(@frame)
     @level.advance_dialogue
-    refute @level.dialogue_ready?(@args)
-    assert_nil @level.current_dialogue(@args)
+    refute @level.dialogue_ready?(@frame)
+    assert_nil @level.current_dialogue(@frame)
 
-    @args.state.player.instance_variable_set(:@moved, true)
-    @level.dialogue_ready?(@args) # eligible now — stamps the delay start
-    @args.state.tick_count += WelcomeLevel::DIALOGUE_DELAY
-    assert @level.dialogue_ready?(@args)
-    assert_equal [ "Press Space to jump onto the ledge" ], @level.current_dialogue(@args)
+    @player.instance_variable_set(:@moved, true)
+    @level.dialogue_ready?(@frame) # eligible now — stamps the delay start
+    @frame = build_frame(player: @player, level: @level, tick_count: WelcomeLevel::DIALOGUE_DELAY)
+    assert @level.dialogue_ready?(@frame)
+    assert_equal [ "Press Space to jump onto the ledge" ], @level.current_dialogue(@frame)
   end
 
   def test_a_reached_beat_waits_a_short_delay_before_its_card_shows
-    @level.setup(@args)
+    @level.setup(@frame)
     @level.advance_dialogue
-    @args.state.player.instance_variable_set(:@moved, true)
-    refute @level.dialogue_ready?(@args), "the card holds back briefly after the milestone"
-    assert_nil @level.current_dialogue(@args)
+    @player.instance_variable_set(:@moved, true)
+    refute @level.dialogue_ready?(@frame), "the card holds back briefly after the milestone"
+    assert_nil @level.current_dialogue(@frame)
 
-    @args.state.tick_count += WelcomeLevel::DIALOGUE_DELAY
-    assert @level.dialogue_ready?(@args)
+    @frame = build_frame(player: @player, level: @level, tick_count: WelcomeLevel::DIALOGUE_DELAY)
+    assert @level.dialogue_ready?(@frame)
   end
 
   def test_dialogue_leaves_the_scene_visible
@@ -147,10 +148,10 @@ class WelcomeLevelTest < Minitest::Test
   end
 
   def test_no_dialogue_once_every_beat_is_dismissed
-    @level.setup(@args)
+    @level.setup(@frame)
     6.times { @level.advance_dialogue }
-    refute @level.dialogue_remaining?(@args)
-    assert_nil @level.current_dialogue(@args)
+    refute @level.dialogue_remaining?(@frame)
+    assert_nil @level.current_dialogue(@frame)
   end
 
 

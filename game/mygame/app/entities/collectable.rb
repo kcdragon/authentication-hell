@@ -6,7 +6,7 @@ module Collectable
 
   def bob_offset(tick) = Math.sin(tick / 15.0) * self.class::BOB
 
-  def on_collision(other, _args)
+  def on_collision(other, _frame)
     return unless other.is_a?(Player)
     return unless @alive
 

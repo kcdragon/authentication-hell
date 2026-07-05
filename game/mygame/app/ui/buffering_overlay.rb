@@ -1,15 +1,15 @@
 class Ui::BufferingOverlay
-  def initialize(args, challenge)
-    @args = args
+  def initialize(frame, challenge)
+    @frame = frame
     @challenge = challenge
   end
 
   def draw
     color = challenge_color
 
-    Ui::Spinner.new(@args).draw(640, 470, color)
+    Ui::Spinner.new(@frame).draw(640, 470, color)
 
-    @args.outputs.labels << { x: 640, y: 420, text: label,
+    @frame.outputs.labels << { x: 640, y: 420, text: label,
                               size_px: 22, font: FONT_MONO_B,
                               r: color[0], g: color[1], b: color[2],
                               anchor_x: 0.5, anchor_y: 0.5 }

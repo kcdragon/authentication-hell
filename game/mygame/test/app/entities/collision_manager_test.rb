@@ -14,7 +14,7 @@ class CollisionManagerTest < Minitest::Test
       @alerts = []
     end
 
-    def on_collision(other, _args) = @alerts << other
+    def on_collision(other, _frame) = @alerts << other
   end
 
   def setup
@@ -24,7 +24,7 @@ class CollisionManagerTest < Minitest::Test
   def resolve(*objects)
     @manager.reset
     objects.each { |o| @manager.add(o) }
-    @manager.resolve(build_args)
+    @manager.resolve(build_frame)
   end
 
   def test_alerts_both_objects_of_an_overlapping_pair
@@ -57,7 +57,7 @@ class CollisionManagerTest < Minitest::Test
     @manager.add(a)
     @manager.add(b)
     @manager.reset
-    @manager.resolve(build_args)
+    @manager.resolve(build_frame)
     assert_empty a.alerts
   end
 
@@ -68,7 +68,7 @@ class CollisionManagerTest < Minitest::Test
     enemy = TotpEnemy.new(x: player.x, level: enemy_level)
     @manager.add(enemy)
     @manager.add(player)
-    @manager.resolve(build_args(player: player, tick_count: 0))
+    @manager.resolve(build_frame(player: player, tick_count: 0))
 
     refute enemy.alive
     assert_equal Player::MAX_HEARTS - 1, player.hearts
@@ -81,10 +81,10 @@ class CollisionManagerTest < Minitest::Test
     player.y = enemy.y + enemy.h - 6
     player.vy = -5
     player.grounded = false
-    args = build_args(player: player)
+    frame = build_frame(player: player)
     @manager.add(enemy)
     @manager.add(player)
-    @manager.resolve(args)
+    @manager.resolve(frame)
 
     refute enemy.alive
     assert_equal Player::STOMP_BOUNCE, player.vy
@@ -101,7 +101,7 @@ class CollisionManagerTest < Minitest::Test
     @manager.add(e1)
     @manager.add(e2)
     @manager.add(player)
-    @manager.resolve(build_args(player: player))
+    @manager.resolve(build_frame(player: player))
 
     refute e1.alive
     refute e2.alive
@@ -116,7 +116,7 @@ class CollisionManagerTest < Minitest::Test
     heart = HeartPickup.new(x: player.x, y: player.y)
     @manager.add(heart)
     @manager.add(player)
-    @manager.resolve(build_args(player: player))
+    @manager.resolve(build_frame(player: player))
 
     refute heart.alive?
     assert_equal 2, player.hearts
@@ -127,7 +127,7 @@ class CollisionManagerTest < Minitest::Test
     char = PasswordCharacter.new(x: player.x, klass: :upper, glyph: "Q")
     @manager.add(char)
     @manager.add(player)
-    @manager.resolve(build_args(player: player))
+    @manager.resolve(build_frame(player: player))
 
     refute char.alive?
     assert char.pickup_order, "stamped so the level can rebuild the password from retired padlocks"
@@ -138,7 +138,7 @@ class CollisionManagerTest < Minitest::Test
     cert = Certificate.new(x: player.x, y: player.y)
     @manager.add(cert)
     @manager.add(player)
-    @manager.resolve(build_args(player: player))
+    @manager.resolve(build_frame(player: player))
 
     refute cert.alive?
     assert_equal Player::MAX_HEARTS, player.hearts, "the pickup leaves the player otherwise untouched"
@@ -154,7 +154,7 @@ class CollisionManagerTest < Minitest::Test
     player.instance_variable_set(:@prev_y, 285)
     @manager.add(platform)
     @manager.add(player)
-    @manager.resolve(build_args(player: player))
+    @manager.resolve(build_frame(player: player))
 
     assert_equal 280, player.y
     assert_equal 0, player.vy

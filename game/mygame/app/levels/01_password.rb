@@ -19,7 +19,7 @@ class PasswordLevel < Level
 
   def accent = AMBER
 
-  def dialogue(_args)
+  def dialogue(_frame)
     [
       [ "Your company requires passwords with",
         "many different kinds of characters" ],
@@ -29,40 +29,40 @@ class PasswordLevel < Level
     ]
   end
 
-  def setup(_args)
+  def setup(_frame)
     @platforms = Platform.scatter
     @holes = Hole.scatter
     @collectables = scatter_chars(@platforms)
     @enemies = hazard_enemies(game.player.x)
   end
 
-  def update(args)
-    validate_password(args) if password_full? && !certificate_spawned?
-    @cleared = true if certificate_collected?(args)
+  def update(frame)
+    validate_password(frame) if password_full? && !certificate_spawned?
+    @cleared = true if certificate_collected?(frame)
   end
 
   def all_collected? = TARGETS.all? { |klass| held_count(klass) >= REQUIRED_PER_CLASS }
 
-  def validation_error_active?(args)
-    @validation_error_at && (args.state.tick_count - @validation_error_at) < VALIDATION_ERROR_TICKS
+  def validation_error_active?(frame)
+    @validation_error_at && (frame.tick_count - @validation_error_at) < VALIDATION_ERROR_TICKS
   end
 
   def complete? = @cleared == true
 
   def next_level = ApiKeyLevel.new(game)
 
-  def draw_hud(args)
-    PASSWORD_LENGTH.times { |slot| draw_password_slot(args, slot, collected[slot]) }
+  def draw_hud(frame)
+    PASSWORD_LENGTH.times { |slot| draw_password_slot(frame, slot, collected[slot]) }
   end
 
-  def draw(args)
+  def draw(frame)
     lines = if all_collected?
       [ "Password complete —", "head right to finish →" ]
     else
       [ "#{collected_count}/#{PASSWORD_LENGTH} characters" ]
     end
-    Caption.new(args, lines, game).draw
-    draw_validation_error(args) if validation_error_active?(args)
+    Caption.new(frame, lines, game).draw
+    draw_validation_error(frame) if validation_error_active?(frame)
   end
 
   private
@@ -73,32 +73,32 @@ class PasswordLevel < Level
   SLOT_PITCH = 42
   SLOT_Y = SCREEN_H - 114
 
-  def draw_password_slot(args, index, glyph)
+  def draw_password_slot(frame, index, glyph)
     klass = glyph && PasswordCharacter.klass_of(glyph)
     face = klass ? PasswordCharacter::CLASS_FACE.fetch(klass) : PAPER
     ink = klass ? PasswordCharacter::CLASS_INK.fetch(klass) : FAINT_INK
     x = SLOT_X + index * SLOT_PITCH
-    args.outputs.solids << { x: x, y: SLOT_Y, w: SLOT_W, h: SLOT_H, r: INK[0], g: INK[1], b: INK[2] }
-    args.outputs.solids << { x: x + 3, y: SLOT_Y + 3, w: SLOT_W - 6, h: SLOT_H - 6,
+    frame.outputs.solids << { x: x, y: SLOT_Y, w: SLOT_W, h: SLOT_H, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.solids << { x: x + 3, y: SLOT_Y + 3, w: SLOT_W - 6, h: SLOT_H - 6,
                              r: face[0], g: face[1], b: face[2] }
-    args.outputs.labels << { x: x + SLOT_W / 2, y: SLOT_Y + SLOT_H / 2 + 1, text: glyph || "·",
+    frame.outputs.labels << { x: x + SLOT_W / 2, y: SLOT_Y + SLOT_H / 2 + 1, text: glyph || "·",
                              size_px: 22, font: FONT_MONO_B, r: ink[0], g: ink[1], b: ink[2],
                              anchor_x: 0.5, anchor_y: 0.5 }
   end
 
-  def draw_validation_error(args)
-    elapsed = args.state.tick_count - @validation_error_at
+  def draw_validation_error(frame)
+    elapsed = frame.tick_count - @validation_error_at
     fade_out = VALIDATION_ERROR_TICKS - LEVEL_INTRO_FADE_OUT
     alpha = (elapsed > fade_out ? 255 * (VALIDATION_ERROR_TICKS - elapsed) / LEVEL_INTRO_FADE_OUT : 255).clamp(0, 255)
 
     cx = 640
-    args.outputs.labels << { x: cx, y: 470, text: "INVALID PASSWORD",
+    frame.outputs.labels << { x: cx, y: 470, text: "INVALID PASSWORD",
                              size_px: 30, font: FONT_MONO_B,
                              r: RED[0], g: RED[1], b: RED[2], a: alpha,
                              anchor_x: 0.5, anchor_y: 0.5 }
-    args.outputs.solids << { x: cx - 150, y: 448, w: 300, h: 4,
+    frame.outputs.solids << { x: cx - 150, y: 448, w: 300, h: 4,
                              r: RED[0], g: RED[1], b: RED[2], a: alpha }
-    args.outputs.labels << { x: cx, y: 426, text: "need 2 upper · 2 lower · 2 number · 2 symbol — try again",
+    frame.outputs.labels << { x: cx, y: 426, text: "need 2 upper · 2 lower · 2 number · 2 symbol — try again",
                              size_px: 16, font: FONT_MONO,
                              r: MUTED[0], g: MUTED[1], b: MUTED[2], a: alpha,
                              anchor_x: 0.5, anchor_y: 0.5 }
@@ -106,13 +106,13 @@ class PasswordLevel < Level
 
   def password_full? = collected_count >= PASSWORD_LENGTH
 
-  def validate_password(args)
-    all_collected? ? spawn_exit_certificate : fail_validation(args)
+  def validate_password(frame)
+    all_collected? ? spawn_exit_certificate : fail_validation(frame)
   end
 
-  def fail_validation(args)
+  def fail_validation(frame)
     @collectables.each { |c| c.alive = true if c.is_a?(PasswordCharacter) }
-    @validation_error_at = args.state.tick_count
+    @validation_error_at = frame.tick_count
   end
 
   def collected
