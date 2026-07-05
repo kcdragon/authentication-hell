@@ -53,7 +53,7 @@ layout: section
 hideInToc: false
 ---
 
-# "Authentication Hell"
+# What is authentication hell?
 
 <!-- What do I mean by authentication hell... -->
 
@@ -92,7 +92,7 @@ layout: section
 hideInToc: false
 ---
 
-# DragonRuby & mruby
+# DragonRuby
 
 ---
 layout: two-cols
@@ -242,7 +242,7 @@ layout: section
 hideInToc: false
 ---
 
-# The game
+# Authentication Hell: The Game
 
 ---
 ---
