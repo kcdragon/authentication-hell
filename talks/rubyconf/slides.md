@@ -20,7 +20,7 @@ defaults:
 
 # Authentication Hell
 
-<div class="ah-tagline">A browser-based game built with Ruby · Philly.rb · Mike Dalton</div>
+<div class="ah-tagline">A browser-based game built with Ruby · RubyConf · Mike Dalton</div>
 
 <!--
 Speaker notes go here, after the HTML comment marker.
@@ -199,6 +199,8 @@ graphics, audio, and input across every platform, including the WASM build.
 - Runs 60 times per second (60 frames per second)
 
 ---
+layout: two-cols
+layoutClass: gap-8
 ---
 
 ## A simple app
@@ -206,31 +208,31 @@ graphics, audio, and input across every platform, including the WASM build.
 ````md magic-move
 ```ruby
 def tick(args)
-  args.state.player ||= { x: 100,
-                          y: 100,
-                          w: 50,
-                          h: 50,
-                          path: 'sprites/square/green.png' }
+  args.state.player ||= {
+    x: 100, y: 100,
+    w: 50, h: 50,
+    path: 'sprites/square/green.png'
+  }
 end
 ```
 ```ruby
 def tick(args)
-  args.state.player ||= { x: 100,
-                          y: 100,
-                          w: 50,
-                          h: 50,
-                          path: 'sprites/square/green.png' }
+  args.state.player ||= {
+    x: 100, y: 100,
+    w: 50, h: 50,
+    path: 'sprites/square/green.png'
+  }
 
   args.outputs.sprites << args.state.player
 end
 ```
 ```ruby
 def tick(args)
-  args.state.player ||= { x: 100,
-                          y: 100,
-                          w: 50,
-                          h: 50,
-                          path: 'sprites/square/green.png' }
+  args.state.player ||= {
+    x: 100, y: 100,
+    w: 50, h: 50,
+    path: 'sprites/square/green.png'
+  }
 
   if args.inputs.up
     args.state.player.y += 10
@@ -249,20 +251,16 @@ end
 ```
 ````
 
----
----
+::right::
 
-## A simple app
-
-<div class="absolute inset-0 flex items-center justify-center">
-  <a
-    href="https://samples.dragonruby.org/samples/02_input_basics/01_moving_a_sprite/index.html"
-    target="_blank"
-    rel="noopener"
-    class="ah-card bg-white px-6 py-4 text-xl font-bold no-underline !text-ink"
-  >
-    ▶ Demo ↗
-  </a>
+<div class="flex items-center justify-center h-full">
+  <div class="relative w-full aspect-video">
+    <img v-click.hide="1" src="./images/sprite-empty.png" class="absolute inset-0 w-full h-full object-contain" alt="DragonRuby window that is empty because the sprite is defined but not yet drawn" />
+    <img v-click="[1, 2]" src="./images/sprite-rendered.png" class="absolute inset-0 w-full h-full object-contain" alt="DragonRuby window with a green square sprite rendered in the bottom-left" />
+    <SlidevVideo v-after autoplay loop muted class="absolute inset-0 w-full h-full object-contain">
+      <source :src="'/videos/sprite-moving.mp4'" type="video/mp4" />
+    </SlidevVideo>
+  </div>
 </div>
 
 ---
