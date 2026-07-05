@@ -468,6 +468,7 @@ a	./dragon/primitive.rb	/^      def a$/;"	f	class:GTK.Triangle.ConversionCapabil
 a	./dragon/primitive.rb	/^      def a$/;"	f	class:GTK.Triangle.Label
 a	./dragon/primitive.rb	/^      def a$/;"	f	class:GTK.Triangle.Sprite
 a	./dragon/primitive.rb	/^      def a$/;"	f	class:GTK.Triangle.__raise_triangle_primitive_not_supported__
+a11y_changed	./dragon/runtime/c_bridge.rb	/^      def a11y_changed enabled$/;"	f	class:GTK.Runtime.CBridge
 a11y_clear_pending_notifications!	./dragon/outputs.rb	/^    def a11y_clear_pending_notifications!$/;"	f	class:GTK.Outputs
 a11y_disable!	./dragon/runtime.rb	/^    def a11y_disable!$/;"	f
 a11y_enable!	./dragon/runtime.rb	/^    def a11y_enable!$/;"	f
@@ -1491,8 +1492,8 @@ include_row_marker?	./dragon/console.rb	/^    def include_row_marker? log_entry$
 include_subdued_markers?	./dragon/console.rb	/^    def include_subdued_markers? text$/;"	f	class:GTK.Console
 included	./dragon/directional_input_helper_methods.rb	/^    def self.included klass$/;"	F	class:GTK.DirectionalInputHelperMethods
 increase_touch_count	./dragon/runtime.rb	/^    def increase_touch_count$/;"	f
-indent	./dragon/string.rb	/^  def indent count, indent_char: "  ", pad_line_with_space: false$/;"	f	class:String.wrapped_lines.indent_lines
-indent_lines	./dragon/string.rb	/^  def indent_lines amount, char = " "$/;"	f	class:String.wrapped_lines
+indent	./dragon/string.rb	/^  def indent count, indent_char: "  ", pad_line_with_space: false$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines
+indent_lines	./dragon/string.rb	/^  def indent_lines amount, char = " "$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary
 init_mtimes	./dragon/runtime/hotload.rb	/^      def init_mtimes file$/;"	f	class:GTK.Runtime.Hotload
 init_wizard_status	./dragon/ios_wizard.rb	/^  def init_wizard_status$/;"	f	class:IOSWizard
 init_wizard_status	./dragon/itch_wizard.rb	/^  def init_wizard_status$/;"	f	class:ItchWizard
@@ -1762,7 +1763,7 @@ line	./dragon/primitive.rb	/^      def line$/;"	f	class:GTK.Triangle.ConversionC
 line!	./dragon/array_deprecated.rb	/^  def line!$/;"	f
 line!	./dragon/hash.rb	/^  def line! opts = nil$/;"	f	class:Hash
 line?	./dragon/geometry.rb	/^      def line? shape$/;"	f
-line_anchors	./dragon/string.rb	/^  def self.line_anchors line_count$/;"	F	class:String.wrapped_lines.indent_lines.indent
+line_anchors	./dragon/string.rb	/^  def self.line_anchors line_count$/;"	F	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines.indent
 line_angle	./dragon/geometry.rb	/^      def line_angle line$/;"	f	class:GTK
 line_center_point	./dragon/geometry.rb	/^      def line_center_point line$/;"	f	class:GTK
 line_height_px	./dragon/console.rb	/^    def line_height_px$/;"	f	class:GTK.Console.process_add_primitive_queue
@@ -1787,7 +1788,7 @@ lines=	./dragon/outputs_deprecated.rb	/^    def lines= value$/;"	f	class:GTK.Out
 lines_on_one_page	./dragon/console.rb	/^    def lines_on_one_page$/;"	f	class:GTK.Console.process_add_primitive_queue
 linkSummaries	./dragon/doc/js/app.js	/^  function linkSummaries() {$/;"	f
 list_files	./dragon/runtime.rb	/^    def list_files dir$/;"	f
-ljust	./dragon/string.rb	/^  def ljust(count, padstr = " ")$/;"	f	class:String.wrapped_lines.indent_lines.indent
+ljust	./dragon/string.rb	/^  def ljust(count, padstr = " ")$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines.indent
 load_entity_data!	./dragon/runtime/save_state_load_state.rb	/^    def load_entity_data! serialization_data$/;"	f	class:GTK.OpenEntity
 load_entity_data!	./dragon/runtime/save_state_load_state.rb	/^    def load_entity_data! serialization_data$/;"	f	class:GTK.StrictEntity
 load_history	./dragon/console.rb	/^    def load_history$/;"	f	class:GTK.Console
@@ -1850,8 +1851,8 @@ logo_final_y	./dragon/console.rb	/^    def logo_final_y$/;"	f	class:GTK.Console
 looks_like_a_sprite?	./dragon/primitive.rb	/^      def looks_like_a_sprite?$/;"	f	class:GTK.Color
 lt	./dragon/numeric_deprecated.rb	/^  def lt$/;"	f	class:NumericDeprecated
 lte	./dragon/numeric_deprecated.rb	/^  def lte$/;"	f	class:NumericDeprecated
-ltrim	./dragon/string.rb	/^  def ltrim$/;"	f	class:String.wrapped_lines.indent_lines
-ltrim!	./dragon/string.rb	/^  def ltrim!$/;"	f	class:String.wrapped_lines.indent_lines
+ltrim	./dragon/string.rb	/^  def ltrim$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines
+ltrim!	./dragon/string.rb	/^  def ltrim!$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines
 mailto	./dragon/runtime.rb	/^    def mailto email:, subject:, body: nil, exception: nil;$/;"	f	class:grep_source_file
 mainFocus	./dragon/doc/js/app.js	/^  function mainFocus() {$/;"	f
 main_rb_reload_completed?	./dragon/runtime/async_require.rb	/^      def main_rb_reload_completed?$/;"	f	class:GTK.Runtime.AsyncRequire
@@ -1955,7 +1956,7 @@ move_window_to_next_display	./dragon/runtime/window.rb	/^      def move_window_t
 mult	./dragon/numeric.rb	/^  def mult n$/;"	f
 mult_alpha	./dragon/console_color.rb	/^      def mult_alpha(alpha_modifier)$/;"	f	class:GTK.Console.Color
 multiline	./dragon/log.rb	/^    def self.multiline? *args$/;"	F	class:GTK.Log
-multiline?	./dragon/string.rb	/^  def multiline?$/;"	f	class:String.wrapped_lines
+multiline?	./dragon/string.rb	/^  def multiline?$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary
 multiply	./dragon/numeric.rb	/^  def multiply n$/;"	f
 name	./dragon/controller.rb	/^    def name$/;"	f
 nan?	./dragon/numeric.rb	/^  def nan?$/;"	f	class:mid?.between?.max.greater.min.Integer
@@ -2201,7 +2202,7 @@ quit	./dragon/runtime.rb	/^    def quit$/;"	f	class:grep_source_file
 quit!	./dragon/runtime.rb	/^    def quit!$/;"	f
 quit_after_startup_eval?	./dragon/runtime/process_argsv.rb	/^      def quit_after_startup_eval?$/;"	f	class:GTK.Runtime.ProcessARGSV
 quit_requested?	./dragon/runtime.rb	/^    def quit_requested?$/;"	f
-quote	./dragon/string.rb	/^  def quote$/;"	f	class:String.wrapped_lines.indent_lines
+quote	./dragon/string.rb	/^  def quote$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines
 r	./dragon/primitive.rb	/^      def r$/;"	f	class:GTK.Color
 r	./dragon/primitive.rb	/^      def r$/;"	f	class:GTK.Triangle.Label
 r	./dragon/primitive.rb	/^      def r$/;"	f	class:GTK.Triangle.Sprite
@@ -2409,7 +2410,7 @@ right_hand	./dragon/controller.rb	/^    def right_hand$/;"	f
 right_of?	./dragon/numeric_deprecated.rb	/^  def right_of?$/;"	f	class:NumericDeprecated
 right_px	./dragon/grid.rb	/^      def right_px = $grid.right_px$/;"	f	class:GTK.Grid.origin_name.x.x_px.y.y_px.w.w_px.h.h_px.bottom.bottom_px.top.top_px.left.left_px.right
 right_wasd	./dragon/keyboard.rb	/^    def right_wasd$/;"	f	class:GTK.Keyboard
-rjust	./dragon/string.rb	/^  def rjust(count, padstr = " ")$/;"	f	class:String.wrapped_lines.indent_lines.indent
+rjust	./dragon/string.rb	/^  def rjust(count, padstr = " ")$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines.indent
 root_dir	./dragon/ios_wizard.rb	/^  def root_dir$/;"	f	class:IOSWizard
 root_folder_directories	./dragon/ios_wizard.rb	/^  def root_folder_directories$/;"	f	class:IOSWizard.ios_metadata.game_metadata.provisioning_profile_xml.__get_plist_orientation_values_xml__
 rotate_point	./dragon/geometry.rb	/^      def rotate_point point, angle, around = nil$/;"	f	class:GTK.Geometry
@@ -2419,8 +2420,8 @@ row	./dragon/layout.rb	/^    def row n$/;"	f	class:GTK.Layout
 row_count	./dragon/layout.rb	/^    def row_count$/;"	f	class:GTK.Layout
 row_from_bottom	./dragon/layout.rb	/^    def row_from_bottom n$/;"	f	class:GTK.Layout
 row_max_index	./dragon/layout.rb	/^    def row_max_index$/;"	f	class:GTK.Layout
-rtrim	./dragon/string.rb	/^  def rtrim$/;"	f	class:String.wrapped_lines.indent_lines
-rtrim!	./dragon/string.rb	/^  def rtrim!$/;"	f	class:String.wrapped_lines.indent_lines
+rtrim	./dragon/string.rb	/^  def rtrim$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines
+rtrim!	./dragon/string.rb	/^  def rtrim!$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines
 run_test	./dragon/tests.rb	/^    def run_test target_and_m$/;"	f	class:GTK.Tests
 running?	./dragon/tests.rb	/^    def running?$/;"	f	class:GTK.Tests
 s	./dragon/hash.rb	/^  def s$/;"	f	class:Hash
@@ -2492,7 +2493,7 @@ serialize	./dragon/runtime.rb	/^      def serialize$/;"	f	class:HTTPRequest
 serialize	./dragon/runtime.rb	/^    def serialize$/;"	f	class:FFI.Draw
 serialize	./dragon/runtime.rb	/^    def serialize$/;"	f	class:grep_source_file
 serialize	./dragon/serialize.rb	/^    def serialize$/;"	f	class:GTK.Serialize
-serialize	./dragon/string.rb	/^  def serialize$/;"	f	class:String.wrapped_lines.indent_lines
+serialize	./dragon/string.rb	/^  def serialize$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines
 serialize_state	./dragon/runtime/save_state_load_state.rb	/^      def serialize_state *opts$/;"	f	class:GTK.Runtime.SaveStateLoadState
 server_available?	./dragon/remote_hotload_client.rb	/^    def server_available?$/;"	f	class:GTK.RemoteHotloadClient
 set	./dragon/keyboard_keys.rb	/^    def set collection, value$/;"	f
@@ -2629,7 +2630,7 @@ source_y=	./dragon/primitive.rb	/^      def source_y= value$/;"	f	class:GTK.Tria
 spam_color=	./dragon/console.rb	/^    def spam_color= value$/;"	f	class:GTK.Console
 speedup!	./dragon/runtime/developer_support.rb	/^      def speedup! factor$/;"	f	class:GTK.Runtime.DeveloperSupport
 spline	./dragon/easing.rb	/^    def self.spline start_tick, current_tick, duration, spline$/;"	F	class:GTK.Easing
-split	./dragon/string.rb	/^  def self.split(s, *args)$/;"	F	class:String.wrapped_lines.indent_lines.indent
+split	./dragon/string.rb	/^  def self.split(s, *args)$/;"	F	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines.indent
 sprite	./dragon/attr_sprite.rb	/^  def sprite$/;"	f	class:AttrSprite
 sprite	./dragon/hash_deprecated.rb	/^  def sprite$/;"	f	class:HashDeprecated
 sprite	./dragon/primitive.rb	/^      def sprite$/;"	f	class:GTK.Triangle.ConversionCapabilities.mark_assert!
@@ -2694,7 +2695,7 @@ stop_replay	./dragon/runtime.rb	/^    def stop_replay$/;"	f
 stop_text_input	./dragon/runtime.rb	/^    def stop_text_input$/;"	f	class:grep_source_file
 str_len	./dragon/console_prompt.rb	/^      def str_len$/;"	f	class:GTK.Console.Prompt
 strict_entities	./dragon/entity.rb	/^    def self.strict_entities$/;"	F	class:GTK.Entity
-strip	./dragon/string.rb	/^  def strip$/;"	f	class:String.wrapped_lines.indent_lines
+strip	./dragon/string.rb	/^  def strip$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines
 subdued_markers	./dragon/console.rb	/^    def subdued_markers$/;"	f	class:GTK.Console
 subtract	./dragon/numeric.rb	/^  def subtract i$/;"	f
 suggest_autocompletion	./dragon/runtime/autocomplete.rb	/^      def suggest_autocompletion opts$/;"	f	class:GTK.Runtime.Autocomplete
@@ -2925,8 +2926,8 @@ transform_x	./dragon/grid.rb	/^    def transform_x x$/;"	f	class:GTK.Grid
 transform_y	./dragon/grid.rb	/^    def transform_y y$/;"	f	class:GTK.Grid
 transient!	./dragon/outputs.rb	/^    def transient!$/;"	f	class:GTK.Outputs
 triangle!	./dragon/array_deprecated.rb	/^  def triangle!$/;"	f
-trim	./dragon/string.rb	/^  def trim$/;"	f	class:String.wrapped_lines.indent_lines
-trim!	./dragon/string.rb	/^  def trim!$/;"	f	class:String.wrapped_lines.indent_lines
+trim	./dragon/string.rb	/^  def trim$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines
+trim!	./dragon/string.rb	/^  def trim!$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary.indent_lines
 true!	./dragon/assert.rb	/^    def true! value, message = nil$/;"	f	class:GTK.test_this_works.Assert.custom_assertion.Assert.test_does_this_work
 truthy_keys	./dragon/controller/keys.rb	/^      def truthy_keys$/;"	f	class:GTK.Controller.Keys
 truthy_keys	./dragon/keyboard_keys.rb	/^    def truthy_keys$/;"	f
@@ -2973,6 +2974,7 @@ update_entity_keys_by_ref	./dragon/runtime/save_state_load_state.rb	/^    def up
 update_entity_keys_by_ref	./dragon/runtime/save_state_load_state.rb	/^  def update_entity_keys_by_ref$/;"	f	class:GTK
 update_mouse_buttons	./dragon/runtime/c_bridge.rb	/^      def update_mouse_buttons newbuttons$/;"	f	class:GTK.Runtime.CBridge
 url_decode	./dragon/api.rb	/^    def url_decode args, string$/;"	f	class:GTK.Api
+utf8_chars	./dragon/string.rb	/^  def self.utf8_chars(str)$/;"	F	class:String
 utf_8_char	./dragon/keyboard_keys.rb	/^    def self.utf_8_char raw_key$/;"	F	class:GTK.KeyboardKeys
 value	./dragon/array_deprecated.rb	/^  def value *args$/;"	f
 value	./dragon/cvar.rb	/^    def value$/;"	f	class:GTK.Cvar
@@ -3046,9 +3048,11 @@ windowevent_size_changed	./dragon/runtime/c_bridge.rb	/^      def windowevent_si
 without_ending_bang	./dragon/string.rb	/^  def without_ending_bang$/;"	f	class:String
 without_ending_bang	./dragon/symbol.rb	/^  def without_ending_bang$/;"	f	class:Symbol
 wizards	./dragon/console_evaluator.rb	/^      def wizards$/;"	f	class:GTK.ConsoleEvaluator
-wrap	./dragon/string.rb	/^  def wrap length$/;"	f	class:String.wrapped_lines
-wrapped_lines	./dragon/string.rb	/^  def self.wrapped_lines(string, length)$/;"	F	class:String
-wrapped_lines	./dragon/string.rb	/^  def wrapped_lines length$/;"	f	class:String.wrapped_lines
+wrap	./dragon/string.rb	/^  def wrap length$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary
+wrapped_lines	./dragon/string.rb	/^  def self.wrapped_lines string, length$/;"	F	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary
+wrapped_lines	./dragon/string.rb	/^  def wrapped_lines length$/;"	f	class:wrapped_lines_character_boundary.wrapped_lines_word_boundary
+wrapped_lines_character_boundary	./dragon/string.rb	/^  def self.wrapped_lines_character_boundary string, length$/;"	F
+wrapped_lines_word_boundary	./dragon/string.rb	/^  def self.wrapped_lines_word_boundary string, length$/;"	F	class:wrapped_lines_character_boundary
 write	./dragon/runtime.rb	/^  def self.write path, contents$/;"	F	class:File
 write_blank_metadata	./dragon/itch_wizard.rb	/^  def write_blank_metadata$/;"	f	class:ItchWizard
 write_blank_metadata	./dragon/metadata.rb	/^  def write_blank_metadata$/;"	f	class:Metadata

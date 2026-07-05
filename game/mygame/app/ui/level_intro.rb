@@ -22,18 +22,18 @@ class Ui::LevelIntro
     left = cx - w / 2
     bottom = cy - h / 2
 
-    @frame.outputs.solids << { x: left + 8, y: bottom - 8, w: w, h: h,
+    @frame.outputs.sprites << { path: :solid, x: left + 8, y: bottom - 8, w: w, h: h,
                               r: INK[0], g: INK[1], b: INK[2], a: alpha }
-    @frame.outputs.solids << { x: left, y: bottom, w: w, h: h,
+    @frame.outputs.sprites << { path: :solid, x: left, y: bottom, w: w, h: h,
                               r: INK[0], g: INK[1], b: INK[2], a: alpha }
-    @frame.outputs.solids << { x: left + 4, y: bottom + 4, w: w - 8, h: h - 8,
+    @frame.outputs.sprites << { path: :solid, x: left + 4, y: bottom + 4, w: w - 8, h: h - 8,
                               r: CARD[0], g: CARD[1], b: CARD[2], a: alpha }
 
     @frame.outputs.labels << { x: cx, y: cy + 44, text: @level.chapter_label.upcase,
                               size_px: 18, font: FONT_MONO_B,
                               r: accent[0], g: accent[1], b: accent[2], a: alpha,
                               anchor_x: 0.5, anchor_y: 0.5 }
-    @frame.outputs.solids << { x: cx - 28, y: cy + 26, w: 56, h: 4,
+    @frame.outputs.sprites << { path: :solid, x: cx - 28, y: cy + 26, w: 56, h: 4,
                               r: accent[0], g: accent[1], b: accent[2], a: alpha }
     @frame.outputs.labels << { x: cx, y: cy - 18, text: title,
                               size_px: title_size, font: FONT_DISPLAY,

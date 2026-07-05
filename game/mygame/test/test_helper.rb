@@ -50,7 +50,14 @@ module GameTest
   KeyDown = Struct.new(:space, :e, :down, :s)
   Keyboard = Struct.new(:left, :right, :key_down)
   Inputs = Struct.new(:keyboard)
-  Outputs = Struct.new(:sprites, :solids, :labels)
+
+  # Fills now ride in `sprites` tagged `path: :solid` (the engine dropped `solids`).
+  # `solids` surfaces just those fills; `art_sprites` surfaces the real PNG art.
+  Outputs = Struct.new(:sprites, :labels) do
+    def solids = sprites.select { |s| s[:path] == :solid }
+
+    def art_sprites = sprites.reject { |s| s[:path] == :solid }
+  end
 
   GameStub = Struct.new(:player, :level, :camera_x, :captions_on) do
     def captions_on? = captions_on
@@ -78,7 +85,7 @@ module GameTest
     @built_level = level
     Frame.new(
       Inputs.new(Keyboard.new(left, right, KeyDown.new(space, e, down, s))),
-      Outputs.new([], [], []),
+      Outputs.new([], []),
       tick_count
     )
   end

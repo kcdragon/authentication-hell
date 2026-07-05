@@ -36,8 +36,8 @@ class RewindPickup
     bob = bob_offset(frame.tick_count)
     x = @x - camera_x
     y = @y + bob
-    frame.outputs.solids << { x: x, y: y, w: SIZE, h: SIZE, r: INK[0], g: INK[1], b: INK[2] }
-    frame.outputs.solids << { x: x + 3, y: y + 3, w: SIZE - 6, h: SIZE - 6,
+    frame.outputs.sprites << { path: :solid, x: x, y: y, w: SIZE, h: SIZE, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.sprites << { path: :solid, x: x + 3, y: y + 3, w: SIZE - 6, h: SIZE - 6,
                              r: BLUE[0], g: BLUE[1], b: BLUE[2] }
     rewind_triangle(frame, x + GLYPH_INSET, y)
     rewind_triangle(frame, x + GLYPH_INSET + GLYPH_TRIANGLE_W - 2, y)
@@ -48,7 +48,7 @@ class RewindPickup
   def rewind_triangle(frame, left, base_y)
     tip_x = left
     back_x = left + GLYPH_TRIANGLE_W
-    frame.outputs.solids << { x: tip_x, y: base_y + SIZE / 2,
+    frame.outputs.sprites << { path: :solid, x: tip_x, y: base_y + SIZE / 2,
                              x2: back_x, y2: base_y + GLYPH_TIP_TRIM,
                              x3: back_x, y3: base_y + SIZE - GLYPH_TIP_TRIM,
                              r: PAPER[0], g: PAPER[1], b: PAPER[2] }

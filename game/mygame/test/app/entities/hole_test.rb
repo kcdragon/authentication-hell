@@ -36,7 +36,7 @@ class HoleTest < Minitest::Test
     hole = Hole.new(x: 1000, w: Hole::W)
     frame = build_frame
     hole.render(frame, 0)
-    assert_equal 0, frame.outputs.sprites.length
+    assert_equal 0, frame.outputs.art_sprites.length
     assert_operator frame.outputs.solids.length, :>, 0
   end
 

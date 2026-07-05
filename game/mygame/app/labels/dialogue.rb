@@ -19,11 +19,11 @@ class Dialogue
     left = cx - W / 2
     bottom = CY - card_h / 2
 
-    @frame.outputs.solids << { x: left + 8, y: bottom - 8, w: W, h: card_h,
+    @frame.outputs.sprites << { path: :solid, x: left + 8, y: bottom - 8, w: W, h: card_h,
                               r: INK[0], g: INK[1], b: INK[2] }
-    @frame.outputs.solids << { x: left, y: bottom, w: W, h: card_h,
+    @frame.outputs.sprites << { path: :solid, x: left, y: bottom, w: W, h: card_h,
                               r: INK[0], g: INK[1], b: INK[2] }
-    @frame.outputs.solids << { x: left + 4, y: bottom + 4, w: W - 8, h: card_h - 8,
+    @frame.outputs.sprites << { path: :solid, x: left + 4, y: bottom + 4, w: W - 8, h: card_h - 8,
                               r: CARD[0], g: CARD[1], b: CARD[2] }
 
     top_line_y = bottom + card_h - PAD - LINE_H / 2

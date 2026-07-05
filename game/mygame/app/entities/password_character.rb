@@ -40,8 +40,8 @@ class PasswordCharacter
     cy = c[:y]
     face = CLASS_FACE.fetch(@klass)
     ink = CLASS_INK.fetch(@klass)
-    frame.outputs.solids << { x: cx, y: cy, w: CHIP, h: CHIP, r: INK[0], g: INK[1], b: INK[2] }
-    frame.outputs.solids << { x: cx + 3, y: cy + 3, w: CHIP - 6, h: CHIP - 6,
+    frame.outputs.sprites << { path: :solid, x: cx, y: cy, w: CHIP, h: CHIP, r: INK[0], g: INK[1], b: INK[2] }
+    frame.outputs.sprites << { path: :solid, x: cx + 3, y: cy + 3, w: CHIP - 6, h: CHIP - 6,
                              r: face[0], g: face[1], b: face[2] }
     frame.outputs.labels << { x: cx + CHIP / 2, y: cy + CHIP / 2 + 1, text: @glyph,
                              size_px: 32, font: FONT_MONO_B, r: ink[0], g: ink[1], b: ink[2],

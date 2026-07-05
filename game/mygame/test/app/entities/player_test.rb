@@ -397,7 +397,7 @@ class PlayerTest < Minitest::Test
   def test_render_emits_the_figure_as_palette_solids
     frame = build_frame
     @player.render(frame, 0)
-    assert_equal 0, frame.outputs.sprites.length, "no PNG art — the figure is primitives"
+    assert_equal 0, frame.outputs.art_sprites.length, "no PNG art — the figure is primitives"
     assert_equal 10, frame.outputs.solids.length,
                  "2 legs + torso card (ink + indigo) + neck + head card (ink + skin) + hair + 2 eyes"
   end

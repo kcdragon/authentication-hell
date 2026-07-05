@@ -21,10 +21,10 @@ class Hole
 
   def render(frame, camera_x = 0)
     sx = @x - camera_x
-    frame.outputs.solids << { x: sx, y: 0, w: @w, h: GROUND_Y,
+    frame.outputs.sprites << { path: :solid, x: sx, y: 0, w: @w, h: GROUND_Y,
                              r: PAPER[0], g: PAPER[1], b: PAPER[2] }
     [ sx, sx + @w - EDGE_W ].each do |ex|
-      frame.outputs.solids << { x: ex, y: 0, w: EDGE_W, h: GROUND_Y,
+      frame.outputs.sprites << { path: :solid, x: ex, y: 0, w: EDGE_W, h: GROUND_Y,
                                r: INK[0], g: INK[1], b: INK[2] }
     end
   end

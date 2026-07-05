@@ -29,7 +29,7 @@ class QrPiece
     bob = bob_offset(frame.tick_count)
     left = @x - camera_x
     bottom = @y + bob
-    frame.outputs.solids << { x: left - BORDER, y: bottom - BORDER,
+    frame.outputs.sprites << { path: :solid, x: left - BORDER, y: bottom - BORDER,
                              w: SIZE + BORDER * 2, h: SIZE + BORDER * 2,
                              r: INK[0], g: INK[1], b: INK[2] }
     frame.outputs.sprites << { x: left, y: bottom, w: SIZE, h: SIZE, path: sprite_path }
