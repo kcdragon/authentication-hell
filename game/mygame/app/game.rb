@@ -1,27 +1,23 @@
 class Game
   attr_reader :player, :level, :camera_x
 
-  def initialize
+  def initialize(level_builder)
+    @level_builder = level_builder
     @player = Player.new
     @collision_manager = CollisionManager.new
-    @level = Level.build(0, self)
+    @level = build_level
     @camera_x = 0
     @started = false
     @paused = false
     @beaten = false
-    @booted = false
     @captions_on = true
-    @start_level = nil
     @collision_report = Network::OneShot.new
     @death_report = Network::OneShot.new
     @unlock_poller = nil
   end
 
-  def tick(args)
-    @frame = Frame.new(args.inputs, args.outputs, args.state.tick_count)
-    Network.base_url(args)
-
-    return boot_tick unless @booted
+  def tick(frame)
+    @frame = frame
 
     cc_clicked = handle_caption_input
     start_run unless @started
@@ -49,23 +45,8 @@ class Game
 
   def tick_count = @frame.tick_count
 
-  def boot_tick
-    poll_start_request
-    handle_caption_input
-    LoadingScene.new(@frame, self).draw
-  end
-
-  def poll_start_request
-    @start_request ||= DR.http_get(Network::Start.url)
-    return unless @start_request[:complete]
-
-    if @start_request[:http_response_code] == 200
-      data = DR.parse_json(@start_request[:response_data])
-      @start_level = data["start_level"] if data && data["start_level"]
-    end
-    @level = Level.build(@start_level || 0, self)
-    @start_request = nil
-    @booted = true
+  def build_level
+    @level_builder.call(self)
   end
 
   def handle_caption_input
@@ -187,7 +168,6 @@ class Game
   end
 
   def phase
-    return :loading unless @booted
     return :beaten if @beaten
     return :ended if @player.game_over
     return :buffering if @player.locked
@@ -256,7 +236,7 @@ class Game
 
   def restart_run
     @player = Player.new
-    @level = Level.build(@start_level || 0, self)
+    @level = build_level
     @unlock_poller = nil
     setup_level
     begin_level_intro

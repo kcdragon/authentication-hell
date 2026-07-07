@@ -44,6 +44,11 @@
 # Server origin baked into the game bundle by bin/build-game
 /game/mygame/app/server_config.txt
 
+# Draft levels from the in-game editor, shared across worktrees (a symlink to the
+# main checkout's copy in Conductor workspaces — see .conductor/setup.sh).
+# Promoted levels move to game/mygame/data/levels/, which is committed.
+/level_drafts
+
 # Node modules — only the Playwright CLI for system tests lives here; bin/setup
 # installs it from package.json. Keep package.json/package-lock.json tracked.
 /node_modules/

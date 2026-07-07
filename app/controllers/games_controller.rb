@@ -30,10 +30,16 @@ class GamesController < ApplicationController
     mark_now_playing(level) if level
     clear_permanent_toasts
     award_active_achievements
-    render json: { start_level: number }
+    render json: start_payload(number)
   end
 
   private
+
+  def start_payload(number)
+    payload = { start_level: number, is_editor_enabled: Rails.env.development? }
+    payload[:editor_constants] = Editor::LevelFile.client_constants if Rails.env.development?
+    payload
+  end
 
   def award_active_achievements
     AwardActiveAchievementsJob.perform_later(Current.user, Time.current)

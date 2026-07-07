@@ -49,3 +49,12 @@ if [ -d "$root/game" ]; then
     fi
   done
 fi
+
+# Draft levels from the in-game editor are shared across every workspace:
+# the real (gitignored) directory lives in the root checkout, each worktree
+# gets a symlink to it. Promoted levels live in the committed
+# game/mygame/data/levels/ and need no seeding.
+mkdir -p "$root/level_drafts"
+if [ ! -e level_drafts ]; then
+  ln -s "$root/level_drafts" level_drafts
+fi

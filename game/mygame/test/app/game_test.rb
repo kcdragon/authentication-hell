@@ -1,50 +1,16 @@
 require_relative "../test_helper"
 
 class GameBootTest < Minitest::Test
-  def poll(start_request: nil)
-    game = Game.new
-    game.instance_variable_set(:@start_request, start_request)
-    game.send(:poll_start_request)
-    game
-  end
+  def test_builds_the_level_through_the_injected_builder_without_http
+    DR.reset!
+    game = Game.new(->(g) { Level.build(2, g) })
 
-  def complete(code:, body:)
-    { complete: true, http_response_code: code, response_data: body }
-  end
-
-  def test_kicks_off_the_start_request_on_the_first_tick
-    DR.last_url = nil
-    game = poll
-
-    assert_equal "http://test/game/start", DR.last_url
-    assert_equal({ complete: false }, game.instance_variable_get(:@start_request))
-    refute game.instance_variable_get(:@booted), "still in flight — the loading screen stays up"
-  end
-
-  def test_resolves_the_server_start_level_once_the_request_completes
-    game = poll(start_request: complete(code: 200, body: '{"start_level":2}'))
-
+    assert_nil DR.last_url, "no HTTP — the Shell already fetched /game/start"
     assert_equal 2, game.level.number
-    assert game.instance_variable_get(:@booted)
-    assert_nil game.instance_variable_get(:@start_request), "no handle lingers once resolved"
-  end
-
-  def test_defaults_to_the_welcome_level_when_the_response_omits_a_level
-    game = poll(start_request: complete(code: 200, body: "{}"))
-
-    assert_equal 0, game.level.number
-    assert game.instance_variable_get(:@booted)
-  end
-
-  def test_defaults_to_the_welcome_level_when_the_request_fails
-    game = poll(start_request: complete(code: 500, body: ""))
-
-    assert_equal 0, game.level.number
-    assert game.instance_variable_get(:@booted)
   end
 
   def test_a_fresh_game_wires_itself_into_its_level
-    game = Game.new
+    game = Game.new(->(g) { Level.build(0, g) })
 
     assert_equal 0, game.level.number
     assert_same game, game.level.send(:game)
@@ -52,24 +18,30 @@ class GameBootTest < Minitest::Test
     refute game.started?
     assert game.captions_on?
   end
+
+  def test_the_builder_also_rebuilds_the_level_on_restart
+    factory_level = nil
+    game = Game.new(->(g) { factory_level = JsonLevel.new(g, "slug" => "level-5") })
+
+    assert_same factory_level, game.level
+    assert_equal JsonLevel::NUMBER, game.level.number
+
+    game.instance_variable_set(:@frame, Frame.new(nil, nil, 0))
+    game.send(:restart_run)
+    assert_same factory_level, game.level, "restart rebuilds through the factory"
+  end
 end
 
 class GamePhaseTest < Minitest::Test
   include GameTest
 
   def setup
-    @game = Game.new
+    @game = Game.new(->(g) { Level.build(0, g) })
     @game.instance_variable_set(:@frame, build_frame(player: @game.player, level: @game.level))
-    @game.instance_variable_set(:@booted, true)
     @game.instance_variable_set(:@started, true)
   end
 
   def phase = @game.send(:phase)
-
-  def test_loading_until_the_boot_request_resolves
-    @game.instance_variable_set(:@booted, false)
-    assert_equal :loading, phase
-  end
 
   def test_the_welcome_dialogue_owns_the_opening_frame
     assert_equal :dialogue, phase
@@ -111,7 +83,7 @@ class GameUnlockTest < Minitest::Test
 
   def setup
     DR.reset!
-    @game = Game.new
+    @game = Game.new(->(g) { Level.build(0, g) })
     @game.instance_variable_set(:@frame, build_frame(player: @game.player, level: @game.level))
     @game.player.lock!(:totp)
     @game.player.confirm_lock!

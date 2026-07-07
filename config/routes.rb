@@ -90,6 +90,13 @@ Rails.application.routes.draw do
     post "death" => "deaths#create", as: :death
   end
 
+  namespace :editor do
+    resources :levels, only: %i[ index show create ], param: :slug,
+                       constraints: { slug: /[a-z0-9\-]+/ } do
+      post :promote, on: :member
+    end
+  end
+
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
