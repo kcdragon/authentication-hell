@@ -35,7 +35,7 @@ bin/ci                 # full CI pipeline locally (config/ci.rb)
 ```
 
 ### CI
-There's no cloud CI — `bin/ci` (defined by `config/ci.rb`) runs everything and, on a green run, records the [gh-signoff](https://github.com/basecamp/gh-signoff) status that unblocks a merge. Always run it yourself after every PR push (each push invalidates the prior signoff); never run `gh signoff` by hand.
+There's no cloud CI — `bin/ci` (defined by `config/ci.rb`) runs everything and, on a green run, records the [gh-signoff](https://github.com/basecamp/gh-signoff) status that unblocks a merge. A `PostToolUse` hook in `.claude/settings.json` runs `bin/ci` automatically after every `git push` — don't run it yourself after pushing; never run `gh signoff` by hand.
 
 RuboCop and Brakeman scope to *our* code only: all of `game/` is excluded except `game/mygame/main.rb` (see `.rubocop.yml` / `config/brakeman.yml`). New hand-written files under `game/mygame/` are linted by default — intended.
 

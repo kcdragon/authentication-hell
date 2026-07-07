@@ -57,6 +57,7 @@ module GameTest
     "accents" => [ "blue", "green", "red", "purple", "amber", "teal", "ruby" ].freeze,
     "world_w_min" => 1280,
     "world_w_max" => 12_800,
+    "world_h" => 2160,
     "time_limit_min" => 10,
     "time_limit_max" => 600
   }.freeze

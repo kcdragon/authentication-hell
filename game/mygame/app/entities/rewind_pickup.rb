@@ -1,27 +1,16 @@
-class RewindPickup
-  include Collectable
-
+class RewindPickup < Pickup
   SECONDS = 30
   SIZE = 34
   LIFT = 40
-  BOB = 6
 
   GLYPH_TRIANGLE_W = 12
   GLYPH_INSET = 6
   GLYPH_TIP_TRIM = 10
 
-  attr_accessor :x, :y, :w, :h
-
   def initialize(x:, y:, level:)
-    @x = x
-    @y = y
-    @w = SIZE
-    @h = SIZE
+    super(x: x, y: y)
     @level = level
-    @alive = true
   end
-
-  def hitbox = { x: @x, y: @y, w: @w, h: @h }
 
   def on_collision(other, frame)
     return unless other.is_a?(Player) && alive?
@@ -30,12 +19,10 @@ class RewindPickup
     super
   end
 
-  def collect(_player) = nil
-
-  def render(frame, camera_x = 0)
+  def render(frame, camera_x = 0, camera_y = 0)
     bob = bob_offset(frame.tick_count)
     x = @x - camera_x
-    y = @y + bob
+    y = @y + bob - camera_y
     frame.outputs.sprites << { path: :solid, x: x, y: y, w: SIZE, h: SIZE, r: INK[0], g: INK[1], b: INK[2] }
     frame.outputs.sprites << { path: :solid, x: x + 3, y: y + 3, w: SIZE - 6, h: SIZE - 6,
                              r: BLUE[0], g: BLUE[1], b: BLUE[2] }

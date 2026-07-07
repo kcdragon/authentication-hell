@@ -93,10 +93,10 @@ class Shell
   end
 
   def draw_option(rect, text, accent)
-    @frame.outputs.solids << { x: rect[:x] - 3, y: rect[:y] - 3, w: rect[:w] + 6, h: rect[:h] + 6,
+    @frame.outputs.sprites << { path: :solid, x: rect[:x] - 3, y: rect[:y] - 3, w: rect[:w] + 6, h: rect[:h] + 6,
                               r: INK[0], g: INK[1], b: INK[2] }
-    @frame.outputs.solids << rect.merge(r: CARD[0], g: CARD[1], b: CARD[2])
-    @frame.outputs.solids << { x: rect[:x], y: rect[:y], w: 12, h: rect[:h],
+    @frame.outputs.sprites << rect.merge(path: :solid, r: CARD[0], g: CARD[1], b: CARD[2])
+    @frame.outputs.sprites << { path: :solid, x: rect[:x], y: rect[:y], w: 12, h: rect[:h],
                               r: accent[0], g: accent[1], b: accent[2] }
     @frame.outputs.labels << { x: rect[:x] + 36, y: rect[:y] + rect[:h] / 2, text: text,
                               size_px: 24, font: FONT_MONO_B,

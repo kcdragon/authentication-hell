@@ -64,6 +64,7 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_equal Editor::LevelFile::FORMAT, constants["format"]
     assert_equal Editor::LevelFile::WORLD_W_RANGE.min, constants["world_w_min"]
     assert_equal Editor::LevelFile::WORLD_W_RANGE.max, constants["world_w_max"]
+    assert_equal Editor::LevelFile::WORLD_H, constants["world_h"]
     assert_equal Editor::LevelFile::TIME_LIMIT_RANGE.min, constants["time_limit_min"]
     assert_equal Editor::LevelFile::TIME_LIMIT_RANGE.max, constants["time_limit_max"]
   end

@@ -1,6 +1,4 @@
-class PasswordCharacter
-  include Collectable
-
+class PasswordCharacter < Pickup
   CLASSES = %i[upper lower digit symbol]
   UNAMBIGUOUS_GLYPHS = {
     upper: "ABCDEFGHJKLMNPQRSTUVWXYZ",
@@ -16,28 +14,22 @@ class PasswordCharacter
   CHIP = 50
   FLOAT_GAP = 16
 
-  attr_accessor :x, :y, :w, :h, :klass, :glyph
+  attr_accessor :klass, :glyph
 
   def initialize(x:, klass:, y: GROUND_Y, glyph: nil)
-    @x = x
-    @y = y
-    @w = SIZE
-    @h = SIZE
+    super(x: x, y: y)
     @klass = klass
     @glyph = glyph || UNAMBIGUOUS_GLYPHS.fetch(klass).chars.sample
-    @alive = true
   end
 
   def chip_rect = { x: @x + (SIZE - CHIP) / 2, y: @y + FLOAT_GAP, w: CHIP, h: CHIP }
 
   def hitbox = chip_rect
 
-  def collect(_player) = nil
-
-  def render(frame, camera_x = 0)
+  def render(frame, camera_x = 0, camera_y = 0)
     c = chip_rect
     cx = c[:x] - camera_x
-    cy = c[:y]
+    cy = c[:y] - camera_y
     face = CLASS_FACE.fetch(@klass)
     ink = CLASS_INK.fetch(@klass)
     frame.outputs.sprites << { path: :solid, x: cx, y: cy, w: CHIP, h: CHIP, r: INK[0], g: INK[1], b: INK[2] }

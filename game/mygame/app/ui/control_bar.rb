@@ -19,7 +19,8 @@ class Ui::ControlBar
 
   def draw_floor
     cam = @game.camera_x
-    @game.level.holes.each { |hole| hole.render(@frame, cam) }
-    @game.level.render_floor(@frame, cam)
+    cam_y = @game.camera_y
+    @game.level.holes.each { |hole| hole.render(@frame, cam, cam_y) }
+    @game.level.render_floor(@frame, cam, cam_y)
   end
 end

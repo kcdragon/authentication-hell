@@ -95,6 +95,12 @@ class Player
     @prev_y = @y
     @y += @vy
 
+    ceiling = [ WORLD_H - HEIGHT, @prev_y ].max
+    if @vy > 0 && @y > ceiling
+      @y = ceiling
+      @vy = 0
+    end
+
     @grounded = false
     if landing_on_floor?(level)
       @y = GROUND_Y
@@ -181,13 +187,13 @@ class Player
     frame.tick_count < @blink_until_tick
   end
 
-  def render(frame, camera_x = 0)
+  def render(frame, camera_x = 0, camera_y = 0)
     sx = @x - camera_x
 
     return if invincible?(frame) &&
               frame.tick_count % (BLINK_INTERVAL * 2) >= BLINK_INTERVAL
 
-    leg_y   = @y
+    leg_y   = @y - camera_y
     torso_y = leg_y + LEG_H
     neck_y  = torso_y + TORSO_H
     head_y  = neck_y + NECK_H

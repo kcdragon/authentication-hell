@@ -31,24 +31,25 @@ class Platform
   UNDERSIDE_H = 7 # part of the platform rect, not an offset shadow — a shadow would crawl against scroll
   WORD_TICKS = [ 40, 24, 52, 30, 18 ].freeze
 
-  def render(frame, camera_x = 0)
+  def render(frame, camera_x = 0, camera_y = 0)
     sx = @x - camera_x
-    frame.outputs.sprites << { path: :solid, x: sx, y: @y - UNDERSIDE_H, w: @w, h: @h + UNDERSIDE_H,
+    sy = @y - camera_y
+    frame.outputs.sprites << { path: :solid, x: sx, y: sy - UNDERSIDE_H, w: @w, h: @h + UNDERSIDE_H,
                              r: INK[0], g: INK[1], b: INK[2] }
-    frame.outputs.sprites << { path: :solid, x: sx + 3, y: @y + 3, w: @w - 6, h: @h - 6,
+    frame.outputs.sprites << { path: :solid, x: sx + 3, y: sy + 3, w: @w - 6, h: @h - 6,
                              r: INDIGO[0], g: INDIGO[1], b: INDIGO[2] }
-    draw_caption(frame, sx)
+    draw_caption(frame, sx, sy)
   end
 
   def on_collision(_other, _frame) = nil
 
   private
 
-  def draw_caption(frame, sx)
-    frame.outputs.sprites << { path: :solid, x: sx + 8, y: @y + 6, w: 14, h: @h - 12,
+  def draw_caption(frame, sx, sy)
+    frame.outputs.sprites << { path: :solid, x: sx + 8, y: sy + 6, w: 14, h: @h - 12,
                              r: BLUE[0], g: BLUE[1], b: BLUE[2] }
     cx = sx + 30
-    word_y = @y + @h / 2 - 2
+    word_y = sy + @h / 2 - 2
     WORD_TICKS.each do |ww|
       break if cx + ww > sx + @w - 10
       frame.outputs.sprites << { path: :solid, x: cx, y: word_y, w: ww, h: 5,

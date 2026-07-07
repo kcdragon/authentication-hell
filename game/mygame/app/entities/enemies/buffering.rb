@@ -10,9 +10,9 @@ class BufferingEnemy < Enemy
 
   def slows? = true
 
-  def render(frame, camera_x = 0)
+  def render(frame, camera_x = 0, camera_y = 0)
     cx = @x - camera_x + @w / 2
-    cy = @y + @h / 2
+    cy = @y + @h / 2 - camera_y
     head = (frame.tick_count / TICKS_PER_SEGMENT).to_i % SEGMENTS
     SEGMENTS.times do |i|
       angle = i * 2 * Math::PI / SEGMENTS

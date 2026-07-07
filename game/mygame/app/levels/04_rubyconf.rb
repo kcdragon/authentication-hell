@@ -49,8 +49,8 @@ class RubyConfLevel < Level
 
   def complete? = @cleared == true
 
-  def render_world(frame, cam)
-    @plants.each { |plant| plant.render(frame, cam) }
+  def render_world(frame, cam, cam_y = 0)
+    @plants.each { |plant| plant.render(frame, cam, cam_y) }
   end
 
   def draw(frame)

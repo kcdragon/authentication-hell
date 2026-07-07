@@ -102,6 +102,19 @@ class Editor::LevelFileTest < ActiveSupport::TestCase
     end
   end
 
+  test "validates platform y bounds" do
+    [ 99, 2160, -30 ].each do |bad_y|
+      level = Editor::LevelFile.new(valid_data.merge("platforms" => [ { "x" => 360, "y" => bad_y, "w" => 180 } ]))
+      assert_not level.valid?, "expected platform y #{bad_y} to be rejected"
+      assert_includes level.errors, "platform y out of range"
+    end
+
+    [ 100, 690, 1500, 2130 ].each do |good_y|
+      level = Editor::LevelFile.new(valid_data.merge("platforms" => [ { "x" => 360, "y" => good_y, "w" => 180 } ]))
+      assert level.valid?, "expected platform y #{good_y} to be accepted"
+    end
+  end
+
   test "find returns nil for unknown or malformed slugs" do
     assert_nil Editor::LevelFile.find("missing")
     assert_nil Editor::LevelFile.find("../../etc/passwd")

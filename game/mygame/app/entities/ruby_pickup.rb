@@ -1,27 +1,10 @@
-class RubyPickup
-  include Collectable
-
+class RubyPickup < Pickup
   SIZE = 44
   LIFT = 20
-  BOB = 6
 
-  attr_accessor :x, :y, :w, :h
-
-  def initialize(x:, y:)
-    @x = x
-    @y = y
-    @w = SIZE
-    @h = SIZE
-    @alive = true
-  end
-
-  def hitbox = { x: @x, y: @y, w: @w, h: @h }
-
-  def collect(_player) = nil
-
-  def render(frame, camera_x = 0)
+  def render(frame, camera_x = 0, camera_y = 0)
     bob = bob_offset(frame.tick_count)
-    frame.outputs.sprites << { x: @x - camera_x, y: @y + bob, w: @w, h: @h,
+    frame.outputs.sprites << { x: @x - camera_x, y: @y + bob - camera_y, w: @w, h: @h,
                               path: "sprites/ui/ruby.png" }
   end
 end
