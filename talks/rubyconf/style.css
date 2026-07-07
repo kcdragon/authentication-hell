@@ -213,6 +213,17 @@
   color: var(--color-muted);
 }
 
+/* Section dividers hold a single centered title with no other content, so —
+   unlike content h1s — a long one should shrink to fit rather than overflow.
+   The widest current title ("Authentication Hell: The Game", ~29 chars) renders
+   ~837px at this 2.7rem ceiling, clearing the ~852px content area (980px canvas
+   minus the layout's px-16). `text-wrap: balance` (overriding the base
+   `text-wrap: nowrap`) is the safety net for any future title longer still. */
+.slidev-layout.section h1 {
+  font-size: clamp(1.6rem, 8cqw, 2.7rem);
+  text-wrap: balance;
+}
+
 /* ---- AGENDA (<Toc> on the section divider) --------------------------- */
 /* `<Toc>` emits nested <ol>/<li>; we counter-number the top level and
    render each entry as a brutalist card. The active section (Slidev adds
