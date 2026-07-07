@@ -86,6 +86,10 @@ Future game art must be bare PNGs (IHDR/IDAT/IEND, no ancillary chunks) or it ch
 - **Cross-origin isolation** (for the WASM `SharedArrayBuffer`): `GamesController` sets COOP/COEP on `/game`, and `GameCrossOriginIsolation` middleware stamps `Cross-Origin-Resource-Policy: same-origin` on `/game_assets/`. Suspect these headers first if the game won't load.
 - **Live dev:** `bin/dev` runs `bin/watch-game` (rebuilds on changes under `game/mygame/` only). Publish takes a couple seconds; hard-refresh `/game`.
 
+### Level editor (dev-only)
+
+In development, `/game` boots to a Play/Edit menu; the editor (`game/mygame/app/editor/`, plus `Editor::*` on the Rails side) authors levels visually and saves them as JSON through dev-only endpoints. New levels are drafts in the gitignored, worktree-shared `level_drafts/`; promoting from the editor moves them to the committed `game/mygame/data/levels/`, which `JsonLevel` rebuilds into playable levels.
+
 ## Secrets
 
 Never invent placeholder encryption keys or API tokens. If a real secret is needed, ask Mike to add it via `bin/rails credentials:edit`.

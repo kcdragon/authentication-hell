@@ -18,6 +18,10 @@ module DR
 
     def http_post(url, _body = nil, _headers = nil) = record(url)
 
+    def http_post_body(url, body, _headers = nil)
+      record(url).merge!(body: body)
+    end
+
     def parse_json(str) = JSON.parse(str)
 
     def complete!(url, code: 200, body: "{}")
@@ -45,6 +49,20 @@ module DR
 end
 
 module GameTest
+  # Mirrors Editor::LevelFile.client_constants, which the server sends down in
+  # the /game/start response for the level editor.
+  EDITOR_RULES = {
+    "format" => 1,
+    "enemy_kinds" => [ "totp", "passkey", "buffering", "password", "tutorial" ].freeze,
+    "accents" => [ "blue", "green", "red", "purple", "amber", "teal", "ruby" ].freeze,
+    "world_w_min" => 1280,
+    "world_w_max" => 12_800,
+    "time_limit_min" => 10,
+    "time_limit_max" => 600
+  }.freeze
+
+  def editor_rules = EDITOR_RULES
+
   # Structs, not Hashes: the engine's hashes quack like attr_accessor — entity
   # code reads `keyboard.left`, which a plain Ruby Hash can't answer.
   KeyDown = Struct.new(:space, :e, :down, :s)

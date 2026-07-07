@@ -1,12 +1,10 @@
-class LoadingScene
-  def initialize(frame, game)
+class ShellLoadingScene
+  def initialize(frame)
     @frame = frame
-    @game = game
   end
 
   def draw
     Ui::Background.new(@frame).draw
-    Ui::ControlBar.new(@frame, @game).draw
     draw_loading
   end
 

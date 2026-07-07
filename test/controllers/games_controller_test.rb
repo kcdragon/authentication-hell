@@ -48,6 +48,26 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, response.parsed_body["start_level"]
   end
 
+  test "start offers the level editor only in development" do
+    sign_in_as(@user)
+
+    get game_start_url
+    assert_equal false, response.parsed_body["is_editor_enabled"]
+    assert_nil response.parsed_body["editor_constants"]
+
+    in_env("development") { get game_start_url }
+    assert_equal true, response.parsed_body["is_editor_enabled"]
+
+    constants = response.parsed_body["editor_constants"]
+    assert_equal Editor::LevelFile::ENEMY_KINDS, constants["enemy_kinds"]
+    assert_equal Editor::LevelFile::ACCENTS, constants["accents"]
+    assert_equal Editor::LevelFile::FORMAT, constants["format"]
+    assert_equal Editor::LevelFile::WORLD_W_RANGE.min, constants["world_w_min"]
+    assert_equal Editor::LevelFile::WORLD_W_RANGE.max, constants["world_w_max"]
+    assert_equal Editor::LevelFile::TIME_LIMIT_RANGE.min, constants["time_limit_min"]
+    assert_equal Editor::LevelFile::TIME_LIMIT_RANGE.max, constants["time_limit_max"]
+  end
+
   test "start marks the resolved level now playing and broadcasts" do
     @user.update!(highest_level_completed: 1)
     sign_in_as(@user)
