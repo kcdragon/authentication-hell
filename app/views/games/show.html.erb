@@ -45,38 +45,4 @@
     </div>
     <div id="<%= Game::Toasts::EPHEMERAL_CONTAINER %>" class="contents"></div>
   </div>
-
-  <%# The game_page layout omits the app-wide importmap, so declare a page-scoped
-      one with absolute, digested asset URLs. %>
-  <script type="importmap">
-    {
-      "imports": {
-        "@hotwired/turbo-rails": "<%= asset_path("turbo.min.js") %>",
-        "@hotwired/stimulus": "<%= asset_path("stimulus.min.js") %>",
-        "@github/webauthn-json": "<%= asset_path("@github--webauthn-json.js") %>",
-        "lib/webauthn_ceremony_controller": "<%= asset_path("lib/webauthn_ceremony_controller.js") %>",
-        "controllers/games_passkey_challenge_controller": "<%= asset_path("controllers/games_passkey_challenge_controller.js") %>",
-        "controllers/dropdown_controller": "<%= asset_path("controllers/dropdown_controller.js") %>",
-        "controllers/collapsible_controller": "<%= asset_path("controllers/collapsible_controller.js") %>",
-        "controllers/game_frame_controller": "<%= asset_path("controllers/game_frame_controller.js") %>",
-        "controllers/playlist_toggle_controller": "<%= asset_path("controllers/playlist_toggle_controller.js") %>"
-      }
-    }
-  </script>
-  <script type="module">
-    import "@hotwired/turbo-rails"
-    import { Application } from "@hotwired/stimulus"
-    import GamesPasskeyChallengeController from "controllers/games_passkey_challenge_controller"
-    import DropdownController from "controllers/dropdown_controller"
-    import CollapsibleController from "controllers/collapsible_controller"
-    import GameFrameController from "controllers/game_frame_controller"
-    import PlaylistToggleController from "controllers/playlist_toggle_controller"
-
-    const application = Application.start()
-    application.register("games-passkey-challenge", GamesPasskeyChallengeController)
-    application.register("dropdown", DropdownController)
-    application.register("collapsible", CollapsibleController)
-    application.register("game-frame", GameFrameController)
-    application.register("playlist-toggle", PlaylistToggleController)
-  </script>
 </div>
