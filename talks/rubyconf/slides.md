@@ -217,13 +217,18 @@ end
 
 ::right::
 
-<div class="flex items-center justify-center h-full">
+<div class="flex flex-col items-center justify-center h-full">
   <div class="relative w-full aspect-video">
     <img v-click.hide="1" src="./images/sprite-empty.png" class="absolute inset-0 w-full h-full object-contain" alt="DragonRuby window that is empty because the sprite is defined but not yet drawn" />
     <img v-click="[1, 2]" src="./images/sprite-rendered.png" class="absolute inset-0 w-full h-full object-contain" alt="DragonRuby window with a green square sprite rendered in the bottom-left" />
     <SlidevVideo v-after autoplay loop muted class="absolute inset-0 w-full h-full object-contain">
       <source :src="'/videos/sprite-moving.mp4'" type="video/mp4" />
     </SlidevVideo>
+  </div>
+  <div class="relative w-full text-center text-sm mt-3" style="color: var(--color-muted)">
+    <div v-click.hide="1">Player defined — nothing drawn yet</div>
+    <div v-click="[1, 2]" class="absolute inset-0">Player drawn as a green square</div>
+    <div v-after class="absolute inset-0">Arrow keys move the square</div>
   </div>
 </div>
 
@@ -280,7 +285,7 @@ end
 
 ::right::
 
-<div class="flex items-center justify-center h-full">
+<div class="flex flex-col items-center justify-center h-full">
   <div class="relative w-full aspect-video">
     <img v-click.hide="1" src="./images/collision-apart.png" class="absolute inset-0 w-full h-full object-contain" alt="DragonRuby window with the player and enemy squares apart" />
     <SlidevVideo v-click="[1, 2]" autoplay loop muted class="absolute inset-0 w-full h-full object-contain">
@@ -289,6 +294,11 @@ end
     <SlidevVideo v-after autoplay loop muted class="absolute inset-0 w-full h-full object-contain">
       <source :src="'/videos/collision-resolved.mp4'" type="video/mp4" />
     </SlidevVideo>
+  </div>
+  <div class="relative w-full text-center text-sm mt-3" style="color: var(--color-muted)">
+    <div v-click.hide="1">Red player and blue terrain, apart</div>
+    <div v-click="[1, 2]" class="absolute inset-0">Player moves right, through the terrain</div>
+    <div v-after class="absolute inset-0">Collision detected — player stops at the edge</div>
   </div>
 </div>
 
