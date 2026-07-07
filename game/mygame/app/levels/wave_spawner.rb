@@ -13,7 +13,8 @@ class WaveSpawner
   def update(tick, camera_x)
     @last_wave_at ||= tick
     return if tick - @last_wave_at < INTERVAL
-    return if @level.enemies.count(&:alive) >= CAP
+    marchers_on_the_ground = @level.enemies.count { |e| e.alive && e.y == GROUND_Y }
+    return if marchers_on_the_ground >= CAP
 
     @last_wave_at = tick
     @level.enemies << spawn_at_camera_edge(next_kind, camera_x)

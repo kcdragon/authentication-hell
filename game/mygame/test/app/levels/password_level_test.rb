@@ -58,9 +58,23 @@ class PasswordLevelTest < Minitest::Test
 
   def test_hazards_never_spawn_on_top_of_the_player
     @level.setup(@frame)
-    nearest_reach = @level.enemies.map { |e| e.x - Enemy::PATROL_RANGE }.min
+    nearest_reach = @level.enemies.map(&:patrol_min_x).min
     assert nearest_reach > @player.x + Player::WIDTH,
            "nearest hazard patrol reach (#{nearest_reach}) must clear the player's right edge"
+  end
+
+  def test_setup_posts_guards_on_password_perches
+    @level.setup(@frame)
+    guards = @level.enemies.select { |e| e.y > GROUND_Y }
+
+    refute_empty guards, "some hazards patrol the staircase tops"
+    guards.each do |guard|
+      perch = @level.platforms.select(&:holds_password)
+                    .find { |p| p.y + p.h == guard.y && guard.x >= p.x && guard.x + guard.w <= p.x + p.w }
+      assert perch, "guard at #{guard.x} stands on a padlock platform"
+      assert_operator guard.patrol_min_x, :>=, perch.x
+      assert_operator guard.patrol_max_x, :<=, perch.x + perch.w - guard.w
+    end
   end
 
   def test_setup_lays_a_platform_field

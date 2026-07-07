@@ -3,6 +3,7 @@ class Level
 
   HEART_DROP_CHANCE = 0.20
   REWIND_DROP_CHANCE = 0.25
+  GUARD_SLICE = 3
 
   def self.build(number, game)
     case number
@@ -120,10 +121,21 @@ class Level
   def loot_for(enemy)
     roll = rand
     if roll < HEART_DROP_CHANCE
-      HeartPickup.new(x: enemy.x.clamp(0, world_w - HeartPickup::SIZE), y: GROUND_Y + HeartPickup::LIFT)
+      HeartPickup.new(x: enemy.x.clamp(0, world_w - HeartPickup::SIZE), y: enemy.y + HeartPickup::LIFT)
     elsif roll < HEART_DROP_CHANCE + REWIND_DROP_CHANCE
       RewindPickup.new(x: enemy.x.clamp(0, world_w - RewindPickup::SIZE),
-                       y: GROUND_Y + RewindPickup::LIFT, level: self)
+                       y: enemy.y + RewindPickup::LIFT, level: self)
     end
+  end
+
+  def enemy_on(kind, platform)
+    kind.new(x: platform.x + (platform.w - Enemy::WIDTH) / 2, level: self).patrol_on(platform)
+  end
+
+  def guard_perches(player_x, platforms = @platforms)
+    platforms.select(&:holds_password)
+             .select { |plat| plat.x > player_x + Enemy::SAFE_GAP }
+             .sort_by(&:x)
+             .each_slice(GUARD_SLICE).map(&:first)
   end
 end
