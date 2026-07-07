@@ -12,11 +12,8 @@
     <link rel="icon" href="/favicon-16.png" type="image/png" sizes="16x16">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
 
-    <%# No app-wide importmap: the game canvas lives in an <iframe> (its loader
-        boots there), and this page declares its own page-scoped importmap for the
-        few modules the toast/nav chrome needs. No <base href> here — that belongs
-        to the iframe document, which owns the game bundle's relative asset paths. %>
     <%= yield :head %>
     <%= render "shared/analytics" if Rails.env.production? %>
   </head>
