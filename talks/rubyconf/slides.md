@@ -101,13 +101,13 @@ layoutClass: gap-8
 
 ## DragonRuby Game Toolkit
 
-- Cross-platform 2D Game Engine
-  - Mac, Linux, Windows
+- Cross-platform 2D game engine
+  - Desktop
+  - Console
   - Steam Deck
-  - PS5, Xbox, Nintendo Switch
-  - iOS, Android
-  - Web (WASM)
-- Write your games in Ruby
+  - Mobile
+  - Web
+- Write games in Ruby!
 
 ::right::
 
@@ -120,7 +120,7 @@ layout: two-cols
 layoutClass: gap-8
 ---
 
-## DragonRuby
+## DragonRuby is Ruby
 
 - Custom Ruby runtime
 - Based on [mruby](https://mruby.org/)
@@ -138,26 +138,16 @@ layout: two-cols
 layoutClass: gap-8
 ---
 
-## SDL
+## Simple DirectMedia Layer (SDL)
 
-- [Simple DirectMedia Layer](https://www.libsdl.org/)
-- Cross-platform C library underneath DragonRuby
-- Low-level access to graphics, audio, and input
-- OpenGL / Direct3D, keyboard, mouse, joystick
-- Windows, macOS, Linux, iOS, Android
-- Powers emulators, video players, and games (Valve, indies)
+- DragonRuby wraps SDL
+- Provides low-level access to graphics, audio, and input
+- Supports all platforms
 
 ::right::
 
 <div class="flex items-center justify-center h-full">
-  <a
-    href="https://www.libsdl.org/"
-    target="_blank"
-    rel="noopener"
-    class="ah-card bg-white px-8 py-6 text-3xl font-bold no-underline !text-ink"
-  >
-    libsdl.org ↗
-  </a>
+  <img src="./images/sdl-logo.png" class="max-w-full max-h-72" alt="Simple DirectMedia Layer (SDL) logo" />
 </div>
 
 <!--
