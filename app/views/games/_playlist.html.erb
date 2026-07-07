@@ -13,10 +13,17 @@
    coming_soon = [ "OAuth & SSO", "Session Hygiene", "Spotting Phishing", "Recovery Codes 201" ]
    total = levels.size + coming_soon.size %>
 
-<aside id="<%= playlist_dom_id %>" class="ah-card w-full lg:w-[346px] lg:flex-shrink-0 overflow-hidden">
-  <div class="border-b-[3px] border-ink px-4 py-3 bg-paper">
-    <p class="font-display text-sm uppercase tracking-tight">Authentication Hell</p>
-    <p class="font-mono text-xs text-muted mt-1"><%= watched_count %> watched · <%= total %> videos</p>
+<aside id="<%= playlist_dom_id %>" data-playlist-toggle-target="panel" class="ah-card w-full lg:w-[346px] lg:flex-shrink-0 overflow-hidden">
+  <div class="flex items-start justify-between gap-2 border-b-[3px] border-ink px-4 py-3 bg-paper">
+    <div class="min-w-0">
+      <p class="font-display text-sm uppercase tracking-tight">Authentication Hell</p>
+      <p class="font-mono text-xs text-muted mt-1"><%= watched_count %> watched · <%= total %> videos</p>
+    </div>
+    <button type="button"
+            data-playlist-toggle-target="collapse"
+            data-action="playlist-toggle#collapse"
+            aria-label="Collapse playlist" aria-expanded="true"
+            class="ah-badge bg-card text-ink shadow-none leading-none cursor-pointer flex-shrink-0">»</button>
   </div>
 
   <% levels.each do |level|

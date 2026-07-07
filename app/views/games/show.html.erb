@@ -6,11 +6,11 @@
     cramped and hard to control on a small screen.
   </div>
 
-  <div class="w-full max-w-[1660px] flex flex-col lg:flex-row gap-4 items-start">
+  <div class="w-full max-w-[1660px] flex flex-col lg:flex-row gap-4 items-start" data-controller="playlist-toggle">
     <%# The game needs a same-origin <iframe> with an exactly-16:9 viewport: the
         DragonRuby engine fills its whole *document*, so a bare canvas on this
         shared page would letterbox. %>
-    <div class="flex-1 min-w-0 w-full max-w-[1280px]">
+    <div class="flex-1 min-w-0 w-full max-w-[1280px]" data-playlist-toggle-target="game">
       <div class="w-full bg-black border-[3px] border-ink rounded-[3px] shadow-brut overflow-hidden" style="aspect-ratio: 16 / 9;">
         <iframe
           src="<%= game_frame_path(level: params[:level]) %>"
@@ -25,6 +25,17 @@
 
     <%= turbo_stream_from Current.user, :playlist %>
     <%= render "games/playlist", user: Current.user %>
+
+    <%# Expand affordance shown only while the playlist is collapsed (lg+). Kept
+        outside the broadcast-replaced <aside> so it always persists. %>
+    <button type="button"
+            data-playlist-toggle-target="rail"
+            data-action="playlist-toggle#expand"
+            aria-label="Show playlist" aria-expanded="false"
+            class="ah-card hidden lg:flex-col items-center gap-2 self-stretch flex-shrink-0 px-2 py-3 bg-paper hover:bg-card transition cursor-pointer">
+      <span aria-hidden="true" class="font-display text-ink">‹</span>
+      <span class="[writing-mode:vertical-rl] rotate-180 font-display text-xs uppercase tracking-tight text-ink">Playlist</span>
+    </button>
   </div>
 
   <%= turbo_stream_from Current.user, :toasts %>
@@ -47,7 +58,8 @@
         "controllers/games_passkey_challenge_controller": "<%= asset_path("controllers/games_passkey_challenge_controller.js") %>",
         "controllers/dropdown_controller": "<%= asset_path("controllers/dropdown_controller.js") %>",
         "controllers/collapsible_controller": "<%= asset_path("controllers/collapsible_controller.js") %>",
-        "controllers/game_frame_controller": "<%= asset_path("controllers/game_frame_controller.js") %>"
+        "controllers/game_frame_controller": "<%= asset_path("controllers/game_frame_controller.js") %>",
+        "controllers/playlist_toggle_controller": "<%= asset_path("controllers/playlist_toggle_controller.js") %>"
       }
     }
   </script>
@@ -58,11 +70,13 @@
     import DropdownController from "controllers/dropdown_controller"
     import CollapsibleController from "controllers/collapsible_controller"
     import GameFrameController from "controllers/game_frame_controller"
+    import PlaylistToggleController from "controllers/playlist_toggle_controller"
 
     const application = Application.start()
     application.register("games-passkey-challenge", GamesPasskeyChallengeController)
     application.register("dropdown", DropdownController)
     application.register("collapsible", CollapsibleController)
     application.register("game-frame", GameFrameController)
+    application.register("playlist-toggle", PlaylistToggleController)
   </script>
 </div>
