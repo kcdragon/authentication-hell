@@ -167,7 +167,7 @@ layout: two-cols
 layoutClass: gap-8
 ---
 
-## A simple app
+## Movement
 
 ````md magic-move
 ```ruby
@@ -223,6 +223,71 @@ end
     <img v-click="[1, 2]" src="./images/sprite-rendered.png" class="absolute inset-0 w-full h-full object-contain" alt="DragonRuby window with a green square sprite rendered in the bottom-left" />
     <SlidevVideo v-after autoplay loop muted class="absolute inset-0 w-full h-full object-contain">
       <source :src="'/videos/sprite-moving.mp4'" type="video/mp4" />
+    </SlidevVideo>
+  </div>
+</div>
+
+---
+layout: two-cols
+layoutClass: gap-8
+---
+
+## Collisions
+
+````md magic-move
+```ruby
+def tick(args)
+  args.state.terrain ||= [...]
+  args.outputs.sprites << args.state.terrain
+
+  args.state.player ||= {...}
+  args.outputs.sprites << args.state.player
+end
+```
+```ruby
+def tick(args)
+  args.state.terrain ||= [...]
+  args.outputs.sprites << args.state.terrain
+
+  args.state.player ||= {...}
+  args.outputs.sprites << args.state.player
+
+  args.state.player.dx = args.inputs.left_right * 2
+  args.state.player.x += args.state.player.dx
+end
+```
+```ruby
+def tick(args)
+  args.state.terrain ||= [...]
+  args.outputs.sprites << args.state.terrain
+
+  args.state.player ||= {...}
+  args.outputs.sprites << args.state.player
+
+  args.state.player.dx = args.inputs.left_right * 2
+  args.state.player.x += args.state.player.dx
+
+  collision = args.state.terrain.find do |t|
+    t.intersect_rect?(args.state.player)
+  end
+  
+  if collision
+    args.state.player.x -= args.state.player.dx
+  end
+end
+```
+````
+
+::right::
+
+<div class="flex items-center justify-center h-full">
+  <div class="relative w-full aspect-video">
+    <img v-click.hide="1" src="./images/collision-apart.png" class="absolute inset-0 w-full h-full object-contain" alt="DragonRuby window with the player and enemy squares apart" />
+    <SlidevVideo v-click="[1, 2]" autoplay loop muted class="absolute inset-0 w-full h-full object-contain">
+      <source :src="'/videos/collision.mp4'" type="video/mp4" />
+    </SlidevVideo>
+    <SlidevVideo v-after autoplay loop muted class="absolute inset-0 w-full h-full object-contain">
+      <source :src="'/videos/collision-resolved.mp4'" type="video/mp4" />
     </SlidevVideo>
   </div>
 </div>
