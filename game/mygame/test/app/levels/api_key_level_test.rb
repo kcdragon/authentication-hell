@@ -99,6 +99,20 @@ class ApiKeyLevelTest < Minitest::Test
     assert @level.complete?
   end
 
+  def test_setup_posts_guards_on_platforms_clear_of_the_chasm
+    guards = @level.enemies.select { |e| e.y > GROUND_Y }
+
+    refute_empty guards, "some hazards patrol the staircase tops"
+    guards.each do |guard|
+      perch = @level.platforms.select(&:holds_password)
+                    .find { |p| p.y + p.h == guard.y && guard.x >= p.x && guard.x + guard.w <= p.x + p.w }
+      assert perch, "guard at #{guard.x} stands on a scattered platform"
+      assert_operator guard.patrol_min_x, :>=, perch.x
+      assert_operator guard.patrol_max_x, :<=, perch.x + perch.w - guard.w
+      refute_equal @level.bridge, perch, "the bridge is no place to stand watch"
+    end
+  end
+
   def test_enemies_spawn_on_both_sides_of_the_chasm
     near_side = @level.enemies.count { |e| e.x < ApiKeyLevel::CHASM_X }
     far_side = @level.enemies.count { |e| e.x > ApiKeyLevel::CHASM_X + ApiKeyLevel::CHASM_W }

@@ -36,6 +36,14 @@ class Enemy
     @patrol_max_x = max
   end
 
+  def patrol_on(platform)
+    @y = platform.y + platform.h
+    @patrol_min_x = platform.x
+    @patrol_max_x = platform.x + platform.w - @w
+    @x = @x.clamp(@patrol_min_x, @patrol_max_x)
+    self
+  end
+
   def update
     @x += @vx
     if @x <= @patrol_min_x

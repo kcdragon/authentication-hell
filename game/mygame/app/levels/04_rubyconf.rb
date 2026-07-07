@@ -13,6 +13,8 @@ class RubyConfLevel < Level
   PLATFORM_PLANT_INSET = 8
   HOLE_MARGIN = 20
 
+  GUARD_KINDS = [ TotpEnemy, PasskeyEnemy ].freeze
+
   def number = 4
 
   def title = "RubyConf Field Trip"
@@ -35,7 +37,7 @@ class RubyConfLevel < Level
     @holes = Hole.scatter
     @plants = ground_plants + platform_plants
     @collectables = ground_rubies + platform_rubies
-    @enemies = []
+    @enemies = platform_guards(game.player.x)
     @waves = WaveSpawner.new(self)
   end
 
@@ -110,11 +112,20 @@ class RubyConfLevel < Level
   end
 
   def platform_rubies
-    perches = @platforms.select(&:holds_password).sort_by(&:x)
-    hiding_spots(perches, PLATFORM_RUBY_COUNT).map do |plat|
+    ruby_perches.map do |plat|
       plant = plants_on(plat).first
       RubyPickup.new(x: centered_in(plant), y: plat.y + plat.h)
     end
+  end
+
+  def ruby_perches
+    perches = @platforms.select(&:holds_password).sort_by(&:x)
+    hiding_spots(perches, PLATFORM_RUBY_COUNT)
+  end
+
+  def platform_guards(player_x)
+    ruby_perches.select { |plat| plat.x > player_x + Enemy::SAFE_GAP }
+                .map.with_index { |plat, i| enemy_on(GUARD_KINDS[i % GUARD_KINDS.length], plat) }
   end
 
   def plants_on(plat)

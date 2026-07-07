@@ -33,7 +33,7 @@ class PasswordLevel < Level
     @platforms = Platform.scatter
     @holes = Hole.scatter
     @collectables = scatter_chars(@platforms)
-    @enemies = hazard_enemies(game.player.x)
+    @enemies = hazard_enemies(game.player.x) + platform_guards(game.player.x)
   end
 
   def update(frame)
@@ -153,6 +153,12 @@ class PasswordLevel < Level
     count = ((CHAR_END_X - start) / HAZARD_PITCH).to_i + 1
     count.times.map do |i|
       HAZARD_KINDS[i % HAZARD_KINDS.length].new(x: start + i * HAZARD_PITCH, level: self)
+    end
+  end
+
+  def platform_guards(player_x)
+    guard_perches(player_x).map.with_index do |plat, i|
+      enemy_on(HAZARD_KINDS[i % HAZARD_KINDS.length], plat)
     end
   end
 end

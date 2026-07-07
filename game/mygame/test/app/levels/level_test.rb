@@ -83,4 +83,31 @@ class LevelTest < Minitest::Test
     level.drop_loot(TotpEnemy.new(x: 300, level: level))
     assert_empty level.collectables
   end
+
+  def test_loot_from_a_platform_guard_lands_on_its_platform
+    level = Level.new(build_game)
+    platform = Platform.new(x: 500, y: 220, w: 200, h: Platform::H)
+    enemy = TotpEnemy.new(x: 560, level: level).patrol_on(platform)
+
+    drop = first_loot(level, enemy)
+    assert_equal enemy.y + drop.class::LIFT, drop.y
+  end
+
+  def test_loot_from_a_ground_enemy_still_lands_on_the_floor
+    level = Level.new(build_game)
+    enemy = TotpEnemy.new(x: 300, level: level)
+
+    drop = first_loot(level, enemy)
+    assert_equal GROUND_Y + drop.class::LIFT, drop.y
+  end
+
+  private
+
+  def first_loot(level, enemy)
+    200.times do
+      drop = level.send(:loot_for, enemy)
+      return drop if drop
+    end
+    flunk "the loot table never rolled a drop"
+  end
 end

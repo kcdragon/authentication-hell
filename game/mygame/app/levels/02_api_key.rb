@@ -34,7 +34,7 @@ class ApiKeyLevel < Level
     @holes = PIT_XS.map { |x| Hole.new(x: x, w: Hole::W) } + [ Hole.new(x: CHASM_X, w: CHASM_W) ]
     @platforms = scattered_platforms << @bridge
     @collectables = [ certificate_at_exit ]
-    @enemies = near_enemies(game.player.x) + far_enemies
+    @enemies = near_enemies(game.player.x) + far_enemies + platform_guards(game.player.x)
     @network = Network::LevelApiKey.new(self)
   end
 
@@ -85,6 +85,12 @@ class ApiKeyLevel < Level
   def far_enemies
     FAR_ENEMY_XS.map.with_index do |x, i|
       HAZARD_KINDS[i % HAZARD_KINDS.length].new(x: x, level: self)
+    end
+  end
+
+  def platform_guards(player_x)
+    guard_perches(player_x).map.with_index do |plat, i|
+      enemy_on(HAZARD_KINDS[i % HAZARD_KINDS.length], plat)
     end
   end
 end

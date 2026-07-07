@@ -17,6 +17,46 @@ class EnemyTest < Minitest::Test
     assert TotpEnemy.new(x: 0, level: enemy_level).stompable?
   end
 
+  def test_spawns_on_the_ground
+    assert_equal GROUND_Y, TotpEnemy.new(x: 0, level: enemy_level).y
+  end
+
+  def test_patrol_on_stations_it_atop_the_platform
+    platform = Platform.new(x: 500, y: 220, w: 200, h: Platform::H)
+    enemy = TotpEnemy.new(x: 560, level: enemy_level).patrol_on(platform)
+
+    assert_equal platform.y + platform.h, enemy.y
+    assert_equal platform.x, enemy.patrol_min_x
+    assert_equal platform.x + platform.w - enemy.w, enemy.patrol_max_x
+  end
+
+  def test_patrol_on_pulls_a_stray_spawn_inside_the_platform
+    platform = Platform.new(x: 500, y: 220, w: 200, h: Platform::H)
+    enemy = TotpEnemy.new(x: 0, level: enemy_level).patrol_on(platform)
+
+    assert_equal platform.x, enemy.x
+  end
+
+  def test_a_platform_patrol_never_walks_off_the_edge
+    platform = Platform.new(x: 500, y: 220, w: 200, h: Platform::H)
+    enemy = TotpEnemy.new(x: 560, level: enemy_level).patrol_on(platform)
+
+    600.times do
+      enemy.update
+      assert_operator enemy.x, :>=, platform.x
+      assert_operator enemy.x + enemy.w, :<=, platform.x + platform.w
+    end
+  end
+
+  def test_a_stomp_defeats_it_on_a_platform
+    platform = Platform.new(x: 500, y: 220, w: 200, h: Platform::H)
+    enemy = TotpEnemy.new(x: @player.x, level: enemy_level).patrol_on(platform)
+    stomp_the(enemy)
+    enemy.on_collision(@player, build_frame)
+
+    refute enemy.alive
+  end
+
   def test_a_stomp_defeats_it
     enemy = PasswordEnemy.new(x: @player.x, level: enemy_level)
     stomp_the(enemy)

@@ -85,18 +85,43 @@ class RubyConfLevelTest < Minitest::Test
     assert_empty covering, "the exit must stay visible through the meadow"
   end
 
-  def test_setup_starts_with_no_enemies
+  def test_setup_posts_guards_only_on_ruby_perches
     @level.setup(@frame)
-    assert_empty @level.enemies
+    perch_tops = @level.send(:ruby_perches).map { |p| p.y + p.h }
+
+    refute_empty @level.enemies
+    @level.enemies.each do |enemy|
+      assert_operator enemy.y, :>, GROUND_Y, "guards start on platforms, not the floor"
+      assert_includes perch_tops, enemy.y, "guard at #{enemy.x} stands on a ruby perch"
+    end
   end
 
-  def test_waves_spawn_on_an_interval
+  def test_guards_patrol_within_their_perch
     @level.setup(@frame)
+    @level.enemies.each do |enemy|
+      perch = @level.send(:ruby_perches).find { |p| p.y + p.h == enemy.y && enemy.x >= p.x && enemy.x + enemy.w <= p.x + p.w }
+      assert perch, "guard at #{enemy.x} stands on a perch"
+      assert_operator enemy.patrol_min_x, :>=, perch.x
+      assert_operator enemy.patrol_max_x, :<=, perch.x + perch.w - enemy.w
+    end
+  end
+
+  def test_guards_are_stompable_kinds_never_amber_or_buffering
+    @level.setup(@frame)
+    kinds = @level.enemies.map(&:class).uniq
+    refute_empty kinds
+    refute_includes kinds, PasswordEnemy
+    refute_includes kinds, BufferingEnemy, "waves supply the pressure — perches get stompable guards"
+  end
+
+  def test_waves_spawn_on_an_interval_above_the_seeded_guards
+    @level.setup(@frame)
+    baseline = @level.enemies.length
     @level.update(at_tick(0))
-    assert_empty @level.enemies
+    assert_equal baseline, @level.enemies.length
 
     @level.update(at_tick(WaveSpawner::INTERVAL))
-    assert_equal 1, @level.enemies.length
+    assert_equal baseline + 1, @level.enemies.length
   end
 
   def test_no_certificate_and_no_completion_while_rubies_remain
