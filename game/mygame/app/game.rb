@@ -1,5 +1,5 @@
 class Game
-  attr_reader :player, :level, :camera_x
+  attr_reader :player, :level, :camera_x, :camera_y
 
   def initialize(level_builder)
     @level_builder = level_builder
@@ -7,6 +7,7 @@ class Game
     @collision_manager = CollisionManager.new
     @level = build_level
     @camera_x = 0
+    @camera_y = 0
     @started = false
     @paused = false
     @beaten = false
@@ -89,6 +90,10 @@ class Game
       (@player.x + @player.w / 2 - SCREEN_W / 2)
         .clamp(0, @level.world_w - SCREEN_W)
 
+    @camera_y =
+      (@player.y + @player.h / 2 - SCREEN_H / 2)
+        .clamp(0, WORLD_H - SCREEN_H)
+
     @level.update(@frame)
 
     @level.enemies.each { |enemy| enemy.update if enemy.alive } unless @player.game_over
@@ -136,15 +141,15 @@ class Game
 
     hidden_for_dialogue = dialogue_active? && @level.dialogue_hides_scene?
     unless intro_active? || hidden_for_dialogue
-      @level.platforms.each { |plat| plat.render(@frame, @camera_x) }
+      @level.platforms.each { |plat| plat.render(@frame, @camera_x, @camera_y) }
 
-      @level.enemies.each { |enemy| enemy.render(@frame, @camera_x) if enemy.alive }
+      @level.enemies.each { |enemy| enemy.render(@frame, @camera_x, @camera_y) if enemy.alive }
 
-      @level.collectables.each { |pickup| pickup.render(@frame, @camera_x) if pickup.alive? }
+      @level.collectables.each { |pickup| pickup.render(@frame, @camera_x, @camera_y) if pickup.alive? }
 
-      @level.render_world(@frame, @camera_x)
+      @level.render_world(@frame, @camera_x, @camera_y)
 
-      @player.render(@frame, @camera_x)
+      @player.render(@frame, @camera_x, @camera_y)
     end
 
     Ui::ControlBar.new(@frame, self).draw
@@ -179,7 +184,7 @@ class Game
 
   def draw_lag_indicator
     @frame.outputs.labels << { x: @player.x - @camera_x + @player.w / 2,
-                               y: @player.y + @player.h + 26, text: "buffering...",
+                               y: @player.y + @player.h + 26 - @camera_y, text: "buffering...",
                                size_enum: -1, alignment_enum: 1, font: FONT_MONO,
                                r: MUTED[0], g: MUTED[1], b: MUTED[2] }
   end
@@ -208,6 +213,7 @@ class Game
   def setup_level
     @player.x = @level.start_x
     @camera_x = 0
+    @camera_y = 0
     @level.setup(@frame)
   end
 

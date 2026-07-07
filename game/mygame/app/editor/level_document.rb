@@ -150,6 +150,8 @@ class LevelDocument
 
   def to_json_string = emit(to_h)
 
+  def world_h = rules["world_h"] || WORLD_H
+
   private
 
   def accents = rules["accents"]
@@ -175,7 +177,7 @@ class LevelDocument
     max_x = @world_w - (item[:w] || Enemy::WIDTH)
     item[:x] = item[:x].clamp(0, [ max_x, 0 ].max)
     if item[:type] == :platform
-      item[:y] = item[:y].clamp(GROUND_Y, SCREEN_H - Platform::H)
+      item[:y] = item[:y].clamp(GROUND_Y, world_h - Platform::H)
     end
   end
 

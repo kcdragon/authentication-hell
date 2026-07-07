@@ -70,7 +70,7 @@ class LevelEditor
   end
 
   def draw_playtest_hint
-    @frame.outputs.solids << PLAYTEST_BANNER.merge(r: INK[0], g: INK[1], b: INK[2], a: 210)
+    @frame.outputs.sprites << PLAYTEST_BANNER.merge(path: :solid, r: INK[0], g: INK[1], b: INK[2], a: 210)
     @frame.outputs.labels << { x: 640, y: SCREEN_H - 21, text: "playtest — TAB or click here to exit",
                               size_px: 18, font: FONT_MONO,
                               r: PAPER[0], g: PAPER[1], b: PAPER[2],
@@ -171,6 +171,8 @@ class LevelEditor
     keyboard = @frame.inputs.keyboard
     @session.pan(-PAN_SPEED) if keyboard.left
     @session.pan(PAN_SPEED) if keyboard.right
+    @session.pan(0, PAN_SPEED) if keyboard.up
+    @session.pan(0, -PAN_SPEED) if keyboard.down
   end
 
   def run_action(action)
@@ -223,23 +225,23 @@ class LevelEditor
 
   def handle_mouse
     mouse = @frame.inputs.mouse
-    @session.pan((-mouse.wheel.y * 60).to_i) if mouse.wheel
+    @session.pan(0, (mouse.wheel.y * 60).to_i) if mouse.wheel
     handle_pan_drag(mouse)
 
     if mouse.click
       press(mouse)
     elsif mouse.held && @world_drag
-      @session.drag_to(mouse.x + @session.camera_x, mouse.y)
+      @session.drag_to(mouse.x + @session.camera_x, mouse.y + @session.camera_y)
     elsif mouse.up
-      @session.release(mouse.x + @session.camera_x, mouse.y) if @world_drag
+      @session.release(mouse.x + @session.camera_x, mouse.y + @session.camera_y) if @world_drag
       @world_drag = false
     end
   end
 
   def handle_pan_drag(mouse)
     if mouse.button_right
-      @session.pan((@pan_grab - mouse.x).to_i) if @pan_grab
-      @pan_grab = mouse.x
+      @session.pan((@pan_grab[:x] - mouse.x).to_i, (@pan_grab[:y] - mouse.y).to_i) if @pan_grab
+      @pan_grab = { x: mouse.x, y: mouse.y }
     else
       @pan_grab = nil
     end
@@ -250,7 +252,7 @@ class LevelEditor
       hud_press(mouse.x, mouse.y)
     else
       @world_drag = true
-      @session.press(mouse.x + @session.camera_x, mouse.y)
+      @session.press(mouse.x + @session.camera_x, mouse.y + @session.camera_y)
     end
   end
 
@@ -297,100 +299,114 @@ class LevelEditor
   def draw_world
     Ui::Background.new(@frame).draw
     cam = @session.camera_x
+    cam_y = @session.camera_y
     document = @session.document
 
-    draw_grid(cam, document)
-    document.items.each { |item| draw_item(item, cam) }
-    draw_start_marker(document, cam)
-    draw_certificate(document, cam)
-    draw_selection(cam)
+    draw_grid(cam, cam_y, document)
+    document.items.each { |item| draw_item(item, cam, cam_y) }
+    draw_start_marker(document, cam, cam_y)
+    draw_certificate(document, cam, cam_y)
+    draw_selection(cam, cam_y)
   end
 
-  def draw_grid(cam, document)
+  def draw_grid(cam, cam_y, document)
     wx = (cam / 100 + 1).to_i * 100
     while wx < cam + SCREEN_W
-      @frame.outputs.solids << { x: (wx - cam).to_i, y: 0, w: 1, h: SCREEN_H,
+      @frame.outputs.sprites << { path: :solid, x: (wx - cam).to_i, y: 0, w: 1, h: SCREEN_H,
                                 r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2], a: 90 }
       wx += 100
     end
 
+    wy = (cam_y / 100 + 1).to_i * 100
+    while wy < cam_y + SCREEN_H
+      @frame.outputs.sprites << { path: :solid, x: 0, y: (wy - cam_y).to_i, w: SCREEN_W, h: 1,
+                                r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2], a: 60 }
+      wy += 100
+    end
+
     Platform::TIERS.each do |tier|
-      @frame.outputs.solids << { x: 0, y: tier, w: SCREEN_W, h: 1,
+      @frame.outputs.sprites << { path: :solid, x: 0, y: tier - cam_y, w: SCREEN_W, h: 1,
                                 r: FAINT_INK[0], g: FAINT_INK[1], b: FAINT_INK[2], a: 140 }
     end
 
-    @frame.outputs.solids << { x: 0, y: GROUND_Y - 2, w: SCREEN_W, h: 2,
+    @frame.outputs.sprites << { path: :solid, x: 0, y: GROUND_Y - 2 - cam_y, w: SCREEN_W, h: 2,
                               r: INK[0], g: INK[1], b: INK[2] }
 
     [ 0, document.world_w ].each do |bound|
       next unless bound >= cam && bound <= cam + SCREEN_W
-      @frame.outputs.solids << { x: (bound - cam).to_i, y: 0, w: 3, h: SCREEN_H,
+      @frame.outputs.sprites << { path: :solid, x: (bound - cam).to_i, y: 0, w: 3, h: SCREEN_H,
+                                r: RED[0], g: RED[1], b: RED[2], a: 160 }
+    end
+
+    if document.world_h >= cam_y && document.world_h <= cam_y + SCREEN_H
+      @frame.outputs.sprites << { path: :solid, x: 0, y: (document.world_h - cam_y).to_i - 3, w: SCREEN_W, h: 3,
                                 r: RED[0], g: RED[1], b: RED[2], a: 160 }
     end
   end
 
-  def draw_item(item, cam)
+  def draw_item(item, cam, cam_y)
     case item[:type]
     when :platform
-      Platform.new(x: item[:x], y: item[:y], w: item[:w], h: Platform::H).render(@frame, cam)
+      Platform.new(x: item[:x], y: item[:y], w: item[:w], h: Platform::H).render(@frame, cam, cam_y)
     when :hole
-      draw_hole(item, cam)
+      draw_hole(item, cam, cam_y)
     when :enemy
-      JsonLevel::ENEMY_KINDS[item[:kind]].new(x: item[:x], level: nil).render(@frame, cam)
+      JsonLevel::ENEMY_KINDS[item[:kind]].new(x: item[:x], level: nil).render(@frame, cam, cam_y)
     end
   end
 
-  def draw_hole(item, cam)
+  def draw_hole(item, cam, cam_y)
     sx = item[:x] - cam
-    @frame.outputs.solids << { x: sx, y: 0, w: item[:w], h: GROUND_Y,
+    @frame.outputs.sprites << { path: :solid, x: sx, y: -cam_y, w: item[:w], h: GROUND_Y,
                               r: MUTED[0], g: MUTED[1], b: MUTED[2], a: 70 }
     [ sx, sx + item[:w] - 3 ].each do |ex|
-      @frame.outputs.solids << { x: ex, y: 0, w: 3, h: GROUND_Y,
+      @frame.outputs.sprites << { path: :solid, x: ex, y: -cam_y, w: 3, h: GROUND_Y,
                                 r: INK[0], g: INK[1], b: INK[2] }
     end
   end
 
-  def draw_start_marker(document, cam)
-    @frame.outputs.borders << { x: document.start_x - cam, y: GROUND_Y,
+  def draw_start_marker(document, cam, cam_y)
+    @frame.outputs.borders << { x: document.start_x - cam, y: GROUND_Y - cam_y,
                                w: Player::WIDTH, h: Player::HEIGHT,
                                r: BLUE[0], g: BLUE[1], b: BLUE[2] }
-    @frame.outputs.labels << { x: document.start_x - cam + Player::WIDTH / 2, y: GROUND_Y + Player::HEIGHT + 16,
+    @frame.outputs.labels << { x: document.start_x - cam + Player::WIDTH / 2,
+                              y: GROUND_Y + Player::HEIGHT + 16 - cam_y,
                               text: "START", size_px: 18, font: FONT_MONO_B,
                               r: BLUE[0], g: BLUE[1], b: BLUE[2],
                               anchor_x: 0.5, anchor_y: 0.5 }
   end
 
-  def draw_certificate(document, cam)
-    Certificate.new(x: document.certificate_x).render(@frame, cam)
+  def draw_certificate(document, cam, cam_y)
+    Certificate.new(x: document.certificate_x).render(@frame, cam, cam_y)
     @frame.outputs.labels << { x: document.certificate_x - cam + Certificate::SIZE / 2,
-                              y: GROUND_Y + Certificate::LIFT + Certificate::SIZE + 18,
+                              y: GROUND_Y + Certificate::LIFT + Certificate::SIZE + 18 - cam_y,
                               text: "EXIT", size_px: 18, font: FONT_MONO_B,
                               r: GREEN[0], g: GREEN[1], b: GREEN[2],
                               anchor_x: 0.5, anchor_y: 0.5 }
   end
 
-  def draw_selection(cam)
+  def draw_selection(cam, cam_y)
     selection = @session.selection
     return unless selection && selection[:kind] == :item
 
     item = selection[:item]
     rect = @session.document.rect_of(item)
-    @frame.outputs.borders << { x: rect[:x] - cam - 2, y: rect[:y] - 2,
+    @frame.outputs.borders << { x: rect[:x] - cam - 2, y: rect[:y] - 2 - cam_y,
                                w: rect[:w] + 4, h: rect[:h] + 4,
                                r: AMBER[0], g: AMBER[1], b: AMBER[2] }
-    draw_patrol_hint(item, cam) if item[:type] == :enemy
+    draw_patrol_hint(item, cam, cam_y) if item[:type] == :enemy
   end
 
-  def draw_patrol_hint(item, cam)
+  def draw_patrol_hint(item, cam, cam_y)
     center = item[:x] + Enemy::WIDTH / 2
-    @frame.outputs.solids << { x: (center - Enemy::PATROL_RANGE - cam).to_i, y: GROUND_Y - 8,
+    @frame.outputs.sprites << { path: :solid, x: (center - Enemy::PATROL_RANGE - cam).to_i, y: GROUND_Y - 8 - cam_y,
                               w: Enemy::PATROL_RANGE * 2, h: 4,
                               r: AMBER[0], g: AMBER[1], b: AMBER[2], a: 130 }
   end
 
   def draw_hud
     document = @session.document
-    @frame.outputs.solids << { x: 0, y: SCREEN_H - HUD_H, w: SCREEN_W, h: HUD_H,
+    @frame.outputs.sprites << { path: :solid, x: 0, y: SCREEN_H - HUD_H, w: SCREEN_W, h: HUD_H,
                               r: INDIGO[0], g: INDIGO[1], b: INDIGO[2] }
 
     buttons.each { |button| draw_button(button) }
@@ -402,7 +418,7 @@ class LevelEditor
     rect = button[:rect]
     active = button[:tool] && button[:tool] == @session.tool
     face = active ? BLUE : INDIGO_LIP
-    @frame.outputs.solids << rect.merge(r: face[0], g: face[1], b: face[2])
+    @frame.outputs.sprites << rect.merge(path: :solid, r: face[0], g: face[1], b: face[2])
     @frame.outputs.labels << { x: rect[:x] + rect[:w] / 2, y: rect[:y] + rect[:h] / 2,
                               text: button[:label], size_px: 20, font: FONT_MONO_B,
                               r: TS_INK[0], g: TS_INK[1], b: TS_INK[2],
@@ -411,13 +427,13 @@ class LevelEditor
 
   def draw_minimap(document)
     strip = minimap_rect
-    @frame.outputs.solids << strip.merge(r: INK[0], g: INK[1], b: INK[2])
+    @frame.outputs.sprites << strip.merge(path: :solid, r: INK[0], g: INK[1], b: INK[2])
     scale = strip[:w] / document.world_w.to_f
 
     document.items.each do |item|
       color = item[:type] == :enemy ? RED : (item[:type] == :hole ? MUTED : BLUE)
       width = [ ((item[:w] || Enemy::WIDTH) * scale).to_i, 2 ].max
-      @frame.outputs.solids << { x: strip[:x] + (item[:x] * scale).to_i, y: strip[:y] + 3,
+      @frame.outputs.sprites << { path: :solid, x: strip[:x] + (item[:x] * scale).to_i, y: strip[:y] + 3,
                                 w: width, h: strip[:h] - 6,
                                 r: color[0], g: color[1], b: color[2] }
     end
@@ -439,7 +455,7 @@ class LevelEditor
                               r: TS_INK[0], g: TS_INK[1], b: TS_INK[2],
                               anchor_x: 1, anchor_y: 0.5 }
     @frame.outputs.labels << { x: HUD_MARGIN, y: SCREEN_H - 108,
-                              text: "X del · C accent · G/H width · J/K time · T title · arrows pan",
+                              text: "X del · C accent · G/H width · J/K time · T title · arrows/wheel pan",
                               size_px: 18, font: FONT_MONO,
                               r: TS_INK[0], g: TS_INK[1], b: TS_INK[2], a: 180,
                               anchor_x: 0, anchor_y: 0.5 }
@@ -489,7 +505,7 @@ class LevelEditor
   end
 
   def draw_load_menu
-    @frame.outputs.solids << { x: 0, y: 0, w: SCREEN_W, h: SCREEN_H,
+    @frame.outputs.sprites << { path: :solid, x: 0, y: 0, w: SCREEN_W, h: SCREEN_H,
                               r: INK[0], g: INK[1], b: INK[2], a: 140 }
     @frame.outputs.labels << { x: 640, y: 540, text: "LOAD LEVEL",
                               size_px: 26, font: FONT_DISPLAY,
@@ -499,7 +515,7 @@ class LevelEditor
     @levels.each_with_index do |level, i|
       rect = load_row_rect(i)
       face = i == @load_index ? BLUE : CARD
-      @frame.outputs.solids << rect.merge(r: face[0], g: face[1], b: face[2])
+      @frame.outputs.sprites << rect.merge(path: :solid, r: face[0], g: face[1], b: face[2])
       ink = i == @load_index ? PAPER : INK
       @frame.outputs.labels << { x: rect[:x] + 16, y: rect[:y] + rect[:h] / 2,
                                 text: "#{level['slug']} · #{level['title']}#{level['draft'] ? ' (draft)' : ''}",
@@ -540,7 +556,7 @@ class LevelEditor
     draw_hud
     return unless @title_buffer
 
-    @frame.outputs.solids << { x: 340, y: 330, w: 600, h: 90,
+    @frame.outputs.sprites << { path: :solid, x: 340, y: 330, w: 600, h: 90,
                               r: INK[0], g: INK[1], b: INK[2], a: 220 }
     @frame.outputs.labels << { x: 640, y: 396, text: "TITLE",
                               size_px: 18, font: FONT_MONO_B,

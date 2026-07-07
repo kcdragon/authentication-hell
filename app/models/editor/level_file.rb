@@ -7,6 +7,10 @@ class Editor::LevelFile
   ACCENTS = %w[ blue green red purple amber teal ruby ].freeze
   WORLD_W_RANGE = (1280..12_800)
   TIME_LIMIT_RANGE = (10..600)
+  GROUND_Y = 100
+  WORLD_H = 2160
+  PLATFORM_H = 30
+  PLATFORM_Y_RANGE = (GROUND_Y..WORLD_H - PLATFORM_H)
   FIRST_NUMBER = 5
 
   cattr_accessor :root, default: Rails.root.join("game/mygame/data/levels")
@@ -61,6 +65,7 @@ class Editor::LevelFile
       accents: ACCENTS,
       world_w_min: WORLD_W_RANGE.min,
       world_w_max: WORLD_W_RANGE.max,
+      world_h: WORLD_H,
       time_limit_min: TIME_LIMIT_RANGE.min,
       time_limit_max: TIME_LIMIT_RANGE.max
     }
@@ -147,7 +152,12 @@ class Editor::LevelFile
   end
 
   def validate_geometry
-    errors << "platforms are malformed" unless entries_valid?("platforms", %w[ x y w ])
+    if entries_valid?("platforms", %w[ x y w ])
+      errors << "platform y out of range" unless
+        data["platforms"].all? { |p| PLATFORM_Y_RANGE.cover?(p["y"]) }
+    else
+      errors << "platforms are malformed"
+    end
     errors << "holes are malformed" unless entries_valid?("holes", %w[ x w ])
     errors << "enemies are malformed" unless enemies_valid?
   end

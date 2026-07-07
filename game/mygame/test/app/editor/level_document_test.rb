@@ -39,9 +39,27 @@ class LevelDocumentTest < Minitest::Test
     assert_equal 0, item[:x]
     assert_equal GROUND_Y, item[:y]
 
-    item = @document.add_platform(WORLD_W + 500, SCREEN_H + 100, 100)
+    item = @document.add_platform(WORLD_W + 500, WORLD_H + 500, 100)
     assert_equal WORLD_W - item[:w], item[:x]
-    assert_equal SCREEN_H - Platform::H, item[:y]
+    assert_equal WORLD_H - Platform::H, item[:y]
+  end
+
+  def test_platforms_can_sit_above_the_screen
+    item = @document.add_platform(300, 1500, 100)
+    assert_equal 1500, item[:y]
+  end
+
+  def test_world_h_comes_from_the_rules
+    assert_equal editor_rules["world_h"], @document.world_h
+
+    short_world = LevelDocument.new(slug: "level-5", rules: editor_rules.merge("world_h" => 1000))
+    item = short_world.add_platform(300, 1500, 100)
+    assert_equal 1000 - Platform::H, item[:y]
+  end
+
+  def test_world_h_falls_back_to_the_game_constant
+    bare = LevelDocument.new(slug: "level-5", rules: editor_rules.except("world_h"))
+    assert_equal WORLD_H, bare.world_h
   end
 
   def test_add_enemy_rejects_unknown_kinds

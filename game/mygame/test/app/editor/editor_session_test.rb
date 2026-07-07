@@ -12,6 +12,7 @@ class EditorSessionTest < Minitest::Test
     assert_equal :select, @session.tool
     assert_nil @session.selection
     assert_equal 0, @session.camera_x
+    assert_equal 0, @session.camera_y
   end
 
   def test_select_tool_ignores_unknown_tools
@@ -143,6 +144,28 @@ class EditorSessionTest < Minitest::Test
     @document.adjust_world_w(-WORLD_W)
     @session.pan(500)
     assert_equal 0, @session.camera_x
+  end
+
+  def test_vertical_pan_clamps_to_the_world_height
+    @session.pan(0, -500)
+    assert_equal 0, @session.camera_y
+    @session.pan(0, WORLD_H * 2)
+    assert_equal WORLD_H - SCREEN_H, @session.camera_y
+  end
+
+  def test_vertical_pan_leaves_the_horizontal_camera_alone
+    @session.pan(300)
+    @session.pan(0, 200)
+    assert_equal 300, @session.camera_x
+    assert_equal 200, @session.camera_y
+  end
+
+  def test_platforms_can_be_placed_above_the_screen
+    @session.select_tool(:platform)
+    @session.press(300, 1500)
+
+    platform = @document.items.first
+    assert_equal 1500 - Platform::H, platform[:y]
   end
 
   def test_jump_to_centers_the_camera

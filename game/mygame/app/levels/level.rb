@@ -101,9 +101,9 @@ class Level
 
   def draw_hud(_frame) = nil
 
-  def render_world(_frame, _cam) = nil
+  def render_world(_frame, _cam, _cam_y = 0) = nil
 
-  def render_floor(_frame, _cam) = nil
+  def render_floor(_frame, _cam, _cam_y = 0) = nil
 
   private
 

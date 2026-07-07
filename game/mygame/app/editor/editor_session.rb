@@ -2,7 +2,7 @@ class EditorSession
   TOOLS = [ :select, :platform, :hole, :enemy_totp, :enemy_passkey,
             :enemy_buffering, :enemy_password, :start, :certificate ].freeze
 
-  attr_reader :document, :tool, :selection, :camera_x
+  attr_reader :document, :tool, :selection, :camera_x, :camera_y
   attr_accessor :status
 
   def initialize(document)
@@ -11,6 +11,7 @@ class EditorSession
     @selection = nil
     @drag = nil
     @camera_x = 0
+    @camera_y = 0
     @status = nil
   end
 
@@ -47,9 +48,11 @@ class EditorSession
     @drag = nil
   end
 
-  def pan(dx)
-    limit = [ @document.world_w - SCREEN_W, 0 ].max
-    @camera_x = (@camera_x + dx).clamp(0, limit)
+  def pan(dx, dy = 0)
+    x_limit = [ @document.world_w - SCREEN_W, 0 ].max
+    y_limit = [ @document.world_h - SCREEN_H, 0 ].max
+    @camera_x = (@camera_x + dx).clamp(0, x_limit)
+    @camera_y = (@camera_y + dy).clamp(0, y_limit)
   end
 
   def jump_to(wx)

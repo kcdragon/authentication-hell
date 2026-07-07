@@ -109,6 +109,32 @@ class PlayerTest < Minitest::Test
     refute @player.reached_platform, "landing on the ground is not a platform"
   end
 
+  def test_ascending_stops_at_the_world_ceiling
+    @player.y = WORLD_H - Player::HEIGHT - 5
+    @player.vy = Player::JUMP_SPEED
+    @player.grounded = false
+    move(build_frame)
+    assert_equal WORLD_H - Player::HEIGHT, @player.y
+    assert_equal 0, @player.vy
+  end
+
+  def test_standing_above_the_nominal_ceiling_is_not_snapped_down
+    @player.y = WORLD_H
+    @player.vy = 0
+    @player.grounded = true
+    move(build_frame)
+    assert_equal WORLD_H - Player::GRAVITY, @player.y, "only gravity, no ceiling snap"
+  end
+
+  def test_jumping_from_the_nominal_ceiling_caps_at_the_takeoff_height
+    @player.y = WORLD_H
+    @player.vy = 0
+    @player.grounded = true
+    move(build_frame(space: true))
+    assert_equal WORLD_H, @player.y
+    assert_equal 0, @player.vy
+  end
+
   def descend_onto(platform, prev_y:)
     @player.instance_variable_set(:@prev_y, prev_y)
     @player.on_collision(platform, build_frame)

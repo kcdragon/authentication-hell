@@ -15,6 +15,7 @@ class GameBootTest < Minitest::Test
     assert_equal 0, game.level.number
     assert_same game, game.level.send(:game)
     assert_equal 0, game.camera_x
+    assert_equal 0, game.camera_y
     refute game.started?
     assert game.captions_on?
   end
@@ -73,6 +74,44 @@ class GamePhaseTest < Minitest::Test
     @game.player.die!
     @game.instance_variable_set(:@beaten, true)
     assert_equal :beaten, phase
+  end
+end
+
+class GameCameraTest < Minitest::Test
+  include GameTest
+
+  def setup
+    DR.reset!
+    @game = Game.new(->(g) { Level.build(0, g) })
+    @game.instance_variable_set(:@frame, build_frame(player: @game.player, level: @game.level))
+    @game.instance_variable_set(:@started, true)
+    @game.send(:setup_level)
+  end
+
+  def test_camera_stays_grounded_while_the_player_is_low
+    @game.send(:update_world)
+    assert_equal 0, @game.camera_y
+  end
+
+  def test_camera_follows_the_player_above_mid_screen
+    @game.player.y = 800
+    @game.player.grounded = false
+    @game.send(:update_world)
+    expected = @game.player.y + Player::HEIGHT / 2 - SCREEN_H / 2
+    assert_equal expected, @game.camera_y
+  end
+
+  def test_camera_clamps_at_the_world_top
+    @game.player.y = WORLD_H + 100
+    @game.player.grounded = false
+    @game.send(:update_world)
+    assert_equal WORLD_H - SCREEN_H, @game.camera_y
+  end
+
+  def test_camera_resets_on_level_setup
+    @game.instance_variable_set(:@camera_y, 300)
+    @game.send(:setup_level)
+    assert_equal 0, @game.camera_y
   end
 end
 

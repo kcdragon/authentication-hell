@@ -52,8 +52,8 @@ class ApiKeyLevel < Level
 
   def next_level = TotpLevel.new(game)
 
-  def render_floor(frame, cam)
-    @bridge&.render(frame, cam)
+  def render_floor(frame, cam, cam_y = 0)
+    @bridge&.render(frame, cam, cam_y)
   end
 
   def draw(frame)

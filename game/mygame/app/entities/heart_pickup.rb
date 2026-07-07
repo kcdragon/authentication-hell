@@ -1,30 +1,15 @@
-class HeartPickup
-  include Collectable
-
+class HeartPickup < Pickup
   SIZE = 28
   LIFT = 40
-  BOB = 6
   SPRITE_NATIVE_W = 120
   SPRITE_NATIVE_H = 110
 
-  attr_accessor :x, :y, :w, :h
-
-  def initialize(x:, y:)
-    @x = x
-    @y = y
-    @w = SIZE
-    @h = SIZE
-    @alive = true
-  end
-
-  def hitbox = { x: @x, y: @y, w: @w, h: @h }
-
   def collect(player) = player.heal
 
-  def render(frame, camera_x = 0)
+  def render(frame, camera_x = 0, camera_y = 0)
     bob = bob_offset(frame.tick_count)
     sprite_h = @w * SPRITE_NATIVE_H / SPRITE_NATIVE_W
-    frame.outputs.sprites << { x: @x - camera_x, y: @y + bob, w: @w, h: sprite_h,
+    frame.outputs.sprites << { x: @x - camera_x, y: @y + bob - camera_y, w: @w, h: sprite_h,
                               path: "sprites/ui/heart_hardmode.png" }
   end
 end

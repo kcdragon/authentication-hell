@@ -56,8 +56,8 @@ class TotpLevel < Level
 
   def next_level = RubyConfLevel.new(game)
 
-  def render_world(frame, cam)
-    @keypad.each { |pad| pad.render(frame, cam) }
+  def render_world(frame, cam, cam_y = 0)
+    @keypad.each { |pad| pad.render(frame, cam, cam_y) }
   end
 
   def draw(frame)
