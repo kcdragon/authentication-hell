@@ -3,8 +3,8 @@ class LevelDocument
   MIN_ITEM_W = 60
   EDGE_GRAB = 12
 
-  attr_reader :slug, :title, :accent, :world_w, :start_x, :time_limit, :certificate_x, :items,
-              :rules
+  attr_reader :slug, :title, :accent, :world_w, :start_x, :start_y, :time_limit, :certificate_x,
+              :items, :rules
 
   def self.from_h(hash, rules)
     document = new(slug: hash["slug"],
@@ -13,6 +13,7 @@ class LevelDocument
                    accent: hash["accent"],
                    world_w: hash["world_w"],
                    start_x: hash["start_x"],
+                   start_y: hash["start_y"],
                    time_limit: hash["time_limit"],
                    certificate_x: hash["certificate_x"])
     (hash["platforms"] || []).each { |p| document.add_platform(p["x"], p["y"], p["w"]) }
@@ -22,13 +23,14 @@ class LevelDocument
   end
 
   def initialize(slug:, rules:, title: nil, accent: nil, world_w: nil, start_x: nil,
-                 time_limit: nil, certificate_x: nil)
+                 start_y: nil, time_limit: nil, certificate_x: nil)
     @slug = slug
     @rules = rules
     @title = title || default_title
     @accent = accents.include?(accent) ? accent : accents.first
     @world_w = (world_w || WORLD_W).clamp(world_w_min, world_w_max)
     @start_x = start_x || JsonLevel::DEFAULT_START_X
+    @start_y = start_y || GROUND_Y
     @time_limit = time_limit || LEVEL_TIME_LIMIT
     @certificate_x = certificate_x || default_certificate_x
     @items = []
@@ -77,8 +79,9 @@ class LevelDocument
     @items.delete_at(index) if index
   end
 
-  def set_start_x(x)
+  def set_start(x, y)
     @start_x = snap(x).clamp(0, @world_w - Player::WIDTH)
+    @start_y = surface_under_start(y)
   end
 
   def set_certificate_x(x)
@@ -93,6 +96,7 @@ class LevelDocument
   def adjust_world_w(delta)
     @world_w = (@world_w + delta).clamp(world_w_min, world_w_max)
     @start_x = @start_x.clamp(0, @world_w - Player::WIDTH)
+    @start_y = @start_y.clamp(GROUND_Y, world_h)
     @certificate_x = @certificate_x.clamp(0, @world_w - Certificate::SIZE)
   end
 
@@ -114,7 +118,7 @@ class LevelDocument
   end
 
   def start_hit?(wx, wy)
-    inside?({ x: @start_x, y: GROUND_Y, w: Player::WIDTH, h: Player::HEIGHT }, wx, wy)
+    inside?({ x: @start_x, y: @start_y, w: Player::WIDTH, h: Player::HEIGHT }, wx, wy)
   end
 
   def certificate_hit?(wx, wy)
@@ -138,6 +142,7 @@ class LevelDocument
       "accent" => @accent,
       "world_w" => @world_w,
       "start_x" => @start_x,
+      "start_y" => @start_y,
       "time_limit" => @time_limit,
       "certificate_x" => @certificate_x,
       "platforms" => typed(:platform).map { |i| { "x" => i[:x], "y" => i[:y], "w" => i[:w] } },
@@ -168,6 +173,15 @@ class LevelDocument
   end
 
   def default_certificate_x = @world_w - Level::CERTIFICATE_INSET
+
+  def surface_under_start(wy)
+    center = @start_x + Player::WIDTH / 2
+    tops = typed(:platform)
+             .select { |p| center >= p[:x] && center <= p[:x] + p[:w] }
+             .map { |p| p[:y] + Platform::H }
+             .select { |top| top <= wy + EDGE_GRAB }
+    (tops.max || GROUND_Y).clamp(GROUND_Y, world_h)
+  end
 
   def snap(value)
     (value.to_f / GRID).round * GRID

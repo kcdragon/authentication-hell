@@ -33,6 +33,15 @@ class JsonLevelTest < Minitest::Test
     assert_equal "Draft", @level.chapter_label
   end
 
+  def test_start_y_defaults_to_the_ground
+    assert_equal GROUND_Y, @level.start_y
+  end
+
+  def test_start_y_comes_from_the_data
+    level = JsonLevel.new(build_game, DATA.merge("start_y" => 250))
+    assert_equal 250, level.start_y
+  end
+
   def test_number_is_unknown_to_rails_progression
     assert_equal 99, @level.number
   end

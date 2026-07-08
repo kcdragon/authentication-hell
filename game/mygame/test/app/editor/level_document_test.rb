@@ -12,6 +12,7 @@ class LevelDocumentTest < Minitest::Test
     assert_equal "blue", @document.accent
     assert_equal WORLD_W, @document.world_w
     assert_equal JsonLevel::DEFAULT_START_X, @document.start_x
+    assert_equal GROUND_Y, @document.start_y
     assert_equal LEVEL_TIME_LIMIT, @document.time_limit
     assert_equal WORLD_W - Level::CERTIFICATE_INSET, @document.certificate_x
     assert_empty @document.items
@@ -87,10 +88,38 @@ class LevelDocumentTest < Minitest::Test
   end
 
   def test_start_and_certificate_clamp_into_the_world
-    @document.set_start_x(-50)
+    @document.set_start(-50, GROUND_Y)
     assert_equal 0, @document.start_x
     @document.set_certificate_x(WORLD_W * 2)
     assert_equal WORLD_W - Certificate::SIZE, @document.certificate_x
+  end
+
+  def test_set_start_snaps_onto_a_platform_it_rests_on
+    @document.add_platform(300, 220, 180)
+    top = 220 + Platform::H
+    @document.set_start(320, top)
+    assert_equal 320, @document.start_x
+    assert_equal top, @document.start_y
+  end
+
+  def test_set_start_falls_back_to_the_ground_off_a_platform
+    @document.add_platform(300, 220, 180)
+    @document.set_start(1000, 250)
+    assert_equal GROUND_Y, @document.start_y
+  end
+
+  def test_set_start_stays_on_the_ground_when_placed_at_floor_level
+    @document.add_platform(300, 220, 180)
+    @document.set_start(320, GROUND_Y)
+    assert_equal GROUND_Y, @document.start_y
+  end
+
+  def test_start_y_round_trips_through_hash_and_json
+    @document.add_platform(300, 220, 180)
+    @document.set_start(320, 220 + Platform::H)
+    parsed = JSON.parse(@document.to_json_string)
+    assert_equal 220 + Platform::H, parsed["start_y"]
+    assert_equal @document.start_y, LevelDocument.from_h(parsed, editor_rules).start_y
   end
 
   def test_cycle_accent_walks_the_palette_and_wraps

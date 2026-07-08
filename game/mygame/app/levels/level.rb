@@ -43,6 +43,8 @@ class Level
 
   def start_x = 0
 
+  def start_y = GROUND_Y
+
   def time_limit = LEVEL_TIME_LIMIT
 
   CERTIFICATE_INSET = 280 # inside Hole.scatter's 700px end margin, so the goal never sits over a pit

@@ -27,6 +27,14 @@ class PlayerTest < Minitest::Test
     refute @player.reached_platform
   end
 
+  def test_place_at_positions_the_player_grounded_and_at_rest
+    @player.place_at(500, 280)
+    assert_equal 500, @player.x
+    assert_equal 280, @player.y
+    assert_equal 0, @player.vy
+    assert @player.grounded
+  end
+
   def test_moves_right_and_faces_east
     start_x = @player.x
     move(build_frame(right: true))

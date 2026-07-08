@@ -90,6 +90,36 @@ class Editor::LevelFileTest < ActiveSupport::TestCase
     end
   end
 
+  test "start_y defaults to the ground when omitted" do
+    level = Editor::LevelFile.new(valid_data)
+    assert level.valid?
+    level.write
+
+    written = JSON.parse(File.read(@draft_root.join("level-5.json")))
+    assert_equal Editor::LevelFile::GROUND_Y, written["start_y"]
+  end
+
+  test "start_y persists an authored platform top" do
+    level = Editor::LevelFile.new(valid_data.merge("start_y" => 250))
+    assert level.valid?
+    level.write
+
+    assert_equal 250, JSON.parse(File.read(@draft_root.join("level-5.json")))["start_y"]
+  end
+
+  test "validates start_y bounds" do
+    [ 99, 2161, -30, "250" ].each do |bad_y|
+      level = Editor::LevelFile.new(valid_data.merge("start_y" => bad_y))
+      assert_not level.valid?, "expected start_y #{bad_y.inspect} to be rejected"
+      assert_includes level.errors, "start_y out of range"
+    end
+
+    [ 100, 250, 2160 ].each do |good_y|
+      level = Editor::LevelFile.new(valid_data.merge("start_y" => good_y))
+      assert level.valid?, "expected start_y #{good_y} to be accepted"
+    end
+  end
+
   test "validates entity arrays" do
     bad_entries = {
       "platforms" => [ { "x" => 1 } ],

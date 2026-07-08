@@ -81,6 +81,18 @@ class Editor::LevelsControllerTest < ActionDispatch::IntegrationTest
     assert_empty Dir.children(@root)
   end
 
+  test "create permits and persists an authored start_y" do
+    sign_in_as(@user)
+
+    in_environment("development") do
+      post editor_levels_url, params: valid_data.merge("start_y" => 250).to_json,
+                              headers: json_headers
+    end
+
+    assert_response :success
+    assert_equal 250, JSON.parse(File.read(@draft_root.join("level-5.json")))["start_y"]
+  end
+
   test "promote moves a draft into the game and refuses a second promotion" do
     sign_in_as(@user)
     Editor::LevelFile.new(valid_data).write

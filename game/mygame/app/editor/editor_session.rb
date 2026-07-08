@@ -27,7 +27,7 @@ class EditorSession
     when :select then press_select(wx, wy)
     when :platform then place_platform(wx, wy)
     when :hole then place_hole(wx, wy)
-    when :start then @document.set_start_x(wx - Player::WIDTH / 2)
+    when :start then @document.set_start(wx - Player::WIDTH / 2, wy)
     when :certificate then @document.set_certificate_x(wx - Certificate::SIZE / 2)
     else place_enemy(wx)
     end
@@ -39,7 +39,7 @@ class EditorSession
     case @drag[:mode]
     when :move then @document.move_to(@drag[:item], wx - @drag[:dx], wy - @drag[:dy])
     when :size then @document.resize(@drag[:item], wx - @drag[:item][:x])
-    when :move_start then @document.set_start_x(wx - @drag[:dx])
+    when :move_start then @document.set_start(wx - @drag[:dx], wy - @drag[:dy])
     when :move_certificate then @document.set_certificate_x(wx - @drag[:dx])
     end
   end
@@ -80,7 +80,7 @@ class EditorSession
       @drag = { mode: :move, item: item, dx: wx - item[:x], dy: wy - (item[:y] || 0) }
     elsif @document.start_hit?(wx, wy)
       @selection = { kind: :start }
-      @drag = { mode: :move_start, dx: wx - @document.start_x }
+      @drag = { mode: :move_start, dx: wx - @document.start_x, dy: wy - @document.start_y }
     elsif @document.certificate_hit?(wx, wy)
       @selection = { kind: :certificate }
       @drag = { mode: :move_certificate, dx: wx - @document.certificate_x }
