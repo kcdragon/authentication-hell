@@ -156,11 +156,61 @@ graphics, audio, and input across every platform, including the WASM build.
 -->
 
 ---
+layout: two-cols
+layoutClass: gap-8
 ---
 
-## tick method
+## tick
 
-- Runs 60 times per second (60 frames per second)
+````md magic-move
+```ruby
+def tick(args)
+end
+```
+```ruby
+def tick(args)
+  args.outputs.labels << {
+    x: 555, y: 400,
+    text: "Hello, DragonRuby!"
+  }
+end
+```
+```ruby
+def tick(args)
+  args.outputs.labels << {
+    x: 555, y: 400,
+    text: "Hello, DragonRuby!"
+  }
+
+  args.outputs.labels << {
+    x: 555, y: 360,
+    text: "Frame: #{args.tick_count}"
+  }
+
+  args.outputs.labels << {
+    x: 555, y: 320,
+    text: "Seconds: #{(args.tick_count / 60).to_i}"
+  }
+end
+```
+````
+
+::right::
+
+<div class="flex flex-col items-center justify-center h-full">
+  <div class="relative w-full aspect-video">
+    <img v-click.hide="1" src="./images/sprite-empty.png" class="absolute inset-0 w-full h-full object-contain" alt="Empty DragonRuby window — tick runs but draws nothing" />
+    <img v-click="[1, 2]" src="./images/tick-hello.png" class="absolute inset-0 w-full h-full object-contain" alt="DragonRuby window showing the text Hello, DragonRuby!" />
+    <SlidevVideo v-after autoplay loop muted class="absolute inset-0 w-full h-full object-contain">
+      <source :src="'/videos/tick-counter.mp4'" type="video/mp4" />
+    </SlidevVideo>
+  </div>
+  <div class="relative w-full text-center text-sm mt-3" style="color: var(--color-muted)">
+    <div v-click.hide="1">Empty window — tick runs every frame</div>
+    <div v-click="[1, 2]" class="absolute inset-0">A label drawn on screen</div>
+    <div v-after class="absolute inset-0">Frame and second counters tick up</div>
+  </div>
+</div>
 
 ---
 layout: two-cols
