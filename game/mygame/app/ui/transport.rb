@@ -37,7 +37,7 @@ class Ui::Transport
     else
       @frame.outputs.sprites << { path: :solid, x: bx + 12, y: by + 9, x2: bx + 12, y2: by + 25,
                                 x3: bx + 26, y3: by + 17,
-                                r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+                                r: PAPER[0], g: PAPER[1], b: PAPER[2] }.merge(SOLID_TRIANGLE_SOURCE)
     end
   end
 

@@ -38,6 +38,6 @@ class RewindPickup < Pickup
     frame.outputs.sprites << { path: :solid, x: tip_x, y: base_y + SIZE / 2,
                              x2: back_x, y2: base_y + GLYPH_TIP_TRIM,
                              x3: back_x, y3: base_y + SIZE - GLYPH_TIP_TRIM,
-                             r: PAPER[0], g: PAPER[1], b: PAPER[2] }
+                             r: PAPER[0], g: PAPER[1], b: PAPER[2] }.merge(SOLID_TRIANGLE_SOURCE)
   end
 end
