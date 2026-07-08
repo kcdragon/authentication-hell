@@ -93,11 +93,11 @@ class GameCameraTest < Minitest::Test
     assert_equal 0, @game.camera_y
   end
 
-  def test_camera_follows_the_player_above_mid_screen
+  def test_camera_follows_the_player_above_three_quarter_screen
     @game.player.y = 800
     @game.player.grounded = false
     @game.send(:update_world)
-    expected = @game.player.y + Player::HEIGHT / 2 - SCREEN_H / 2
+    expected = @game.player.y + Player::HEIGHT / 2 - SCREEN_H * 3 / 4
     assert_equal expected, @game.camera_y
   end
 
