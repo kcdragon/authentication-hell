@@ -211,7 +211,7 @@ class Game
   end
 
   def setup_level
-    @player.x = @level.start_x
+    @player.place_at(@level.start_x, @level.start_y)
     @camera_x = 0
     @camera_y = 0
     @level.setup(@frame)

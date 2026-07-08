@@ -115,6 +115,24 @@ class GameCameraTest < Minitest::Test
   end
 end
 
+class GameSpawnTest < Minitest::Test
+  include GameTest
+
+  def setup
+    DR.reset!
+    @game = Game.new(->(g) { JsonLevel.new(g, "slug" => "level-5", "start_x" => 320, "start_y" => 280) })
+    @game.instance_variable_set(:@frame, build_frame(player: @game.player, level: @game.level))
+  end
+
+  def test_setup_level_spawns_the_player_at_the_authored_start
+    @game.send(:setup_level)
+    assert_equal 320, @game.player.x
+    assert_equal 280, @game.player.y
+    assert @game.player.grounded
+    assert_equal 0, @game.player.vy
+  end
+end
+
 class GameUnlockTest < Minitest::Test
   include GameTest
 

@@ -72,6 +72,15 @@ class EditorSessionTest < Minitest::Test
     assert_in_delta 3000 - Certificate::SIZE / 2, @document.certificate_x, LevelDocument::GRID
   end
 
+  def test_start_tool_snaps_onto_a_platform
+    @document.add_platform(300, 220, 180)
+    top = 220 + Platform::H
+    @session.select_tool(:start)
+    @session.press(332, top)
+    assert_in_delta 332 - Player::WIDTH / 2, @document.start_x, LevelDocument::GRID
+    assert_equal top, @document.start_y
+  end
+
   def test_select_press_on_an_item_starts_a_move_drag
     platform = @document.add_platform(300, 220, 180)
     @session.press(350, 230)
@@ -102,6 +111,15 @@ class EditorSessionTest < Minitest::Test
     assert_equal :start, @session.selection[:kind]
     @session.drag_to(@document.start_x + 210, GROUND_Y + 10)
     assert_equal 400, @document.start_x
+  end
+
+  def test_dragging_the_start_marker_lifts_it_onto_a_platform
+    @document.add_platform(300, 220, 180)
+    top = 220 + Platform::H
+    @session.press(@document.start_x + 10, GROUND_Y + 10)
+    assert_equal :start, @session.selection[:kind]
+    @session.drag_to(342, top + 10)
+    assert_equal top, @document.start_y
   end
 
   def test_dragging_the_certificate_moves_it

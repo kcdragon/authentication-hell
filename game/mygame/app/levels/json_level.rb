@@ -38,6 +38,8 @@ class JsonLevel < Level
 
   def start_x = @data["start_x"] || DEFAULT_START_X
 
+  def start_y = @data["start_y"] || GROUND_Y
+
   def time_limit = @data["time_limit"] || LEVEL_TIME_LIMIT
 
   def setup(_frame)

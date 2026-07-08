@@ -11,6 +11,7 @@ class Editor::LevelFile
   WORLD_H = 2160
   PLATFORM_H = 30
   PLATFORM_Y_RANGE = (GROUND_Y..WORLD_H - PLATFORM_H)
+  START_Y_RANGE = (GROUND_Y..WORLD_H)
   FIRST_NUMBER = 5
 
   cattr_accessor :root, default: Rails.root.join("game/mygame/data/levels")
@@ -127,6 +128,7 @@ class Editor::LevelFile
       "accent" => data["accent"],
       "world_w" => data["world_w"],
       "start_x" => data["start_x"],
+      "start_y" => data["start_y"] || GROUND_Y,
       "time_limit" => data["time_limit"],
       "certificate_x" => data["certificate_x"],
       "platforms" => data["platforms"].map { |p| p.slice("x", "y", "w") },
@@ -143,12 +145,18 @@ class Editor::LevelFile
     errors << "time_limit out of range" unless TIME_LIMIT_RANGE.cover?(data["time_limit"])
     validate_marker "start_x"
     validate_marker "certificate_x"
+    validate_start_y
   end
 
   def validate_marker(key)
     value = data[key]
     in_world = value.is_a?(Integer) && value >= 0 && value <= data["world_w"].to_i
     errors << "#{key} out of range" unless in_world
+  end
+
+  def validate_start_y
+    value = data.fetch("start_y", GROUND_Y)
+    errors << "start_y out of range" unless value.is_a?(Integer) && START_Y_RANGE.cover?(value)
   end
 
   def validate_geometry

@@ -40,7 +40,7 @@ class Editor::LevelsController < Editor::ApplicationController
   private
 
   def level_params
-    params.permit(:format, :slug, :title, :accent, :world_w, :start_x, :time_limit,
+    params.permit(:format, :slug, :title, :accent, :world_w, :start_x, :start_y, :time_limit,
                   :certificate_x,
                   platforms: %i[ x y w ], holes: %i[ x w ], enemies: %i[ kind x ])
   end

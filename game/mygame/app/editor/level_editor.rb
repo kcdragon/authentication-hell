@@ -366,11 +366,11 @@ class LevelEditor
   end
 
   def draw_start_marker(document, cam, cam_y)
-    @frame.outputs.borders << { x: document.start_x - cam, y: GROUND_Y - cam_y,
+    @frame.outputs.borders << { x: document.start_x - cam, y: document.start_y - cam_y,
                                w: Player::WIDTH, h: Player::HEIGHT,
                                r: BLUE[0], g: BLUE[1], b: BLUE[2] }
     @frame.outputs.labels << { x: document.start_x - cam + Player::WIDTH / 2,
-                              y: GROUND_Y + Player::HEIGHT + 16 - cam_y,
+                              y: document.start_y + Player::HEIGHT + 16 - cam_y,
                               text: "START", size_px: 18, font: FONT_MONO_B,
                               r: BLUE[0], g: BLUE[1], b: BLUE[2],
                               anchor_x: 0.5, anchor_y: 0.5 }

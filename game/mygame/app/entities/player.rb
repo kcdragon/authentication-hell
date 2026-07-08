@@ -56,6 +56,12 @@ class Player
     @drop_floor_y = 0
   end
 
+  def place_at(x, y)
+    @x, @y, @prev_y = x, y, y
+    @vy = 0
+    @grounded = true
+  end
+
   def update(frame, level)
     @stomped_this_tick = false
     return if @locked || @game_over
