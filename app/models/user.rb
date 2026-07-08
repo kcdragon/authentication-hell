@@ -140,6 +140,8 @@ class User < ApplicationRecord
   end
 
   def grant_achievement(key)
+    return if earned?(key)
+
     record = earned_achievements.create(achievement_key: key.to_s)
     record if record.persisted?
   end

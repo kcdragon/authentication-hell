@@ -28,6 +28,19 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
     assert @user.earned?(:level_0_complete)
   end
 
+  test "replaying an already-completed level advances now_playing without re-awarding or raising" do
+    @user.update!(highest_level_completed: 0)
+    @user.grant_achievement(:level_0_complete)
+    sign_in_as(@user)
+
+    assert_no_difference -> { @user.earned_achievements.count } do
+      post games_levels_complete_url, params: { level: 0 }
+    end
+
+    assert_response :no_content
+    assert_equal 1, @user.reload.now_playing_level
+  end
+
   test "complete never lowers an already-higher progress mark" do
     @user.update!(highest_level_completed: 1)
     sign_in_as(@user)
