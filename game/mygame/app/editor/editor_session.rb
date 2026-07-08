@@ -29,7 +29,7 @@ class EditorSession
     when :hole then place_hole(wx, wy)
     when :start then @document.set_start(wx - Player::WIDTH / 2, wy)
     when :certificate then @document.set_certificate_x(wx - Certificate::SIZE / 2)
-    else place_enemy(wx)
+    else place_enemy(wx, wy)
     end
   end
 
@@ -101,9 +101,10 @@ class EditorSession
     @drag = { mode: :size, item: item }
   end
 
-  def place_enemy(wx)
+  def place_enemy(wx, wy)
     kind = @tool.to_s.sub("enemy_", "")
-    item = @document.add_enemy(kind, wx - Enemy::WIDTH / 2)
+    y = @document.surface_under(wx, wy)
+    item = @document.add_enemy(kind, wx - Enemy::WIDTH / 2, y)
     @selection = item ? { kind: :item, item: item } : nil
   end
 end

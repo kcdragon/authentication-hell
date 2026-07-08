@@ -133,7 +133,7 @@ class Editor::LevelFile
       "certificate_x" => data["certificate_x"],
       "platforms" => data["platforms"].map { |p| p.slice("x", "y", "w") },
       "holes" => data["holes"].map { |h| h.slice("x", "w") },
-      "enemies" => data["enemies"].map { |e| e.slice("kind", "x") }
+      "enemies" => data["enemies"].map { |e| e.slice("kind", "x", "y") }
     }
   end
 
@@ -178,7 +178,8 @@ class Editor::LevelFile
   end
 
   def enemies_valid?
-    entries_valid?("enemies", %w[ x ]) &&
-      data["enemies"].all? { |e| ENEMY_KINDS.include?(e["kind"]) }
+    entries_valid?("enemies", %w[ x y ]) &&
+      data["enemies"].all? { |e| ENEMY_KINDS.include?(e["kind"]) } &&
+      data["enemies"].all? { |e| START_Y_RANGE.cover?(e["y"]) }
   end
 end

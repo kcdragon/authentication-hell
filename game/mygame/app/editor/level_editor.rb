@@ -351,7 +351,7 @@ class LevelEditor
     when :hole
       draw_hole(item, cam, cam_y)
     when :enemy
-      JsonLevel::ENEMY_KINDS[item[:kind]].new(x: item[:x], level: nil).render(@frame, cam, cam_y)
+      JsonLevel::ENEMY_KINDS[item[:kind]].new(x: item[:x], y: item[:y], level: nil).render(@frame, cam, cam_y)
     end
   end
 
@@ -399,7 +399,7 @@ class LevelEditor
 
   def draw_patrol_hint(item, cam, cam_y)
     center = item[:x] + Enemy::WIDTH / 2
-    @frame.outputs.sprites << { path: :solid, x: (center - Enemy::PATROL_RANGE - cam).to_i, y: GROUND_Y - 8 - cam_y,
+    @frame.outputs.sprites << { path: :solid, x: (center - Enemy::PATROL_RANGE - cam).to_i, y: item[:y] - 8 - cam_y,
                               w: Enemy::PATROL_RANGE * 2, h: 4,
                               r: AMBER[0], g: AMBER[1], b: AMBER[2], a: 130 }
   end

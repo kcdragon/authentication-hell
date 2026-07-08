@@ -18,7 +18,7 @@ class LevelDocument
                    certificate_x: hash["certificate_x"])
     (hash["platforms"] || []).each { |p| document.add_platform(p["x"], p["y"], p["w"]) }
     (hash["holes"] || []).each { |h| document.add_hole(h["x"], h["w"]) }
-    (hash["enemies"] || []).each { |e| document.add_enemy(e["kind"], e["x"]) }
+    (hash["enemies"] || []).each { |e| document.add_enemy(e["kind"], e["x"], e["y"]) }
     document
   end
 
@@ -54,9 +54,9 @@ class LevelDocument
     item
   end
 
-  def add_enemy(kind, x)
+  def add_enemy(kind, x, y = GROUND_Y)
     return nil unless enemy_kinds.include?(kind)
-    item = { type: :enemy, kind: kind, x: snap(x) }
+    item = { type: :enemy, kind: kind, x: snap(x), y: snap(y) }
     clamp_into_world(item)
     @items << item
     item
@@ -65,6 +65,7 @@ class LevelDocument
   def move_to(item, x, y)
     item[:x] = snap(x)
     item[:y] = snap(y) if item[:type] == :platform
+    item[:y] = surface_under(item[:x] + Enemy::WIDTH / 2, y) if item[:type] == :enemy
     clamp_into_world(item)
   end
 
@@ -81,7 +82,15 @@ class LevelDocument
 
   def set_start(x, y)
     @start_x = snap(x).clamp(0, @world_w - Player::WIDTH)
-    @start_y = surface_under_start(y)
+    @start_y = surface_under(@start_x + Player::WIDTH / 2, y)
+  end
+
+  def surface_under(center_x, wy)
+    tops = typed(:platform)
+             .select { |p| center_x >= p[:x] && center_x <= p[:x] + p[:w] }
+             .map { |p| p[:y] + Platform::H }
+             .select { |top| top <= wy + EDGE_GRAB }
+    (tops.max || GROUND_Y).clamp(GROUND_Y, world_h)
   end
 
   def set_certificate_x(x)
@@ -130,7 +139,7 @@ class LevelDocument
     case item[:type]
     when :platform then { x: item[:x], y: item[:y], w: item[:w], h: Platform::H }
     when :hole then { x: item[:x], y: 0, w: item[:w], h: GROUND_Y }
-    when :enemy then { x: item[:x], y: GROUND_Y, w: Enemy::WIDTH, h: Enemy::HEIGHT }
+    when :enemy then { x: item[:x], y: item[:y], w: Enemy::WIDTH, h: Enemy::HEIGHT }
     end
   end
 
@@ -147,7 +156,7 @@ class LevelDocument
       "certificate_x" => @certificate_x,
       "platforms" => typed(:platform).map { |i| { "x" => i[:x], "y" => i[:y], "w" => i[:w] } },
       "holes" => typed(:hole).map { |i| { "x" => i[:x], "w" => i[:w] } },
-      "enemies" => typed(:enemy).map { |i| { "kind" => i[:kind], "x" => i[:x] } }
+      "enemies" => typed(:enemy).map { |i| { "kind" => i[:kind], "x" => i[:x], "y" => i[:y] } }
     }
   end
 
@@ -174,15 +183,6 @@ class LevelDocument
 
   def default_certificate_x = @world_w - Level::CERTIFICATE_INSET
 
-  def surface_under_start(wy)
-    center = @start_x + Player::WIDTH / 2
-    tops = typed(:platform)
-             .select { |p| center >= p[:x] && center <= p[:x] + p[:w] }
-             .map { |p| p[:y] + Platform::H }
-             .select { |top| top <= wy + EDGE_GRAB }
-    (tops.max || GROUND_Y).clamp(GROUND_Y, world_h)
-  end
-
   def snap(value)
     (value.to_f / GRID).round * GRID
   end
@@ -192,6 +192,8 @@ class LevelDocument
     item[:x] = item[:x].clamp(0, [ max_x, 0 ].max)
     if item[:type] == :platform
       item[:y] = item[:y].clamp(GROUND_Y, world_h - Platform::H)
+    elsif item[:type] == :enemy
+      item[:y] = item[:y].clamp(GROUND_Y, world_h)
     end
   end
 

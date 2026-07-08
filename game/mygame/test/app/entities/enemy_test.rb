@@ -21,6 +21,10 @@ class EnemyTest < Minitest::Test
     assert_equal GROUND_Y, TotpEnemy.new(x: 0, level: enemy_level).y
   end
 
+  def test_honors_an_explicit_spawn_y
+    assert_equal 250, TotpEnemy.new(x: 0, y: 250, level: enemy_level).y
+  end
+
   def test_patrol_on_stations_it_atop_the_platform
     platform = Platform.new(x: 500, y: 220, w: 200, h: Platform::H)
     enemy = TotpEnemy.new(x: 560, level: enemy_level).patrol_on(platform)

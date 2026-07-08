@@ -7,9 +7,9 @@ class Enemy
   attr_reader :x, :y, :w, :h, :auth, :vx, :patrol_min_x, :patrol_max_x
   attr_accessor :alive
 
-  def initialize(x:, level:)
+  def initialize(x:, level:, y: GROUND_Y)
     @x = x
-    @y = GROUND_Y
+    @y = y
     @w = WIDTH
     @h = HEIGHT
     @auth = self.class::AUTH
