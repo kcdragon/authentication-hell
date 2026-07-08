@@ -190,7 +190,7 @@ class Editor::LevelsControllerTest < ActionDispatch::IntegrationTest
       "certificate_x" => 6120,
       "platforms" => [ { "x" => 360, "y" => 220, "w" => 180 } ],
       "holes" => [ { "x" => 900, "w" => 150 } ],
-      "enemies" => [ { "kind" => "totp", "x" => 1400 } ]
+      "enemies" => [ { "kind" => "totp", "x" => 1400, "y" => 100 } ]
     }
   end
 end
