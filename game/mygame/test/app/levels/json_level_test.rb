@@ -15,8 +15,8 @@ class JsonLevelTest < Minitest::Test
     "platforms" => [ { "x" => 360, "y" => 220, "w" => 180 },
                      { "x" => 900, "y" => 300, "w" => 240 } ],
     "holes" => [ { "x" => 700, "w" => 150 } ],
-    "enemies" => [ { "kind" => "totp", "x" => 1400 },
-                   { "kind" => "buffering", "x" => 2000 } ]
+    "enemies" => [ { "kind" => "totp", "x" => 1400, "y" => GROUND_Y },
+                   { "kind" => "buffering", "x" => 2000, "y" => GROUND_Y } ]
   }.freeze
 
   def setup
@@ -62,9 +62,28 @@ class JsonLevelTest < Minitest::Test
     assert @level.enemies.all? { |e| e.y == GROUND_Y }
   end
 
+  def test_setup_perches_an_enemy_that_sits_on_a_platform
+    data = DATA.merge("enemies" => [ { "kind" => "totp", "x" => 400, "y" => 250 } ])
+    level = JsonLevel.new(build_game, data)
+    level.setup(@frame)
+
+    platform = level.platforms.first
+    enemy = level.enemies.first
+    assert_equal platform.y + platform.h, enemy.y
+    assert_equal platform.x, enemy.patrol_min_x
+    assert_equal platform.x + platform.w - enemy.w, enemy.patrol_max_x
+  end
+
+  def test_setup_leaves_a_ground_enemy_free_to_roam
+    @level.setup(@frame)
+    enemy = @level.enemies.first
+    assert_equal GROUND_Y, enemy.y
+    assert_equal enemy.x - Enemy::PATROL_RANGE, enemy.patrol_min_x
+  end
+
   def test_setup_skips_unknown_enemy_kinds
-    data = DATA.merge("enemies" => [ { "kind" => "cobol", "x" => 500 },
-                                     { "kind" => "totp", "x" => 900 } ])
+    data = DATA.merge("enemies" => [ { "kind" => "cobol", "x" => 500, "y" => GROUND_Y },
+                                     { "kind" => "totp", "x" => 900, "y" => GROUND_Y } ])
     level = JsonLevel.new(build_game, data)
     level.setup(@frame)
     assert_equal [ TotpEnemy ], level.enemies.map(&:class)

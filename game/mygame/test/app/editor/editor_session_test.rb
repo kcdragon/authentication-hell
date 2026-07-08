@@ -59,7 +59,19 @@ class EditorSessionTest < Minitest::Test
     enemy = @document.items.first
     assert_equal "passkey", enemy[:kind]
     assert_equal 1400, enemy[:x]
+    assert_equal GROUND_Y, enemy[:y]
     assert_equal :item, @session.selection[:kind]
+  end
+
+  def test_enemy_tool_perches_on_a_platform_under_the_click
+    @document.add_platform(1360, 220, 200)
+    top = 220 + Platform::H
+    @session.select_tool(:enemy_totp)
+    @session.press(1432, top)
+
+    enemy = @document.items.last
+    assert_equal :enemy, enemy[:type]
+    assert_equal top, enemy[:y]
   end
 
   def test_start_and_certificate_tools_set_the_markers

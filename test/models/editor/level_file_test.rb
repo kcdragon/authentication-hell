@@ -145,6 +145,31 @@ class Editor::LevelFileTest < ActiveSupport::TestCase
     end
   end
 
+  test "rejects an enemy without a y" do
+    level = Editor::LevelFile.new(valid_data.merge("enemies" => [ { "kind" => "totp", "x" => 1400 } ]))
+    assert_not level.valid?
+  end
+
+  test "enemy y persists an authored platform top" do
+    level = Editor::LevelFile.new(valid_data.merge("enemies" => [ { "kind" => "totp", "x" => 1400, "y" => 250 } ]))
+    assert level.valid?
+    level.write
+
+    assert_equal 250, JSON.parse(File.read(@draft_root.join("level-5.json")))["enemies"].first["y"]
+  end
+
+  test "validates enemy y bounds" do
+    [ 99, 2161, -30, "250" ].each do |bad_y|
+      level = Editor::LevelFile.new(valid_data.merge("enemies" => [ { "kind" => "totp", "x" => 1400, "y" => bad_y } ]))
+      assert_not level.valid?, "expected enemy y #{bad_y.inspect} to be rejected"
+    end
+
+    [ 100, 250, 2160 ].each do |good_y|
+      level = Editor::LevelFile.new(valid_data.merge("enemies" => [ { "kind" => "totp", "x" => 1400, "y" => good_y } ]))
+      assert level.valid?, "expected enemy y #{good_y} to be accepted"
+    end
+  end
+
   test "find returns nil for unknown or malformed slugs" do
     assert_nil Editor::LevelFile.find("missing")
     assert_nil Editor::LevelFile.find("../../etc/passwd")
@@ -193,7 +218,7 @@ class Editor::LevelFileTest < ActiveSupport::TestCase
       "certificate_x" => 6120,
       "platforms" => [ { "x" => 360, "y" => 220, "w" => 180 } ],
       "holes" => [ { "x" => 900, "w" => 150 } ],
-      "enemies" => [ { "kind" => "totp", "x" => 1400 } ]
+      "enemies" => [ { "kind" => "totp", "x" => 1400, "y" => 100 } ]
     }
   end
 end

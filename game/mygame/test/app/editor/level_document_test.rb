@@ -164,6 +164,35 @@ class LevelDocumentTest < Minitest::Test
     assert_nil @document.item_at(4000, 500)
   end
 
+  def test_add_enemy_defaults_to_the_ground_and_stores_an_explicit_y
+    assert_equal GROUND_Y, @document.add_enemy("totp", 500)[:y]
+    assert_equal 250, @document.add_enemy("totp", 500, 250)[:y]
+  end
+
+  def test_item_at_hits_an_enemy_perched_on_a_platform
+    top = 220 + Platform::H
+    enemy = @document.add_enemy("totp", 500, top)
+    assert_same enemy, @document.item_at(510, top + 50)
+    assert_nil @document.item_at(510, GROUND_Y + 50)
+  end
+
+  def test_move_to_lifts_an_enemy_onto_a_platform
+    @document.add_platform(300, 220, 180)
+    top = 220 + Platform::H
+    enemy = @document.add_enemy("totp", 1000)
+    @document.move_to(enemy, 320, top + 10)
+    assert_equal top, enemy[:y]
+  end
+
+  def test_enemy_y_round_trips_through_hash_and_json
+    top = 220 + Platform::H
+    @document.add_platform(300, 220, 180)
+    @document.add_enemy("totp", 320, top)
+    parsed = JSON.parse(@document.to_json_string)
+    assert_equal top, parsed["enemies"].first["y"]
+    assert_equal @document.to_h, LevelDocument.from_h(parsed, editor_rules).to_h
+  end
+
   def test_platform_edge_at_grabs_the_right_edge_only
     platform = @document.add_platform(300, 220, 180)
     assert_same platform, @document.platform_edge_at(480, 230)

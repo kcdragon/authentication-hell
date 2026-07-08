@@ -59,7 +59,20 @@ class JsonLevel < Level
 
   def build_enemy(entry)
     klass = ENEMY_KINDS[entry["kind"]]
-    klass&.new(x: entry["x"], level: self)
+    return nil unless klass
+
+    enemy = klass.new(x: entry["x"], y: entry["y"], level: self)
+    perch = perch_under(enemy)
+    perch ? enemy.patrol_on(perch) : enemy
+  end
+
+  def perch_under(enemy)
+    return nil if enemy.y <= GROUND_Y
+
+    @platforms.find do |platform|
+      platform.y + platform.h == enemy.y &&
+        enemy.x + enemy.w > platform.x && enemy.x < platform.x + platform.w
+    end
   end
 
   def certificate_x = @data["certificate_x"] || world_w - CERTIFICATE_INSET
