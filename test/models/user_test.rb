@@ -241,6 +241,17 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 2, user.reload.highest_level_completed
   end
 
+  test "grant_achievement is idempotent and leaves the user savable when already earned" do
+    user = users(:one)
+    user.grant_achievement(:level_0_complete)
+
+    assert_no_difference -> { user.earned_achievements.count } do
+      assert_nil user.grant_achievement(:level_0_complete), "a re-grant returns nil, not a record"
+    end
+
+    assert_nothing_raised { user.update!(now_playing_level: 1) }
+  end
+
   test "reset_progress! clears levels and earned achievements" do
     user = users(:one)
     user.update!(highest_level_completed: 2, now_playing_level: 1)
