@@ -91,7 +91,7 @@ class Game
         .clamp(0, @level.world_w - SCREEN_W)
 
     @camera_y =
-      (@player.y + @player.h / 2 - SCREEN_H / 2)
+      (@player.y + @player.h / 2 - SCREEN_H * 3 / 4)
         .clamp(0, WORLD_H - SCREEN_H)
 
     @level.update(@frame)
