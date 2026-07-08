@@ -38,6 +38,8 @@ PLAY_BUTTON = { x: SCRUBBER_X, y: CONTROLS_Y, w: 34, h: 34 }.freeze
 
 CC_BUTTON = { x: SCREEN_W - SCRUBBER_X - 150, y: CONTROLS_Y, w: 38, h: 30 }.freeze
 
+SOLID_TRIANGLE_SOURCE = { source_x: 0, source_y: 0, source_x2: 0, source_y2: 1, source_x3: 1, source_y3: 0 }.freeze
+
 # CAPTION_W keeps the caption card's left edge (640 - W/2 = 360) clear of the
 # top-left HUD, which reaches ~x 344.
 CAPTION_W      = 560

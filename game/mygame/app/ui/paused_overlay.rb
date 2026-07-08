@@ -10,7 +10,7 @@ class Ui::PausedOverlay
     cy = 440
     @frame.outputs.sprites << { path: :solid, x: cx - 16, y: cy + 26, x2: cx - 16, y2: cy - 26,
                               x3: cx + 30, y3: cy,
-                              r: INK[0], g: INK[1], b: INK[2] }
+                              r: INK[0], g: INK[1], b: INK[2] }.merge(SOLID_TRIANGLE_SOURCE)
     @frame.outputs.labels << { x: cx, y: cy - 64, text: "PAUSED",
                               size_px: 24, font: FONT_MONO_B,
                               r: INK[0], g: INK[1], b: INK[2],
