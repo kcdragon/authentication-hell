@@ -1,8 +1,10 @@
 /* =========================================================================
-   Authentication Hell — talk theme
+   slidev-theme-authentication-hell
    Mirrors the app's "HARD MODE" neo-brutalist design system
    (app/assets/tailwind/application.css). Same tokens, same self-hosted
    fonts, same hard-offset-shadow / 3px-ink-border look.
+   Loaded by ./index.ts after the Slidev base layout CSS and
+   theme-default's typography, which it overrides.
    ========================================================================= */
 
 /* ---- SELF-HOSTED FONTS (copied from app/assets/fonts) ----------------- */
@@ -11,28 +13,28 @@
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("./fonts/archivo-black-400.woff2") format("woff2");
+  src: url("../fonts/archivo-black-400.woff2") format("woff2");
 }
 @font-face {
   font-family: "Space Grotesk";
   font-style: normal;
   font-weight: 400 700;
   font-display: swap;
-  src: url("./fonts/space-grotesk-var.woff2") format("woff2");
+  src: url("../fonts/space-grotesk-var.woff2") format("woff2");
 }
 @font-face {
   font-family: "Space Mono";
   font-style: normal;
   font-weight: 400;
   font-display: swap;
-  src: url("./fonts/space-mono-400.woff2") format("woff2");
+  src: url("../fonts/space-mono-400.woff2") format("woff2");
 }
 @font-face {
   font-family: "Space Mono";
   font-style: normal;
   font-weight: 700;
   font-display: swap;
-  src: url("./fonts/space-mono-700.woff2") format("woff2");
+  src: url("../fonts/space-mono-700.woff2") format("woff2");
 }
 
 /* ---- TOKENS (verbatim from the app) ----------------------------------- */
@@ -245,13 +247,11 @@
   font-family: var(--font-mono);
   font-weight: 700;
 }
-.ah-toc :deep(.slidev-toc-item),
 .ah-toc .slidev-toc-item {
   counter-increment: ah-toc;
   list-style: none;
   margin: 0 0 0.9rem;
 }
-.ah-toc :deep(.slidev-toc-item a),
 .ah-toc .slidev-toc-item a {
   display: flex;
   align-items: baseline;
@@ -263,17 +263,14 @@
   color: var(--color-ink);
   font-size: 1.15rem;
 }
-.ah-toc :deep(.slidev-toc-item a)::before,
 .ah-toc .slidev-toc-item a::before {
   content: counter(ah-toc, decimal-leading-zero);
   color: var(--color-muted);
 }
-.ah-toc :deep(.slidev-toc-item.active a),
 .ah-toc .slidev-toc-item.active a {
   background: var(--color-ink);
   color: var(--color-paper);
 }
-.ah-toc :deep(.slidev-toc-item.active a)::before,
 .ah-toc .slidev-toc-item.active a::before {
   color: var(--color-paper);
 }

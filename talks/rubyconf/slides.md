@@ -1,6 +1,5 @@
 ---
-# No external theme — the look comes from ./style.css + ./layouts,
-# mirroring the app's "HARD MODE" design system.
+theme: ./theme
 title: Welcome to Authentication Hell
 info: |
   ## Welcome to Authentication Hell
