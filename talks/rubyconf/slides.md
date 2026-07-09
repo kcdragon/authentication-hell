@@ -168,7 +168,7 @@ layoutClass: gap-8
 def tick(args)
 end
 ```
-```ruby
+```ruby {2-5}
 def tick(args)
   args.outputs.labels << {
     x: 555, y: 400,
@@ -176,7 +176,7 @@ def tick(args)
   }
 end
 ```
-```ruby
+```ruby {7-15}
 def tick(args)
   args.outputs.labels << {
     x: 555, y: 400,
@@ -230,7 +230,7 @@ def tick(args)
   }
 end
 ```
-```ruby
+```ruby {8}
 def tick(args)
   args.state.player ||= {
     x: 100, y: 100,
@@ -241,7 +241,7 @@ def tick(args)
   args.outputs.sprites << args.state.player
 end
 ```
-```ruby
+```ruby {8-19}
 def tick(args)
   args.state.player ||= {
     x: 100, y: 100,
@@ -300,7 +300,7 @@ def tick(args)
   args.outputs.sprites << args.state.player
 end
 ```
-```ruby
+```ruby {8-9}
 def tick(args)
   args.state.terrain ||= [...]
   args.outputs.sprites << args.state.terrain
@@ -312,7 +312,7 @@ def tick(args)
   args.state.player.x += args.state.player.dx
 end
 ```
-```ruby
+```ruby {11-17}
 def tick(args)
   args.state.terrain ||= [...]
   args.outputs.sprites << args.state.terrain
