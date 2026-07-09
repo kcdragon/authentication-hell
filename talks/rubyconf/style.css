@@ -103,6 +103,18 @@
 .slidev-layout a { color: var(--color-passkey); text-decoration: none; }
 .slidev-layout a:hover { text-decoration: underline; }
 
+/* The built-in image-left / image-right layouts give the image column a bare
+   black background, which shows through transparent logos. Paint it the same
+   paper color as the rest of the slide. The image column is the grid child that
+   sits beside the single `.slidev-layout` content panel — image-right puts it
+   last, image-left first (two-cols has a `.slidev-layout` on both sides, so it
+   is untouched). The layout sets the logo as an inline `background-image`, which
+   correctly wins over this rule and sits on top of the paper fill. */
+.grid > .slidev-layout + div,
+.grid > div:not(.slidev-layout):has(+ .slidev-layout) {
+  background-color: var(--color-paper);
+}
+
 .slidev-layout strong { font-weight: 700; }
 
 /* Bullets get a hard square marker in the ink color. */

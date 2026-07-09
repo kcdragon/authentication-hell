@@ -95,8 +95,9 @@ hideInToc: false
 # DragonRuby
 
 ---
-layout: two-cols
-layoutClass: gap-8
+layout: image-right
+image: images/dragonruby-logo.png
+backgroundSize: contain
 ---
 
 ## DragonRuby Game Toolkit
@@ -108,12 +109,6 @@ layoutClass: gap-8
   - Mobile
   - Web
 - Write games in Ruby!
-
-::right::
-
-<div class="flex items-center justify-center h-full">
-  <img src="./images/dragonruby-logo.png" class="max-w-full max-h-80" alt="DragonRuby logo" />
-</div>
 
 ---
 layout: two-cols
