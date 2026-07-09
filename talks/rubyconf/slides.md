@@ -29,6 +29,23 @@ matching the app's brutalist headings.
 -->
 
 ---
+layout: two-cols
+layoutClass: gap-8
+---
+
+## Hi, I'm Mike Dalton
+
+- Ruby developer
+- Staff engineer at Triumph
+- Love to build side projects
+
+::right::
+
+<div class="flex items-center justify-center h-full">
+  <img src="./images/mike-dalton.jpg" class="w-64 h-64 object-cover rounded-lg" alt="Mike Dalton" />
+</div>
+
+---
 layout: section
 hideInToc: false
 ---
