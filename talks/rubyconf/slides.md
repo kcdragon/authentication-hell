@@ -110,8 +110,9 @@ backgroundSize: contain
 - Write games in Ruby!
 
 ---
-layout: two-cols
-layoutClass: gap-8
+layout: image-right
+image: images/mruby-logo.png
+backgroundSize: contain
 ---
 
 ## DragonRuby is Ruby
@@ -121,28 +122,17 @@ layoutClass: gap-8
 - Subset of Ruby language specification
 - No Gem support
 
-::right::
-
-<div class="flex items-center justify-center h-full">
-  <img src="./images/mruby-logo.png" class="max-w-full max-h-72" alt="mruby logo" />
-</div>
-
 ---
-layout: two-cols
-layoutClass: gap-8
+layout: image-right
+image: images/sdl-logo.png
+backgroundSize: contain
 ---
 
-## Simple DirectMedia Layer (SDL)
+## Simple DirectMedia Layer
 
 - DragonRuby wraps SDL
 - Provides low-level access to graphics, audio, and input
 - Supports all platforms
-
-::right::
-
-<div class="flex items-center justify-center h-full">
-  <img src="./images/sdl-logo.png" class="max-w-full max-h-72" alt="Simple DirectMedia Layer (SDL) logo" />
-</div>
 
 <!--
 DragonRuby sits on top of SDL — it's what gives us hardware-accelerated
