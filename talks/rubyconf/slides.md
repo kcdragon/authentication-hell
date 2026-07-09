@@ -372,6 +372,31 @@ hideInToc: false
 ---
 ---
 
+## WebAssembly (WASM)
+
+<div class="flex items-center justify-center gap-10 mt-10">
+  <div class="ah-card bg-white flex items-center justify-center p-6">
+    <img src="./images/dragonruby-logo.png" class="max-h-56 w-auto" alt="DragonRuby logo" />
+  </div>
+
+  <div class="flex flex-col items-center">
+    <span class="font-mono font-bold text-sm uppercase tracking-widest mb-1">compiles to</span>
+    <span class="text-6xl leading-none">→</span>
+  </div>
+
+  <div class="ah-card bg-white flex items-center justify-center p-6">
+    <img src="./images/wasm-logo.png" class="max-h-56 w-auto" alt="WebAssembly (WASM) logo" />
+  </div>
+</div>
+
+<!--
+DragonRuby compiles our game to WebAssembly, which is how it runs in the
+browser at native-ish speed — that's the artifact Rails serves at /game.
+-->
+
+---
+---
+
 ## Game Demo
 
 <div class="absolute inset-0 flex items-center justify-center">
