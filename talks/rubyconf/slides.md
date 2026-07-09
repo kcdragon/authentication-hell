@@ -30,7 +30,6 @@ matching the app's brutalist headings.
 
 ---
 layout: two-cols
-layoutClass: gap-8
 ---
 
 ## Hi, I'm Mike Dalton
@@ -157,11 +156,34 @@ graphics, audio, and input across every platform, including the WASM build.
 -->
 
 ---
-layout: two-cols
-layoutClass: gap-8
+layout: two-cols-header
 ---
 
 ## tick
+
+::left::
+
+```ruby
+def tick(args)
+end
+```
+
+::right::
+
+- The entry point for your game's code
+- `args` gives you everything you need:
+  - `args.inputs` - read keyboard, mouse, and controller input
+  - `args.outputs` - draw sprites and labels
+  - `args.state` - store game state across ticks
+- Called **60 times per second** - that's 60 FPS
+
+---
+layout: two-cols-header
+---
+
+## tick
+
+::left::
 
 ````md magic-move
 ```ruby
@@ -214,11 +236,12 @@ end
 </div>
 
 ---
-layout: two-cols
-layoutClass: gap-8
+layout: two-cols-header
 ---
 
 ## Movement
+
+::left::
 
 ````md magic-move
 ```ruby
@@ -284,11 +307,12 @@ end
 </div>
 
 ---
-layout: two-cols
-layoutClass: gap-8
+layout: two-cols-header
 ---
 
 ## Collisions
+
+::left::
 
 ````md magic-move
 ```ruby

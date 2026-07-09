@@ -105,6 +105,14 @@
 .slidev-layout a { color: var(--color-passkey); text-decoration: none; }
 .slidev-layout a:hover { text-decoration: underline; }
 
+/* Put breathing room between the columns of the two-column layouts. Only a
+   column-gap so the header row (two-cols-header) keeps its spacing to the
+   columns below it — a full `gap` would push the header away too. */
+.slidev-layout.two-columns,
+.slidev-layout.two-cols-header {
+  column-gap: 2rem;
+}
+
 /* The built-in image-left / image-right layouts give the image column a bare
    black background, which shows through transparent logos. Paint it the same
    paper color as the rest of the slide. The image column is the grid child that
