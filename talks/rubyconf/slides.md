@@ -478,22 +478,6 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 ---
 ---
 
-## Game Demo
-
-<div class="absolute inset-0 flex items-center justify-center">
-  <a
-    href="http://localhost:3000/game"
-    target="_blank"
-    rel="noopener"
-    class="ah-card bg-white px-6 py-4 text-xl font-bold no-underline !text-ink"
-  >
-    ▶ Demo ↗
-  </a>
-</div>
-
----
----
-
 ## Proof of concept
 
 <div class="flex justify-center mt-6">
