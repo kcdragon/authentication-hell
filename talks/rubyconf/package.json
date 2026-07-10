@@ -8,6 +8,7 @@
     "export": "slidev export"
   },
   "dependencies": {
-    "@slidev/cli": "^52.0.0"
+    "@slidev/cli": "^52.0.0",
+    "slidev-addon-fancy-arrow": "^0.16.1"
   }
 }

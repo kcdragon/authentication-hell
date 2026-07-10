@@ -10,6 +10,8 @@ drawings:
   persist: false
 transition: slide-left
 mdc: true
+addons:
+  - fancy-arrow
 layout: cover
 # Most slides are excluded from the Toc; flip this default to false per-slide
 # to surface a slide (the section dividers do this).
@@ -403,6 +405,27 @@ end
     <div v-after class="absolute inset-0">Collision detected — player stops at the edge</div>
   </div>
 </div>
+
+---
+dragPos:
+  c: 99,233,179,187
+  sdl: 376,115,256,129
+  ruby: 692,341,161,161
+---
+
+## Architecture
+
+<img v-drag="'c'" data-id="c" src="./images/c-logo.png" />
+
+<img v-drag="'sdl'" data-id="sdl" src="./images/sdl-logo.png" />
+
+<img v-drag="'ruby'" data-id="ruby" src="./images/ruby-logo.png" />
+
+<FancyArrow two-way from="[data-id=c]" to="[data-id=sdl]" />
+
+<FancyArrow two-way from="[data-id=c]" to="[data-id=ruby]">
+  <code class="px-2 py-1 rounded bg-white">tick(args)</code>
+</FancyArrow>
 
 ---
 layout: section
