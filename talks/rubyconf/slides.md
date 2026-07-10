@@ -48,9 +48,11 @@ layout: two-cols
 
 ::right::
 
-<div class="flex items-center justify-center h-full">
-  <img src="./images/mike-dalton.jpg" class="w-64 h-64 object-cover rounded-lg" alt="Mike Dalton" />
-</div>
+<img v-drag="[594,37,244,244]" src="./images/mike-dalton.jpg" />
+
+<img v-drag="[467,322,192,192]" src="./images/triumph-logo.png" />
+
+<img v-drag="[741,336,172,172]" src="./images/calendar-vision-logo.png" class="rounded-2xl" />
 
 ---
 layout: section
