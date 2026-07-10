@@ -482,7 +482,7 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 
 <div class="flex justify-center mt-6">
   <div class="ah-card bg-white p-2 leading-none">
-    <SlidevVideo autoplay loop muted class="block max-h-[42vh] w-auto">
+    <SlidevVideo autoplay loop muted class="block max-h-[340px] w-auto">
       <source :src="'/videos/proof-of-concept.mp4'" type="video/mp4" />
     </SlidevVideo>
   </div>
@@ -495,21 +495,24 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 
 <div class="flex flex-col items-center gap-3 mt-3">
   <div class="ah-card bg-white p-2 leading-none">
-    <img src="./images/discord-heapu8.png" class="block max-h-[28vh] w-auto" alt="Discord message diagnosing the Module.HEAPU8 undefined error in the DragonRuby WASM build" />
+    <img src="./images/discord-heapu8.png" class="block max-h-[300px] w-auto" alt="Discord message diagnosing the Module.HEAPU8 undefined error in the DragonRuby WASM build" />
   </div>
   <div class="ah-card bg-white p-2 leading-none">
-    <img src="./images/discord-reply.png" class="block h-auto" alt="Discord reply: this is a bug introduced in DragonRuby 7+ it seems" />
+    <img src="./images/discord-reply.png" class="block max-w-[630px] h-auto" alt="Discord reply: this is a bug introduced in DragonRuby 7+ it seems" />
   </div>
 </div>
 
 ---
 ---
 
-## Game Theme
+## Each level is a video
 
-- Player stuck in a training video
-- Each level is a playlist
-- Enemies are authentication
+<div class="flex justify-center mt-6">
+  <div class="ah-card bg-white p-2 leading-none">
+    <img src="./images/level-video-player.png" class="block max-h-[340px] w-auto" alt="Game level styled as a corporate training video player, with a scrubber, timestamp, and CC controls below the platformer scene" />
+  </div>
+</div>
+
 
 ---
 ---
@@ -518,7 +521,7 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 
 <div class="flex justify-center mt-6">
   <div class="ah-card bg-white p-2 leading-none">
-    <img src="./images/claude-design.png" class="block max-h-[42vh] w-auto" alt="Claude Design canvas redesigning the game screens" />
+    <img src="./images/claude-design.png" class="block max-h-[340px] w-auto" alt="Claude Design canvas redesigning the game screens" />
   </div>
 </div>
 
@@ -529,7 +532,7 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 
 <div class="flex justify-center mt-6">
   <div class="ah-card bg-white p-2 leading-none">
-    <SlidevVideo autoplay loop muted class="block max-h-[42vh] w-auto">
+    <SlidevVideo autoplay loop muted class="block max-h-[340px] w-auto">
       <source :src="'/videos/authenticate-in-game.mp4'" type="video/mp4" />
     </SlidevVideo>
   </div>
