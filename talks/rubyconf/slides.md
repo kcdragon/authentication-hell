@@ -408,12 +408,18 @@ end
 
 ---
 dragPos:
-  c: 99,233,179,187
-  sdl: 376,115,256,129
+  c: 99,273,179,187
+  sdl: 376,155,256,129
   ruby: 692,341,161,161
+  native: 70,125,600,365
+  dragonruby: 90,140,100,79
 ---
 
 ## Architecture
+
+<div v-drag="'native'" class="border-3 border-dashed border-gray-400 rounded"></div>
+
+<img v-drag="'dragonruby'" data-id="dragonruby" src="./images/dragonruby-logo.png" />
 
 <img v-drag="'c'" data-id="c" src="./images/c-logo.png" />
 
