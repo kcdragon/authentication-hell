@@ -23,6 +23,12 @@ defaults:
 
 <div class="ah-tagline">A browser-based game built with Ruby · RubyConf · Mike Dalton</div>
 
+<div class="mt-10 flex justify-end pr-8">
+  <div class="ah-card bg-white p-2 leading-none -rotate-2">
+    <img src="./images/level-video-player.png" class="block w-[360px] h-auto" alt="Placeholder: gameplay screenshot of Authentication Hell" />
+  </div>
+</div>
+
 <!--
 Speaker notes go here, after the HTML comment marker.
 Press `c` during the talk to open presenter mode.
