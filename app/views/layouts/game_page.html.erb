@@ -14,6 +14,11 @@
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
 
+    <%# SharedArrayBuffer needs cross-origin isolation, which only a full
+        navigation's COOP/COEP headers can establish — a Turbo visit keeps the
+        old non-isolated document alive and the game hangs on its loader. %>
+    <meta name="turbo-visit-control" content="reload">
+
     <%= yield :head %>
     <%= render "shared/analytics" if Rails.env.production? %>
   </head>

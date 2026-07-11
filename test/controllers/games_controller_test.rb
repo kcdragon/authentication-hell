@@ -17,6 +17,15 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_response :success
   end
 
+  test "show sets cross-origin isolation headers and forces a full page load" do
+    sign_in_as(@user)
+
+    get game_url
+    assert_equal "same-origin", response.headers["Cross-Origin-Opener-Policy"]
+    assert_equal "require-corp", response.headers["Cross-Origin-Embedder-Policy"]
+    assert_match %r{<meta name="turbo-visit-control" content="reload">}, response.body
+  end
+
   test "show surfaces the certificate claim toast once the game is beaten" do
     @user.update!(highest_level_completed: GameLevel.all.last.number)
     sign_in_as(@user)
