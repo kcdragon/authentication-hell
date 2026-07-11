@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_10_000000) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_11_000002) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -62,6 +62,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_10_000000) do
     t.datetime "updated_at", null: false
     t.index ["session_id", "kind"], name: "index_game_challenges_on_session_id_and_kind", unique: true
     t.index ["session_id"], name: "index_game_challenges_on_session_id"
+  end
+
+  create_table "game_settings", force: :cascade do |t|
+    t.float "heart_drop_chance", default: 0.3, null: false
+    t.float "rewind_drop_chance", default: 0.35, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "game_stats", force: :cascade do |t|

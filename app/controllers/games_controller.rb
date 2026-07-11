@@ -36,7 +36,10 @@ class GamesController < ApplicationController
   private
 
   def start_payload(number)
-    payload = { start_level: number, is_editor_enabled: Rails.env.development? }
+    settings = GameSetting.instance
+    payload = { start_level: number, is_editor_enabled: Rails.env.development?,
+                heart_drop_chance: settings.heart_drop_chance.to_f,
+                rewind_drop_chance: settings.rewind_drop_chance.to_f }
     payload[:editor_constants] = Editor::LevelFile.client_constants if Rails.env.development?
     payload
   end

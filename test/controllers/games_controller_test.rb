@@ -57,6 +57,23 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_equal 0, response.parsed_body["start_level"]
   end
 
+  test "start includes the configured loot drop rates" do
+    GameSetting.instance.update!(heart_drop_chance: 0.9, rewind_drop_chance: 0.05)
+    sign_in_as(@user)
+
+    get game_start_url
+    assert_equal 0.9, response.parsed_body["heart_drop_chance"]
+    assert_equal 0.05, response.parsed_body["rewind_drop_chance"]
+  end
+
+  test "start falls back to the default drop rates when unconfigured" do
+    sign_in_as(@user)
+
+    get game_start_url
+    assert_equal GameSetting::DEFAULT_HEART_DROP_CHANCE, response.parsed_body["heart_drop_chance"]
+    assert_equal GameSetting::DEFAULT_REWIND_DROP_CHANCE, response.parsed_body["rewind_drop_chance"]
+  end
+
   test "start offers the level editor only in development" do
     sign_in_as(@user)
 

@@ -78,14 +78,17 @@ module GameTest
     def art_sprites = sprites.reject { |s| s[:path] == :solid }
   end
 
-  GameStub = Struct.new(:player, :level, :camera_x, :captions_on) do
+  GameStub = Struct.new(:player, :level, :camera_x, :captions_on,
+                        :heart_drop_chance, :rewind_drop_chance) do
     def captions_on? = captions_on
   end
 
   def enemy_level = @enemy_level ||= Level.new(build_game)
 
-  def build_game(player: nil, level: nil, camera_x: 0, captions_on: true)
-    GameStub.new(player, level, camera_x, captions_on)
+  def build_game(player: nil, level: nil, camera_x: 0, captions_on: true,
+                 heart_drop_chance: Level::HEART_DROP_CHANCE,
+                 rewind_drop_chance: Level::REWIND_DROP_CHANCE)
+    GameStub.new(player, level, camera_x, captions_on, heart_drop_chance, rewind_drop_chance)
   end
 
   # The level build_frame last wired up, for entity code that needs it passed

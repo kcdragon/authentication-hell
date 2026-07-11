@@ -51,7 +51,9 @@ class Shell
 
   def choose_play
     number = @start_data["start_level"] || 0
-    @game = Game.new(->(game) { Level.build(number, game) })
+    @game = Game.new(->(game) { Level.build(number, game) },
+                     heart_drop_chance: @start_data["heart_drop_chance"],
+                     rewind_drop_chance: @start_data["rewind_drop_chance"])
     @mode = :game
   end
 
