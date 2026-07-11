@@ -206,7 +206,7 @@ layout: section
 hideInToc: false
 ---
 
-# DragonRuby
+# Introduction to DragonRuby
 
 ---
 layout: image-right
