@@ -120,6 +120,40 @@ hideInToc: false
 # What if there was a game?
 
 ---
+---
+
+<div class="grid grid-cols-3 gap-x-5 gap-y-4 h-full content-center w-fit mx-auto">
+  <div v-click class="ah-card bg-white p-2 leading-none">
+    <img src="./images/aladdin.png" class="block h-[150px] w-auto mx-auto" alt="Aladdin for Sega Genesis gameplay" />
+    <div class="mt-1 text-center text-sm font-bold">Aladdin</div>
+  </div>
+  <div v-click class="ah-card bg-white p-2 leading-none">
+    <img src="./images/sonic-2.png" class="block h-[150px] w-auto mx-auto" alt="Sonic the Hedgehog 2 — Emerald Hill Zone" />
+    <div class="mt-1 text-center text-sm font-bold">Sonic the Hedgehog 2</div>
+  </div>
+  <div v-click class="ah-card bg-white p-2 leading-none">
+    <img src="./images/crash-warped.jpg" class="block h-[150px] w-auto mx-auto" alt="Crash Bandicoot: Warped — Toad Village" />
+    <div class="mt-1 text-center text-sm font-bold">Crash Bandicoot: Warped</div>
+  </div>
+  <div v-click class="ah-card bg-white p-2 leading-none">
+    <img src="./images/spyro.jpg" class="block h-[150px] w-auto mx-auto" alt="Spyro the Dragon gameplay" />
+    <div class="mt-1 text-center text-sm font-bold">Spyro the Dragon</div>
+  </div>
+  <div v-click class="ah-card bg-white p-2 leading-none">
+    <img src="./images/ori.jpg" class="block h-[150px] w-auto mx-auto" alt="Ori and the Blind Forest gameplay" />
+    <div class="mt-1 text-center text-sm font-bold">Ori and the Blind Forest</div>
+  </div>
+  <div v-click class="ah-card bg-white p-2 leading-none">
+    <img src="./images/hollow-knight.jpg" class="block h-[150px] w-auto mx-auto" alt="Hollow Knight — the Lake of Unn" />
+    <div class="mt-1 text-center text-sm font-bold">Hollow Knight</div>
+  </div>
+</div>
+
+<!--
+I've been a gamer my whole life...
+-->
+
+---
 layout: image
 image: /images/rubyconf-cfp.png
 backgroundSize: cover
