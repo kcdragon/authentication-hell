@@ -9,9 +9,7 @@
    watched_count = levels.count { |l| hlc && l.number <= hlc }
    # Cosmetic m:ss per level (the in-game scrubber fakes a 3:20 runtime).
    durations = { 0 => "0:45", 1 => "1:30", 2 => "1:15", 3 => "3:20", 4 => "2:00" }
-   # Decorative locked entries so the rail reads as a fuller course playlist.
-   coming_soon = [ "OAuth & SSO", "Session Hygiene", "Spotting Phishing", "Recovery Codes 201" ]
-   total = levels.size + coming_soon.size %>
+   total = levels.size %>
 
 <aside id="<%= playlist_dom_id %>" data-playlist-toggle-target="panel" class="ah-card w-full lg:w-[346px] lg:flex-shrink-0 overflow-hidden">
   <div class="flex items-start justify-between gap-2 border-b-[3px] border-ink px-4 py-3 bg-paper">
@@ -64,17 +62,5 @@
     <% else %>
       <div class="<%= row_class %>"><%= inner %></div>
     <% end %>
-  <% end %>
-
-  <% coming_soon.each do |title| %>
-    <div class="flex items-center gap-3 px-3 py-3 border-b-[3px] border-dashed border-locked-ink last:border-b-0 bg-locked">
-      <div class="w-24 aspect-video flex-shrink-0 grid place-items-center border-[3px] border-dashed border-locked-ink rounded-[2px] bg-locked">
-        <span class="text-xl opacity-60" aria-hidden="true">🔒</span>
-      </div>
-      <div class="min-w-0">
-        <p class="font-display text-xs uppercase tracking-tight text-locked-ink truncate"><%= title %></p>
-        <p class="font-mono text-[11px] text-locked-ink mt-1">Coming soon</p>
-      </div>
-    </div>
   <% end %>
 </aside>
