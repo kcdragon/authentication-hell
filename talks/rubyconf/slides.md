@@ -234,8 +234,12 @@ backgroundSize: contain
 
 - Custom Ruby runtime
 - Based on [mruby](https://mruby.org/)
+- Smaller memory footprint
 - Subset of Ruby language specification
-- No Gem support
+  - Missing some standard library like `fileutils`, `json` and `net/http` 
+  - No Gem support
+  - Restricted reflection (i.e. no `defined?`)
+  - Other limitations
 
 ---
 layout: image-right
