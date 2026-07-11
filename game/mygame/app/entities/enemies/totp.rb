@@ -1,5 +1,6 @@
 class TotpEnemy < Enemy
   AUTH = :totp
+  KIND = "totp"
   COLOR = { r: 90, g: 60, b: 160 }
 
   def render(frame, camera_x = 0, camera_y = 0)

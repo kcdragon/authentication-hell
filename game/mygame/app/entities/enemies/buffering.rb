@@ -1,5 +1,6 @@
 class BufferingEnemy < Enemy
   AUTH = nil
+  KIND = "buffering"
   COLOR = { r: MUTED[0], g: MUTED[1], b: MUTED[2] }
 
   RADIUS = 26

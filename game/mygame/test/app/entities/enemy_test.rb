@@ -103,6 +103,32 @@ class EnemyTest < Minitest::Test
     assert other.alive
   end
 
+  def test_reports_its_kind_for_the_leaderboard
+    assert_equal "totp", TotpEnemy.new(x: 0, level: enemy_level).kind
+    assert_equal "password", PasswordEnemy.new(x: 0, level: enemy_level).kind
+    assert_equal "passkey", PasskeyEnemy.new(x: 0, level: enemy_level).kind
+    assert_equal "buffering", BufferingEnemy.new(x: 0, level: enemy_level).kind
+  end
+
+  def test_a_defeat_is_reported_to_the_server_as_it_happens
+    DR.reset!
+    enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
+
+    enemy.on_collision(@player, build_frame(tick_count: 0))
+    refute enemy.alive
+    assert_includes DR.urls, "http://test/games/defeats?kind=totp"
+  end
+
+  def test_a_surviving_enemy_reports_no_defeat
+    DR.reset!
+    @player.hurt(build_frame(tick_count: 0))
+    enemy = TotpEnemy.new(x: @player.x, level: enemy_level)
+
+    enemy.on_collision(@player, build_frame(tick_count: 1))
+    assert enemy.alive
+    assert_empty DR.urls
+  end
+
   def test_a_defeated_enemy_drops_loot_into_its_level
     level = Level.new(build_game)
     drop = HeartPickup.new(x: 0, y: GROUND_Y)

@@ -93,6 +93,26 @@ class Games::PasswordChallengeControllerTest < ActionDispatch::IntegrationTest
     assert_not(streams.any? { |s| s.to_html.include?("Achievement unlocked") })
   end
 
+  test "each completed challenge counts a password re-authentication" do
+    sign_in_as(@user)
+
+    2.times do
+      post games_password_start_url
+      post games_password_complete_url, params: { password: "password" }, as: :turbo_stream
+    end
+
+    assert_equal 2, @user.game_stats.find_by(key: "reauth_password").count
+  end
+
+  test "failing the challenge counts no re-authentication" do
+    sign_in_as(@user)
+    post games_password_start_url
+
+    post games_password_complete_url, params: { password: "wrong" }, as: :turbo_stream
+
+    assert_nil @user.game_stats.find_by(key: "reauth_password")
+  end
+
   test "failing the challenge awards nothing" do
     sign_in_as(@user)
     post games_password_start_url

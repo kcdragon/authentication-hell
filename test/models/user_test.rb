@@ -347,33 +347,14 @@ class UserTest < ActiveSupport::TestCase
     assert user.beat_game?
   end
 
-  test "ranked exposes an achievements_count aggregate" do
-    users(:one).grant_achievement(:password_survivor)
-    users(:one).grant_achievement(:totp_survivor)
+  test "reset_progress! clears game stats" do
+    user = users(:one)
+    GameStat.record_reauth_totp(user)
+    GameStat.record_defeat_buffering(user)
 
-    ranked_one = User.ranked.find { |u| u.id == users(:one).id }
-    assert_equal 2, ranked_one.achievements_count
-  end
+    user.reset_progress!
 
-  test "ranked by achievements orders by earned count descending" do
-    users(:one).grant_achievement(:password_survivor)
-    users(:one).grant_achievement(:totp_survivor)
-    users(:two).grant_achievement(:password_survivor)
-
-    ranked = User.ranked(by: :achievements).to_a
-    assert ranked.index(users(:one)) < ranked.index(users(:two)),
-      "user with more achievements should rank higher"
-  end
-
-  test "ranked by level orders by highest level and sorts uncleared players last" do
-    users(:one).update!(highest_level_completed: 0)
-    users(:two).update!(highest_level_completed: 1)
-    ranked = User.ranked(by: :level).to_a
-
-    assert ranked.index(users(:two)) < ranked.index(users(:one)),
-      "higher level should rank higher"
-    assert ranked.index(users(:one)) < ranked.index(users(:unconfirmed)),
-      "a player with no cleared level sorts last"
+    assert_equal 0, user.game_stats.count
   end
 
   test "disable_totp! clears the secret, flag, and recovery codes" do

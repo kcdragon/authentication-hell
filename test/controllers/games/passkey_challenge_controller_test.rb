@@ -89,6 +89,30 @@ class Games::PasskeyChallengeControllerTest < ActionDispatch::IntegrationTest
     assert(streams.any? { |s| s.to_html.include?("Achievement unlocked") })
   end
 
+  test "completing the challenge counts a passkey re-authentication" do
+    client = enable_passkey_for(@user)
+    sign_in_as(@user)
+    post games_passkey_start_url
+
+    post games_passkey_options_url, as: :json
+    assertion = client.get(challenge: response.parsed_body["challenge"], user_verified: true)
+    post games_passkey_complete_url, params: { credential: assertion }, as: :json
+
+    assert_equal 1, @user.game_stats.find_by(key: "reauth_passkey").count
+  end
+
+  test "failing the challenge counts no re-authentication" do
+    other_client = enable_passkey_for(users(:two))
+    sign_in_as(@user)
+    post games_passkey_start_url
+
+    post games_passkey_options_url, as: :json
+    assertion = other_client.get(challenge: response.parsed_body["challenge"], user_verified: true)
+    post games_passkey_complete_url, params: { credential: assertion }, as: :json
+
+    assert_nil @user.game_stats.find_by(key: "reauth_passkey")
+  end
+
   test "failing the challenge awards nothing" do
     other_client = enable_passkey_for(users(:two))
     sign_in_as(@user)
