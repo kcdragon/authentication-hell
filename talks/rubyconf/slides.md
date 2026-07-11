@@ -78,9 +78,43 @@ layout: section
 hideInToc: false
 ---
 
-# What is authentication hell?
+# "Authentication Hell"
 
-<!-- What do I mean by authentication hell... -->
+---
+layout: image
+image: /images/hell-login-password.png
+backgroundSize: cover
+---
+
+---
+layout: image
+image: /images/hell-vpn-password.png
+backgroundSize: cover
+---
+
+---
+layout: image
+image: /images/hell-okta-push.png
+backgroundSize: cover
+---
+
+---
+layout: image
+image: /images/hell-aws-vault.png
+backgroundSize: cover
+---
+
+---
+layout: image
+image: /images/hell-okta-github.png
+backgroundSize: cover
+---
+
+---
+layout: image
+image: /images/hell-okta-teleport.png
+backgroundSize: cover
+---
 
 ---
 layout: image
