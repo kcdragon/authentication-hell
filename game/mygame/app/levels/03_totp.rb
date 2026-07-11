@@ -5,9 +5,13 @@ class TotpLevel < Level
   REQUIRED_STREAK = 3
 
   QR_PIECE_COUNT = 4
-  GROUND_PIECE_XS = [ 600, 1120 ].freeze
-  COLLECT_PLATFORMS = [ [ 300, 220 ], [ 860, 220 ] ].freeze
-  COLLECT_PLATFORM_TOP = Platform::TIERS.first
+  GROUND_PIECE_XS = [ 780, 2440 ].freeze
+  COLLECT_PLATFORMS = [ [ 380, 250, 220 ], [ 1150, 250, 220 ], [ 1470, 330, 220 ],
+                        [ 3050, 250, 200 ], [ 3330, 330, 200 ], [ 3610, 410, 200 ] ].freeze
+  PIECE_PLATFORM_INDEXES = [ 2, 5 ].freeze
+  HOLE_XS = [ 2200, 2560 ].freeze
+  GROUND_GUARDS = [ [ 620, PasswordEnemy ], [ 1900, BufferingEnemy ] ].freeze
+  PLATFORM_GUARDS = [ [ 1, TotpEnemy ], [ 4, PasskeyEnemy ] ].freeze
 
   NUMPAD_ROWS = [ %w[7 8 9], %w[4 5 6], %w[1 2 3] ].freeze
   PAD_W = 124
@@ -22,11 +26,11 @@ class TotpLevel < Level
 
   def accent = PURPLE
 
-  def world_w = SCREEN_W * 2
+  def world_w = SCREEN_W * 4
 
   def start_x = 80
 
-  def time_limit = 60
+  def time_limit = 120
 
   def setup(_frame)
     @holes = []
@@ -86,11 +90,13 @@ class TotpLevel < Level
   def collected_pieces = @collectables.count { |c| c.is_a?(QrPiece) && !c.alive? }
 
   def build_collection_zone
-    COLLECT_PLATFORMS.each do |x, w|
-      @platforms << Platform.new(x: x, y: COLLECT_PLATFORM_TOP - Platform::H, w: w, h: Platform::H,
+    COLLECT_PLATFORMS.each do |x, top, w|
+      @platforms << Platform.new(x: x, y: top - Platform::H, w: w, h: Platform::H,
                                  holds_password: false)
     end
+    @holes = HOLE_XS.map { |x| Hole.new(x: x, w: Hole::W) }
     @collectables.concat(ground_pieces + platform_pieces)
+    @enemies.concat(ground_guards + platform_guards)
   end
 
   def ground_pieces
@@ -100,10 +106,19 @@ class TotpLevel < Level
   end
 
   def platform_pieces
-    COLLECT_PLATFORMS.each_with_index.map do |(x, w), i|
-      QrPiece.new(x: x + (w - QrPiece::SIZE) / 2, y: COLLECT_PLATFORM_TOP + QrPiece::LIFT,
+    PIECE_PLATFORM_INDEXES.each_with_index.map do |platform_index, i|
+      x, top, w = COLLECT_PLATFORMS[platform_index]
+      QrPiece.new(x: x + (w - QrPiece::SIZE) / 2, y: top + QrPiece::LIFT,
                   index: GROUND_PIECE_XS.length + i)
     end
+  end
+
+  def ground_guards
+    GROUND_GUARDS.map { |x, kind| kind.new(x: x, level: self) }
+  end
+
+  def platform_guards
+    PLATFORM_GUARDS.map { |index, kind| enemy_on(kind, @platforms[index]) }
   end
 
   def keypad_origin = world_w - SCREEN_W
