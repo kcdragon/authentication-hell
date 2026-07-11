@@ -1,8 +1,8 @@
 class Level
   attr_reader :enemies, :platforms, :collectables, :holes
 
-  HEART_DROP_CHANCE = 0.20
-  REWIND_DROP_CHANCE = 0.25
+  HEART_DROP_CHANCE = 0.30
+  REWIND_DROP_CHANCE = 0.35
   GUARD_SLICE = 3
 
   def self.build(number, game)
