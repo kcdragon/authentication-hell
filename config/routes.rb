@@ -88,6 +88,7 @@ Rails.application.routes.draw do
     post "levels/playing"  => "levels#playing",  as: :levels_playing
 
     post "death" => "deaths#create", as: :death
+    post "defeats" => "defeats#create", as: :defeats
   end
 
   namespace :editor do

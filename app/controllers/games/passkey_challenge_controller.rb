@@ -43,6 +43,7 @@ class Games::PasskeyChallengeController < ApplicationController
 
     stored.update!(sign_count: webauthn_credential.sign_count, last_used_at: Time.current)
     Current.session.game_challenges.where(kind: "passkey").delete_all
+    GameStat.record_reauth_passkey(Current.user)
     Turbo::StreamsChannel.broadcast_remove_to(Current.user, :toasts, target: toast_id)
     Achievement::Awarder.call(Current.user, :passkey_survivor)
     render json: { ok: true }

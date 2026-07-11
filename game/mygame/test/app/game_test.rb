@@ -133,6 +133,41 @@ class GameSpawnTest < Minitest::Test
   end
 end
 
+class GameDefeatReportTest < Minitest::Test
+  include GameTest
+
+  def setup
+    DR.reset!
+    @game = Game.new(->(g) { JsonLevel.new(g, "slug" => "arena") })
+    @game.instance_variable_set(:@frame, build_frame(player: @game.player, level: @game.level))
+    @game.send(:setup_level)
+  end
+
+  def test_a_defeated_enemy_is_reported_to_the_server
+    @game.level.enemies << TotpEnemy.new(x: @game.player.x, level: @game.level)
+
+    @game.send(:update_world)
+
+    assert_includes DR.urls, "http://test/games/defeats?kind=totp"
+  end
+
+  def test_every_same_tick_defeat_is_reported
+    @game.level.enemies << TotpEnemy.new(x: @game.player.x, level: @game.level)
+    @game.level.enemies << BufferingEnemy.new(x: @game.player.x, level: @game.level)
+
+    @game.send(:update_world)
+
+    assert_includes DR.urls, "http://test/games/defeats?kind=totp"
+    assert_includes DR.urls, "http://test/games/defeats?kind=buffering"
+  end
+
+  def test_an_uneventful_tick_reports_nothing
+    @game.send(:update_world)
+
+    refute(DR.urls.any? { |url| url.include?("/games/defeats") })
+  end
+end
+
 class GameUnlockTest < Minitest::Test
   include GameTest
 

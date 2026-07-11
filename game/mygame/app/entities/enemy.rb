@@ -59,6 +59,8 @@ class Enemy
     { x: @x, y: @y, w: @w, h: @h }
   end
 
+  def kind = self.class::KIND
+
   def on_collision(other, frame)
     return unless other.is_a?(Player)
 
@@ -83,6 +85,7 @@ class Enemy
 
   def die
     @alive = false
+    Network::Defeats.report(kind)
     @level.drop_loot(self)
   end
 end

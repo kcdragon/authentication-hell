@@ -20,6 +20,7 @@ class Games::TotpChallengeController < ApplicationController
   def complete
     if Current.session.game_challenges.exists?(kind: "totp") && Current.user.verify_totp(params[:code])
       Current.session.game_challenges.where(kind: "totp").delete_all
+      GameStat.record_reauth_totp(Current.user)
       Achievement::Awarder.call(Current.user, :totp_survivor)
       render turbo_stream: turbo_stream.remove(toast_id)
     else

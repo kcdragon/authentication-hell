@@ -1,33 +1,12 @@
-<div class="mx-auto max-w-2xl w-full">
+<div class="mx-auto max-w-3xl w-full">
   <h1 class="font-display text-4xl uppercase tracking-tight">Leaderboard</h1>
-  <p class="ah-hint mt-1">The furthest, most-decorated players. Sort by level or achievements.</p>
+  <p class="ah-hint mt-1"><%= leaderboard_hint %></p>
 
-  <div class="mt-6 flex items-center gap-4 px-4 font-bold text-xs uppercase tracking-wide text-muted">
-    <span class="w-8">#</span>
-    <span class="flex-1">Player</span>
-    <span class="w-40"><%= leaderboard_sort_link "Level", "level" %></span>
-    <span class="w-28 text-right"><%= leaderboard_sort_link "Achievements", "achievements" %></span>
-  </div>
+  <nav aria-label="Leaderboard tabs" class="mt-6 flex gap-2">
+    <%= leaderboard_tab_link "Achievements", "achievements" %>
+    <%= leaderboard_tab_link "Auths", "auths" %>
+    <%= leaderboard_tab_link "Defeats", "defeats" %>
+  </nav>
 
-  <ul class="mt-2 flex flex-col gap-3">
-    <% @users.each.with_index(1) do |user, rank| %>
-      <% mine = user == Current.user %>
-      <% level = user.current_level %>
-      <li class="flex items-center gap-4 border-[3px] border-ink rounded-[3px] px-4 py-3 shadow-brut-sm
-                 <%= mine ? "bg-password" : "bg-card" %>">
-        <span class="w-8 font-display text-lg <%= mine ? "text-ink" : "text-muted" %>"><%= rank %></span>
-        <div class="flex flex-1 items-center gap-3 min-w-0">
-          <%= avatar_badge(user) %>
-          <span class="font-bold truncate"><%= user.username %></span>
-        </div>
-        <span class="w-40 flex items-center gap-2">
-          <span class="text-xl" aria-hidden="true"><%= level.emoji %></span>
-          <span class="font-medium text-sm">Lv <%= level.number %> · <%= level.name %></span>
-        </span>
-        <span class="w-28 text-right font-mono font-bold text-sm">
-          <%= user.achievements_count %> / <%= Achievement.all.size %>
-        </span>
-      </li>
-    <% end %>
-  </ul>
+  <%= render @tab, users: @users, game_stats: @game_stats %>
 </div>

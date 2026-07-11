@@ -1,5 +1,6 @@
 class PasskeyEnemy < Enemy
   AUTH = :passkey
+  KIND = "passkey"
   COLOR = { r: 60, g: 120, b: 200 }
 
   def render(frame, camera_x = 0, camera_y = 0)
