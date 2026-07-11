@@ -88,6 +88,12 @@ backgroundSize: cover
 
 ---
 layout: image
+image: /images/hell-okta-push.png
+backgroundSize: cover
+---
+
+---
+layout: image
 image: /images/hell-vpn-password.png
 backgroundSize: cover
 ---
@@ -106,13 +112,31 @@ backgroundSize: cover
 
 ---
 layout: image
+image: /images/hell-okta-push.png
+backgroundSize: cover
+---
+
+---
+layout: image
 image: /images/hell-okta-github.png
 backgroundSize: cover
 ---
 
 ---
 layout: image
+image: /images/hell-okta-push.png
+backgroundSize: cover
+---
+
+---
+layout: image
 image: /images/hell-okta-teleport.png
+backgroundSize: cover
+---
+
+---
+layout: image
+image: /images/hell-okta-push.png
 backgroundSize: cover
 ---
 
