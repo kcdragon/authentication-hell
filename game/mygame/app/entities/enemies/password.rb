@@ -1,5 +1,6 @@
 class PasswordEnemy < Enemy
   AUTH = :password
+  KIND = "password"
   COLOR = { r: 200, g: 140, b: 40 }
 
   def render(frame, camera_x = 0, camera_y = 0)

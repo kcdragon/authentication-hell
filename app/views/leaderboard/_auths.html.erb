@@ -1,0 +1,27 @@
+<div class="mt-6 flex items-center gap-4 px-4 font-bold text-xs uppercase tracking-wide text-muted">
+  <span class="w-8">#</span>
+  <span class="flex-1">Player</span>
+  <span class="w-16 text-right text-totp">TOTP</span>
+  <span class="w-24 text-right text-password">Password</span>
+  <span class="w-20 text-right text-passkey">Passkey</span>
+  <span class="w-16 text-right">Total</span>
+</div>
+
+<ul class="mt-2 flex flex-col gap-3">
+  <% users.each.with_index(1) do |user, rank| %>
+    <% mine = user == Current.user %>
+    <% stats = game_stats[user.id] || {} %>
+    <li class="flex items-center gap-4 border-[3px] border-ink rounded-[3px] px-4 py-3 shadow-brut-sm
+               <%= mine ? "bg-password" : "bg-card" %>">
+      <span class="w-8 font-display text-lg <%= mine ? "text-ink" : "text-muted" %>"><%= rank %></span>
+      <div class="flex flex-1 items-center gap-3 min-w-0">
+        <%= avatar_badge(user) %>
+        <span class="font-bold truncate"><%= user.username %></span>
+      </div>
+      <span class="w-16 text-right font-mono text-sm" data-stat="reauth_totp"><%= stats["reauth_totp"].to_i %></span>
+      <span class="w-24 text-right font-mono text-sm" data-stat="reauth_password"><%= stats["reauth_password"].to_i %></span>
+      <span class="w-20 text-right font-mono text-sm" data-stat="reauth_passkey"><%= stats["reauth_passkey"].to_i %></span>
+      <span class="w-16 text-right font-mono font-bold text-sm"><%= user.auths_count %></span>
+    </li>
+  <% end %>
+</ul>

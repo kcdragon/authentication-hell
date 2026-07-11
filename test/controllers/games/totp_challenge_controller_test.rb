@@ -96,6 +96,26 @@ class Games::TotpChallengeControllerTest < ActionDispatch::IntegrationTest
     assert_not(streams.any? { |s| s.to_html.include?("Achievement unlocked") })
   end
 
+  test "completing the challenge counts a TOTP re-authentication" do
+    secret = enable_2fa_for(@user)
+    sign_in_as(@user)
+    post games_totp_start_url
+
+    post games_totp_complete_url, params: { code: ROTP::TOTP.new(secret).now }, as: :turbo_stream
+
+    assert_equal 1, @user.game_stats.find_by(key: "reauth_totp").count
+  end
+
+  test "failing the challenge counts no re-authentication" do
+    enable_2fa_for(@user)
+    sign_in_as(@user)
+    post games_totp_start_url
+
+    post games_totp_complete_url, params: { code: "000000" }, as: :turbo_stream
+
+    assert_nil @user.game_stats.find_by(key: "reauth_totp")
+  end
+
   test "failing the challenge awards nothing" do
     enable_2fa_for(@user)
     sign_in_as(@user)

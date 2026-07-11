@@ -11,6 +11,7 @@ class User < ApplicationRecord
   has_many :recovery_codes, dependent: :destroy
   has_many :webauthn_credentials, dependent: :destroy
   has_many :earned_achievements, dependent: :destroy
+  has_many :game_stats, dependent: :destroy
 
   has_one_attached :avatar do |attachable|
     attachable.variant :nav, resize_to_fill: [ 64, 64 ]
@@ -19,19 +20,6 @@ class User < ApplicationRecord
   has_one_attached :certificate_pdf
 
   encrypts :totp_secret
-
-  scope :ranked, ->(by: :level) {
-    ordering = if by.to_s == "achievements"
-      "achievements_count DESC, COALESCE(highest_level_completed, -1) DESC"
-    else
-      "COALESCE(highest_level_completed, -1) DESC, achievements_count DESC"
-    end
-
-    left_joins(:earned_achievements)
-      .group(:id)
-      .select("users.*, COUNT(earned_achievements.id) AS achievements_count")
-      .order(Arel.sql(ordering))
-  }
 
   before_create { self.webauthn_id ||= WebAuthn.generate_user_id }
 
@@ -151,6 +139,7 @@ class User < ApplicationRecord
       update!(highest_level_completed: nil, now_playing_level: nil,
         certificate_token: nil, certificate_awarded_at: nil)
       earned_achievements.delete_all
+      game_stats.delete_all
     end
     certificate_pdf.purge_later
   end

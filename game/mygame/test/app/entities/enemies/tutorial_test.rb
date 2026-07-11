@@ -13,6 +13,10 @@ class TutorialEnemyTest < Minitest::Test
     assert_equal :password, @enemy.auth
   end
 
+  def test_counts_as_a_password_defeat
+    assert_equal "password", @enemy.kind
+  end
+
   def test_is_not_stompable
     refute @enemy.stompable?
   end
