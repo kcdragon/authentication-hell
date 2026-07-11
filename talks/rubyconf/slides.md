@@ -117,36 +117,6 @@ backgroundSize: cover
 ---
 
 ---
-layout: image
-image: /images/create-password-rules.png
-backgroundSize: cover
----
-
----
-layout: image
-image: /images/okta-verify-push.png
-backgroundSize: cover
----
-
----
-layout: image
-image: /images/authy-totp-codes.png
-backgroundSize: cover
----
-
----
-layout: image
-image: /images/email-otp-code.png
-backgroundSize: cover
----
-
----
-layout: image
-image: /images/security-key-webauthn.png
-backgroundSize: cover
----
-
----
 layout: section
 hideInToc: false
 ---
