@@ -1,8 +1,10 @@
 class Game
-  attr_reader :player, :level, :camera_x, :camera_y
+  attr_reader :player, :level, :camera_x, :camera_y, :heart_drop_chance, :rewind_drop_chance
 
-  def initialize(level_builder)
+  def initialize(level_builder, heart_drop_chance: nil, rewind_drop_chance: nil)
     @level_builder = level_builder
+    @heart_drop_chance = heart_drop_chance || Level::HEART_DROP_CHANCE
+    @rewind_drop_chance = rewind_drop_chance || Level::REWIND_DROP_CHANCE
     @player = Player.new
     @collision_manager = CollisionManager.new
     @level = build_level

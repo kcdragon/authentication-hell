@@ -37,6 +37,23 @@ class ShellTest < Minitest::Test
     assert_empty DR.urls, "the game reuses the shell's start data — no second request"
   end
 
+  def test_drop_rates_from_the_payload_thread_into_the_game
+    poll(start_request: complete(code: 200,
+                                 body: '{"start_level":1,"heart_drop_chance":0.9,"rewind_drop_chance":0.05}'))
+
+    game = @shell.instance_variable_get(:@game)
+    assert_equal 0.9, game.heart_drop_chance
+    assert_equal 0.05, game.rewind_drop_chance
+  end
+
+  def test_missing_drop_rates_fall_back_to_the_level_constants
+    poll(start_request: complete(code: 200, body: '{"start_level":1}'))
+
+    game = @shell.instance_variable_get(:@game)
+    assert_equal Level::HEART_DROP_CHANCE, game.heart_drop_chance
+    assert_equal Level::REWIND_DROP_CHANCE, game.rewind_drop_chance
+  end
+
   def test_a_failed_start_still_boots_the_game_at_the_welcome_level
     poll(start_request: complete(code: 500, body: ""))
 

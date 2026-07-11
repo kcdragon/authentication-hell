@@ -122,9 +122,9 @@ class Level
 
   def loot_for(enemy)
     roll = rand
-    if roll < HEART_DROP_CHANCE
+    if roll < game.heart_drop_chance
       HeartPickup.new(x: enemy.x.clamp(0, world_w - HeartPickup::SIZE), y: enemy.y + HeartPickup::LIFT)
-    elsif roll < HEART_DROP_CHANCE + REWIND_DROP_CHANCE
+    elsif roll < game.heart_drop_chance + game.rewind_drop_chance
       RewindPickup.new(x: enemy.x.clamp(0, world_w - RewindPickup::SIZE),
                        y: enemy.y + RewindPickup::LIFT, level: self)
     end

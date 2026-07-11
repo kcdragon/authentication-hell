@@ -20,6 +20,20 @@ class GameBootTest < Minitest::Test
     assert game.captions_on?
   end
 
+  def test_drop_rates_default_to_the_level_constants
+    game = Game.new(->(g) { Level.build(0, g) })
+
+    assert_equal Level::HEART_DROP_CHANCE, game.heart_drop_chance
+    assert_equal Level::REWIND_DROP_CHANCE, game.rewind_drop_chance
+  end
+
+  def test_drop_rates_come_from_the_server_when_provided
+    game = Game.new(->(g) { Level.build(0, g) }, heart_drop_chance: 0.9, rewind_drop_chance: 0.05)
+
+    assert_equal 0.9, game.heart_drop_chance
+    assert_equal 0.05, game.rewind_drop_chance
+  end
+
   def test_the_builder_also_rebuilds_the_level_on_restart
     factory_level = nil
     game = Game.new(->(g) { factory_level = JsonLevel.new(g, "slug" => "level-5") })
