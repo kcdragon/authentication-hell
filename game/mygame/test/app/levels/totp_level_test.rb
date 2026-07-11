@@ -17,12 +17,12 @@ class TotpLevelTest < Minitest::Test
     assert_equal 3, @level.number
   end
 
-  def test_world_is_two_screens_wide
-    assert_equal SCREEN_W * 2, @level.world_w
+  def test_world_is_four_screens_wide
+    assert_equal SCREEN_W * 4, @level.world_w
   end
 
-  def test_allows_only_sixty_seconds
-    assert_equal 60, @level.time_limit
+  def test_allows_two_minutes
+    assert_equal 120, @level.time_limit
   end
 
   def test_hands_off_to_the_bonus_chapter
@@ -44,6 +44,13 @@ class TotpLevelTest < Minitest::Test
     assert(pieces.all? { |piece| piece.x + piece.w <= @level.world_w - SCREEN_W })
   end
 
+  def test_pieces_spread_across_the_collection_run
+    xs = pieces.map(&:x).sort
+    xs.each_cons(2) do |a, b|
+      assert_operator b - a, :>=, 600, "pieces bunch up: #{xs.inspect}"
+    end
+  end
+
   def test_no_piece_waits_at_the_player_spawn
     assert(pieces.all? { |piece| piece.x > @level.start_x + Player::WIDTH * 3 },
            "every piece takes a deliberate walk to reach")
@@ -53,10 +60,42 @@ class TotpLevelTest < Minitest::Test
     assert(@level.keypad.all? { |pad| pad.x >= @level.world_w - SCREEN_W })
   end
 
-  def test_collection_platforms_are_one_hop_up
+  def test_every_collection_platform_is_reachable_by_hops
     proven_jump_reach = Platform::TIERS.first - GROUND_Y
     collection = @level.platforms.reject { |plat| plat.x >= @level.world_w - SCREEN_W }
-    assert(collection.all? { |plat| plat.y + plat.h - GROUND_Y <= proven_jump_reach })
+    collection.each do |plat|
+      top = plat.y + plat.h
+      next if top - GROUND_Y <= proven_jump_reach
+
+      hop_from_lower_neighbor = collection.any? do |other|
+        rise = top - (other.y + other.h)
+        gap = [ plat.x - (other.x + other.w), other.x - (plat.x + plat.w) ].max
+        !other.equal?(plat) && rise > 0 && rise <= proven_jump_reach && gap < 200
+      end
+      assert hop_from_lower_neighbor, "platform at x=#{plat.x} top=#{top} has no reachable hop"
+    end
+  end
+
+  def test_two_jumpable_pits_guard_the_collection_run
+    assert_equal TotpLevel::HOLE_XS.length, @level.holes.length
+    @level.holes.each do |hole|
+      assert_equal Hole::W, hole.w
+      assert_operator hole.x + hole.w, :<=, @level.world_w - SCREEN_W
+    end
+  end
+
+  def test_the_strip_between_the_pits_leaves_room_to_stand
+    left, right = @level.holes.sort_by(&:x)
+    assert_operator right.x - (left.x + left.w), :>=, Player::WIDTH * 2
+  end
+
+  def test_no_piece_hovers_over_a_pit
+    pieces.each do |piece|
+      @level.holes.each do |hole|
+        clear = piece.x + piece.w <= hole.x || piece.x >= hole.x + hole.w
+        assert clear, "piece at x=#{piece.x} hangs over the pit at x=#{hole.x}"
+      end
+    end
   end
 
   def test_setup_places_every_digit_zero_through_nine
@@ -82,13 +121,39 @@ class TotpLevelTest < Minitest::Test
     assert(steps.all? { |s| s <= proven_jump_reach }, "each row is a reachable hop above the last: #{steps.inspect}")
   end
 
-  def test_setup_starts_with_no_enemies_and_a_dormant_challenge
-    assert_empty @level.enemies
+  def test_setup_posts_one_guard_of_each_kind_and_a_dormant_challenge
+    assert_equal %w[buffering passkey password totp], @level.enemies.map(&:kind).sort
     lt = @level.totp
     refute lt.active?, "the QR only exists once its pieces are collected"
     refute lt.registered?
     assert_equal 0, lt.streak
     assert_equal [], lt.entered
+  end
+
+  def test_platform_guards_patrol_their_assigned_platforms
+    TotpLevel::PLATFORM_GUARDS.each do |index, kind|
+      x, top, w = TotpLevel::COLLECT_PLATFORMS[index]
+      guard = @level.enemies.find { |e| e.is_a?(kind) }
+      assert_equal top, guard.y
+      assert_equal x, guard.patrol_min_x
+      assert_equal x + w - guard.w, guard.patrol_max_x
+    end
+  end
+
+  def test_ground_guards_start_clear_of_the_spawn
+    TotpLevel::GROUND_GUARDS.each do |x, _kind|
+      assert_operator x, :>, @level.start_x + Enemy::SAFE_GAP
+    end
+  end
+
+  def test_ground_guards_never_wander_over_a_pit
+    marchers = @level.enemies.select { |e| e.y == GROUND_Y }
+    marchers.each do |guard|
+      @level.holes.each do |hole|
+        clear = guard.patrol_max_x + guard.w <= hole.x || guard.patrol_min_x >= hole.x + hole.w
+        assert clear, "guard patrolling #{guard.patrol_min_x}..#{guard.patrol_max_x} crosses the pit at x=#{hole.x}"
+      end
+    end
   end
 
   def test_totp_stays_dormant_while_pieces_remain
@@ -188,11 +253,11 @@ class TotpLevelTest < Minitest::Test
 
   def test_waves_spawn_during_the_collection_phase
     @level.update(@frame)
-    assert_empty @level.enemies, "no enemy yet at tick 0"
+    baseline = @level.enemies.length
 
     @frame = build_frame(player: @player, level: @level, tick_count: WaveSpawner::INTERVAL)
     @level.update(@frame)
-    refute_empty @level.enemies, "enemies harass the hunt before any registration"
+    assert_equal baseline + 1, @level.enemies.length, "waves harass the hunt before any registration"
   end
 
 
