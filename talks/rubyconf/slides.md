@@ -542,6 +542,10 @@ main.c
 
 <FancyArrow from="[data-id=we-write]" to="[data-id=ruby]" />
 
+<!--
+https://mruby.org/docs/articles/executing-ruby-code-with-mruby.html
+-->
+
 ---
 layout: section
 hideInToc: false
