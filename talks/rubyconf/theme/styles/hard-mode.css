@@ -162,6 +162,15 @@
   padding: 0.1em 0.35em;
 }
 
+/* Square off the top-left of a code block that follows a <FileName> tab so the
+   tab sits flush into the corner. The tab itself is styled in FileName.vue;
+   this reaches the sibling <pre>, which a scoped component style can't. */
+.ah-filename + .slidev-code-wrapper pre,
+.ah-filename + .shiki-magic-move-container pre,
+.ah-filename + pre {
+  border-top-left-radius: 0;
+}
+
 /* ---- REUSABLE BRUTALIST HELPERS (use in slide markup) ----------------- */
 /* A raised card: <div class="ah-card">…</div> */
 .ah-card {

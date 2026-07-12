@@ -266,6 +266,8 @@ layout: two-cols-header
 
 ::left::
 
+<FileName>main.rb</FileName>
+
 ```ruby
 def tick(args)
 end
@@ -287,6 +289,8 @@ layout: two-cols-header
 ## tick
 
 ::left::
+
+<FileName>main.rb</FileName>
 
 ````md magic-move
 ```ruby
@@ -345,6 +349,8 @@ layout: two-cols-header
 ## Movement
 
 ::left::
+
+<FileName>main.rb</FileName>
 
 ````md magic-move
 ```ruby
@@ -416,6 +422,8 @@ layout: two-cols-header
 ## Collisions
 
 ::left::
+
+<FileName>main.rb</FileName>
 
 ````md magic-move
 ```ruby
@@ -633,6 +641,8 @@ layout: two-cols-header
 
 ::left::
 
+<FileName>main.rb</FileName>
+
 ````md magic-move
 ```ruby {4-8}
 def tick(args)
@@ -681,6 +691,8 @@ layout: two-cols-header
 
 ::left::
 
+<FileName>totp_challenge_controller.rb</FileName>
+
 ````md magic-move
 ```ruby
 class Games::TotpChallengeController < ApplicationController
@@ -717,6 +729,8 @@ layout: two-cols-header
 ## Authenticate in toast
 
 ::left::
+
+<FileName>totp_challenge_controller.rb</FileName>
 
 ````md magic-move
 ```ruby
@@ -756,6 +770,8 @@ layout: two-cols-header
 ## Unfreeze player
 
 ::left::
+
+<FileName>main.rb</FileName>
 
 ````md magic-move
 ```ruby
