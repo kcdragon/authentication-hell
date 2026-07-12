@@ -606,7 +606,7 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 
 <div class="flex justify-center mt-6">
   <div class="ah-card bg-white p-2 leading-none">
-    <SlidevVideo autoplay loop muted class="block max-h-[340px] w-auto">
+    <SlidevVideo autoplay loop muted class="block max-h-[380px] w-auto">
       <source :src="'/videos/authenticate-in-game.mp4'" type="video/mp4" />
     </SlidevVideo>
   </div>
