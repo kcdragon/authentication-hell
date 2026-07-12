@@ -613,62 +613,145 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 </div>
 
 ---
+layout: two-cols-header
 ---
 
-## Trigger authentication (game)
+## Player hit by TOTP enemy
+
+::left::
+
+````md magic-move
+```ruby {4-8}
+def tick(args)
+  ...
+  
+  if collision?(args)
+    args.state.collision_request = DR.http_post(
+      "/games/totp/start"
+    )
+  end
+end
+```
+```ruby {10-13}
+def tick(args)
+  ...
+  
+  if collision?(args)
+    args.state.collision_request = DR.http_post(
+      "/games/totp/start"
+    )
+  end
+  
+  if args.state.collision_request[:complete]
+    args.state.collision_request = nil
+    args.state.player.frozen = true
+  end
+end
+```
+````
+
+::right::
+
+<div class="flex items-center justify-center h-full">
+  <div class="ah-card bg-white p-2 leading-none">
+    <SlidevVideo autoplay loop muted class="block w-full h-auto">
+      <source :src="'/videos/trigger-auth-game.mp4'" type="video/mp4" />
+    </SlidevVideo>
+  </div>
+</div>
+
+---
+layout: two-cols-header
+---
+
+## Present TOTP challenge toast
+
+::left::
+
+````md magic-move
+```ruby
+class Games::TotpChallengeController < ApplicationController
+  def start
+    Current.session.start_totp_game_challenge!
+
+    Turbo::StreamsChannel.broadcast_append_to(
+      Current.user, :toasts,
+      target: "toasts_container",
+      partial: "games/totp_challenge",
+      locals: { user: Current.user }
+    )
+
+    head :no_content
+  end
+end
+```
+````
+
+::right::
+
+<div class="flex items-center justify-center h-full">
+  <div class="ah-card bg-white p-2 leading-none">
+    <SlidevVideo autoplay loop muted class="block w-full h-auto">
+      <source :src="'/videos/totp-toast.mp4'" type="video/mp4" />
+    </SlidevVideo>
+  </div>
+</div>
+
+---
+layout: two-cols-header
+---
+
+## Authenticate in toast
+
+::left::
+
+````md magic-move
+```ruby
+class Games::TotpChallengeController < ApplicationController
+  def complete
+    if Current.user.verify_totp(params[:code])
+      Current.session.complete_totp_game_challenge!
+      render turbo_stream: turbo_stream.remove(toast_id)
+    else
+      render turbo_stream: turbo_stream.replace(
+        toast_id,
+        partial: "games/totp_challenge",
+        locals: { error: "Invalid password. Try again." }
+      )
+    end
+  end
+  
+  def toast_id = dom_id(current_user, :totp_challenge)
+end
+```
+````
+
+::right::
+
+<div class="flex items-center justify-center h-full">
+  <div class="ah-card bg-white p-2 leading-none">
+    <SlidevVideo autoplay loop muted class="block w-full h-auto">
+      <source :src="'/videos/complete-totp-toast.mp4'" type="video/mp4" />
+    </SlidevVideo>
+  </div>
+</div>
+
+---
+layout: two-cols-header
+---
+
+## Unfreeze player
+
+::left::
 
 ````md magic-move
 ```ruby
 def tick(args)
-  args.state.collision_request = DR.http_post(
-    "http://localhost:3000/games/password/start"
-  )
-end
-```
-```ruby
-def tick(args)
-  if args.state.collision_request && args.state.collision_request[:complete]
-    args.state.collision_request = nil
-    args.state.player.frozen = true
-  end
-  
-  args.state.collision_request = DR.http_post(
-    "http://localhost:3000/games/password/start"
-  )
-end
-```
-```ruby
-def tick(args)
-  if args.state.collision_request && args.state.collision_request[:complete]
-    args.state.collision_request = nil
-    args.state.player.frozen = true
-  end
-  
-  args.state.collision_request = DR.http_post(
-    "http://localhost:3000/games/password/start"
-  )
+  ...
   
   if args.state.player.frozen
     if !args.state.status_request
-      args.state.status_request = DR.http_get("http://localhost:3000/games/password/status")
-    end
-  end
-end
-```
-```ruby
-def tick(args)
-  if args.state.collision_request && args.state.collision_request[:complete]
-    args.state.collision_request = nil
-    args.state.player.frozen = true
-  end
-  
-  args.state.collision_request = DR.http_post(
-    "http://localhost:3000/games/password/start"
-  )
-  
-  if args.state.player.frozen
-    if !args.state.status_request
-      args.state.status_request = DR.http_get("http://localhost:3000/games/password/status")
+      args.state.status_request = DR.http_get("/games/totp/status")
     elsif args.state.status_request[:complete]
       data = DR.parse_json(args.state.status_request[:response_data])
       if data && data["frozen"] == false
@@ -681,73 +764,15 @@ end
 ```
 ````
 
----
----
+::right::
 
-## Trigger authentication (web)
-
-````md magic-move
-```ruby
-class Games::PasswordChallengeController < ApplicationController
-  skip_forgery_protection only: :start
-
-  def start
-    Current.session.game_challenges.find_or_create_by!(kind: "password")
-    Turbo::StreamsChannel.broadcast_append_to(
-      Current.user, :toasts,
-      target: "toasts",
-      partial: "games/password_challenge",
-      locals: { user: Current.user }
-    )
-    head :no_content
-  end
-end
-```
-```ruby
-class Games::PasswordChallengeController < ApplicationController
-  skip_forgery_protection only: :start
-
-  def start
-    Current.session.game_challenges.find_or_create_by!(kind: "password")
-    Turbo::StreamsChannel.broadcast_append_to(
-      Current.user, :toasts,
-      target: "toasts",
-      partial: "games/password_challenge",
-      locals: { user: Current.user }
-    )
-    head :no_content
-  end
-  
-  def status
-    render json: { locked: Current.session.game_challenges.exists?(kind: "password") }
-  end
-end
-```
-````
-
----
----
-
-## Resolve authentication (web)
-
-````md magic-move
-```ruby
-class Games::PasswordChallengeController < ApplicationController
-  def complete
-    if Current.session.game_challenges.exists?(kind: "password") && Current.user.authenticate(params[:password])
-      Current.session.game_challenges.where(kind: "password").delete_all
-      render turbo_stream: turbo_stream.remove("toast")
-    else
-      render turbo_stream: turbo_stream.replace(
-        "toast",
-        partial: "games/password_challenge",
-        locals: { user: Current.user, error: "Invalid password. Try again." }
-      )
-    end
-  end
-end
-```
-````
+<div class="flex items-center justify-center h-full">
+  <div class="ah-card bg-white p-2 leading-none">
+    <SlidevVideo autoplay loop muted class="block w-full h-auto">
+      <source :src="'/videos/unfreeze-totp-challenge.mp4'" type="video/mp4" />
+    </SlidevVideo>
+  </div>
+</div>
 
 ---
 layout: cover
