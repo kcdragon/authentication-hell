@@ -517,6 +517,19 @@ hideInToc: false
 ---
 ---
 
+## Gameplay
+
+<div class="flex justify-center mt-6">
+  <div class="ah-card bg-white p-2 leading-none">
+    <SlidevVideo autoplay loop muted class="block max-h-[380px] w-auto">
+      <source :src="'/videos/password-complexity-with-game-over.mp4'" type="video/mp4" />
+    </SlidevVideo>
+  </div>
+</div>
+
+---
+---
+
 ## Tech Stack
 
 - DragonRuby game compiled to WASM
