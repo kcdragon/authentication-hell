@@ -492,8 +492,11 @@ end
 dragPos:
   c: 99,273,179,187
   sdl: 376,155,256,129
-  ruby: 692,341,161,161
-  native: 70,125,600,365
+  ruby: 755,150,161,161
+  rubyFile: 758,310,175,44
+  weWrite: 630,39,180,40
+  cFile: 475,394,140,44
+  native: 70,125,657,365
   dragonruby: 90,140,100,79
 ---
 
@@ -509,11 +512,35 @@ dragPos:
 
 <img v-drag="'ruby'" data-id="ruby" src="./images/ruby-logo.png" />
 
+<div v-drag="'rubyFile'" class="flex justify-center">
+
+```
+main.rb
+```
+
+</div>
+
+<div v-drag="'cFile'" data-id="c-file" class="flex justify-center">
+
+```
+main.c
+```
+
+</div>
+
 <FancyArrow two-way from="[data-id=c]" to="[data-id=sdl]" />
 
-<FancyArrow two-way from="[data-id=c]" to="[data-id=ruby]">
+<FancyArrow two-way from="[data-id=c]" to="[data-id=c-file]">
   <code class="px-2 py-1 rounded bg-white">tick(args)</code>
 </FancyArrow>
+
+<FancyArrow from="[data-id=ruby]" to="[data-id=c-file]">
+  <code class="px-2 py-1 rounded bg-white">mrbc -B</code>
+</FancyArrow>
+
+<div v-drag="'weWrite'" data-id="we-write" class="font-bold text-center">We write this file</div>
+
+<FancyArrow from="[data-id=we-write]" to="[data-id=ruby]" />
 
 ---
 layout: section
