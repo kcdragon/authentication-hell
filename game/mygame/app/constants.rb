@@ -51,6 +51,10 @@ LEVEL_INTRO_TICKS    = 110
 LEVEL_INTRO_FADE_IN  = 18
 LEVEL_INTRO_FADE_OUT = 24
 
+TIME_HINT_THRESHOLDS = [ 30, 10 ].freeze
+TIME_HINT_TICKS      = 300
+REWIND_FLASH_TICKS   = 90
+
 # Lowercase-kebab ttf filenames: the WASM asset lookup is case-sensitive.
 FONT_DISPLAY = "fonts/archivo-black-400.ttf"
 FONT_MONO    = "fonts/space-mono-400.ttf"

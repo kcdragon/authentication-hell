@@ -219,3 +219,112 @@ class GameUnlockTest < Minitest::Test
     assert @game.player.locked
   end
 end
+
+class GameTimeHintTest < Minitest::Test
+  include GameTest
+
+  def setup
+    DR.reset!
+    @game = Game.new(->(g) { Level.build(0, g) })
+    @game.instance_variable_set(:@started, true)
+    @game.level.begin_clock(0)
+  end
+
+  def at_tick(tick)
+    @game.instance_variable_set(:@frame, build_frame(player: @game.player,
+                                                     level: @game.level, tick_count: tick))
+  end
+
+  def threshold_tick = (@game.level.time_limit - TIME_HINT_THRESHOLDS.max) * 60
+
+  def test_the_hint_fires_when_remaining_time_reaches_the_threshold
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+
+    assert @game.time_hint_active?
+    assert_equal 0, @game.time_hint_elapsed
+  end
+
+  def test_the_hint_stays_quiet_while_time_is_plentiful
+    at_tick(threshold_tick - 60)
+    @game.send(:update_time_hint)
+
+    refute @game.time_hint_active?
+  end
+
+  def test_the_hint_window_closes_after_its_run
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+    at_tick(threshold_tick + TIME_HINT_TICKS)
+
+    refute @game.time_hint_active?
+  end
+
+  def test_the_hint_does_not_restamp_while_time_stays_low
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+    at_tick(threshold_tick + 120)
+    @game.send(:update_time_hint)
+
+    assert_equal 120, @game.time_hint_elapsed
+  end
+
+  def test_a_second_warning_fires_at_the_lower_threshold
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+    at_tick(just_under_ten_seconds_left)
+    @game.send(:update_time_hint)
+
+    assert @game.time_hint_active?
+    assert_equal 0, @game.time_hint_elapsed
+  end
+
+  def test_a_small_rewind_back_into_the_higher_band_does_not_refire
+    at_tick(just_under_ten_seconds_left)
+    @game.send(:update_time_hint)
+    @game.level.rewind(15, just_under_ten_seconds_left)
+    at_tick(just_under_ten_seconds_left + TIME_HINT_TICKS)
+    @game.send(:update_time_hint)
+
+    refute @game.time_hint_active?
+  end
+
+  def just_under_ten_seconds_left
+    (@game.level.time_limit - TIME_HINT_THRESHOLDS.min) * 60 + 60
+  end
+
+  def test_the_hint_refires_when_a_rewind_buys_time_and_it_runs_low_again
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+    @game.level.rewind(60, threshold_tick)
+    at_tick(threshold_tick + 10)
+    @game.send(:update_time_hint)
+    at_tick(threshold_tick + 60 * 60 + 10)
+    @game.send(:update_time_hint)
+
+    assert @game.time_hint_active?
+    assert_equal 0, @game.time_hint_elapsed
+  end
+
+  def test_the_hint_never_fires_after_game_over
+    @game.player.die!
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+
+    refute @game.time_hint_active?
+  end
+
+  def test_restart_rearms_the_hint
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+    @game.send(:restart_run)
+
+    refute @game.time_hint_active?
+
+    @game.level.begin_clock(threshold_tick)
+    at_tick(threshold_tick + threshold_tick)
+    @game.send(:update_time_hint)
+
+    assert @game.time_hint_active?
+  end
+end

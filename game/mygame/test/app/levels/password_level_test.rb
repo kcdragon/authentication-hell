@@ -21,6 +21,10 @@ class PasswordLevelTest < Minitest::Test
     assert_equal 0, @level.start_x
   end
 
+  def test_the_clock_runs_a_minute_and_a_half
+    assert_equal 90, @level.time_limit
+  end
+
   def test_setup_clears_any_carried_password_progress
     stale_progress = [ "A" ]
     stage(stale_progress)

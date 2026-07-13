@@ -16,6 +16,7 @@ class RewindPickup < Pickup
     return unless other.is_a?(Player) && alive?
 
     @level.rewind(SECONDS, frame.tick_count)
+    @level.note_rewind_collected(self, frame.tick_count)
     super
   end
 
