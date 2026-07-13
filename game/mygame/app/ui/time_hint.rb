@@ -1,7 +1,7 @@
 class Ui::TimeHint
   WIDTH = 560
   HEADING = "You're almost at the end of the video"
-  BODY = "Defeat an employee to rewind #{RewindFlash::LABEL}"
+  BODY = "Defeat an enemy to rewind #{RewindFlash::LABEL}"
 
   def initialize(frame, game)
     @frame = frame
