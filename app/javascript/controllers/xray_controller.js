@@ -118,9 +118,9 @@ export default class extends Controller {
     chip.textContent = region.label
     chip.style.cssText =
       `position:absolute;left:0;top:0;background:${region.chip};color:#fff;` +
-      "font-family:'Space Mono',ui-monospace,monospace;font-size:11px;" +
+      "font-family:'Space Mono',ui-monospace,monospace;font-size:22px;" +
       "font-weight:700;letter-spacing:0.05em;text-transform:uppercase;" +
-      "padding:2px 6px;white-space:nowrap;"
+      "padding:4px 12px;white-space:nowrap;"
     box.appendChild(chip)
 
     this.layer.appendChild(box)
