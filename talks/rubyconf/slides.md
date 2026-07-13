@@ -210,7 +210,7 @@ hideInToc: false
 
 ---
 layout: image-right
-image: images/dragonruby-logo.png
+image: /images/dragonruby-logo.png
 backgroundSize: contain
 ---
 
@@ -226,7 +226,7 @@ backgroundSize: contain
 
 ---
 layout: image-right
-image: images/mruby-logo.png
+image: /images/mruby-logo.png
 backgroundSize: contain
 ---
 
@@ -243,7 +243,7 @@ backgroundSize: contain
 
 ---
 layout: image-right
-image: images/sdl-logo.png
+image: /images/sdl-logo.png
 backgroundSize: contain
 ---
 
