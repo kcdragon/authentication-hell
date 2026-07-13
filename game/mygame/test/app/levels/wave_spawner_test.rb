@@ -40,6 +40,13 @@ class WaveSpawnerTest < Minitest::Test
     assert_equal WaveSpawner::CAP, grounded, "guards standing watch upstairs don't throttle the waves"
   end
 
+  def test_respects_a_custom_cap
+    spawner = WaveSpawner.new(@level, cap: 8)
+    20.times { |i| spawner.update(i * WaveSpawner::INTERVAL, 0) }
+
+    assert_equal 8, @level.enemies.count(&:alive)
+  end
+
   def test_cycles_through_the_enemy_kinds_in_order
     5.times { |i| @spawner.update(i * WaveSpawner::INTERVAL, 0) }
 

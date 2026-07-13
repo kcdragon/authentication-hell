@@ -21,8 +21,29 @@ class ApiKeyLevelTest < Minitest::Test
     assert_instance_of TotpLevel, @level.next_level
   end
 
-  def test_allows_five_minutes_to_visit_a_terminal
-    assert_equal 300, @level.time_limit
+  def test_allows_two_minutes_to_visit_a_terminal
+    assert_equal 120, @level.time_limit
+  end
+
+  def test_waves_stay_dormant_until_the_one_minute_mark
+    @level.begin_clock(0)
+    baseline = @level.enemies.length
+
+    just_before = ApiKeyLevel::WAVE_START_SECONDS * 60 - 1
+    5.times { @level.update(build_frame(player: Player.new, level: @level, tick_count: just_before)) }
+
+    assert_equal baseline, @level.enemies.length
+  end
+
+  def test_waves_march_in_after_the_one_minute_mark
+    @level.begin_clock(0)
+    baseline = @level.enemies.length
+
+    mark = ApiKeyLevel::WAVE_START_SECONDS * 60
+    @level.update(build_frame(player: Player.new, level: @level, tick_count: mark))
+    @level.update(build_frame(player: Player.new, level: @level, tick_count: mark + WaveSpawner::INTERVAL))
+
+    assert_operator @level.enemies.length, :>, baseline
   end
 
   def test_the_chasm_is_far_too_wide_to_jump

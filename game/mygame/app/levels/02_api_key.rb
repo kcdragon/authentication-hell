@@ -10,6 +10,9 @@ class ApiKeyLevel < Level
   HAZARD_KINDS = [ TotpEnemy, PasskeyEnemy, BufferingEnemy ]
   HAZARD_PITCH = 1100
 
+  WAVE_START_SECONDS = 60
+  WAVE_CAP = 7
+
   attr_reader :bridge
 
   def number = 2
@@ -18,7 +21,7 @@ class ApiKeyLevel < Level
 
   def accent = TEAL
 
-  def time_limit = 300
+  def time_limit = 120
 
   def dialogue(_frame)
     [
@@ -36,11 +39,13 @@ class ApiKeyLevel < Level
     @collectables = [ certificate_at_exit ]
     @enemies = near_enemies(game.player.x) + far_enemies + platform_guards(game.player.x)
     @network = Network::LevelApiKey.new(self)
+    @waves = WaveSpawner.new(self, cap: WAVE_CAP)
   end
 
   def update(frame)
     @network.poll(frame.tick_count) unless game.player.game_over
     @bridge.update
+    @waves.update(frame.tick_count, game.camera_x) if waves_active?(frame.tick_count)
     @cleared = true if certificate_collected?(frame)
   end
 
@@ -66,6 +71,8 @@ class ApiKeyLevel < Level
   end
 
   private
+
+  def waves_active?(tick) = !complete? && elapsed(tick) >= WAVE_START_SECONDS * 60
 
   def scattered_platforms
     Platform.scatter.reject do |platform|
