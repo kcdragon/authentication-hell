@@ -594,24 +594,26 @@ hideInToc: false
 - rotp and webauthn gems
 
 ---
+layout: two-cols
+dragPos:
+  wasmLogo: 642,243,261,261
+  wasmDragonruby: 121,257,300,237
 ---
 
 ## WebAssembly (WASM)
 
-<div class="flex items-center justify-center gap-10 mt-10">
-  <div class="ah-card bg-white flex items-center justify-center p-6">
-    <img src="./images/dragonruby-logo.png" class="max-h-56 w-auto" alt="DragonRuby logo" />
-  </div>
+::left::
 
-  <div class="flex flex-col items-center">
-    <span class="font-mono font-bold text-sm uppercase tracking-widest mb-1">compiles to</span>
-    <span class="text-6xl leading-none">→</span>
-  </div>
+- Binary instruction format for the web
+- Run any language in the browser
+- Including DragonRuby!
 
-  <div class="ah-card bg-white flex items-center justify-center p-6">
-    <img src="./images/wasm-logo.png" class="max-h-56 w-auto" alt="WebAssembly (WASM) logo" />
-  </div>
-</div>
+<img v-drag="'wasmDragonruby'" data-id="wasm-dragonruby" src="./images/dragonruby-logo.png" alt="DragonRuby logo" />
+
+<img v-drag="'wasmLogo'" data-id="wasm-logo" src="./images/wasm-logo.png" alt="WebAssembly (WASM) logo" />
+
+<FancyArrow from="[data-id=wasm-dragonruby]" to="[data-id=wasm-logo]">
+</FancyArrow>
 
 <!--
 DragonRuby compiles our game to WebAssembly, which is how it runs in the
