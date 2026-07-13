@@ -206,11 +206,14 @@ class Game
   end
 
   def update_time_hint
-    return if @time_hint_shown || @player.game_over
-    return unless @level.remaining_seconds(tick_count) <= TIME_HINT_SECONDS_LEFT
+    return if @player.game_over
 
-    @time_hint_shown = true
-    @time_hint_at = tick_count
+    if @level.remaining_seconds(tick_count) > TIME_HINT_SECONDS_LEFT
+      @time_hint_shown = false
+    elsif !@time_hint_shown
+      @time_hint_shown = true
+      @time_hint_at = tick_count
+    end
   end
 
   def draw_rewind_flashes

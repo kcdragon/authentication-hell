@@ -260,14 +260,26 @@ class GameTimeHintTest < Minitest::Test
     refute @game.time_hint_active?
   end
 
-  def test_the_hint_fires_once_per_run_even_after_a_rewind
+  def test_the_hint_does_not_restamp_while_time_stays_low
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+    at_tick(threshold_tick + 120)
+    @game.send(:update_time_hint)
+
+    assert_equal 120, @game.time_hint_elapsed
+  end
+
+  def test_the_hint_refires_when_a_rewind_buys_time_and_it_runs_low_again
     at_tick(threshold_tick)
     @game.send(:update_time_hint)
     @game.level.rewind(60, threshold_tick)
-    at_tick(threshold_tick + TIME_HINT_TICKS + 60 * 60)
+    at_tick(threshold_tick + 10)
+    @game.send(:update_time_hint)
+    at_tick(threshold_tick + 60 * 60 + 10)
     @game.send(:update_time_hint)
 
-    refute @game.time_hint_active?
+    assert @game.time_hint_active?
+    assert_equal 0, @game.time_hint_elapsed
   end
 
   def test_the_hint_never_fires_after_game_over
