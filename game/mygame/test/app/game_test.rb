@@ -219,3 +219,76 @@ class GameUnlockTest < Minitest::Test
     assert @game.player.locked
   end
 end
+
+class GameTimeHintTest < Minitest::Test
+  include GameTest
+
+  def setup
+    DR.reset!
+    @game = Game.new(->(g) { Level.build(0, g) })
+    @game.instance_variable_set(:@started, true)
+    @game.level.begin_clock(0)
+  end
+
+  def at_tick(tick)
+    @game.instance_variable_set(:@frame, build_frame(player: @game.player,
+                                                     level: @game.level, tick_count: tick))
+  end
+
+  def threshold_tick = (@game.level.time_limit - TIME_HINT_SECONDS_LEFT) * 60
+
+  def test_the_hint_fires_when_remaining_time_reaches_the_threshold
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+
+    assert @game.time_hint_active?
+    assert_equal 0, @game.time_hint_elapsed
+  end
+
+  def test_the_hint_stays_quiet_while_time_is_plentiful
+    at_tick(threshold_tick - 60)
+    @game.send(:update_time_hint)
+
+    refute @game.time_hint_active?
+  end
+
+  def test_the_hint_window_closes_after_its_run
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+    at_tick(threshold_tick + TIME_HINT_TICKS)
+
+    refute @game.time_hint_active?
+  end
+
+  def test_the_hint_fires_once_per_run_even_after_a_rewind
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+    @game.level.rewind(60, threshold_tick)
+    at_tick(threshold_tick + TIME_HINT_TICKS + 60 * 60)
+    @game.send(:update_time_hint)
+
+    refute @game.time_hint_active?
+  end
+
+  def test_the_hint_never_fires_after_game_over
+    @game.player.die!
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+
+    refute @game.time_hint_active?
+  end
+
+  def test_restart_rearms_the_hint
+    at_tick(threshold_tick)
+    @game.send(:update_time_hint)
+    @game.send(:restart_run)
+
+    refute @game.time_hint_active?
+
+    @game.level.begin_clock(threshold_tick)
+    at_tick(threshold_tick + threshold_tick)
+    @game.send(:update_time_hint)
+
+    assert @game.time_hint_active?
+  end
+end

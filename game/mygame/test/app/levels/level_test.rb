@@ -93,6 +93,49 @@ class LevelTest < Minitest::Test
     assert_equal enemy.y + drop.class::LIFT, drop.y
   end
 
+  def test_remaining_seconds_counts_down_from_the_time_limit
+    level = TotpLevel.new(build_game)
+    level.begin_clock(0)
+
+    assert_equal level.time_limit, level.remaining_seconds(0)
+    assert_in_delta level.time_limit - 40, level.remaining_seconds(40 * 60)
+    assert_equal 0.0, level.remaining_seconds(level.time_limit * 60 + 100)
+  end
+
+  def test_remaining_seconds_recovers_after_a_rewind
+    level = TotpLevel.new(build_game)
+    level.begin_clock(0)
+    forty_seconds_in = 40 * 60
+    before = level.remaining_seconds(forty_seconds_in)
+
+    level.rewind(30, forty_seconds_in)
+    assert_in_delta before + 30, level.remaining_seconds(forty_seconds_in)
+  end
+
+  def test_note_rewind_collected_records_a_flash_at_the_pickup
+    level = Level.new(build_game)
+    pickup = RewindPickup.new(x: 300, y: GROUND_Y, level: level)
+
+    level.note_rewind_collected(pickup, 500)
+
+    assert_equal 500, level.last_rewind_at
+    flash = level.rewind_flashes.fetch(0)
+    assert_equal pickup.x + pickup.w / 2, flash.x
+    assert_equal pickup.y + pickup.h, flash.y
+    assert_equal 500, flash.started_at
+  end
+
+  def test_expire_rewind_flashes_drops_finished_ones
+    level = Level.new(build_game)
+    pickup = RewindPickup.new(x: 300, y: GROUND_Y, level: level)
+    level.note_rewind_collected(pickup, 0)
+    level.note_rewind_collected(pickup, 200)
+
+    level.expire_rewind_flashes(REWIND_FLASH_TICKS + 10)
+
+    assert_equal [ 200 ], level.rewind_flashes.map(&:started_at)
+  end
+
   def test_loot_from_a_ground_enemy_still_lands_on_the_floor
     level = Level.new(build_game)
     enemy = TotpEnemy.new(x: 300, level: level)
