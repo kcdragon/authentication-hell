@@ -72,6 +72,11 @@ class Level
     ((tick - @started_at) / (time_limit * 60).to_f).clamp(0.0, 1.0)
   end
 
+  def elapsed(tick)
+    return 0 unless @started_at
+    tick - @started_at
+  end
+
   def rewind(seconds, now)
     return unless @started_at
     @started_at = [ @started_at + seconds * 60, now ].min

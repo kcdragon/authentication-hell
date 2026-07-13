@@ -4,8 +4,9 @@ class WaveSpawner
   KINDS = [ TotpEnemy, PasswordEnemy, PasskeyEnemy, BufferingEnemy ]
   SPEED = 3
 
-  def initialize(level)
+  def initialize(level, cap: CAP)
     @level = level
+    @cap = cap
     @wave_count = 0
     @last_wave_at = nil
   end
@@ -14,7 +15,7 @@ class WaveSpawner
     @last_wave_at ||= tick
     return if tick - @last_wave_at < INTERVAL
     marchers_on_the_ground = @level.enemies.count { |e| e.alive && e.y == GROUND_Y }
-    return if marchers_on_the_ground >= CAP
+    return if marchers_on_the_ground >= @cap
 
     @last_wave_at = tick
     @level.enemies << spawn_at_camera_edge(next_kind, camera_x)
