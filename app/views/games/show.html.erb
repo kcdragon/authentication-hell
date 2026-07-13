@@ -19,7 +19,8 @@
           class="block w-full h-full border-0"
           allow="autoplay; fullscreen; gamepad"
           data-controller="game-frame"
-          data-game-frame-toasts-value="<%= Game::Toasts::PERMANENT_CONTAINER %>"></iframe>
+          data-game-frame-toasts-value="<%= Game::Toasts::PERMANENT_CONTAINER %>"
+          data-xray-region="dragonruby"></iframe>
       </div>
     </div>
 
@@ -39,7 +40,7 @@
   </div>
 
   <%= turbo_stream_from Current.user, :toasts %>
-  <div class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2">
+  <div class="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-2" data-xray-region="rails">
     <div id="<%= Game::Toasts::PERMANENT_CONTAINER %>" class="contents">
       <%= render "games/certificate_toast" if Current.user.beat_game? %>
     </div>

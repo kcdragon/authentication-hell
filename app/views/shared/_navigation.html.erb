@@ -37,6 +37,12 @@
         <span>Admin</span>
         <span class="font-mono text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-[2px] border border-ink/40 text-muted">super admin</span>
       <% end %>
+
+      <%= link_to game_path(xray: 1), data: { turbo: false },
+            class: "flex items-center justify-between px-4 py-3 text-ink border-b border-faint hover:bg-paper" do %>
+        <span>◐ X-ray</span>
+        <span class="font-mono text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded-[2px] border border-ink/40 text-muted">super admin</span>
+      <% end %>
     <% end %>
 
     <% if Rails.env.development? %>
