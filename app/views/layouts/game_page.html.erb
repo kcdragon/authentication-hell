@@ -23,8 +23,8 @@
     <%= render "shared/analytics" if Rails.env.production? %>
   </head>
 
-  <body>
-    <header class="border-b-[3px] border-ink bg-paper">
+  <body data-controller="<%= "xray" if Current.user.super_admin? %>">
+    <header class="border-b-[3px] border-ink bg-paper" data-xray-region="rails">
       <div class="container mx-auto px-5 py-4 flex items-center justify-between gap-4">
         <%= link_to root_path, data: { turbo: false }, class: "shrink-0", aria: { label: "Authentication Hell — home" } do %>
           <%= render "shared/logo", layout: :horizontal %>
