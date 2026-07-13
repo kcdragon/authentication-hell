@@ -569,6 +569,17 @@ hideInToc: false
 ---
 ---
 
+## Page Structure
+
+<div class="flex justify-center mt-6">
+  <div class="ah-card bg-white p-2 leading-none">
+    <img src="/images/page-structure.png" class="block max-h-[340px] w-auto" />
+  </div>
+</div>
+
+---
+---
+
 ## Tech Stack
 
 - DragonRuby game compiled to WASM
