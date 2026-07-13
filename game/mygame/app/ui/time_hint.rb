@@ -1,6 +1,6 @@
 class Ui::TimeHint
   WIDTH = 560
-  HEADING = "TAPE RUNNING OUT"
+  HEADING = "You're almost at the end of the video"
   BODY = "Defeat an employee to rewind #{RewindFlash::LABEL}"
 
   def initialize(frame, game)

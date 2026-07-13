@@ -11,7 +11,7 @@ class TimeHintTest < Minitest::Test
 
     assert_equal 3, frame.outputs.solids.length
     texts = frame.outputs.labels.map { |l| l[:text] }
-    assert_includes texts, "TAPE RUNNING OUT"
+    assert_includes texts, "You're almost at the end of the video"
     assert_includes texts, "Defeat an employee to rewind +0:30"
     assert(frame.outputs.labels.all? { |l| l[:a] == 255 })
   end

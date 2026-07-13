@@ -15,7 +15,7 @@ class Game
     @beaten = false
     @captions_on = true
     @time_hint_at = nil
-    @time_hint_shown = false
+    @time_hint_threshold = nil
     @collision_report = Network::OneShot.new
     @death_report = Network::OneShot.new
     @unlock_poller = nil
@@ -208,12 +208,17 @@ class Game
   def update_time_hint
     return if @player.game_over
 
-    if @level.remaining_seconds(tick_count) > TIME_HINT_SECONDS_LEFT
-      @time_hint_shown = false
-    elsif !@time_hint_shown
-      @time_hint_shown = true
-      @time_hint_at = tick_count
-    end
+    threshold = crossed_time_threshold
+    return if threshold == @time_hint_threshold
+
+    dropped_lower = threshold && (@time_hint_threshold.nil? || threshold < @time_hint_threshold)
+    @time_hint_threshold = threshold
+    @time_hint_at = tick_count if dropped_lower
+  end
+
+  def crossed_time_threshold
+    remaining = @level.remaining_seconds(tick_count)
+    TIME_HINT_THRESHOLDS.select { |threshold| remaining <= threshold }.min
   end
 
   def draw_rewind_flashes
@@ -273,7 +278,7 @@ class Game
     @level = build_level
     @unlock_poller = nil
     @time_hint_at = nil
-    @time_hint_shown = false
+    @time_hint_threshold = nil
     setup_level
     begin_level_intro
     Network::Levels.playing(@level.number)
