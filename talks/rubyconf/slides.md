@@ -490,29 +490,39 @@ end
 
 ---
 dragPos:
-  c: 99,273,179,187
-  sdl: 376,155,256,129
-  ruby: 755,150,161,161
-  rubyFile: 758,310,175,44
+  c: 161,273,117,123
+  sdl: 376,155,210,106
+  ruby: 756,158,118,118
+  rubyFile: 734,274,175,44
   weWrite: 630,39,180,40
-  cFile: 475,394,140,44
+  cFile: 446,424,175,44
   native: 70,125,657,365
   dragonruby: 90,140,100,79
+  cSource: 133,397,175,44
+  cCompiled: 475,301,117,123
 ---
 
 ## Architecture
 
-<div v-drag="'native'" class="border-3 border-dashed border-gray-400 rounded"></div>
+<div v-click="4" v-drag="'native'" class="border-3 border-dashed border-gray-400 rounded"></div>
 
-<img v-drag="'dragonruby'" data-id="dragonruby" src="./images/dragonruby-logo.png" />
+<img v-click="4" v-drag="'dragonruby'" data-id="dragonruby" src="./images/dragonruby-logo.png" />
 
-<img v-drag="'c'" data-id="c" src="./images/c-logo.png" />
+<img v-click="3" v-drag="'c'" data-id="c" src="./images/c-logo.png" />
 
-<img v-drag="'sdl'" data-id="sdl" src="./images/sdl-logo.png" />
+<div v-click="3" v-drag="'cSource'" class="flex justify-center">
 
-<img v-drag="'ruby'" data-id="ruby" src="./images/ruby-logo.png" />
+```
+dragonruby.c
+```
 
-<div v-drag="'rubyFile'" class="flex justify-center">
+</div>
+
+<img v-click="3" v-drag="'sdl'" data-id="sdl" src="./images/sdl-logo.png" />
+
+<img v-click="1" v-drag="'ruby'" data-id="ruby" src="./images/ruby-logo.png" />
+
+<div v-click="1" v-drag="'rubyFile'" class="flex justify-center">
 
 ```
 main.rb
@@ -520,7 +530,9 @@ main.rb
 
 </div>
 
-<div v-drag="'cFile'" data-id="c-file" class="flex justify-center">
+<img v-click="2" v-drag="'cCompiled'" data-id="c-compiled" src="./images/c-logo.png" />
+
+<div v-click="2" v-drag="'cFile'" class="flex justify-center">
 
 ```
 main.c
@@ -528,19 +540,19 @@ main.c
 
 </div>
 
-<FancyArrow two-way from="[data-id=c]" to="[data-id=sdl]" />
+<FancyArrow v-click="3" two-way from="[data-id=c]" to="[data-id=sdl]" />
 
-<FancyArrow two-way from="[data-id=c]" to="[data-id=c-file]">
+<FancyArrow v-click="3" two-way from="[data-id=c]" to="[data-id=c-compiled]">
   <code class="px-2 py-1 rounded bg-white">tick(args)</code>
 </FancyArrow>
 
-<FancyArrow from="[data-id=ruby]" to="[data-id=c-file]">
+<FancyArrow v-click="2" from="[data-id=ruby]" to="[data-id=c-compiled]">
   <code class="px-2 py-1 rounded bg-white">mrbc -B</code>
 </FancyArrow>
 
-<div v-drag="'weWrite'" data-id="we-write" class="font-bold text-center">We write this file</div>
+<div v-click="1" v-drag="'weWrite'" data-id="we-write" class="font-bold text-center">We write this file</div>
 
-<FancyArrow from="[data-id=we-write]" to="[data-id=ruby]" />
+<FancyArrow v-click="1" from="[data-id=we-write]" to="[data-id=ruby]" />
 
 <!--
 https://mruby.org/docs/articles/executing-ruby-code-with-mruby.html
