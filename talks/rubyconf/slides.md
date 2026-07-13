@@ -571,11 +571,7 @@ hideInToc: false
 
 ## Page Structure
 
-<div class="flex justify-center mt-6">
-  <div class="ah-card bg-white p-2 leading-none">
-    <img src="/images/page-structure.png" class="block max-h-[340px] w-auto" />
-  </div>
-</div>
+<Framed src="/images/page-structure.png" alt="AuthHell page structure: game canvas, video playlist sidebar, and the Enemy Encounter 2FA re-auth toast" />
 
 ---
 ---
@@ -630,25 +626,21 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 
 ## Discord to the rescue
 
-<div class="flex flex-col items-center gap-3 mt-3">
+<Framed>
   <div class="ah-card bg-white p-2 leading-none">
     <img src="./images/discord-heapu8.png" class="block max-h-[300px] w-auto" alt="Discord message diagnosing the Module.HEAPU8 undefined error in the DragonRuby WASM build" />
   </div>
   <div class="ah-card bg-white p-2 leading-none">
     <img src="./images/discord-reply.png" class="block max-w-[630px] h-auto" alt="Discord reply: this is a bug introduced in DragonRuby 7+ it seems" />
   </div>
-</div>
+</Framed>
 
 ---
 ---
 
 ## Each level is a video
 
-<div class="flex justify-center mt-6">
-  <div class="ah-card bg-white p-2 leading-none">
-    <img src="./images/level-video-player.png" class="block max-h-[340px] w-auto" alt="Game level styled as a corporate training video player, with a scrubber, timestamp, and CC controls below the platformer scene" />
-  </div>
-</div>
+<Framed src="./images/level-video-player.png" alt="Game level styled as a corporate training video player, with a scrubber, timestamp, and CC controls below the platformer scene" />
 
 
 ---
@@ -656,11 +648,7 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 
 ## Claude Design
 
-<div class="flex justify-center mt-6">
-  <div class="ah-card bg-white p-2 leading-none">
-    <img src="./images/claude-design.png" class="block max-h-[340px] w-auto" alt="Claude Design canvas redesigning the game screens" />
-  </div>
-</div>
+<Framed src="./images/claude-design.png" alt="Claude Design canvas redesigning the game screens" />
 
 ---
 ---
