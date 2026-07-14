@@ -29,12 +29,18 @@ defaults:
   </div>
 </div>
 
-<div v-drag="[87,288,180,220]" class="flex flex-col items-center">
+<div v-drag="[191,254,180,220]" class="flex flex-col items-center">
   <a href="https://authenticationhell.com" target="_blank" rel="noopener" class="ah-tagline !mt-0 mb-3 text-lg !text-ink no-underline">authenticationhell.com</a>
   <div class="ah-card bg-white p-3 leading-none rotate-2">
     <img src="./images/qr-authenticationhell.svg" class="w-32 h-32" alt="QR code to authenticationhell.com" />
   </div>
 </div>
+
+<img v-drag="[-7,404,80,123]" src="./images/plants/coreopsis.png" alt="Coreopsis plant sprite from the game" />
+
+<img v-drag="[51,482,130,95]" src="./images/plants/pink-bush.png" alt="Pink bush plant sprite from the game" />
+
+<img v-drag="[-17,461,120,111]" src="./images/plants/poppy-bush.png" alt="Poppy bush plant sprite from the game" />
 
 <!--
 Speaker notes go here, after the HTML comment marker.
