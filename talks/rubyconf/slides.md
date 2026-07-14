@@ -67,22 +67,61 @@ matching the app's brutalist headings.
 </div>
 
 ---
-layout: two-cols
+layout: fact
 ---
 
-## Hi, I'm Mike Dalton
+<div class="flex items-center justify-center gap-5">
+  <div class="relative h-64 w-64">
+    <img src="./images/mike-dalton.jpg" class="h-64 w-64 rounded-full object-cover" alt="Mike Dalton" />
+    <img
+      v-click
+      src="./images/mustache.png"
+      alt="Mustache"
+      class="mustache-slide absolute left-1/2 top-[54%] w-32 -translate-x-[calc(50%+4px)]"
+    />
+  </div>
+  <h1 class="!m-0 !text-5xl">Hi, I'm Mike Dalton</h1>
+</div>
 
-- Ruby developer
-- Staff engineer at Triumph
-- Love to build side projects
+<style>
+img.mustache-slide.slidev-vclick-target {
+  transition: transform 1.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease;
+}
+img.mustache-slide.slidev-vclick-hidden {
+  transform: translate(calc(-50% - 380px), 0);
+}
+</style>
 
-::right::
+---
+layout: fact
+---
 
-<img v-drag="[594,37,244,244]" src="./images/mike-dalton.jpg" />
+<div class="flex items-center justify-center gap-5">
+  <img src="./images/triumph-logo.png" class="h-16 w-auto" alt="Triumph logo" />
+  <h1 class="!m-0 !text-5xl">Engineer at Triumph</h1>
+</div>
 
-<img v-drag="[467,322,192,192]" src="./images/triumph-logo.png" />
+---
+layout: fact
+---
 
-<img v-drag="[741,336,172,172]" src="./images/calendar-vision-logo.png" class="rounded-2xl" />
+<div class="flex items-center justify-center gap-5">
+  <h1 class="!m-0 !text-5xl">Love to build side projects</h1>
+</div>
+
+<div v-drag="[218,37,133,162]" class="flex flex-col items-center">
+  <img src="./images/calendar-vision-logo.png" class="w-[172px] h-[172px] rounded-2xl" alt="Calendar Vision logo" />
+  <div class="mt-2 text-center font-bold">Calendar Vision</div>
+</div>
+
+<img v-drag="[153,406,300,39]" src="./images/gamestats-logo.svg" alt="Game Stats AI logo" />
+
+<img v-drag="[595,392,300,44]" src="./images/runeshare-logo.png" alt="RuneShare logo" />
+
+<div v-drag="[673,40,129,162]" class="flex flex-col items-center">
+  <img src="./images/broadside-logo.png" class="w-[160px] h-[160px]" alt="Broadside logo" />
+  <div class="mt-2 text-center font-bold">Broadside</div>
+</div>
 
 ---
 layout: section
