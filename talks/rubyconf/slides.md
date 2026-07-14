@@ -897,6 +897,40 @@ end
 </div>
 
 ---
+layout: two-cols-header
+---
+
+## Check challenge status
+
+::left::
+
+<FileName>totp_challenge_controller.rb</FileName>
+
+````md magic-move
+```ruby
+class Games::TotpChallengeController < ApplicationController
+  def status
+    render json: { frozen: !completed? }
+  end
+  
+  private
+  
+  def completed? = Current.session.totp_game_challenge_completed?
+end
+```
+````
+
+::right::
+
+<div class="flex items-center justify-center h-full">
+  <div class="ah-card bg-white p-2 leading-none">
+    <SlidevVideo autoplay loop muted class="block w-full h-auto">
+      <source :src="'/videos/unfreeze-totp-challenge.mp4'" type="video/mp4" />
+    </SlidevVideo>
+  </div>
+</div>
+
+---
 layout: cover
 ---
 
