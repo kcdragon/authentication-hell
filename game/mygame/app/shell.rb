@@ -52,9 +52,16 @@ class Shell
   def choose_play
     number = @start_data["start_level"] || 0
     @game = Game.new(->(game) { Level.build(number, game) },
+                     extra_levels: extra_levels,
                      heart_drop_chance: @start_data["heart_drop_chance"],
                      rewind_drop_chance: @start_data["rewind_drop_chance"])
     @mode = :game
+  end
+
+  def extra_levels
+    by_number = {}
+    (@start_data["levels"] || []).each { |level| by_number[level["number"]] = level }
+    by_number
   end
 
   def choose_edit

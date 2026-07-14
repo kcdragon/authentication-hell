@@ -158,6 +158,30 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
     assert_nil @user.reload.certificate_awarded_at, "the bonus level never certifies on its own"
   end
 
+  test "completing a promoted editor level records progress but awards no achievement" do
+    root = Pathname.new(Dir.mktmpdir)
+    draft_root = Pathname.new(Dir.mktmpdir)
+    Editor::LevelFile.root = root
+    Editor::LevelFile.draft_root = draft_root
+    Editor::LevelFile.new(promoted_level_data).write
+    Editor::LevelFile.find("level-9").promote!
+    user_level = GameLevel.find(5)
+    @user.update!(highest_level_completed: user_level.number - 1)
+    sign_in_as(@user)
+
+    assert_no_difference -> { @user.earned_achievements.count } do
+      post games_levels_complete_url, params: { level: user_level.number }
+    end
+
+    assert_response :no_content
+    assert_equal user_level.number, @user.reload.highest_level_completed
+  ensure
+    Editor::LevelFile.root = Rails.root.join("game/mygame/data/levels")
+    Editor::LevelFile.draft_root = Rails.root.join("level_drafts")
+    FileUtils.remove_entry(root)
+    FileUtils.remove_entry(draft_root)
+  end
+
   test "playing requires authentication" do
     post games_levels_playing_url, params: { level: 1 }
     assert_redirected_to new_session_path
@@ -206,5 +230,15 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :no_content
     assert_nil @user.reload.now_playing_level
+  end
+
+  private
+
+  def promoted_level_data
+    {
+      "format" => 1, "slug" => "level-9", "title" => "Level 9", "accent" => "blue",
+      "world_w" => 6400, "start_x" => 200, "time_limit" => 120, "certificate_x" => 6120,
+      "platforms" => [], "holes" => [], "enemies" => []
+    }
   end
 end

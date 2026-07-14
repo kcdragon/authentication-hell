@@ -1,15 +1,20 @@
 class GameLevel
-  attr_reader :number, :name, :emoji, :achievement_description
+  attr_reader :number, :name, :emoji, :achievement_description, :slug, :data
 
-  def initialize(number:, name:, emoji:, achievement_description:, bonus: false)
+  FIRST_PROMOTED_NUMBER = 5
+  PROMOTED_EMOJI = "🎬"
+
+  def initialize(number:, name:, emoji:, achievement_description:, bonus: false, slug: nil, data: nil)
     @number = number
     @name = name
     @emoji = emoji
     @achievement_description = achievement_description
     @bonus = bonus
+    @slug = slug
+    @data = data
   end
 
-  ALL = [
+  BUILTIN = [
     new(number: 0, name: "Welcome", emoji: "🎓",
       achievement_description: "Finish the Welcome level and step into the world."),
     new(number: 1, name: "Password Complexity", emoji: "🔑",
@@ -31,9 +36,22 @@ class GameLevel
 
   def bonus? = @bonus
 
-  def self.all = ALL
+  def awards_achievement? = @data.nil?
 
-  def self.find(number) = ALL.find { it.number == number }
+  def self.all = BUILTIN + promoted
 
-  def self.graduation = ALL.reject(&:bonus?).last
+  def self.promoted
+    published = Editor::LevelFile.all.reject(&:draft?).select(&:valid?)
+    published.sort_by { |level| [ level.slug.to_s[/\d+/].to_i, level.slug.to_s ] }
+      .each_with_index.map do |level, index|
+        new(number: FIRST_PROMOTED_NUMBER + index, name: level.title, emoji: PROMOTED_EMOJI,
+          achievement_description: "", bonus: true, slug: level.slug, data: level.data)
+      end
+  rescue Editor::LevelFile::CorruptFile
+    []
+  end
+
+  def self.find(number) = all.find { it.number == number }
+
+  def self.graduation = BUILTIN.reject(&:bonus?).last
 end

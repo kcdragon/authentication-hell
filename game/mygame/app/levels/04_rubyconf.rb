@@ -17,6 +17,8 @@ class RubyConfLevel < Level
 
   def number = 4
 
+  def next_level = game.extra_level(5)
+
   def title = "RubyConf Field Trip"
 
   def chapter_label = "Bonus Chapter"

@@ -48,7 +48,7 @@ class Achievement
       window: PACIFIC.parse("2026-07-16 11:15:00")..PACIFIC.parse("2026-07-16 11:45:00"))
   ].freeze
 
-  ALL = (SURVIVOR + COMPLETION + CREATOR + EVENTS + GameLevel.all.map(&:achievement)).freeze
+  ALL = (SURVIVOR + COMPLETION + CREATOR + EVENTS + GameLevel::BUILTIN.map(&:achievement)).freeze
 
   def self.all
     ALL
