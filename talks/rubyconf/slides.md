@@ -29,12 +29,36 @@ defaults:
   </div>
 </div>
 
+<div v-drag="[87,288,180,220]" class="flex flex-col items-center">
+  <a href="https://authenticationhell.com" target="_blank" rel="noopener" class="ah-tagline !mt-0 mb-3 text-lg !text-ink no-underline">authenticationhell.com</a>
+  <div class="ah-card bg-white p-3 leading-none rotate-2">
+    <img src="./images/qr-authenticationhell.svg" class="w-32 h-32" alt="QR code to authenticationhell.com" />
+  </div>
+</div>
+
 <!--
 Speaker notes go here, after the HTML comment marker.
 Press `c` during the talk to open presenter mode.
 The cover layout puts the title in an inked block with a hard offset shadow,
 matching the app's brutalist headings.
 -->
+
+---
+
+## Play along!
+
+<div class="flex items-center justify-center gap-16 mt-10">
+  <div class="max-w-md space-y-4 text-2xl">
+    <p>Feel free to <strong>play the game during the talk.</strong></p>
+    <p>Sign up, then dive into Authentication Hell on your laptop.</p>
+  </div>
+  <div class="flex flex-col items-center">
+    <a href="https://authenticationhell.com" target="_blank" rel="noopener" class="ah-tagline !mt-0 mb-3 text-xl !text-ink no-underline">authenticationhell.com</a>
+    <div class="ah-card bg-white p-4 leading-none">
+      <img src="./images/qr-authenticationhell.svg" class="w-52 h-52" alt="QR code to authenticationhell.com" />
+    </div>
+  </div>
+</div>
 
 ---
 layout: two-cols
