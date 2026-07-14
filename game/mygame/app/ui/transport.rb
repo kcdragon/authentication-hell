@@ -11,10 +11,11 @@ class Ui::Transport
 
     limit = @game.level.time_limit
     elapsed = @game.progress * limit
+    ink = rewound_recently? ? GREEN : TS_INK
     @frame.outputs.labels << { x: bx + 48, y: by + 26,
                               text: "#{timecode(elapsed)} / #{timecode(limit)}",
                               size_px: 22, font: FONT_MONO,
-                              r: TS_INK[0], g: TS_INK[1], b: TS_INK[2],
+                              r: ink[0], g: ink[1], b: ink[2],
                               anchor_x: 0, anchor_y: 1 }
 
     draw_captions(by)
@@ -51,6 +52,11 @@ class Ui::Transport
       @frame.outputs.sprites << { path: :solid, x: CC_BUTTON[:x], y: by + 6, w: 20, h: 2,
                                 r: BLUE[0], g: BLUE[1], b: BLUE[2] }
     end
+  end
+
+  def rewound_recently?
+    last = @game.level.last_rewind_at
+    !last.nil? && @frame.tick_count - last < REWIND_FLASH_TICKS
   end
 
   def timecode(seconds)

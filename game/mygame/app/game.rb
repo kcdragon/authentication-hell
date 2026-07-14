@@ -15,6 +15,8 @@ class Game
     @paused = false
     @beaten = false
     @captions_on = true
+    @time_hint_at = nil
+    @time_hint_threshold = nil
     @collision_report = Network::OneShot.new
     @death_report = Network::OneShot.new
     @unlock_poller = nil
@@ -49,6 +51,10 @@ class Game
     data = @extra_levels[number]
     JsonLevel.new(self, data, number) if data
   end
+
+  def time_hint_active? = !@time_hint_at.nil? && time_hint_elapsed < TIME_HINT_TICKS
+
+  def time_hint_elapsed = tick_count - @time_hint_at
 
   private
 
@@ -128,6 +134,7 @@ class Game
     end
 
     end_run if out_of_time?
+    update_time_hint
 
     @collision_report.update { @player.confirm_lock! }
     @death_report.update
@@ -158,6 +165,8 @@ class Game
       @level.render_world(@frame, @camera_x, @camera_y)
 
       @player.render(@frame, @camera_x, @camera_y)
+
+      draw_rewind_flashes
     end
 
     Ui::ControlBar.new(@frame, self).draw
@@ -176,6 +185,7 @@ class Game
     when :dialogue then Dialogue.new(@frame, @level.current_dialogue(@frame), @level.accent).draw
     else
       draw_lag_indicator if @player.slowed?(tick_count)
+      Ui::TimeHint.new(@frame, self).draw if time_hint_active?
       @level.draw(@frame)
     end
   end
@@ -199,6 +209,27 @@ class Game
 
   def out_of_time?
     !@player.game_over && progress >= 1.0
+  end
+
+  def update_time_hint
+    return if @player.game_over
+
+    threshold = crossed_time_threshold
+    return if threshold == @time_hint_threshold
+
+    dropped_lower = threshold && (@time_hint_threshold.nil? || threshold < @time_hint_threshold)
+    @time_hint_threshold = threshold
+    @time_hint_at = tick_count if dropped_lower
+  end
+
+  def crossed_time_threshold
+    remaining = @level.remaining_seconds(tick_count)
+    TIME_HINT_THRESHOLDS.select { |threshold| remaining <= threshold }.min
+  end
+
+  def draw_rewind_flashes
+    @level.expire_rewind_flashes(tick_count)
+    @level.rewind_flashes.each { |flash| flash.render(@frame, @camera_x, @camera_y) }
   end
 
   def end_run
@@ -252,6 +283,8 @@ class Game
     @player = Player.new
     @level = build_level
     @unlock_poller = nil
+    @time_hint_at = nil
+    @time_hint_threshold = nil
     setup_level
     begin_level_intro
     Network::Levels.playing(@level.number)

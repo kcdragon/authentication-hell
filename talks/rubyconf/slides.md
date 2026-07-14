@@ -654,6 +654,11 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 
 <Framed src="./images/level-video-player.png" alt="Game level styled as a corporate training video player, with a scrubber, timestamp, and CC controls below the platformer scene" />
 
+<div v-drag="[82,296,150,44,14]" data-id="play-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">Play / pause</div>
+<FancyArrow color="red-500" width="3" from="[data-id=play-label]@bottom" to="(220, 440)" />
+
+<div v-drag="[413,465,90,44,-9]" data-id="timer-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Timer</div>
+<FancyArrow color="red-500" width="3" from="[data-id=timer-label]@top" to="(330, 440)" />
 
 ---
 ---

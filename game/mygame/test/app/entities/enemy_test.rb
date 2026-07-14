@@ -52,6 +52,38 @@ class EnemyTest < Minitest::Test
     end
   end
 
+  def test_a_ground_patrol_turns_around_at_a_hole
+    level = Level.new(build_game)
+    hole = Hole.new(x: 250, w: Hole::W)
+    level.holes << hole
+    enemy = TotpEnemy.new(x: 100, level: level)
+
+    600.times do
+      enemy.update
+      refute enemy.x + enemy.w > hole.x && enemy.x < hole.x + hole.w,
+             "enemy walked onto the hole"
+    end
+  end
+
+  def test_a_marcher_reverses_at_a_hole
+    level = Level.new(build_game)
+    hole = Hole.new(x: 400, w: Hole::W)
+    level.holes << hole
+    enemy = TotpEnemy.new(x: 100, level: level)
+    enemy.march_right(3)
+
+    reversed = false
+    600.times do
+      enemy.update
+      refute enemy.x + enemy.w > hole.x && enemy.x < hole.x + hole.w,
+             "marcher walked onto the hole"
+      reversed ||= enemy.vx < 0
+    end
+
+    assert reversed, "marcher never turned back from the hole"
+    assert_operator enemy.x + enemy.w, :<=, hole.x, "marcher stayed left of the hole"
+  end
+
   def test_a_stomp_defeats_it_on_a_platform
     platform = Platform.new(x: 500, y: 220, w: 200, h: Platform::H)
     enemy = TotpEnemy.new(x: @player.x, level: enemy_level).patrol_on(platform)

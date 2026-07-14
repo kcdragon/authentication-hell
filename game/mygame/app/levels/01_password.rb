@@ -19,6 +19,8 @@ class PasswordLevel < Level
 
   def accent = AMBER
 
+  def time_limit = 90
+
   def dialogue(_frame)
     [
       [ "Your company requires passwords with",

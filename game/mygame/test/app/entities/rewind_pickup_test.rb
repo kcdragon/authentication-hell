@@ -39,6 +39,20 @@ class RewindPickupTest < Minitest::Test
     assert_equal after_first, level.progress(forty_seconds_in)
   end
 
+  def test_on_collision_records_a_flash_for_the_collect_feedback
+    player = Player.new
+    level = TotpLevel.new(build_game)
+    level.begin_clock(0)
+    forty_seconds_in = 40 * 60
+    frame = build_frame(player: player, level: level, tick_count: forty_seconds_in)
+
+    pickup = RewindPickup.new(x: player.x, y: player.y, level: level)
+    pickup.on_collision(player, frame)
+
+    assert_equal forty_seconds_in, level.last_rewind_at
+    assert_equal 1, level.rewind_flashes.length
+  end
+
   def test_ignores_a_non_player_collider
     pickup = RewindPickup.new(x: 100, y: GROUND_Y, level: TotpLevel.new(build_game))
     pickup.on_collision(Object.new, build_frame)

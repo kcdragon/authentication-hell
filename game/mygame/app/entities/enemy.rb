@@ -53,6 +53,7 @@ class Enemy
       @x = @patrol_max_x
       @vx = -@vx.abs
     end
+    turn_from_hole if @y == GROUND_Y
   end
 
   def hitbox
@@ -82,6 +83,23 @@ class Enemy
   end
 
   private
+
+  def turn_from_hole
+    hole = @level.holes.find { |h| overlaps_hole?(h) }
+    return unless hole
+
+    if @vx > 0
+      @x = hole.x - @w
+      @vx = -@vx.abs
+    else
+      @x = hole.x + hole.w
+      @vx = @vx.abs
+    end
+  end
+
+  def overlaps_hole?(hole)
+    @x + @w > hole.x && @x < hole.x + hole.w
+  end
 
   def die
     @alive = false

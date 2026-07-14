@@ -1,5 +1,5 @@
 class Level
-  attr_reader :enemies, :platforms, :collectables, :holes
+  attr_reader :enemies, :platforms, :collectables, :holes, :rewind_flashes, :last_rewind_at
 
   HEART_DROP_CHANCE = 0.30
   REWIND_DROP_CHANCE = 0.35
@@ -21,6 +21,7 @@ class Level
     @platforms = []
     @collectables = []
     @holes = []
+    @rewind_flashes = []
   end
 
   def setup(_frame) = nil
@@ -80,6 +81,18 @@ class Level
   def rewind(seconds, now)
     return unless @started_at
     @started_at = [ @started_at + seconds * 60, now ].min
+  end
+
+  def remaining_seconds(tick) = time_limit * (1.0 - progress(tick))
+
+  def note_rewind_collected(pickup, tick)
+    @last_rewind_at = tick
+    @rewind_flashes << RewindFlash.new(x: pickup.x + pickup.w / 2,
+                                       y: pickup.y + pickup.h, started_at: tick)
+  end
+
+  def expire_rewind_flashes(tick)
+    @rewind_flashes = @rewind_flashes.select { |flash| flash.active?(tick) }
   end
 
   def drop_loot(enemy)
