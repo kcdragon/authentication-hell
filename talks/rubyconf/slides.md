@@ -628,7 +628,7 @@ dragPos:
   cCompiled: 475,301,117,123
 ---
 
-## Architecture
+## 👋 Architecture 👋
 
 <div v-click="4" v-drag="'native'" class="border-3 border-dashed border-gray-400 rounded"></div>
 
