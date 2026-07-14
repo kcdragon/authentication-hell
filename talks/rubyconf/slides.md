@@ -881,10 +881,16 @@ layout: cover
   </div>
   <div class="flex flex-col items-center">
     <a href="https://github.com/kcdragon/authentication-hell" target="_blank" rel="noopener" class="ah-tagline !mt-0 mb-3 text-xl !text-ink no-underline flex items-center gap-2">
-      <ph-github-logo-fill class="text-2xl" /> kcdragon/authentication-hell
+      <ph-github-logo-fill class="text-2xl" /><span class="text-sm">kcdragon/authentication-hell</span>
     </a>
     <div class="ah-card bg-white p-4 leading-none">
       <img src="./images/qr-github.svg" class="w-44 h-44" alt="QR code to the source on GitHub" />
+    </div>
+  </div>
+  <div class="flex flex-col items-center">
+    <a href="https://mikedalton.co/socials/" target="_blank" rel="noopener" class="ah-tagline !mt-0 mb-3 text-xl !text-ink no-underline">mikedalton.co/socials</a>
+    <div class="ah-card bg-white p-4 leading-none">
+      <img src="./images/qr-socials.svg" class="w-44 h-44" alt="QR code to Mike Dalton's socials" />
     </div>
   </div>
 </div>
