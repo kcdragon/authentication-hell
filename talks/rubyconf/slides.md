@@ -931,6 +931,13 @@ end
 </div>
 
 ---
+
+## Takeaways
+
+- You can develop your own game... in Ruby!
+- You can easily add better authentication methods (i.e. passkeys) to your app
+
+---
 layout: cover
 ---
 
