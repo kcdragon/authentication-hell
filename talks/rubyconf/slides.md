@@ -150,6 +150,63 @@ hideInToc: false
 # "Authentication Hell"
 
 ---
+layout: fact
+---
+
+## I like my job
+
+---
+layout: fact
+---
+
+## But there's one thing I hate
+
+---
+layout: center
+---
+
+<div class="absolute inset-0 overflow-hidden pointer-events-none">
+  <img v-click="1" src="./images/okta-push.png" alt="Okta push notification" class="okta-push push-from-t"  style="left: 30px;   top: 24px;"  />
+  <img v-click="1" src="./images/okta-push.png" alt="Okta push notification" class="okta-push push-from-tr" style="right: 24px;  top: 96px;"  />
+  <img v-click="1" src="./images/okta-push.png" alt="Okta push notification" class="okta-push push-from-r"  style="right: 40px;  top: 300px;" />
+  <img v-click="1" src="./images/okta-push.png" alt="Okta push notification" class="okta-push push-from-br" style="right: 20px;  bottom: 96px;" />
+  <img v-click="1" src="./images/okta-push.png" alt="Okta push notification" class="okta-push push-from-b"  style="left: 40px;   bottom: 24px;" />
+  <img v-click="1" src="./images/okta-push.png" alt="Okta push notification" class="okta-push push-from-bl" style="left: 24px;   bottom: 150px;" />
+  <img v-click="1" src="./images/okta-push.png" alt="Okta push notification" class="okta-push push-from-l"  style="left: 30px;   top: 300px;" />
+  <img v-click="1" src="./images/okta-push.png" alt="Okta push notification" class="okta-push push-from-tl" style="left: 200px;  top: 120px;" />
+</div>
+
+<img src="./images/okta-logo.png" class="relative z-10 w-[520px] h-auto mx-auto" alt="Okta logo" />
+
+<style>
+img.okta-push.slidev-vclick-target {
+  position: absolute;
+  width: 300px;
+  height: auto;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
+}
+img.okta-push.push-from-t  { transform: translate(0, 0) rotate(-3deg); transition-delay: 0ms; }
+img.okta-push.push-from-tr { transform: translate(0, 0) rotate(4deg);  transition-delay: 500ms; }
+img.okta-push.push-from-r  { transform: translate(0, 0) rotate(-2deg); transition-delay: 900ms; }
+img.okta-push.push-from-br { transform: translate(0, 0) rotate(3deg);  transition-delay: 1050ms; }
+img.okta-push.push-from-b  { transform: translate(0, 0) rotate(-4deg); transition-delay: 1200ms; }
+img.okta-push.push-from-bl { transform: translate(0, 0) rotate(2deg);  transition-delay: 1350ms; }
+img.okta-push.push-from-l  { transform: translate(0, 0) rotate(5deg);  transition-delay: 1500ms; }
+img.okta-push.push-from-tl { transform: translate(0, 0) rotate(-5deg); transition-delay: 1650ms; }
+
+img.okta-push.push-from-t.slidev-vclick-hidden  { transform: translate(0, -120vh) rotate(-3deg); }
+img.okta-push.push-from-b.slidev-vclick-hidden  { transform: translate(0, 120vh)  rotate(-4deg); }
+img.okta-push.push-from-l.slidev-vclick-hidden  { transform: translate(-140vw, 0) rotate(5deg); }
+img.okta-push.push-from-r.slidev-vclick-hidden  { transform: translate(140vw, 0)  rotate(-2deg); }
+img.okta-push.push-from-tl.slidev-vclick-hidden { transform: translate(-140vw, -120vh) rotate(-5deg); }
+img.okta-push.push-from-tr.slidev-vclick-hidden { transform: translate(140vw, -120vh)  rotate(4deg); }
+img.okta-push.push-from-bl.slidev-vclick-hidden { transform: translate(-140vw, 120vh)  rotate(2deg); }
+img.okta-push.push-from-br.slidev-vclick-hidden { transform: translate(140vw, 120vh)   rotate(3deg); }
+</style>
+
+---
 layout: image
 image: /images/hell-login-password.png
 backgroundSize: cover
