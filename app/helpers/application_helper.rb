@@ -10,5 +10,10 @@ module ApplicationHelper
     end
   end
 
+  def mobile_warning_text
+    "Authentication Hell plays best on a desktop with a keyboard — the game may be " \
+      "cramped and hard to control on a small screen."
+  end
+
   def dev_prefills_enabled? = DevPrefills.enabled?
 end
