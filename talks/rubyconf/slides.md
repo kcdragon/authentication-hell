@@ -1,11 +1,11 @@
 ---
 theme: ./theme
-title: Welcome to Authentication Hell
+title: Authentication Hell
 info: |
-  ## Welcome to Authentication Hell
-  A browser-based game written in Ruby, and what it taught me about auth.
+  ## Authentication Hell
+  A browser-based game written in Ruby.
 
-  Presented at Philly.rb.
+  Presented at RubyConf Las Vegas
 drawings:
   persist: false
 transition: slide-left
