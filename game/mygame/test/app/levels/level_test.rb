@@ -15,6 +15,18 @@ class LevelTest < Minitest::Test
     assert_instance_of WelcomeLevel, Level.build(99, build_game)
   end
 
+  def test_build_returns_a_promoted_json_level_when_seeded
+    game = build_game(extra_levels: { 5 => { "slug" => "level-9", "title" => "Level 9" } })
+    level = Level.build(5, game)
+    assert_instance_of JsonLevel, level
+    assert_equal 5, level.number
+    assert_equal "Level 9", level.title
+  end
+
+  def test_build_falls_back_to_welcome_without_promoted_data
+    assert_instance_of WelcomeLevel, Level.build(5, build_game)
+  end
+
   def test_built_levels_report_their_own_number
     [ 0, 1, 2, 3, 4 ].each { |n| assert_equal n, Level.build(n, build_game).number }
   end

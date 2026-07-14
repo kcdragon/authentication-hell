@@ -21,16 +21,17 @@ class JsonLevel < Level
 
   DEFAULT_START_X = 200
 
-  def initialize(game, data)
+  def initialize(game, data, number = nil)
     super(game)
     @data = data
+    @number = number
   end
 
-  def number = NUMBER
+  def number = @number || NUMBER
 
   def title = @data["title"] || default_title
 
-  def chapter_label = "Draft"
+  def chapter_label = @number ? "Chapter #{number + 1}" : "Draft"
 
   def accent = ACCENTS[@data["accent"]] || BLUE
 
@@ -53,7 +54,7 @@ class JsonLevel < Level
 
   def complete? = @collectables.any? { |c| c.is_a?(Certificate) && !c.alive? }
 
-  def next_level = nil
+  def next_level = @number ? game.extra_level(@number + 1) : nil
 
   private
 

@@ -74,6 +74,34 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     assert_equal GameSetting::DEFAULT_REWIND_DROP_CHANCE, response.parsed_body["rewind_drop_chance"]
   end
 
+  test "start ships no promoted levels when none are published" do
+    sign_in_as(@user)
+
+    get game_start_url
+    assert_equal [], response.parsed_body["levels"]
+  end
+
+  test "start ships promoted editor levels with their game number and data" do
+    root = Pathname.new(Dir.mktmpdir)
+    draft_root = Pathname.new(Dir.mktmpdir)
+    Editor::LevelFile.root = root
+    Editor::LevelFile.draft_root = draft_root
+    Editor::LevelFile.new(promoted_level_data).write
+    Editor::LevelFile.find("level-9").promote!
+    sign_in_as(@user)
+
+    get game_start_url
+    levels = response.parsed_body["levels"]
+    assert_equal 1, levels.length
+    assert_equal 5, levels.first["number"]
+    assert_equal "level-9", levels.first["slug"]
+  ensure
+    Editor::LevelFile.root = Rails.root.join("game/mygame/data/levels")
+    Editor::LevelFile.draft_root = Rails.root.join("level_drafts")
+    FileUtils.remove_entry(root)
+    FileUtils.remove_entry(draft_root)
+  end
+
   test "start offers the level editor only in development" do
     sign_in_as(@user)
 
@@ -304,5 +332,13 @@ class GamesControllerTest < ActionDispatch::IntegrationTest
     yield
   ensure
     Rails.env = original
+  end
+
+  def promoted_level_data
+    {
+      "format" => 1, "slug" => "level-9", "title" => "Level 9", "accent" => "blue",
+      "world_w" => 6400, "start_x" => 200, "time_limit" => 120, "certificate_x" => 6120,
+      "platforms" => [], "holes" => [], "enemies" => []
+    }
   end
 end

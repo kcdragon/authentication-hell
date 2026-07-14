@@ -129,4 +129,24 @@ class JsonLevelTest < Minitest::Test
   def test_has_no_next_level
     assert_nil @level.next_level
   end
+
+  def test_play_mode_reports_its_number_and_chapter_label
+    level = JsonLevel.new(build_game, DATA.dup, 5)
+    assert_equal 5, level.number
+    assert_equal "Chapter 6", level.chapter_label
+  end
+
+  def test_play_mode_chains_to_the_next_promoted_level
+    game = build_game(extra_levels: { 6 => DATA.merge("title" => "Level 6") })
+    level = JsonLevel.new(game, DATA.dup, 5)
+    following = level.next_level
+    assert_instance_of JsonLevel, following
+    assert_equal 6, following.number
+    assert_equal "Level 6", following.title
+  end
+
+  def test_play_mode_tail_has_no_next_level
+    level = JsonLevel.new(build_game, DATA.dup, 5)
+    assert_nil level.next_level
+  end
 end

@@ -11,7 +11,7 @@ class Level
     when 2 then ApiKeyLevel.new(game)
     when 3 then TotpLevel.new(game)
     when 4 then RubyConfLevel.new(game)
-    else WelcomeLevel.new(game)
+    else number >= 5 ? game.extra_level(number) || WelcomeLevel.new(game) : WelcomeLevel.new(game)
     end
   end
 

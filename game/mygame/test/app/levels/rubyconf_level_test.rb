@@ -18,8 +18,16 @@ class RubyConfLevelTest < Minitest::Test
     assert_equal RUBY, @level.accent
   end
 
-  def test_is_the_final_level
+  def test_is_the_final_level_without_promoted_levels
     assert_nil @level.next_level
+  end
+
+  def test_chains_into_the_first_promoted_level_when_present
+    game = build_game(extra_levels: { 5 => { "slug" => "level-9", "title" => "Level 9" } })
+    level = RubyConfLevel.new(game)
+    following = level.next_level
+    assert_instance_of JsonLevel, following
+    assert_equal 5, following.number
   end
 
   def test_world_is_the_full_width

@@ -9,7 +9,7 @@ class Games::LevelsController < ApplicationController
     return head(:no_content) unless level
 
     Current.user.record_level_completed(level.number)
-    Achievement::Awarder.call(Current.user, level.achievement_key)
+    Achievement::Awarder.call(Current.user, level.achievement_key) if level.awards_achievement?
     advance_now_playing_past(level)
     head :no_content
   end
