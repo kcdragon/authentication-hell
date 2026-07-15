@@ -6,7 +6,12 @@
     <%= leaderboard_tab_link "Achievements", "achievements" %>
     <%= leaderboard_tab_link "Auths", "auths" %>
     <%= leaderboard_tab_link "Defeats", "defeats" %>
+    <%= leaderboard_tab_link "Times", "times" %>
   </nav>
 
-  <%= render @tab, users: @users, game_stats: @game_stats %>
+  <% if @tab == "times" %>
+    <%= render "times", boards: @level_boards %>
+  <% else %>
+    <%= render @tab, users: @users, game_stats: @game_stats %>
+  <% end %>
 </div>

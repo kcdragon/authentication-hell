@@ -79,6 +79,26 @@ class LevelTest < Minitest::Test
     assert_equal 0.0, level.progress(100)
   end
 
+  def test_wall_elapsed_counts_from_the_clock_start
+    level = TotpLevel.new(build_game)
+    level.begin_clock(0)
+    assert_equal 300, level.wall_elapsed(300)
+  end
+
+  def test_wall_elapsed_is_zero_before_the_clock_starts
+    assert_equal 0, TotpLevel.new(build_game).wall_elapsed(300)
+  end
+
+  def test_wall_elapsed_ignores_rewinds_that_shrink_elapsed
+    level = TotpLevel.new(build_game)
+    level.begin_clock(0)
+    forty_seconds_in = 40 * 60
+    before = level.elapsed(forty_seconds_in)
+    level.rewind(30, forty_seconds_in)
+    assert_operator level.elapsed(forty_seconds_in), :<, before
+    assert_equal forty_seconds_in, level.wall_elapsed(forty_seconds_in)
+  end
+
   def test_drop_loot_appends_the_rolled_pickup
     level = Level.new(build_game)
     drop = HeartPickup.new(x: 300, y: GROUND_Y)

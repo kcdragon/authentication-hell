@@ -259,11 +259,15 @@ class Game
   def beat_game
     return if @beaten
     @beaten = true
-    Network::Levels.complete(@level.number)
+    Network::Levels.complete(@level.number, completion_ms)
+  end
+
+  def completion_ms
+    (@level.wall_elapsed(tick_count) * 1000.0 / 60).round
   end
 
   def advance_level
-    Network::Levels.complete(@level.number)
+    Network::Levels.complete(@level.number, completion_ms)
     @level = @level.next_level
     setup_level
     begin_level_intro

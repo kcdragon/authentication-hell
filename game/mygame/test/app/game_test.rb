@@ -182,6 +182,51 @@ class GameDefeatReportTest < Minitest::Test
   end
 end
 
+class GameCompleteReportTest < Minitest::Test
+  include GameTest
+
+  def setup
+    DR.reset!
+    @game = Game.new(->(g) { JsonLevel.new(g, "slug" => "arena") })
+    at_tick(0)
+    @game.send(:setup_level)
+    @game.level.begin_clock(0)
+  end
+
+  def at_tick(tick)
+    @game.instance_variable_set(:@frame, build_frame(player: @game.player,
+                                                     level: @game.level, tick_count: tick))
+  end
+
+  def reach_certificate
+    @game.level.collectables.each { |c| c.alive = false if c.is_a?(Certificate) }
+  end
+
+  def test_completion_reports_wall_clock_time_in_milliseconds
+    reach_certificate
+    at_tick(300)
+    @game.send(:update_world)
+
+    assert_includes DR.urls, "http://test/games/levels/complete?level=99&ms=5000"
+  end
+
+  def test_a_rewind_does_not_shorten_the_reported_time
+    @game.level.rewind(30, 120)
+    reach_certificate
+    at_tick(300)
+    @game.send(:update_world)
+
+    assert_includes DR.urls, "http://test/games/levels/complete?level=99&ms=5000"
+  end
+
+  def test_an_uneventful_tick_reports_no_completion
+    at_tick(300)
+    @game.send(:update_world)
+
+    refute(DR.urls.any? { |url| url.include?("/games/levels/complete") })
+  end
+end
+
 class GameUnlockTest < Minitest::Test
   include GameTest
 

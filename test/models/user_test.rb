@@ -357,6 +357,15 @@ class UserTest < ActiveSupport::TestCase
     assert_equal 0, user.game_stats.count
   end
 
+  test "reset_progress! clears level completions" do
+    user = users(:one)
+    LevelCompletion.record(user, 1, 42_000)
+
+    user.reset_progress!
+
+    assert_equal 0, user.level_completions.count
+  end
+
   test "disable_totp! clears the secret, flag, and recovery codes" do
     user = users(:one)
     user.enable_totp!(ROTP::Base32.random)

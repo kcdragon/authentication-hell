@@ -46,6 +46,38 @@ class LeaderboardControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-stat=defeat_password]", text: "2"
   end
 
+  test "the times tab shows a formatted best time per level" do
+    LevelCompletion.record(@user, 1, 42_000)
+    sign_in_as(@user)
+
+    get leaderboard_path(tab: "times")
+
+    assert_response :success
+    assert_select "[data-stat=best_time_level_1]", text: "0:42.0"
+  end
+
+  test "the times tab ranks faster clears first" do
+    other = users(:two)
+    LevelCompletion.record(@user, 1, 64_500)
+    LevelCompletion.record(other, 1, 42_000)
+    sign_in_as(@user)
+
+    get leaderboard_path(tab: "times")
+
+    assert_response :success
+    times = css_select("[data-level-board=1] [data-stat=best_time_level_1]").map(&:text)
+    assert_equal [ "0:42.0", "1:04.5" ], times
+  end
+
+  test "the times tab shows an empty state for a level with no clears" do
+    sign_in_as(@user)
+
+    get leaderboard_path(tab: "times")
+
+    assert_response :success
+    assert_select "[data-level-board=1]", text: /No clears yet/
+  end
+
   test "index falls back to the achievements tab for an unknown one" do
     sign_in_as(@user)
     get leaderboard_path(tab: "bogus")
