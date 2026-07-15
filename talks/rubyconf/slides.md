@@ -822,6 +822,12 @@ hideInToc: false
 
 <Framed src="/images/page-structure.png" alt="AuthHell page structure: game canvas, video playlist sidebar, and the Enemy Encounter 2FA re-auth toast" />
 
+<div v-drag="[60,220,150,44,-6]" data-id="dragonruby-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">DragonRuby</div>
+<FancyArrow color="red-500" width="3" from="[data-id=dragonruby-label]@right" to="(280, 205)" />
+
+<div v-drag="[820,430,110,44,7]" data-id="rails-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Rails</div>
+<FancyArrow color="red-500" width="3" from="[data-id=rails-label]@left" to="(700, 420)" />
+
 ---
 layout: two-cols
 dragPos:
