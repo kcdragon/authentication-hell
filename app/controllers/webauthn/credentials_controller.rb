@@ -74,7 +74,7 @@ class Webauthn::CredentialsController < ApplicationController
 
     ConfirmationsMailer.confirm(user).deliver_later
     session.delete(:passwordless_registration)
-    flash[:notice] = "Account created. Check your email to confirm before signing in."
-    render json: { redirect: new_session_path }
+    session[:pending_confirmation_email] = user.email_address
+    render json: { redirect: confirmation_pending_path }
   end
 end

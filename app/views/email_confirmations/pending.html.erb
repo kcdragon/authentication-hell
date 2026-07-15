@@ -1,0 +1,35 @@
+<div class="mx-auto max-w-md w-full ah-card p-6">
+  <%= link_to root_path, class: "inline-block mb-5", aria: { label: "Authentication Hell — home" } do %>
+    <%= render "shared/logo", layout: :horizontal %>
+  <% end %>
+
+  <div class="flex items-center justify-center w-14 h-14 mb-4 text-3xl bg-passkey text-white border-[3px] border-ink rounded-[3px] shadow-brut-sm" aria-hidden="true">✉</div>
+
+  <h1 class="text-[28px] leading-[.95]">Check your email</h1>
+
+  <p class="mt-4 font-medium text-ink">
+    <% if @email_address.present? %>
+      We sent a confirmation link to <strong class="font-bold"><%= @email_address %></strong>.
+    <% else %>
+      We sent a confirmation link to your email address.
+    <% end %>
+    Click it to activate your account, then come back to sign in.
+  </p>
+
+  <p class="mt-3 ah-hint">
+    The link expires in 24 hours. Don't see it? Check your spam folder, or resend below.
+  </p>
+
+  <%= form_with url: email_confirmation_path, class: "mt-5 space-y-3.5" do |form| %>
+    <div class="space-y-1.5">
+      <%= form.label :email_address, "Email", class: "ah-label" %>
+      <%= form.email_field :email_address, required: true, autocomplete: "email", placeholder: "player@example.com", value: @email_address, class: "ah-input" %>
+    </div>
+
+    <%= form.submit "Resend confirmation email", class: "ah-btn ah-btn--primary shadow-brut cursor-pointer" %>
+  <% end %>
+
+  <p class="mt-8 font-medium text-sm text-muted">
+    <%= link_to "Back to sign in", new_session_path, class: "text-ink underline underline-offset-[3px] decoration-2 hover:no-underline" %>
+  </p>
+</div>

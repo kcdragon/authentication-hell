@@ -7,6 +7,7 @@ Rails.application.routes.draw do
   resource :registration, only: %i[ new create ]
   resource :passkey_registration, only: :create
   resource :email_confirmation, only: %i[ new create show ], param: :token
+  get "check_your_email", to: "email_confirmations#pending", as: :confirmation_pending
   resources :passwords, param: :token
   resource :password_change, only: %i[ show update ], controller: "users/passwords"
 
