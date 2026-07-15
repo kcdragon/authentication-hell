@@ -775,6 +775,18 @@ click outside the iframe to get slide-nav keys back. Change return_to to
 <FancyArrow color="red-500" width="3" from="[data-id=enemy-password-label]@left" to="(615, 335)" />
 
 ---
+
+## Earn a certificate
+
+<Framed src="./images/certificate.png" imgClass="block max-h-[400px] w-auto" alt="Course complete page: 'You beat Authentication Hell' above a Certificate of Completion awarded to kcdragon, with a QR code, Download PDF and Back to the game buttons, and share links" />
+
+<div v-drag="[19,169,237,44,-6]" data-id="proof-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">Prove you passed</div>
+<FancyArrow color="red-500" width="3" from="[data-id=proof-label]@right" to="(411, 240)" />
+
+<div v-drag="[743,383,180,44,7]" data-id="share-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Share to social</div>
+<FancyArrow color="red-500" width="3" from="[data-id=share-label]@left" to="(499, 500)" />
+
+---
 ---
 
 ## Page Structure
