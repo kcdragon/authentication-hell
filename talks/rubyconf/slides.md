@@ -809,18 +809,18 @@ img.auth-toast.toast-from-r.slidev-vclick-hidden { transform: translate(140vw, 0
 <FancyArrow color="red-500" width="3" from="[data-id=share-label]@left" to="(499, 500)" />
 
 ---
+layout: section
+hideInToc: false
+---
+
+# Building the game
+
+---
 ---
 
 ## Page Structure
 
 <Framed src="/images/page-structure.png" alt="AuthHell page structure: game canvas, video playlist sidebar, and the Enemy Encounter 2FA re-auth toast" />
-
----
-
-## Why Rails?
-
-- DragonRuby can be stand-alone
-- Rails allows for authentication methods players are used to
 
 ---
 layout: two-cols
@@ -850,11 +850,11 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 -->
 
 ---
-layout: section
-hideInToc: false
----
 
-# Building the game
+## Why Rails?
+
+- DragonRuby can be stand-alone
+- Rails allows for authentication methods players are used to
 
 ---
 
