@@ -727,13 +727,25 @@ click outside the iframe to get slide-nav keys back. Change return_to to
 
 ## Each level is a video
 
-<Framed src="./images/level-video-player.png" alt="Game level styled as a corporate training video player, with a scrubber, timestamp, and CC controls below the platformer scene" />
+<Framed>
+  <div class="flex items-center justify-center gap-6">
+    <div class="ah-card bg-white p-2 leading-none">
+      <img src="./images/level-video-player.png" class="block w-[600px] h-auto" alt="Game level styled as a corporate training video player, with a scrubber, timestamp, and CC controls below the platformer scene" />
+    </div>
+    <div class="ah-card bg-white p-2 leading-none">
+      <img src="./images/level-playlist.png" class="block max-h-[380px] w-auto" alt="Course playlist sidebar listing five chapters — Welcome, Password Complexity, API Keys, Time-Based One-Time Passwords, and RubyConf Field Trip — with the last marked Now Playing" />
+    </div>
+  </div>
+</Framed>
 
-<div v-drag="[82,296,150,44,14]" data-id="play-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">Play / pause</div>
-<FancyArrow color="red-500" width="3" from="[data-id=play-label]@bottom" to="(220, 440)" />
+<div v-drag="[22,229,150,44,-14]" data-id="play-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">Play / pause</div>
+<FancyArrow color="red-500" width="3" from="[data-id=play-label]@bottom" to="(100, 435)" />
 
-<div v-drag="[413,465,90,44,-9]" data-id="timer-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Timer</div>
-<FancyArrow color="red-500" width="3" from="[data-id=timer-label]@top" to="(330, 440)" />
+<div v-drag="[267,475,90,44,-9]" data-id="timer-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Timer</div>
+<FancyArrow color="red-500" width="3" from="[data-id=timer-label]@top" to="(200, 430)" />
+
+<div v-drag="[733,38,150,44,11]" data-id="playlist-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Level select</div>
+<FancyArrow color="red-500" width="3" from="[data-id=playlist-label]@bottom" to="(750, 210)" />
 
 ---
 ---
