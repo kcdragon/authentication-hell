@@ -22,12 +22,14 @@ class Leaderboard::Query
   private
 
   def selections
-    "users.*, COUNT(earned_achievements.id) AS achievements_count, #{AUTHS_COUNT_SQL}, #{DEFEATS_COUNT_SQL}"
+    "users.*, COUNT(earned_achievements.id) AS achievements_count, " \
+      "MAX(earned_achievements.created_at) AS reached_count_at, " \
+      "#{AUTHS_COUNT_SQL}, #{DEFEATS_COUNT_SQL}"
   end
 
   def ordering
     case @by
-    when "achievements" then "achievements_count DESC, COALESCE(highest_level_completed, -1) DESC"
+    when "achievements" then "achievements_count DESC, reached_count_at ASC, COALESCE(highest_level_completed, -1) DESC"
     when "auths" then "auths_count DESC, COALESCE(highest_level_completed, -1) DESC"
     when "defeats" then "defeats_count DESC, COALESCE(highest_level_completed, -1) DESC"
     else "COALESCE(highest_level_completed, -1) DESC, achievements_count DESC"

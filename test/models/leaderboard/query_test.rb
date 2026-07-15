@@ -44,6 +44,17 @@ class Leaderboard::QueryTest < ActiveSupport::TestCase
       "user with more achievements should rank higher"
   end
 
+  test "by achievements breaks count ties by who reached the count first" do
+    users(:one).grant_achievement(:password_survivor)
+    users(:two).grant_achievement(:totp_survivor)
+    users(:one).earned_achievements.update_all(created_at: 2.days.ago)
+    users(:two).earned_achievements.update_all(created_at: 1.day.ago)
+
+    ranked = Leaderboard::Query.call(by: :achievements).to_a
+    assert ranked.index(users(:one)) < ranked.index(users(:two)),
+      "at an equal count, the user who reached it earlier should rank higher"
+  end
+
   test "by auths orders by re-authentication count descending" do
     2.times { GameStat.record_reauth_totp(users(:two)) }
     GameStat.record_reauth_passkey(users(:one))
