@@ -694,6 +694,26 @@ hideInToc: false
 ---
 ---
 
+<div class="absolute inset-0 overflow-hidden bg-black">
+  <iframe
+    src="http://localhost:3000/auto_sign_in?return_to=/game"
+    title="Authentication Hell — live demo"
+    allow="cross-origin-isolated; autoplay; fullscreen; gamepad"
+    class="border-0 origin-top-left"
+    style="width: 1440px; height: 810px; transform: scale(0.68056);"
+  ></iframe>
+</div>
+
+<!--
+Live demo — needs `bin/dev` running; /auto_sign_in logs in automatically as
+the first user. Click the canvas to start the game and capture the keyboard;
+click outside the iframe to get slide-nav keys back. Change return_to to
+/game?level=N to pin a specific level.
+-->
+
+---
+---
+
 <div class="absolute inset-0 flex items-center justify-center p-6">
   <div class="ah-card bg-white p-2 leading-none">
     <SlidevVideo autoplay loop muted class="block max-h-[92vh] max-w-full w-auto">

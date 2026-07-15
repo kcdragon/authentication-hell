@@ -9,6 +9,8 @@ class GamesController < ApplicationController
   # cross-origin-isolated page.
   before_action :set_cross_origin_isolation_headers, only: %i[ show frame ]
 
+  after_action :allow_cross_origin_framing, only: %i[ show frame ], if: -> { Rails.env.development? }
+
   def show
   end
 
