@@ -723,6 +723,17 @@ click outside the iframe to get slide-nav keys back. Change return_to to
 </div>
 
 ---
+
+## Security training course
+
+<Framed src="/images/course-landing-page.png" alt="AuthHell course landing page styled as corporate security training: an Authentication Hell course card with a Start the course button, an Onboarding Tape Lesson 1 video player, and a What You'll Learn checklist" />
+
+<div v-drag="[23,168,174,53,-7]" data-id="start-the-course-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">Start the course</div>
+<FancyArrow color="red-500" width="3" from="[data-id=start-the-course-label]@bottom" to="(300, 350)" />
+
+<div v-drag="[778,227,174,53,16]" data-id="what-youll-learn-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">What you'll learn</div>
+<FancyArrow color="red-500" width="3" from="[data-id=what-youll-learn-label]@bottom" to="(550, 420)" />
+
 ---
 
 ## Each level is a video
