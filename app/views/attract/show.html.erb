@@ -1,0 +1,49 @@
+<% content_for :title, "Come play Authentication Hell" %>
+<% play_url = root_url
+   display_url = "authenticationhell.com" %>
+
+<div class="grid grid-cols-[1.45fr_1fr] h-full w-full">
+  <section class="flex flex-col justify-between min-w-0 h-full p-[4vw]"
+           style="background-image:radial-gradient(circle at 1px 1px,#ffffff14 1px,transparent 0);background-size:26px 26px">
+    <div>
+      <%= render "shared/logo_mark", size: "clamp(3rem,6vw,6rem)", tone: :reversed, shadow: true, label: "Authentication Hell" %>
+    </div>
+
+    <div class="min-w-0">
+      <p class="font-mono uppercase tracking-[0.3em] text-password text-[clamp(0.85rem,1.5vw,1.6rem)]">Come play</p>
+      <h1 class="font-display uppercase tracking-tight leading-[0.85] text-[clamp(2.5rem,6vw,6.5rem)] mt-[1.5vw]">
+        Authentication<br>
+        <span class="text-error">Hell</span>
+      </h1>
+      <p class="font-sans font-medium text-paper/80 text-[clamp(1.1rem,2.1vw,2.2rem)] leading-tight mt-[2.2vw] max-w-[22ch]">
+        A security-training video you don’t watch — you <span class="text-paper font-bold">play</span>.
+        Dodge the enemies, re-authenticate mid-run, survive.
+      </p>
+    </div>
+
+    <p class="font-mono text-paper/55 text-[clamp(0.75rem,1.15vw,1.2rem)] leading-relaxed">
+      Built live for <span class="text-paper font-bold">“Welcome to Authentication Hell”</span><br>
+      a talk by Mike Dalton · RubyConf 2026
+    </p>
+  </section>
+
+  <section class="grid place-items-center min-w-0 bg-paper text-ink p-[3vw]"
+           style="background-image:radial-gradient(circle at 1px 1px,#1111110f 1px,transparent 0);background-size:22px 22px">
+    <div class="flex flex-col items-center text-center gap-[2vw]">
+      <p class="font-display uppercase tracking-tight text-[clamp(1.3rem,2.6vw,2.8rem)] attract-pulse">
+        Scan to play <span class="attract-bob text-passkey">→</span>
+      </p>
+
+      <div class="w-[26vw] max-w-[440px] aspect-square bg-white border-[3px] border-ink rounded-[3px] shadow-brut-lg p-[1.6vw]">
+        <%= play_qr_code(play_url) %>
+      </div>
+
+      <p class="font-mono font-bold text-passkey text-[clamp(1.1rem,2vw,2.2rem)] break-all">
+        <%= display_url %>
+      </p>
+      <p class="font-sans font-medium text-muted text-[clamp(0.9rem,1.3vw,1.35rem)] max-w-[28ch]">
+        Grab your laptop — it plays right in the browser.
+      </p>
+    </div>
+  </section>
+</div>
