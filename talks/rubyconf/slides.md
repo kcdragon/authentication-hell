@@ -900,6 +900,13 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 ---
 ---
 
+## Claude Code
+
+<Framed src="./images/claude-code.png" imgClass="block max-h-[400px] w-auto" alt="Claude Code proposing a plan for a space-bar jump in the /play game, with context, approach, and jump physics constants" />
+
+---
+---
+
 ## Authenticate in game
 
 <div class="flex justify-center mt-6">
