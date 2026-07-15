@@ -850,6 +850,12 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 -->
 
 ---
+layout: section
+hideInToc: false
+---
+
+# Building the game
+
 ---
 
 ## Proof of concept
