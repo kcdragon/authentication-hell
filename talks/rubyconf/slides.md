@@ -978,7 +978,14 @@ layout: two-cols-header
 <FileName>totp_challenge_controller.rb</FileName>
 
 ````md magic-move
-```ruby
+```ruby {3}
+class Games::TotpChallengeController < ApplicationController
+  def start
+    Current.session.start_totp_game_challenge!
+  end
+end
+```
+```ruby {5-10}
 class Games::TotpChallengeController < ApplicationController
   def start
     Current.session.start_totp_game_challenge!
@@ -1017,7 +1024,19 @@ layout: two-cols-header
 <FileName>totp_challenge_controller.rb</FileName>
 
 ````md magic-move
-```ruby
+```ruby {3-6}
+class Games::TotpChallengeController < ApplicationController
+  def complete
+    if Current.user.verify_totp(params[:code])
+      Current.session.complete_totp_game_challenge!
+      render turbo_stream: turbo_stream.remove(toast_id)
+    end
+  end
+  
+  def toast_id = dom_id(current_user, :totp_challenge)
+end
+```
+```ruby {6-11}
 class Games::TotpChallengeController < ApplicationController
   def complete
     if Current.user.verify_totp(params[:code])
@@ -1058,7 +1077,18 @@ layout: two-cols-header
 <FileName>main.rb</FileName>
 
 ````md magic-move
-```ruby
+```ruby {4-8}
+def tick(args)
+  ...
+  
+  if args.state.player.frozen
+    if !args.state.status_request
+      args.state.status_request = DR.http_get("/games/totp/status")
+    end
+  end
+end
+```
+```ruby {7-13}
 def tick(args)
   ...
   
