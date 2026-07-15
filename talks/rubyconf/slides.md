@@ -725,6 +725,35 @@ click outside the iframe to get slide-nav keys back. Change return_to to
 ---
 ---
 
+## Each level is a video
+
+<Framed src="./images/level-video-player.png" alt="Game level styled as a corporate training video player, with a scrubber, timestamp, and CC controls below the platformer scene" />
+
+<div v-drag="[82,296,150,44,14]" data-id="play-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">Play / pause</div>
+<FancyArrow color="red-500" width="3" from="[data-id=play-label]@bottom" to="(220, 440)" />
+
+<div v-drag="[413,465,90,44,-9]" data-id="timer-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Timer</div>
+<FancyArrow color="red-500" width="3" from="[data-id=timer-label]@top" to="(330, 440)" />
+
+---
+---
+
+## Enemies are authentication
+
+<Framed src="./images/enemies-authentication.png" alt="Game scene with three enemies on platforms — a password phone, a passkey cloud key, and a locked password field — each representing an authentication challenge" />
+
+<div v-drag="[120,300,140,44,-8]" data-id="enemy-2fa-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">2FA code</div>
+<FancyArrow color="red-500" width="3" from="[data-id=enemy-2fa-label]@right" to="(430, 335)" />
+
+<div v-drag="[420,150,110,44,6]" data-id="enemy-passkey-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Passkey</div>
+<FancyArrow color="red-500" width="3" from="[data-id=enemy-passkey-label]@bottom" to="(510, 245)" />
+
+<div v-drag="[720,300,130,44,8]" data-id="enemy-password-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Password</div>
+<FancyArrow color="red-500" width="3" from="[data-id=enemy-password-label]@left" to="(615, 335)" />
+
+---
+---
+
 ## Page Structure
 
 <Framed src="/images/page-structure.png" alt="AuthHell page structure: game canvas, video playlist sidebar, and the Enemy Encounter 2FA re-auth toast" />
@@ -792,35 +821,6 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
     <img src="./images/discord-reply.png" class="block max-w-[630px] h-auto" alt="Discord reply: this is a bug introduced in DragonRuby 7+ it seems" />
   </div>
 </Framed>
-
----
----
-
-## Each level is a video
-
-<Framed src="./images/level-video-player.png" alt="Game level styled as a corporate training video player, with a scrubber, timestamp, and CC controls below the platformer scene" />
-
-<div v-drag="[82,296,150,44,14]" data-id="play-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">Play / pause</div>
-<FancyArrow color="red-500" width="3" from="[data-id=play-label]@bottom" to="(220, 440)" />
-
-<div v-drag="[413,465,90,44,-9]" data-id="timer-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Timer</div>
-<FancyArrow color="red-500" width="3" from="[data-id=timer-label]@top" to="(330, 440)" />
-
----
----
-
-## Enemies are authentication
-
-<Framed src="./images/enemies-authentication.png" alt="Game scene with three enemies on platforms — a password phone, a passkey cloud key, and a locked password field — each representing an authentication challenge" />
-
-<div v-drag="[120,300,140,44,-8]" data-id="enemy-2fa-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">2FA code</div>
-<FancyArrow color="red-500" width="3" from="[data-id=enemy-2fa-label]@right" to="(430, 335)" />
-
-<div v-drag="[420,150,110,44,6]" data-id="enemy-passkey-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Passkey</div>
-<FancyArrow color="red-500" width="3" from="[data-id=enemy-passkey-label]@bottom" to="(510, 245)" />
-
-<div v-drag="[720,300,130,44,8]" data-id="enemy-password-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Password</div>
-<FancyArrow color="red-500" width="3" from="[data-id=enemy-password-label]@left" to="(615, 335)" />
 
 ---
 ---
