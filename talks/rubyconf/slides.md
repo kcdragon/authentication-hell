@@ -862,6 +862,8 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 - DragonRuby can be stand-alone
 - Rails allows for authentication methods players are used to
 
+<img v-drag="[445,222,416,274]" src="./images/rails-logo.png" alt="Ruby on Rails logo" />
+
 ---
 
 ## Proof of concept
