@@ -774,6 +774,28 @@ click outside the iframe to get slide-nav keys back. Change return_to to
 <div v-drag="[720,300,130,44,8]" data-id="enemy-password-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Password</div>
 <FancyArrow color="red-500" width="3" from="[data-id=enemy-password-label]@left" to="(615, 335)" />
 
+<div class="absolute inset-0 overflow-hidden pointer-events-none">
+  <img v-click="1" src="./images/toast-totp.png" alt="Enemy Encounter toast: re-authenticate with your TOTP code to keep playing" class="auth-toast toast-from-l" style="left: 24px; bottom: 40px;" />
+  <img v-click="1" src="./images/toast-passkey.png" alt="Passkey Checkpoint toast: re-authenticate with your passkey to keep playing" class="auth-toast toast-from-t" style="left: 50%; margin-left: -155px; bottom: 40px;" />
+  <img v-click="1" src="./images/toast-password.png" alt="Password Enemy toast: re-authenticate with your password to keep playing" class="auth-toast toast-from-r" style="right: 24px; bottom: 40px;" />
+</div>
+
+<style>
+img.auth-toast.slidev-vclick-target {
+  position: absolute;
+  width: 310px;
+  height: auto;
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
+}
+img.auth-toast.toast-from-l { transform: translate(0, 0) rotate(-2deg); transition-delay: 0ms; }
+img.auth-toast.toast-from-t { transform: translate(0, 0) rotate(2deg);  transition-delay: 250ms; }
+img.auth-toast.toast-from-r { transform: translate(0, 0) rotate(-3deg); transition-delay: 500ms; }
+
+img.auth-toast.toast-from-l.slidev-vclick-hidden { transform: translate(-140vw, 0) rotate(-2deg); }
+img.auth-toast.toast-from-t.slidev-vclick-hidden { transform: translate(0, 120vh)  rotate(2deg); }
+img.auth-toast.toast-from-r.slidev-vclick-hidden { transform: translate(140vw, 0)  rotate(-3deg); }
+</style>
+
 ---
 
 ## Earn a certificate
