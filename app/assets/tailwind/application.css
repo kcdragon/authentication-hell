@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./attract.css";
 
 /* ---- 0. SELF-HOSTED FONTS ---------------------------------------------
    url() refs must stay bare filenames: the built tailwind.css has the root

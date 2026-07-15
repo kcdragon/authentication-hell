@@ -104,6 +104,8 @@ Rails.application.routes.draw do
 
   get "acknowledgements" => "acknowledgements#show", as: :acknowledgements
 
+  get "attract" => "attract#show", as: :attract
+
   get "sitemap" => "sitemaps#show", as: :sitemap, defaults: { format: "xml" }
 
   # Defines the root path route ("/")

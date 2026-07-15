@@ -1,0 +1,18 @@
+/* =========================================================================
+   CONFERENCE ATTRACT SCREEN
+   A subtle, always-on loop for the /attract kiosk display — a slow breathing
+   pulse on the "scan to play" call-to-action and a gentle bob on the arrow so
+   the screen reads as live from across the room without being distracting.
+   ========================================================================= */
+@keyframes attract-pulse {
+  0%, 100% { opacity: 1;    transform: scale(1); }
+  50%      { opacity: 0.55; transform: scale(0.97); }
+}
+
+@keyframes attract-bob {
+  0%, 100% { transform: translateX(0); }
+  50%      { transform: translateX(0.4em); }
+}
+
+.attract-pulse { animation: attract-pulse 2.4s ease-in-out infinite; }
+.attract-bob   { animation: attract-bob 1.4s ease-in-out infinite; display: inline-block; }
