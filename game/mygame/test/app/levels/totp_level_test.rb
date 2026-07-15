@@ -261,6 +261,18 @@ class TotpLevelTest < Minitest::Test
   end
 
 
+  def test_rewinds_drop_at_double_the_global_rate
+    game = build_game
+    assert_equal game.rewind_drop_chance * TotpLevel::REWIND_DROP_MULTIPLIER,
+                 TotpLevel.new(game).send(:rewind_drop_chance),
+                 "the TOTP level hands out rewinds more generously than the rest"
+  end
+
+  def test_other_levels_keep_the_global_rewind_rate
+    game = build_game
+    assert_equal game.rewind_drop_chance, PasswordLevel.new(game).send(:rewind_drop_chance)
+  end
+
   private
 
   def pieces = @level.collectables.select { |c| c.is_a?(QrPiece) }

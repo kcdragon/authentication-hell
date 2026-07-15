@@ -4,6 +4,8 @@ class TotpLevel < Level
   CODE_LENGTH = 6
   REQUIRED_STREAK = 3
 
+  REWIND_DROP_MULTIPLIER = 2
+
   QR_PIECE_COUNT = 4
   GROUND_PIECE_XS = [ 780, 2440 ].freeze
   COLLECT_PLATFORMS = [ [ 380, 250, 220 ], [ 1150, 250, 220 ], [ 1470, 330, 220 ],
@@ -84,6 +86,8 @@ class TotpLevel < Level
   end
 
   private
+
+  def rewind_drop_chance = game.rewind_drop_chance * REWIND_DROP_MULTIPLIER
 
   def all_pieces_collected? = @collectables.none? { |c| c.is_a?(QrPiece) && c.alive? }
 

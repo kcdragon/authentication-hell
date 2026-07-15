@@ -144,11 +144,13 @@ class Level
 
   def certificate_spawned? = @certificate_spawned == true
 
+  def rewind_drop_chance = game.rewind_drop_chance
+
   def loot_for(enemy)
     roll = rand
     if roll < game.heart_drop_chance
       HeartPickup.new(x: enemy.x.clamp(0, world_w - HeartPickup::SIZE), y: enemy.y + HeartPickup::LIFT)
-    elsif roll < game.heart_drop_chance + game.rewind_drop_chance
+    elsif roll < game.heart_drop_chance + rewind_drop_chance
       RewindPickup.new(x: enemy.x.clamp(0, world_w - RewindPickup::SIZE),
                        y: enemy.y + RewindPickup::LIFT, level: self)
     end
