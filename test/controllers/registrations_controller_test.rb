@@ -20,7 +20,8 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil user
     assert_not user.confirmed?
     assert_enqueued_email_with ConfirmationsMailer, :confirm, args: [ user ]
-    assert_redirected_to new_session_path
+    assert_redirected_to confirmation_pending_path
+    assert_equal "brandnew@example.com", session[:pending_confirmation_email]
     assert_nil cookies[:session_id]
   end
 
@@ -39,7 +40,7 @@ class RegistrationsControllerTest < ActionDispatch::IntegrationTest
       end
     end
 
-    assert_redirected_to new_session_path
+    assert_redirected_to confirmation_pending_path
   end
 
   test "create with a duplicate email is rejected" do

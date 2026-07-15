@@ -20,7 +20,7 @@ class PasskeyRegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_difference -> { User.count }, 1 do
       response = register_passkey_over_http(nickname: "Phone")
       assert_response :success
-      assert_equal new_session_path, response.parsed_body["redirect"]
+      assert_equal confirmation_pending_path, response.parsed_body["redirect"]
     end
 
     user = User.find_by(email_address: "passkeynew@example.com")
@@ -28,5 +28,6 @@ class PasskeyRegistrationsControllerTest < ActionDispatch::IntegrationTest
     assert_not user.confirmed?
     assert_equal 1, user.webauthn_credentials.count
     assert_enqueued_email_with ConfirmationsMailer, :confirm, args: [ user ]
+    assert_equal "passkeynew@example.com", session[:pending_confirmation_email]
   end
 end
