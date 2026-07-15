@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_07_11_000002) do
+ActiveRecord::Schema[8.1].define(version: 2026_07_15_000000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -79,6 +79,16 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_11_000002) do
     t.datetime "updated_at", null: false
     t.index ["user_id", "key"], name: "index_game_stats_on_user_id_and_key", unique: true
     t.index ["user_id"], name: "index_game_stats_on_user_id"
+  end
+
+  create_table "level_completions", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "level_number", null: false
+    t.integer "best_ms", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id", "level_number"], name: "index_level_completions_on_user_id_and_level_number", unique: true
+    t.index ["user_id"], name: "index_level_completions_on_user_id"
   end
 
   create_table "recovery_codes", force: :cascade do |t|
@@ -162,6 +172,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_07_11_000002) do
   add_foreign_key "earned_achievements", "users"
   add_foreign_key "game_challenges", "sessions"
   add_foreign_key "game_stats", "users"
+  add_foreign_key "level_completions", "users"
   add_foreign_key "recovery_codes", "users"
   add_foreign_key "sessions", "users"
   add_foreign_key "temporary_api_key_challenges", "sessions"

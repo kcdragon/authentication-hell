@@ -2,11 +2,18 @@ module LeaderboardHelper
   TAB_HINTS = {
     "achievements" => "The furthest, most-decorated players. Sort by level or achievements.",
     "auths" => "Who has survived the most in-game re-authentications, by method.",
-    "defeats" => "Who has defeated the most enemies, by kind."
+    "defeats" => "Who has defeated the most enemies, by kind.",
+    "times" => "Fastest clears of every chapter — wall-clock, no rewind credit."
   }.freeze
 
   def leaderboard_hint
     TAB_HINTS[@tab]
+  end
+
+  def leaderboard_time(ms)
+    tenths = (ms / 100.0).round
+    minutes, rest = tenths.divmod(600)
+    format("%d:%04.1f", minutes, rest / 10.0)
   end
 
   def leaderboard_tab_link(label, key)

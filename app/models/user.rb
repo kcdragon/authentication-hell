@@ -12,6 +12,7 @@ class User < ApplicationRecord
   has_many :webauthn_credentials, dependent: :destroy
   has_many :earned_achievements, dependent: :destroy
   has_many :game_stats, dependent: :destroy
+  has_many :level_completions, dependent: :destroy
 
   has_one_attached :avatar do |attachable|
     attachable.variant :nav, resize_to_fill: [ 64, 64 ]
@@ -140,6 +141,7 @@ class User < ApplicationRecord
         certificate_token: nil, certificate_awarded_at: nil)
       earned_achievements.delete_all
       game_stats.delete_all
+      level_completions.delete_all
     end
     certificate_pdf.purge_later
   end

@@ -1,8 +1,8 @@
 class Network::Levels
   HEADERS = [ "Content-Type: application/x-www-form-urlencoded" ].freeze
 
-  def self.complete(level)
-    DR.http_post("#{complete_url}?level=#{level}", {}, HEADERS)
+  def self.complete(level, ms)
+    DR.http_post("#{complete_url}?level=#{level}&ms=#{ms}", {}, HEADERS)
   end
 
   def self.playing(level)

@@ -1,0 +1,31 @@
+<%# locals: (boards:) %>
+
+<div class="mt-6 flex flex-col gap-8">
+  <% boards.each do |level, completions| %>
+    <section data-level-board="<%= level.number %>">
+      <h2 class="font-display text-2xl uppercase tracking-tight">
+        <%= level.emoji %> <%= level.name %>
+      </h2>
+
+      <% if completions.empty? %>
+        <p class="ah-hint mt-2">No clears yet.</p>
+      <% else %>
+        <ul class="mt-3 flex flex-col gap-3">
+          <% completions.each.with_index(1) do |completion, rank| %>
+            <% mine = completion.user == Current.user %>
+            <li class="flex items-center gap-4 border-[3px] border-ink rounded-[3px] px-4 py-3 shadow-brut-sm
+                       <%= mine ? "bg-password" : "bg-card" %>">
+              <span class="w-8 font-display text-lg <%= mine ? "text-ink" : "text-muted" %>"><%= rank %></span>
+              <div class="flex flex-1 items-center gap-3 min-w-0">
+                <%= avatar_badge(completion.user) %>
+                <span class="font-bold truncate"><%= completion.user.username %></span>
+              </div>
+              <span class="w-20 text-right font-mono font-bold text-sm"
+                    data-stat="best_time_level_<%= level.number %>"><%= leaderboard_time(completion.best_ms) %></span>
+            </li>
+          <% end %>
+        </ul>
+      <% end %>
+    </section>
+  <% end %>
+</div>

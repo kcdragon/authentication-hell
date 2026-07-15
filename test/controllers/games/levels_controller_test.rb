@@ -182,6 +182,61 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
     FileUtils.remove_entry(draft_root)
   end
 
+  test "complete records the reported time as a level completion" do
+    sign_in_as(@user)
+
+    post games_levels_complete_url, params: { level: 1, ms: 42_000 }
+
+    assert_response :no_content
+    assert_equal 42_000, @user.level_completions.find_by(level_number: 1).best_ms
+  end
+
+  test "a faster replay of an already-completed level still improves the best time" do
+    @user.update!(highest_level_completed: 1)
+    LevelCompletion.record(@user, 1, 42_000)
+    sign_in_as(@user)
+
+    post games_levels_complete_url, params: { level: 1, ms: 30_000 }
+
+    assert_response :no_content
+    assert_equal 30_000, @user.level_completions.find_by(level_number: 1).best_ms
+  end
+
+  test "a new best time toasts the player" do
+    sign_in_as(@user)
+
+    streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+      post games_levels_complete_url, params: { level: 1, ms: 42_000 }
+    end
+
+    assert(streams.any? { |s| s.to_html.include?("New best time") && s.to_html.include?("0:42.0") })
+  end
+
+  test "a slower replay records no better time and does not toast" do
+    @user.update!(highest_level_completed: 1)
+    LevelCompletion.record(@user, 1, 30_000)
+    sign_in_as(@user)
+
+    streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
+      post games_levels_complete_url, params: { level: 1, ms: 42_000 }
+    end
+
+    assert_equal 30_000, @user.level_completions.find_by(level_number: 1).best_ms
+    assert_not(streams.any? { |s| s.to_html.include?("New best time") })
+  end
+
+  test "a missing, garbage, zero, or absurd time completes the level with no recorded time" do
+    sign_in_as(@user)
+
+    [ nil, "abc", "0", (LevelCompletion::MAX_MS + 1).to_s ].each do |ms|
+      post games_levels_complete_url, params: { level: 1, ms: ms }.compact
+      assert_response :no_content
+    end
+
+    assert_nil @user.level_completions.find_by(level_number: 1)
+    assert_equal 1, @user.reload.highest_level_completed
+  end
+
   test "playing requires authentication" do
     post games_levels_playing_url, params: { level: 1 }
     assert_redirected_to new_session_path

@@ -65,7 +65,13 @@ class Level
 
   def begin_clock(tick)
     @started_at = tick
+    @clock_started_at = tick
     @intro_at = tick
+  end
+
+  def wall_elapsed(tick)
+    return 0 unless @clock_started_at
+    tick - @clock_started_at
   end
 
   def progress(tick)

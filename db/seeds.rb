@@ -29,13 +29,21 @@ end
 # game — furthest and fully decorated. Among the rest, level and achievement count are
 # deliberately uncorrelated (e.g. ada is further than grace but less decorated, grace is
 # the reverse) so the two sort columns produce visibly different orderings.
-# Idempotent — grant_achievement/record_level_completed are no-ops once set.
+# `times` seeds the Times tab: best_ms per level_number, tuned so mike isn't fastest
+# everywhere — level 0 fills a four-row board, level 1 a two-row one, levels 2-3 a single
+# row each, and every later level shows its empty state.
+# Idempotent — grant_achievement/record_level_completed and the fastest-wins upsert are no-ops once set.
 leaderboard_players = [
-  { username: "ada",      level: 1,   achievements: %w[ passkey_survivor ] },
-  { username: "mike",     level: 3,   achievements: %w[ level_0_complete level_1_complete level_2_complete level_3_complete password_survivor totp_survivor passkey_survivor graduate ] },
-  { username: "grace",    level: 0,   achievements: Achievement.keys },
-  { username: "linus",    level: 0,   achievements: %w[ level_0_complete password_survivor totp_survivor passkey_survivor ] },
-  { username: "margaret", level: nil, achievements: %w[ password_survivor totp_survivor ] }
+  { username: "ada",      level: 1,   achievements: %w[ passkey_survivor ],
+    times: { 0 => 38_900, 1 => 64_500 } },
+  { username: "mike",     level: 3,   achievements: %w[ level_0_complete level_1_complete level_2_complete level_3_complete password_survivor totp_survivor passkey_survivor graduate ],
+    times: { 0 => 45_000, 1 => 58_100, 2 => 72_400, 3 => 88_700 } },
+  { username: "grace",    level: 0,   achievements: Achievement.keys,
+    times: { 0 => 41_200 } },
+  { username: "linus",    level: 0,   achievements: %w[ level_0_complete password_survivor totp_survivor passkey_survivor ],
+    times: { 0 => 52_300 } },
+  { username: "margaret", level: nil, achievements: %w[ password_survivor totp_survivor ],
+    times: {} }
 ]
 
 leaderboard_players.each do |attrs|
@@ -47,6 +55,7 @@ leaderboard_players.each do |attrs|
 
   player.record_level_completed(attrs[:level]) if attrs[:level]
   attrs[:achievements].each { |key| player.grant_achievement(key) }
+  attrs[:times].each { |level_number, ms| LevelCompletion.record(player, level_number, ms) }
 end
 
 # The dev user has beaten the game — issue the certificate so the claim link resolves.
