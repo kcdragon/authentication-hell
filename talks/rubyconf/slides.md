@@ -816,14 +816,11 @@ img.auth-toast.toast-from-r.slidev-vclick-hidden { transform: translate(140vw, 0
 <Framed src="/images/page-structure.png" alt="AuthHell page structure: game canvas, video playlist sidebar, and the Enemy Encounter 2FA re-auth toast" />
 
 ---
----
 
-## Tech Stack
+## Why Rails?
 
-- DragonRuby game compiled to WASM
-- Embedded inside a Rails 8 app
-- Built-in Rails Authentication generator
-- rotp and webauthn gems
+- DragonRuby can be stand-alone
+- Rails allows for authentication methods players are used to
 
 ---
 layout: two-cols
