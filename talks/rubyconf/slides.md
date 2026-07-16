@@ -509,6 +509,20 @@ Share your certificate with the world with the convenient social links.
 -->
 
 ---
+
+## Leaderboard
+
+<Framed src="./images/leaderboard.png" imgClass="block max-h-[350px] w-auto" alt="Leaderboard page ranking players by level and achievements: jhash, kcdragon, berislav and others, most at Lv 4 RubyConf Field Trip, with sortable tabs for Achievements, Auths, Defeats, and Times" />
+
+<div v-drag="[19,150,240,66,-4]" data-id="jake-label" class="ah-card bg-white px-3 py-2 font-bold -rotate-2 grid place-items-center text-center leading-tight">Jake is beating me at my own game</div>
+<FancyArrow color="red-500" width="3" from="[data-id=jake-label]@right" to="(438, 208)" />
+
+<!--
+As you play the game, check out the leaderboard to see how you're doing.
+And congrats to Jake who is already beating me at my own game.
+-->
+
+---
 layout: section
 hideInToc: false
 ---
