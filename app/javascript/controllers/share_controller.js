@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 
 export default class extends Controller {
-  static values = { url: String, text: String, awardPath: String }
+  static values = { url: String, text: String, xText: String, blueskyText: String, mastodonText: String, awardPath: String }
   static targets = ["native", "copyLabel"]
 
   connect() {
@@ -18,7 +18,7 @@ export default class extends Controller {
   }
 
   x() {
-    this.open(`https://twitter.com/intent/tweet?text=${this.enc(this.textValue)}&url=${this.enc(this.urlValue)}`)
+    this.open(`https://twitter.com/intent/tweet?text=${this.enc(this.xTextValue)}&url=${this.enc(this.urlValue)}`)
   }
 
   linkedin() {
@@ -26,14 +26,14 @@ export default class extends Controller {
   }
 
   bluesky() {
-    this.open(`https://bsky.app/intent/compose?text=${this.enc(`${this.textValue} ${this.urlValue}`)}`)
+    this.open(`https://bsky.app/intent/compose?text=${this.enc(`${this.blueskyTextValue} ${this.urlValue}`)}`)
   }
 
   mastodon() {
     const instance = window.prompt("Your Mastodon instance (e.g. ruby.social)")
     if (!instance) return
     const host = instance.replace(/^https?:\/\//, "").replace(/\/+$/, "")
-    this.open(`https://${host}/share?text=${this.enc(`${this.textValue} ${this.urlValue}`)}`)
+    this.open(`https://${host}/share?text=${this.enc(`${this.mastodonTextValue} ${this.urlValue}`)}`)
   }
 
   async copy() {
