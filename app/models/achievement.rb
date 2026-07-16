@@ -29,11 +29,6 @@ class Achievement
       description: "Share your certificate with the world.")
   ].freeze
 
-  CREATOR = [
-    new(key: "level_creator", name: "Level Designer", emoji: "🛠️",
-      description: "Create your first level in the editor.")
-  ].freeze
-
   PACIFIC = ActiveSupport::TimeZone["America/Los_Angeles"]
 
   EVENTS = [
@@ -48,7 +43,7 @@ class Achievement
       window: PACIFIC.parse("2026-07-16 11:15:00")..PACIFIC.parse("2026-07-16 11:45:00"))
   ].freeze
 
-  ALL = (SURVIVOR + COMPLETION + CREATOR + EVENTS + GameLevel::BUILTIN.map(&:achievement)).freeze
+  ALL = (SURVIVOR + COMPLETION + EVENTS + GameLevel::BUILTIN.map(&:achievement)).freeze
 
   def self.all
     ALL

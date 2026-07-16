@@ -19,7 +19,6 @@ class Editor::LevelsController < Editor::ApplicationController
     level = Editor::LevelFile.new(level_params.to_h)
     if level.valid?
       level.write
-      Achievement::Awarder.call(Current.user, :level_creator)
       render json: { ok: true, slug: level.slug, draft: level.draft? }
     else
       render json: { ok: false, errors: level.errors }, status: :unprocessable_entity
