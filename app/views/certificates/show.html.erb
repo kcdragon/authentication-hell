@@ -2,6 +2,10 @@
 
 <% share_url = @verify_url %>
 <% share_text = "I just survived Authentication Hell 😈🔐 — the full credential gauntlet. Think you can beat it?" %>
+<% credited = "I just survived Authentication Hell by %s 😈🔐 — the full credential gauntlet. Think you can beat it?" %>
+<% x_share_text = credited % "@kcdragon_" %>
+<% bluesky_share_text = credited % "@kcdragon.bsky.social" %>
+<% mastodon_share_text = credited % "@kcdragon@ruby.social" %>
 
 <% content_for :head do %>
   <meta property="og:title" content="I beat Authentication Hell">
@@ -35,6 +39,9 @@
        data-controller="share"
        data-share-url-value="<%= share_url %>"
        data-share-text-value="<%= share_text %>"
+       data-share-x-text-value="<%= x_share_text %>"
+       data-share-bluesky-text-value="<%= bluesky_share_text %>"
+       data-share-mastodon-text-value="<%= mastodon_share_text %>"
        data-share-award-path-value="<%= share_certificate_path %>">
     <h3 class="font-display text-lg uppercase tracking-tight text-center">Share your victory</h3>
     <div class="flex flex-wrap items-center justify-center gap-3 mt-4">
