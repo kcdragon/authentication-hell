@@ -531,6 +531,11 @@ backgroundSize: contain
   - Web
 - Write games in Ruby!
 
+<!--
+I built this game with DragonRuby. DragonRuby is a cross platform 2D game engine that can deploy to any platform. Desktop, console, mobile, and most importantly for this game, web!
+And DragonRuby allow you to write games with Ruby.
+-->
+
 ---
 layout: image-right
 image: /images/mruby-logo.png
@@ -548,6 +553,13 @@ backgroundSize: contain
   - Restricted reflection (i.e. no `defined?`)
   - Other limitations
 
+<!--
+DragonRuby is a custom Ruby runtime based on mruby. It has a smaller memory footprint than MRI which is critical for game development.
+Because of this, it only implements a subset of the Ruby language specification.
+Some standard libraries are missing.
+There are no Ruby gems and reflection is restricted.
+-->
+
 ---
 layout: image-right
 image: /images/sdl-logo.png
@@ -561,8 +573,9 @@ backgroundSize: contain
 - Supports all platforms
 
 <!--
-DragonRuby sits on top of SDL — it's what gives us hardware-accelerated
-graphics, audio, and input across every platform, including the WASM build.
+DragonRuby wraps a C library called SDL.
+SDL provides low level access to graphics and input like a keyboard.
+And it supports all platforms!
 -->
 
 ---
@@ -588,6 +601,13 @@ end
   - `args.outputs` - draw sprites and labels
   - `args.state` - store game state across ticks
 - Called **60 times per second** - that's 60 FPS
+
+<!--
+The only code you need to write for a DragonRuby game is an implementation of the ticket method.
+This is the entry point for your game's code and gives you access to everything you need.
+You can read from the keyboard, mouse or controller, you can draw sprites and labels on the screen and you can store state that you can access across calls to tick.
+tick is called 60 times per second so it has to finish quickly.
+-->
 
 ---
 layout: two-cols-header
@@ -721,6 +741,15 @@ end
     <div v-after class="absolute inset-0">Arrow keys move the square</div>
   </div>
 </div>
+
+<!--
+Movement is easy with DragonRuby.
+We start by defining a player in the game state.
+
+Then we draw the player on the screen.
+
+Then we respond to keyboard input and move the player.
+-->
 
 ---
 layout: two-cols-header
@@ -872,7 +901,6 @@ hideInToc: false
 
 # Building the game
 
----
 ---
 
 ## Page Structure
