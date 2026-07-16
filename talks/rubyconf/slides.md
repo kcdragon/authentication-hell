@@ -141,25 +141,6 @@ layout: section
 hideInToc: false
 ---
 
-## Agenda
-
-<Toc minDepth="1" maxDepth="1" columns="2" class="ah-toc mt-6" />
-
-<!--
-The agenda is auto-generated from the `# Section` headings on the
-`layout: section` divider slides below. The headmatter sets
-`defaults: { hideInToc: true }`, so slides are excluded unless they
-override it with `hideInToc: false` — only those dividers do, so only
-they appear here. Reorder or rename a section and this list follows
-automatically. Entries are clickable and the current section
-highlights while presenting.
--->
-
----
-layout: section
-hideInToc: false
----
-
 # "Authentication Hell"
 
 ---
