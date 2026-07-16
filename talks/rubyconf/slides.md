@@ -382,14 +382,16 @@ Introducing Authentication Hell: The Game
 
 ---
 
-<div class="absolute inset-0 overflow-hidden bg-black">
-  <iframe
-    src="http://localhost:3000/auto_sign_in?return_to=/game"
-    title="Authentication Hell — live demo"
-    allow="cross-origin-isolated; autoplay; fullscreen; gamepad"
-    class="border-0 origin-top-left"
-    style="width: 1440px; height: 810px; transform: scale(0.68056);"
-  ></iframe>
+<div class="h-full flex items-center justify-center">
+  <div class="overflow-clip bg-black" style="width: 840px; height: 472.5px;">
+    <iframe
+      src="http://localhost:3000/auto_sign_in?return_to=/game"
+      title="Authentication Hell — live demo"
+      allow="cross-origin-isolated; autoplay; fullscreen; gamepad"
+      class="border-0 origin-top-left"
+      style="width: 1440px; height: 810px; transform: scale(0.58333);"
+    ></iframe>
+  </div>
 </div>
 
 <!--
