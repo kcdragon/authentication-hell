@@ -402,9 +402,9 @@ I don't want to give anything more away in the game. You can check it out later.
 
 ---
 
-<div class="absolute inset-0 flex items-center justify-center p-6">
+<div class="flex items-center justify-center h-full">
   <div class="ah-card bg-white p-2 leading-none">
-    <SlidevVideo autoplay loop muted class="block max-h-[92vh] max-w-full w-auto">
+    <SlidevVideo autoplay loop muted class="block max-h-[440px] max-w-full w-auto">
       <source :src="'/videos/password-complexity-with-game-over.mp4'" type="video/mp4" />
     </SlidevVideo>
   </div>
