@@ -409,7 +409,10 @@ hideInToc: false
 
 # Authentication Hell: The Game
 
----
+<!--
+Introducing Authentication Hell: The Game
+-->
+
 ---
 
 <div class="absolute inset-0 overflow-hidden bg-black">
@@ -423,13 +426,13 @@ hideInToc: false
 </div>
 
 <!--
-Live demo — needs `bin/dev` running; /auto_sign_in logs in automatically as
-the first user. Click the canvas to start the game and capture the keyboard;
-click outside the iframe to get slide-nav keys back. Change return_to to
-/game?level=N to pin a specific level.
+Let's try to do a live demo
+
+...Demo first two levels...
+
+I don't want to give anything more away in the game. You can check it out later.
 -->
 
----
 ---
 
 <div class="absolute inset-0 flex items-center justify-center p-6">
@@ -439,6 +442,10 @@ click outside the iframe to get slide-nav keys back. Change return_to to
     </SlidevVideo>
   </div>
 </div>
+
+<!--
+This was the backup demo slide in case the demo didn't work.
+-->
 
 ---
 
@@ -451,6 +458,10 @@ click outside the iframe to get slide-nav keys back. Change return_to to
 
 <div v-drag="[777,229,192,59,16]" data-id="what-youll-learn-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">"What you'll learn"</div>
 <FancyArrow color="red-500" width="3" from="[data-id=what-youll-learn-label]@bottom" to="(550, 420)" />
+
+<!--
+The theme of the game is a security training course. You play a new hire who has to take security training. If you've ever worked at a big company, you know exactly what those are like.
+-->
 
 ---
 
@@ -476,7 +487,14 @@ click outside the iframe to get slide-nav keys back. Change return_to to
 <div v-drag="[733,38,150,44,11]" data-id="playlist-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Level select</div>
 <FancyArrow color="red-500" width="3" from="[data-id=playlist-label]@bottom" to="(750, 210)" />
 
----
+<!--
+Each level in the game is a video.
+You can see all the levels in the playlist on the right.
+There's a button to pause the "video".
+There's a timer to keep track of the time remaining.
+But don't let the time go to 0 before you collect your certificate!
+-->
+
 ---
 
 ## Enemies are authentication
@@ -514,6 +532,12 @@ img.auth-toast.toast-from-t.slidev-vclick-hidden { transform: translate(0, 120vh
 img.auth-toast.toast-from-r.slidev-vclick-hidden { transform: translate(140vw, 0)  rotate(-3deg); }
 </style>
 
+<!--
+Enemies in the game are authentication methods.
+
+If you get hit by an enemy, you'll have to either re-authenticate with your password, one time password or passkey depending on the enemy that hits you.
+-->
+
 ---
 
 ## Earn a certificate
@@ -525,6 +549,11 @@ img.auth-toast.toast-from-r.slidev-vclick-hidden { transform: translate(140vw, 0
 
 <div v-drag="[743,383,180,44,7]" data-id="share-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Share to social</div>
 <FancyArrow color="red-500" width="3" from="[data-id=share-label]@left" to="(499, 500)" />
+
+<!--
+If you beat the game, you'll be presented with your very on certificate proving to the world your authentication competency.
+Share your certificate with the world with the convenient social links.
+-->
 
 ---
 layout: section
