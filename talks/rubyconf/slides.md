@@ -1130,6 +1130,16 @@ end
 
 <!--
 When you get hit by an enemy, you have to re-authenticate.
+This is done by the game making a network request to the Rails server.
+If there's one thing you take away from this section, its that network requests are different in DragonRuby.
+Remember, tick is called 60 times per second.
+It is impossible to make a network request and wait for the response within tick due to this.
+DragonRuby facilitates network requests waiting for the response int he background.
+When we make a network request in the code, its not being called here.
+Its called in the background.
+
+When the network request is finished, DragonRuby populates the state with the response of the request.
+In this case, we'll respond to the response  by freezing the player.
 -->
 
 ---
@@ -1177,6 +1187,12 @@ end
     </SlidevVideo>
   </div>
 </div>
+
+<!--
+Inside of the network request we just called, we need to store in the session that the challenge has started.
+
+Then we turbo stream in a toast message that allows the user to authenticate.
+-->
 
 ---
 layout: two-cols-header
@@ -1231,6 +1247,13 @@ end
   </div>
 </div>
 
+<!--
+After the player fills in their passcode, we have to authenticate that its valid.
+If it is, we update the session to say the challenge has been completed.
+
+If the authentication is not valid, we tell the user that something went wrong.
+-->
+
 ---
 layout: two-cols-header
 ---
@@ -1282,6 +1305,12 @@ end
   </div>
 </div>
 
+<!--
+Back in the game, we have to poll for the authentication being complete.
+
+Once we find out that the authentication is complete, we can unfreeze the player and they can resume playing the game.
+-->
+
 ---
 layout: two-cols-header
 ---
@@ -1316,6 +1345,10 @@ end
   </div>
 </div>
 
+<!--
+The endpoint we check is pretty simple since we're storing the status of the authentication challenge.
+-->
+
 ---
 layout: two-cols-header
 ---
@@ -1341,6 +1374,12 @@ gem "rqrcode" # QR Codes
     <img src="./images/toast-totp.png" class="block w-48" alt="Enemy Encounter toast: re-authenticate with your TOTP code to keep playing" />
   </div>
 </div>
+
+<!--
+Implementing authentication in the game turned out to be the simple part.
+We've got a great ecosystem of Ruby gems to do this.
+I used the rotp gem to implement one time password verification and the rqrcode to generate QR codes for linking the authenticator.
+-->
 
 ---
 layout: two-cols-header
@@ -1369,12 +1408,24 @@ gem "webauthn"
 
 <img v-drag="[140,319,240,36]" src="./images/cedarcode-logo.svg" alt="Cedarcode logo" />
 
+<!--
+Passkeys are easy to implement to.
+The folks at Cedarcode have a webauthn gem that does most if it for you.
+-->
+
 ---
 
 ## Takeaways
 
 - You can develop your own game... in Ruby!
 - You can easily add better authentication methods, like Passkeys, to your app
+
+<!--
+Despite the silliness of this game, I think there are some real takeaways from this talk.
+You can easily build your own game in Ruby.
+The library has everything you need, examples of games, and a great community around it.
+And adding better authentication methods like passkeys is easy to do in any modern Rails app.
+-->
 
 ---
 layout: cover
