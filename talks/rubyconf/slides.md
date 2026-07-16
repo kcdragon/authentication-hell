@@ -932,18 +932,16 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 </div>
 
 ---
----
 
 ## Discord to the rescue
 
-<Framed>
-  <div class="ah-card bg-white p-2 leading-none">
-    <img src="./images/discord-heapu8.png" class="block max-h-[300px] w-auto" alt="Discord message diagnosing the Module.HEAPU8 undefined error in the DragonRuby WASM build" />
-  </div>
-  <div class="ah-card bg-white p-2 leading-none">
-    <img src="./images/discord-reply.png" class="block max-w-[630px] h-auto" alt="Discord reply: this is a bug introduced in DragonRuby 7+ it seems" />
-  </div>
-</Framed>
+<div v-drag="[213,114,560,278]" class="ah-card bg-white p-2 leading-none">
+  <img src="./images/discord-heapu8.png" class="block w-full h-auto" alt="Discord message diagnosing the Module.HEAPU8 undefined error in the DragonRuby WASM build" />
+</div>
+
+<div v-drag="[212,402,560,72]" class="ah-card bg-white p-2 leading-none">
+  <img src="./images/discord-reply.png" class="block w-full h-auto" alt="Discord reply: this is a bug introduced in DragonRuby 7+ it seems" />
+</div>
 
 ---
 ---
