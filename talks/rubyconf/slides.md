@@ -335,14 +335,6 @@ Welcome to Authentication Hell
 -->
 
 ---
-layout: section
-hideInToc: false
----
-
-# What if there was a game?
-
----
----
 
 <div class="grid grid-cols-3 gap-x-5 gap-y-4 h-full content-center w-fit mx-auto">
   <div class="ah-card bg-white p-2 leading-none">
@@ -372,7 +364,18 @@ hideInToc: false
 </div>
 
 <!--
-I've been a gamer my whole life...
+I've been a gamer my whole life. From Sega to PlayStation to PC. Raise your hand if you've played one of these games in your life.
+-->
+
+---
+layout: section
+hideInToc: false
+---
+
+# What if there was a game?
+
+<!--
+And I kept having this thought... What if there was a game that poked fun of the absurdity of authentication? A game where the penalty was having to re-authentication.
 -->
 
 ---
@@ -382,7 +385,7 @@ backgroundSize: cover
 ---
 
 <!--
-Earlier this year...
+Earlier this year, they announced the CFP for RubyConf. They were looking for talk in several different tracks.
 -->
 
 ---
@@ -394,6 +397,134 @@ hideInToc: true
 <blockquote class="mt-8 border-l-4 border-ink pl-6 italic" style="font-size: 3rem; line-height: 1.3;">
   ...A program which absolutely should not exist, yet, defying all reason and good taste, does....And we want you to do it in Ruby.
 </blockquote>
+
+<!--
+One of those track was "Weird Ruby". They were looking for talks about "A program which absolutely should not exist, yet, defying all reason and good taste, does... And we want you to do it in Ruby. And that sounds like the perfect fit for this game.
+-->
+
+---
+layout: section
+hideInToc: false
+---
+
+# Authentication Hell: The Game
+
+---
+---
+
+<div class="absolute inset-0 overflow-hidden bg-black">
+  <iframe
+    src="http://localhost:3000/auto_sign_in?return_to=/game"
+    title="Authentication Hell — live demo"
+    allow="cross-origin-isolated; autoplay; fullscreen; gamepad"
+    class="border-0 origin-top-left"
+    style="width: 1440px; height: 810px; transform: scale(0.68056);"
+  ></iframe>
+</div>
+
+<!--
+Live demo — needs `bin/dev` running; /auto_sign_in logs in automatically as
+the first user. Click the canvas to start the game and capture the keyboard;
+click outside the iframe to get slide-nav keys back. Change return_to to
+/game?level=N to pin a specific level.
+-->
+
+---
+---
+
+<div class="absolute inset-0 flex items-center justify-center p-6">
+  <div class="ah-card bg-white p-2 leading-none">
+    <SlidevVideo autoplay loop muted class="block max-h-[92vh] max-w-full w-auto">
+      <source :src="'/videos/password-complexity-with-game-over.mp4'" type="video/mp4" />
+    </SlidevVideo>
+  </div>
+</div>
+
+---
+
+## Security training course
+
+<Framed src="/images/course-landing-page.png" alt="AuthHell course landing page styled as corporate security training: an Authentication Hell course card with a Start the course button, an Onboarding Tape Lesson 1 video player, and a What You'll Learn checklist" />
+
+<div v-drag="[16,165,191,56,-7]" data-id="start-the-course-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">"Start the course"</div>
+<FancyArrow color="red-500" width="3" from="[data-id=start-the-course-label]@bottom" to="(300, 350)" />
+
+<div v-drag="[777,229,192,59,16]" data-id="what-youll-learn-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">"What you'll learn"</div>
+<FancyArrow color="red-500" width="3" from="[data-id=what-youll-learn-label]@bottom" to="(550, 420)" />
+
+---
+
+## Each level is a video
+
+<Framed>
+  <div class="flex items-center justify-center gap-6">
+    <div class="ah-card bg-white p-2 leading-none">
+      <img src="./images/level-video-player.png" class="block w-[600px] h-auto" alt="Game level styled as a corporate training video player, with a scrubber, timestamp, and CC controls below the platformer scene" />
+    </div>
+    <div class="ah-card bg-white p-2 leading-none">
+      <img src="./images/level-playlist.png" class="block max-h-[380px] w-auto" alt="Course playlist sidebar listing five chapters — Welcome, Password Complexity, API Keys, Time-Based One-Time Passwords, and RubyConf Field Trip — with the last marked Now Playing" />
+    </div>
+  </div>
+</Framed>
+
+<div v-drag="[22,229,150,44,-14]" data-id="play-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">Play / pause</div>
+<FancyArrow color="red-500" width="3" from="[data-id=play-label]@bottom" to="(100, 435)" />
+
+<div v-drag="[267,475,90,44,-9]" data-id="timer-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Timer</div>
+<FancyArrow color="red-500" width="3" from="[data-id=timer-label]@top" to="(200, 430)" />
+
+<div v-drag="[733,38,150,44,11]" data-id="playlist-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Level select</div>
+<FancyArrow color="red-500" width="3" from="[data-id=playlist-label]@bottom" to="(750, 210)" />
+
+---
+---
+
+## Enemies are authentication
+
+<Framed src="./images/enemies-authentication.png" alt="Game scene with three enemies on platforms — a password phone, a passkey cloud key, and a locked password field — each representing an authentication challenge" />
+
+<div v-drag="[120,300,140,44,-8]" data-id="enemy-2fa-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">2FA code</div>
+<FancyArrow color="red-500" width="3" from="[data-id=enemy-2fa-label]@right" to="(430, 335)" />
+
+<div v-drag="[420,150,110,44,6]" data-id="enemy-passkey-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Passkey</div>
+<FancyArrow color="red-500" width="3" from="[data-id=enemy-passkey-label]@bottom" to="(510, 245)" />
+
+<div v-drag="[720,300,130,44,8]" data-id="enemy-password-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Password</div>
+<FancyArrow color="red-500" width="3" from="[data-id=enemy-password-label]@left" to="(615, 335)" />
+
+<div class="absolute inset-0 overflow-hidden pointer-events-none">
+  <img v-click="1" src="./images/toast-totp.png" alt="Enemy Encounter toast: re-authenticate with your TOTP code to keep playing" class="auth-toast toast-from-l" style="left: 24px; bottom: 40px;" />
+  <img v-click="1" src="./images/toast-passkey.png" alt="Passkey Checkpoint toast: re-authenticate with your passkey to keep playing" class="auth-toast toast-from-t" style="left: 50%; margin-left: -155px; bottom: 40px;" />
+  <img v-click="1" src="./images/toast-password.png" alt="Password Enemy toast: re-authenticate with your password to keep playing" class="auth-toast toast-from-r" style="right: 24px; bottom: 40px;" />
+</div>
+
+<style>
+img.auth-toast.slidev-vclick-target {
+  position: absolute;
+  width: 310px;
+  height: auto;
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
+}
+img.auth-toast.toast-from-l { transform: translate(0, 0) rotate(-2deg); transition-delay: 0ms; }
+img.auth-toast.toast-from-t { transform: translate(0, 0) rotate(2deg);  transition-delay: 250ms; }
+img.auth-toast.toast-from-r { transform: translate(0, 0) rotate(-3deg); transition-delay: 500ms; }
+
+img.auth-toast.toast-from-l.slidev-vclick-hidden { transform: translate(-140vw, 0) rotate(-2deg); }
+img.auth-toast.toast-from-t.slidev-vclick-hidden { transform: translate(0, 120vh)  rotate(2deg); }
+img.auth-toast.toast-from-r.slidev-vclick-hidden { transform: translate(140vw, 0)  rotate(-3deg); }
+</style>
+
+---
+
+## Earn a certificate
+
+<Framed src="./images/certificate.png" imgClass="block max-h-[400px] w-auto" alt="Course complete page: 'You beat Authentication Hell' above a Certificate of Completion awarded to kcdragon, with a QR code, Download PDF and Back to the game buttons, and share links" />
+
+<div v-drag="[19,169,237,44,-6]" data-id="proof-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">Prove you passed</div>
+<FancyArrow color="red-500" width="3" from="[data-id=proof-label]@right" to="(411, 240)" />
+
+<div v-drag="[743,383,180,44,7]" data-id="share-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Share to social</div>
+<FancyArrow color="red-500" width="3" from="[data-id=share-label]@left" to="(499, 500)" />
 
 ---
 layout: section
@@ -751,130 +882,6 @@ main.c
 <!--
 https://mruby.org/docs/articles/executing-ruby-code-with-mruby.html
 -->
-
----
-layout: section
-hideInToc: false
----
-
-# Authentication Hell: The Game
-
----
----
-
-<div class="absolute inset-0 overflow-hidden bg-black">
-  <iframe
-    src="http://localhost:3000/auto_sign_in?return_to=/game"
-    title="Authentication Hell — live demo"
-    allow="cross-origin-isolated; autoplay; fullscreen; gamepad"
-    class="border-0 origin-top-left"
-    style="width: 1440px; height: 810px; transform: scale(0.68056);"
-  ></iframe>
-</div>
-
-<!--
-Live demo — needs `bin/dev` running; /auto_sign_in logs in automatically as
-the first user. Click the canvas to start the game and capture the keyboard;
-click outside the iframe to get slide-nav keys back. Change return_to to
-/game?level=N to pin a specific level.
--->
-
----
----
-
-<div class="absolute inset-0 flex items-center justify-center p-6">
-  <div class="ah-card bg-white p-2 leading-none">
-    <SlidevVideo autoplay loop muted class="block max-h-[92vh] max-w-full w-auto">
-      <source :src="'/videos/password-complexity-with-game-over.mp4'" type="video/mp4" />
-    </SlidevVideo>
-  </div>
-</div>
-
----
-
-## Security training course
-
-<Framed src="/images/course-landing-page.png" alt="AuthHell course landing page styled as corporate security training: an Authentication Hell course card with a Start the course button, an Onboarding Tape Lesson 1 video player, and a What You'll Learn checklist" />
-
-<div v-drag="[16,165,191,56,-7]" data-id="start-the-course-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">"Start the course"</div>
-<FancyArrow color="red-500" width="3" from="[data-id=start-the-course-label]@bottom" to="(300, 350)" />
-
-<div v-drag="[777,229,192,59,16]" data-id="what-youll-learn-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">"What you'll learn"</div>
-<FancyArrow color="red-500" width="3" from="[data-id=what-youll-learn-label]@bottom" to="(550, 420)" />
-
----
-
-## Each level is a video
-
-<Framed>
-  <div class="flex items-center justify-center gap-6">
-    <div class="ah-card bg-white p-2 leading-none">
-      <img src="./images/level-video-player.png" class="block w-[600px] h-auto" alt="Game level styled as a corporate training video player, with a scrubber, timestamp, and CC controls below the platformer scene" />
-    </div>
-    <div class="ah-card bg-white p-2 leading-none">
-      <img src="./images/level-playlist.png" class="block max-h-[380px] w-auto" alt="Course playlist sidebar listing five chapters — Welcome, Password Complexity, API Keys, Time-Based One-Time Passwords, and RubyConf Field Trip — with the last marked Now Playing" />
-    </div>
-  </div>
-</Framed>
-
-<div v-drag="[22,229,150,44,-14]" data-id="play-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">Play / pause</div>
-<FancyArrow color="red-500" width="3" from="[data-id=play-label]@bottom" to="(100, 435)" />
-
-<div v-drag="[267,475,90,44,-9]" data-id="timer-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Timer</div>
-<FancyArrow color="red-500" width="3" from="[data-id=timer-label]@top" to="(200, 430)" />
-
-<div v-drag="[733,38,150,44,11]" data-id="playlist-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Level select</div>
-<FancyArrow color="red-500" width="3" from="[data-id=playlist-label]@bottom" to="(750, 210)" />
-
----
----
-
-## Enemies are authentication
-
-<Framed src="./images/enemies-authentication.png" alt="Game scene with three enemies on platforms — a password phone, a passkey cloud key, and a locked password field — each representing an authentication challenge" />
-
-<div v-drag="[120,300,140,44,-8]" data-id="enemy-2fa-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">2FA code</div>
-<FancyArrow color="red-500" width="3" from="[data-id=enemy-2fa-label]@right" to="(430, 335)" />
-
-<div v-drag="[420,150,110,44,6]" data-id="enemy-passkey-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Passkey</div>
-<FancyArrow color="red-500" width="3" from="[data-id=enemy-passkey-label]@bottom" to="(510, 245)" />
-
-<div v-drag="[720,300,130,44,8]" data-id="enemy-password-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Password</div>
-<FancyArrow color="red-500" width="3" from="[data-id=enemy-password-label]@left" to="(615, 335)" />
-
-<div class="absolute inset-0 overflow-hidden pointer-events-none">
-  <img v-click="1" src="./images/toast-totp.png" alt="Enemy Encounter toast: re-authenticate with your TOTP code to keep playing" class="auth-toast toast-from-l" style="left: 24px; bottom: 40px;" />
-  <img v-click="1" src="./images/toast-passkey.png" alt="Passkey Checkpoint toast: re-authenticate with your passkey to keep playing" class="auth-toast toast-from-t" style="left: 50%; margin-left: -155px; bottom: 40px;" />
-  <img v-click="1" src="./images/toast-password.png" alt="Password Enemy toast: re-authenticate with your password to keep playing" class="auth-toast toast-from-r" style="right: 24px; bottom: 40px;" />
-</div>
-
-<style>
-img.auth-toast.slidev-vclick-target {
-  position: absolute;
-  width: 310px;
-  height: auto;
-  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
-}
-img.auth-toast.toast-from-l { transform: translate(0, 0) rotate(-2deg); transition-delay: 0ms; }
-img.auth-toast.toast-from-t { transform: translate(0, 0) rotate(2deg);  transition-delay: 250ms; }
-img.auth-toast.toast-from-r { transform: translate(0, 0) rotate(-3deg); transition-delay: 500ms; }
-
-img.auth-toast.toast-from-l.slidev-vclick-hidden { transform: translate(-140vw, 0) rotate(-2deg); }
-img.auth-toast.toast-from-t.slidev-vclick-hidden { transform: translate(0, 120vh)  rotate(2deg); }
-img.auth-toast.toast-from-r.slidev-vclick-hidden { transform: translate(140vw, 0)  rotate(-3deg); }
-</style>
-
----
-
-## Earn a certificate
-
-<Framed src="./images/certificate.png" imgClass="block max-h-[400px] w-auto" alt="Course complete page: 'You beat Authentication Hell' above a Certificate of Completion awarded to kcdragon, with a QR code, Download PDF and Back to the game buttons, and share links" />
-
-<div v-drag="[19,169,237,44,-6]" data-id="proof-label" class="ah-card bg-white px-3 py-1.5 font-bold -rotate-2 grid place-items-center">Prove you passed</div>
-<FancyArrow color="red-500" width="3" from="[data-id=proof-label]@right" to="(411, 240)" />
-
-<div v-drag="[743,383,180,44,7]" data-id="share-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Share to social</div>
-<FancyArrow color="red-500" width="3" from="[data-id=share-label]@left" to="(499, 500)" />
 
 ---
 layout: section
