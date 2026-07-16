@@ -1152,11 +1152,64 @@ end
 </div>
 
 ---
+layout: two-cols-header
+---
+
+## Time-based One Time Passwords
+
+::left::
+
+<FileName>Gemfile</FileName>
+
+```ruby
+gem "rotp"    # One Time Passwords
+gem "rqrcode" # QR Codes
+```
+
+::right::
+
+<div class="flex flex-col items-center gap-3">
+  <div class="ah-card bg-white p-2 leading-none">
+    <img src="./images/toast-totp-qr.png" class="block w-48" alt="Temporary 2FA toast: link a temporary authenticator by scanning a QR code, then entering the current code" />
+  </div>
+  <div class="ah-card bg-white p-2 leading-none">
+    <img src="./images/toast-totp.png" class="block w-48" alt="Enemy Encounter toast: re-authenticate with your TOTP code to keep playing" />
+  </div>
+</div>
+
+---
+layout: two-cols-header
+---
+
+## Passkeys
+
+::left::
+
+<FileName>Gemfile</FileName>
+
+```ruby
+gem "webauthn"
+```
+
+::right::
+
+<div class="flex flex-col items-center gap-3">
+  <div class="ah-card bg-white p-2 leading-none">
+    <img src="./images/passkey-save-prompt.png" class="block w-64" alt="macOS system prompt: Save a passkey? — localhost supports passkeys, with Touch ID to Save Passkey" />
+  </div>
+  <div class="ah-card bg-white p-2 leading-none">
+    <img src="./images/passkey-challenge-toast.png" class="block w-64" alt="Passkey Checkpoint toast: you bumped into the passkey enemy — verify with passkey to keep playing" />
+  </div>
+</div>
+
+<img v-drag="[140,319,240,36]" src="./images/cedarcode-logo.svg" alt="Cedarcode logo" />
+
+---
 
 ## Takeaways
 
 - You can develop your own game... in Ruby!
-- You can easily add better authentication methods (i.e. passkeys) to your app
+- You can easily add better authentication methods, like Passkeys, to your app
 
 ---
 layout: cover
