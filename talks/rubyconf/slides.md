@@ -838,6 +838,18 @@ end
   </div>
 </div>
 
+<!--
+Collisions are an important part of games.
+For example, if a player is moving and makes contact with an obstacle, we need to stop them from moving.
+In this example, we have a player in red and an obstacle in blue rendered to the screen.
+
+If we respond to right input by moving the player right, it goes right through the obstacle which is not desired.
+
+Instead, we need to check for a collision.
+We can check to see if there is overlap in the player and obstacle.
+If there is, we prevent the player from moving.
+-->
+
 ---
 dragPos:
   c: 161,273,117,123
@@ -905,6 +917,14 @@ main.c
 <FancyArrow v-click="1" from="[data-id=we-write]" to="[data-id=ruby]" />
 
 <!--
+This is my, admitedly, hand wavy description of a dragonruby program.
+
+We write a file called main.rb with a tick method in it.
+
+DragonRuby compiles it to a C file with our programs bytecode in it.
+
+DragonRuby then orchestrates calls to SDL and calls to our tick program.
+
 https://mruby.org/docs/articles/executing-ruby-code-with-mruby.html
 -->
 
@@ -914,6 +934,10 @@ hideInToc: false
 ---
 
 # Building the game
+
+<!--
+I want to talk next about the building the game.
+-->
 
 ---
 
@@ -926,6 +950,12 @@ hideInToc: false
 
 <div v-drag="[794,421,110,44,7]" data-id="rails-label" class="ah-card bg-white px-3 py-1.5 font-bold rotate-2 grid place-items-center">Rails</div>
 <FancyArrow color="red-500" width="3" from="[data-id=rails-label]@left" to="(700, 420)" />
+
+<!--
+The game is both a DragonRuby game and a Rails app.
+DragonRuby is compiled to WebAssembly and embedded inside a Rails.
+You can see on the screen which parts are DragonRuby and which parts a the Rails app.
+-->
 
 ---
 layout: two-cols
@@ -950,8 +980,8 @@ dragPos:
 </FancyArrow>
 
 <!--
-DragonRuby compiles our game to WebAssembly, which is how it runs in the
-browser at native-ish speed — that's the artifact Rails serves at /game.
+DragonRuby compiles our game to WebAssembly so we can run it in the browser.
+WebAssembly is a binary instruction format for the web that allows you to run any language in the browser including Ruby
 -->
 
 ---
@@ -962,6 +992,12 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
 - Rails allows for authentication methods players are used to
 
 <img v-drag="[445,222,416,274]" src="./images/rails-logo.png" alt="Ruby on Rails logo" />
+
+<!--
+Why Rails?
+DragonRuby can produce a stand alone game.
+But I wanted to use authentication methods that felt familiar to users so I choose to do the authentication in a Rails app like any other Rails app.
+-->
 
 ---
 
@@ -975,6 +1011,11 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
   </div>
 </div>
 
+<!--
+Authentication Hell had very humble beginnings.
+I built a proof of concept first to prove that I could actually trigger authentication from within the game.
+-->
+
 ---
 
 ## Discord to the rescue
@@ -987,21 +1028,40 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
   <img src="./images/discord-reply.png" class="block w-full h-auto" alt="Discord reply: this is a bug introduced in DragonRuby 7+ it seems" />
 </div>
 
----
+<!--
+I was a little worried at first because I could not get HTTP requests to work within the game when compiled to WebAssembly.
+Luckily there's a great community on the DragonRuby Discord.
+I was able to share my issue and they fixed it in a new release of DragonRuby within a day or two.
+-->
+
 ---
 
 ## Claude Design
 
 <Framed src="./images/claude-design.png" alt="Claude Design canvas redesigning the game screens" />
 
----
+<!--
+I'm not much of a designer myself so I decided to try out Claude Design to help me out with a design.
+It presented me with a bunch of options and then I narrowed it down to this one.
+I thought it came up with a pretty cool and unique design but I've since come across very similar designs on other apps so maybe its quite as unique as I thought.
+-->
+
 ---
 
 ## Claude Code
 
 <Framed src="./images/claude-code.png" imgClass="block max-h-[400px] w-auto" alt="Claude Code proposing a plan for a space-bar jump in the /play game, with context, approach, and jump physics constants" />
 
----
+<!--
+Claude was helpful in building this game in a couple months.
+It did a solid job in building mechanics for the game like "jumping".
+But it struggle with aspects like "fun".
+The levels it produced on its own were boring and short.
+I had to intervene and provide it with specific guidance on what needed to change.
+
+Aside: I also used Claude to help build these slide. I thought it did a pretty decent job until I got to tech check this morning and there were a bunch of issues when extending to the projector. Thank you to the AV team here for bearing with me while I got that fixed.
+-->
+
 ---
 
 ## Authenticate in game
@@ -1013,6 +1073,10 @@ browser at native-ish speed — that's the artifact Rails serves at /game.
     </SlidevVideo>
   </div>
 </div>
+
+<!--
+Let's do a deep dive on authentication in the game.
+-->
 
 ---
 layout: two-cols-header
@@ -1063,6 +1127,10 @@ end
     </SlidevVideo>
   </div>
 </div>
+
+<!--
+When you get hit by an enemy, you have to re-authenticate.
+-->
 
 ---
 layout: two-cols-header
