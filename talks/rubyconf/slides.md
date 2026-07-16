@@ -75,7 +75,6 @@ layout: fact
   <div class="relative h-64 w-64">
     <img src="./images/mike-dalton.jpg" class="h-64 w-64 rounded-full object-cover" alt="Mike Dalton" />
     <img
-      v-click
       src="./images/mustache.png"
       alt="Mustache"
       class="mustache-slide absolute left-1/2 top-[54%] w-32 -translate-x-[calc(50%+4px)]"
@@ -83,15 +82,6 @@ layout: fact
   </div>
   <h1 class="!m-0 !text-5xl">Hi, I'm Mike</h1>
 </div>
-
-<style>
-img.mustache-slide.slidev-vclick-target {
-  transition: transform 1.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s ease;
-}
-img.mustache-slide.slidev-vclick-hidden {
-  transform: translate(calc(-50% - 380px), 0);
-}
-</style>
 
 <!--
 Hi! I'm Mike. You may know me as this floating head from social media. I've had a couple people mention it doesn't quite look like me anymore so I've updated it to include a mustache.
