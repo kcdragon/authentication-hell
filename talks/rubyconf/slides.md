@@ -1295,7 +1295,7 @@ layout: cover
   </div>
 </div>
 
-<div class="absolute bottom-4 left-0 right-0 text-center text-xs text-muted">
+<div v-drag="[190,514,600,24]" class="text-center text-xs text-muted">
   Built with
   <a href="https://www.ruby-lang.org/en/" target="_blank" rel="noopener">Ruby</a>
   ·
