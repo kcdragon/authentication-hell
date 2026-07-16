@@ -43,10 +43,7 @@ defaults:
 <img v-drag="[-17,461,120,111]" src="./images/plants/poppy-bush.png" alt="Poppy bush plant sprite from the game" />
 
 <!--
-Speaker notes go here, after the HTML comment marker.
-Press `c` during the talk to open presenter mode.
-The cover layout puts the title in an inked block with a hard offset shadow,
-matching the app's brutalist headings.
+Hi everyone. Thanks for coming to my talk Authentication Hell, a browser-based game built with Ruby.
 -->
 
 ---
@@ -66,6 +63,10 @@ matching the app's brutalist headings.
   </div>
 </div>
 
+<!--
+I know some of you will be tempted to play the game during my talk so I want to let you know that's all right! You can check the game out at authenticationhell.com
+-->
+
 ---
 layout: fact
 ---
@@ -80,7 +81,7 @@ layout: fact
       class="mustache-slide absolute left-1/2 top-[54%] w-32 -translate-x-[calc(50%+4px)]"
     />
   </div>
-  <h1 class="!m-0 !text-5xl">Hi, I'm Mike Dalton</h1>
+  <h1 class="!m-0 !text-5xl">Hi, I'm Mike</h1>
 </div>
 
 <style>
@@ -92,6 +93,10 @@ img.mustache-slide.slidev-vclick-hidden {
 }
 </style>
 
+<!--
+Hi! I'm Mike. You may know me as this floating head from social media. I've had a couple people mention it doesn't quite look like me anymore so I've updated it to include a mustache.
+-->
+
 ---
 layout: fact
 ---
@@ -100,6 +105,10 @@ layout: fact
   <img src="./images/triumph-logo.png" class="h-16 w-auto" alt="Triumph logo" />
   <h1 class="!m-0 !text-5xl">Engineer at Triumph</h1>
 </div>
+
+<!--
+I'm a staff engineer at a company called Triumph.
+-->
 
 ---
 layout: fact
@@ -122,6 +131,10 @@ layout: fact
   <img src="./images/broadside-logo.png" class="w-[160px] h-[160px]" alt="Broadside logo" />
   <div class="mt-2 text-center font-bold">Broadside</div>
 </div>
+
+<!--
+And in my spare time I love to work on side projects including this one.
+-->
 
 ---
 layout: section
@@ -155,11 +168,19 @@ layout: fact
 
 ## I like my job
 
+<!--
+I like my job
+-->
+
 ---
 layout: fact
 ---
 
-## But there's one thing I hate
+## But there's one thing...
+
+<!--
+But there's one thing that drive's my crazy
+-->
 
 ---
 layout: center
@@ -206,17 +227,41 @@ img.okta-push.push-from-bl.slidev-vclick-hidden { transform: translate(-140vw, 1
 img.okta-push.push-from-br.slidev-vclick-hidden { transform: translate(140vw, 120vh)   rotate(3deg); }
 </style>
 
+<!--
+And that's Okta. Specifically...
+
+Okta push notifications
+-->
+
+---
+layout: image
+image: /images/kitchen-happy.png
+backgroundSize: cover
+---
+
+<!--
+My work day starts like this
+-->
+
 ---
 layout: image
 image: /images/hell-login-password.png
 backgroundSize: cover
 ---
 
+<!--
+Sign into my computer with my password
+-->
+
 ---
 layout: image
 image: /images/hell-okta-push.png
 backgroundSize: cover
 ---
+
+<!--
+Then answer an Okta push notification
+-->
 
 ---
 layout: image
@@ -224,11 +269,19 @@ image: /images/hell-vpn-password.png
 backgroundSize: cover
 ---
 
+<!--
+Once I connect to the internet, I need to connect to the VPN
+-->
+
 ---
 layout: image
 image: /images/hell-okta-push.png
 backgroundSize: cover
 ---
+
+<!--
+The answer an Okta push notification
+-->
 
 ---
 layout: image
@@ -236,11 +289,9 @@ image: /images/hell-aws-vault.png
 backgroundSize: cover
 ---
 
----
-layout: image
-image: /images/hell-okta-push.png
-backgroundSize: cover
----
+<!--
+We access Claude through AWS Bedrock which requires signing into AWS Vault
+-->
 
 ---
 layout: image
@@ -248,11 +299,19 @@ image: /images/hell-okta-github.png
 backgroundSize: cover
 ---
 
+<!--
+We access Github through Okta...
+-->
+
 ---
 layout: image
 image: /images/hell-okta-push.png
 backgroundSize: cover
 ---
+
+<!--
+Which requires another Okta push notification
+-->
 
 ---
 layout: image
@@ -260,11 +319,39 @@ image: /images/hell-okta-teleport.png
 backgroundSize: cover
 ---
 
+<!--
+And if I want to deploy, I need to sign in through Teleport
+-->
+
 ---
 layout: image
 image: /images/hell-okta-push.png
 backgroundSize: cover
 ---
+
+<!--
+Which requires another Okta push notification
+-->
+
+---
+layout: image
+image: /images/kitchen-defeated.png
+backgroundSize: cover
+---
+
+<!--
+And when I'm done all that I start to look like this
+-->
+
+---
+layout: fact
+---
+
+## Welcome to Authentication Hell
+
+<!--
+Welcome to Authentication Hell
+-->
 
 ---
 layout: section
