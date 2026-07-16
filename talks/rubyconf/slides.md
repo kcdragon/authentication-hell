@@ -36,11 +36,11 @@ defaults:
   </div>
 </div>
 
-<img v-drag="[-7,404,80,123]" src="./images/plants/coreopsis.png" alt="Coreopsis plant sprite from the game" />
+<img v-drag="[11,374,80,123]" src="./images/plants/coreopsis.png" alt="Coreopsis plant sprite from the game" />
 
-<img v-drag="[51,482,130,95]" src="./images/plants/pink-bush.png" alt="Pink bush plant sprite from the game" />
+<img v-drag="[63,452,130,95]" src="./images/plants/pink-bush.png" alt="Pink bush plant sprite from the game" />
 
-<img v-drag="[-17,461,120,111]" src="./images/plants/poppy-bush.png" alt="Poppy bush plant sprite from the game" />
+<img v-drag="[7,425,120,111]" src="./images/plants/poppy-bush.png" alt="Poppy bush plant sprite from the game" />
 
 <!--
 Hi everyone. Thanks for coming to my talk Authentication Hell, a browser-based game built with Ruby.
