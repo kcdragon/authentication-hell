@@ -81,36 +81,6 @@ class Editor::LevelsControllerTest < ActionDispatch::IntegrationTest
     assert_empty Dir.children(@root)
   end
 
-  test "create awards the level creator achievement and toasts the first time" do
-    sign_in_as(@user)
-
-    assert_difference -> { @user.earned_achievements.count }, 1 do
-      in_environment("development") do
-        streams = capture_turbo_stream_broadcasts([ @user, :toasts ]) do
-          post editor_levels_url, params: valid_data.to_json, headers: json_headers
-        end
-        assert(streams.any? { |s| s.to_html.include?("Achievement unlocked") })
-      end
-    end
-
-    assert_response :success
-    assert @user.earned?(:level_creator)
-  end
-
-  test "create does not re-award the level creator achievement on a later save" do
-    sign_in_as(@user)
-    @user.grant_achievement(:level_creator)
-
-    assert_no_difference -> { @user.earned_achievements.count } do
-      in_environment("development") do
-        post editor_levels_url, params: valid_data.merge("slug" => "level-6").to_json,
-                                headers: json_headers
-      end
-    end
-
-    assert_response :success
-  end
-
   test "create permits and persists an authored start_y" do
     sign_in_as(@user)
 

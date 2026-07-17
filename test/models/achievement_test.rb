@@ -3,7 +3,7 @@ require "test_helper"
 class AchievementTest < ActiveSupport::TestCase
   test "all returns the catalog" do
     assert_equal Achievement::SURVIVOR.size + Achievement::COMPLETION.size +
-      Achievement::CREATOR.size + Achievement::EVENTS.size + GameLevel.all.size,
+      Achievement::EVENTS.size + GameLevel.all.size,
       Achievement.all.size
     assert Achievement.all.all? { |a| a.is_a?(Achievement) }
   end
@@ -18,10 +18,6 @@ class AchievementTest < ActiveSupport::TestCase
     %w[graduate social_sharer].each do |key|
       assert_includes Achievement.keys, key, "expected #{key} in the catalog"
     end
-  end
-
-  test "all includes the creator achievement" do
-    assert_includes Achievement.keys, "level_creator"
   end
 
   test "active_at awards beta_tester before RubyConf and not after it starts" do
