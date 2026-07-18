@@ -103,6 +103,6 @@ group :test do
   # matter: the npm `playwright` package must match playwright-ruby-client's
   # COMPATIBLE_PLAYWRIGHT_VERSION, which bin/setup installs automatically. Bump
   # both gems together and re-run bin/setup so the JS side stays in sync.
-  gem "capybara-playwright-driver", "0.5.9"
+  gem "capybara-playwright-driver", "0.5.10"
   gem "playwright-ruby-client", "1.60.0"
 end
