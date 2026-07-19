@@ -941,6 +941,25 @@ But I wanted to use authentication methods that felt familiar to users so I choo
 
 ---
 
+## Talking to Rails
+
+<Placeholder />
+
+- The game (WASM) and Rails share a browser tab, but not memory
+- No `localStorage` / `sessionStorage` — the game talks to Rails over **network requests**
+- `DR.http_post` / `DR.http_get` hit ordinary Rails endpoints
+- Rails owns the session + auth state; the game asks and reacts
+
+<!--
+TODO: flesh this out before the talk if I give it.
+The game half and the Rails half live in the same page but are separate worlds.
+Instead of stashing state in browser storage, the game communicates with Rails the
+same way any client would — HTTP requests. This sets up the "Player hit by TOTP enemy"
+deep dive on how a collision triggers a network request to re-authenticate.
+-->
+
+---
+
 ## Proof of concept
 
 <div class="flex justify-center mt-6">
