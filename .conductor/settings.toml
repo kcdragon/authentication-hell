@@ -12,3 +12,7 @@ icon = "flame"
 [scripts.run.rubyconf]
 command = "cd talks/rubyconf && { [ -d node_modules ] || npm install; } && npm run dev -- --port $CONDUCTOR_PORT"
 icon = "presentation"
+
+[scripts.run.future]
+command = "cd talks/future && { [ -d node_modules ] || npm install; } && npm run dev -- --port $CONDUCTOR_PORT"
+icon = "presentation"

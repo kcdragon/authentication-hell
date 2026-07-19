@@ -1,0 +1,14 @@
+{
+  "name": "talk-future",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "slidev",
+    "build": "slidev build",
+    "export": "slidev export"
+  },
+  "dependencies": {
+    "@slidev/cli": "^52.0.0",
+    "slidev-addon-fancy-arrow": "^0.16.1"
+  }
+}
