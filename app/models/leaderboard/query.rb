@@ -17,6 +17,7 @@ class Leaderboard::Query
       .group(:id)
       .select(selections)
       .order(Arel.sql(ordering))
+      .preload(:earned_achievements)
   end
 
   private

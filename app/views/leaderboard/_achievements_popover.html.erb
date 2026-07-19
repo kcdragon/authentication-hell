@@ -1,0 +1,23 @@
+<%# locals: (user:) %>
+
+<div class="hidden group-hover:block group-focus-within:block
+            absolute right-0 top-full mt-2 z-20 w-64 text-left
+            border-[3px] border-ink rounded-[3px] bg-card p-3 shadow-brut">
+  <% earned = user.earned_achievements.sort_by(&:created_at) %>
+  <div class="font-display text-[11px] uppercase tracking-wide text-muted mb-2">
+    <%= user.username %> · <%= earned.size %>/<%= Achievement.all.size %>
+  </div>
+  <% if earned.any? %>
+    <ul class="flex flex-col gap-2">
+      <% earned.each do |record| %>
+        <% achievement = record.achievement %>
+        <li class="flex items-center gap-2">
+          <span class="text-lg" aria-hidden="true"><%= achievement.emoji %></span>
+          <span class="font-semibold text-[13px] leading-tight"><%= achievement.name %></span>
+        </li>
+      <% end %>
+    </ul>
+  <% else %>
+    <p class="font-semibold text-[13px] text-muted">No achievements yet.</p>
+  <% end %>
+</div>

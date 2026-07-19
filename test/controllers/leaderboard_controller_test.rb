@@ -78,6 +78,26 @@ class LeaderboardControllerTest < ActionDispatch::IntegrationTest
     assert_select "[data-level-board=1]", text: /No clears yet/
   end
 
+  test "the achievements tab lists a player's earned achievements in a hovercard" do
+    @user.grant_achievement("password_survivor")
+    sign_in_as(@user)
+
+    get leaderboard_path(tab: "achievements")
+
+    assert_response :success
+    assert_select "button[aria-label=?]", "#{@user.username}'s achievements"
+    assert_select "li", text: /Password Survivor/
+  end
+
+  test "the achievements hovercard shows an empty state when a player has none" do
+    sign_in_as(@user)
+
+    get leaderboard_path(tab: "achievements")
+
+    assert_response :success
+    assert_select "p", text: "No achievements yet."
+  end
+
   test "index falls back to the achievements tab for an unknown one" do
     sign_in_as(@user)
     get leaderboard_path(tab: "bogus")
