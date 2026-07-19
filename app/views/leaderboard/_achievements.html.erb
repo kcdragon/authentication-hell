@@ -22,9 +22,14 @@
         <span class="text-xl" aria-hidden="true"><%= level.emoji %></span>
         <span class="font-medium text-sm">Lv <%= level.number %> · <%= level.name %></span>
       </span>
-      <span class="w-28 text-right font-mono font-bold text-sm">
-        <%= user.achievements_count %> / <%= Achievement.all.size %>
-      </span>
+      <div class="w-28 relative group flex justify-end">
+        <button type="button"
+                class="font-mono font-bold text-sm cursor-default focus:outline-solid focus:outline-blue-600 rounded-[3px]"
+                aria-label="<%= user.username %>'s achievements">
+          <%= user.achievements_count %> / <%= Achievement.all.size %>
+        </button>
+        <%= render "leaderboard/achievements_popover", user: user %>
+      </div>
     </li>
   <% end %>
 </ul>
