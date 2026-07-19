@@ -1,0 +1,293 @@
+/* =========================================================================
+   slidev-theme-authentication-hell
+   Mirrors the app's "HARD MODE" neo-brutalist design system
+   (app/assets/tailwind/application.css). Same tokens, same self-hosted
+   fonts, same hard-offset-shadow / 3px-ink-border look.
+   Loaded by ./index.ts after the Slidev base layout CSS and
+   theme-default's typography, which it overrides.
+   ========================================================================= */
+
+/* ---- SELF-HOSTED FONTS (copied from app/assets/fonts) ----------------- */
+@font-face {
+  font-family: "Archivo Black";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/archivo-black-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Grotesk";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("../fonts/space-grotesk-var.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("../fonts/space-mono-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Space Mono";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("../fonts/space-mono-700.woff2") format("woff2");
+}
+
+/* ---- TOKENS (verbatim from the app) ----------------------------------- */
+:root {
+  --color-paper:      #f5f2e9;
+  --color-card:       #ffffff;
+  --color-ink:        #111111;
+  --color-muted:      #5b5750;
+  --color-faint:      #e7e3d7;
+
+  --color-totp:       #8b5cf6;  /* TOTP / 2FA */
+  --color-password:   #f5a623;  /* password & achievements */
+  --color-passkey:    #2f6bff;  /* passkey + primary */
+  --color-success:    #16a34a;
+  --color-error:      #e5342a;
+
+  --font-display: "Archivo Black", system-ui, sans-serif;
+  --font-sans:    "Space Grotesk", system-ui, sans-serif;
+  --font-mono:    "Space Mono", ui-monospace, monospace;
+
+  --shadow-brut-sm: 3px 3px 0 var(--color-ink);
+  --shadow-brut:    6px 6px 0 var(--color-ink);
+  --shadow-brut-lg: 8px 8px 0 var(--color-ink);
+
+  /* Slidev theme hooks */
+  --slidev-theme-primary: var(--color-passkey);
+}
+
+/* ---- BASE ------------------------------------------------------------- */
+.slidev-layout {
+  font-family: var(--font-sans);
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+  /* faint dotted grid, like graph paper under the brutalist cards */
+  background-image: radial-gradient(var(--color-faint) 1.2px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+
+.slidev-layout h1,
+.slidev-layout h2,
+.slidev-layout h3 {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  color: var(--color-ink);
+  /* Slides are a fixed-width canvas, so keep headings on one line — overflow
+     is the signal to shorten a title, not silently wrap to two lines. */
+  text-wrap: nowrap;
+}
+
+/* The slide is a fixed 980px-wide canvas (Slidev scales it to the screen), so
+   `cqw` is reliable here: 1cqw = 1% of the slide width regardless of zoom.
+   clamp() sizes headings to that width — long titles like "Let's
+   Authenticate!" come out smaller so they still fit one line — with rem floors
+   and ceilings so short titles don't balloon. */
+.slidev-layout { container-type: inline-size; }
+
+.slidev-layout h1 {
+  font-size: clamp(2rem, 7.5cqw, 3.1rem);
+  line-height: 1.02;
+  margin-bottom: 0.5rem;
+}
+.slidev-layout h2 {
+  font-size: clamp(1.5rem, 4.6cqw, 1.9rem);
+  margin-bottom: 2.5rem;
+}
+
+.slidev-layout a { color: var(--color-passkey); text-decoration: none; }
+.slidev-layout a:hover { text-decoration: underline; }
+
+/* Put breathing room between the columns of the two-column layouts. Only a
+   column-gap so the header row (two-cols-header) keeps its spacing to the
+   columns below it — a full `gap` would push the header away too. */
+.slidev-layout.two-columns,
+.slidev-layout.two-cols-header {
+  column-gap: 2rem;
+}
+
+/* The built-in image-left / image-right layouts give the image column a bare
+   black background, which shows through transparent logos. Paint it the same
+   paper color as the rest of the slide. The image column is the grid child that
+   sits beside the single `.slidev-layout` content panel — image-right puts it
+   last, image-left first (two-cols has a `.slidev-layout` on both sides, so it
+   is untouched). The layout sets the logo as an inline `background-image`, which
+   correctly wins over this rule and sits on top of the paper fill. */
+.grid > .slidev-layout + div,
+.grid > div:not(.slidev-layout):has(+ .slidev-layout) {
+  background-color: var(--color-paper);
+}
+
+.slidev-layout strong { font-weight: 700; }
+
+/* Bullets get a hard square marker in the ink color. */
+.slidev-layout ul { list-style: none; padding-left: 0; }
+.slidev-layout ul > li {
+  position: relative;
+  padding-left: 1.4em;
+  margin: 0.45em 0;
+}
+.slidev-layout ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.6em;
+  height: 0.6em;
+  background: var(--color-ink);
+}
+
+/* ---- CODE ------------------------------------------------------------- */
+.slidev-layout code,
+.slidev-layout pre {
+  font-family: var(--font-mono);
+}
+.slidev-layout pre {
+  border: 3px solid var(--color-ink);
+  border-radius: 3px;
+  box-shadow: var(--shadow-brut-sm);
+  background: var(--color-card) !important;
+}
+.slidev-layout :not(pre) > code {
+  background: var(--color-card);
+  border: 2px solid var(--color-ink);
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+}
+
+/* Square off the top-left of a code block that follows a <FileName> tab so the
+   tab sits flush into the corner. The tab itself is styled in FileName.vue;
+   this reaches the sibling <pre>, which a scoped component style can't. */
+.ah-filename + .slidev-code-wrapper pre,
+.ah-filename + .shiki-magic-move-container pre,
+.ah-filename + pre {
+  border-top-left-radius: 0;
+}
+
+/* ---- REUSABLE BRUTALIST HELPERS (use in slide markup) ----------------- */
+/* A raised card: <div class="ah-card">…</div> */
+.ah-card {
+  background: var(--color-card);
+  border: 3px solid var(--color-ink);
+  border-radius: 3px;
+  box-shadow: var(--shadow-brut);
+  padding: 1.1rem 1.3rem;
+}
+
+/* Status / role badge: <span class="ah-badge ah-badge--passkey">PASSKEY</span> */
+.ah-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border: 2px solid var(--color-ink);
+  border-radius: 3px;
+  padding: 0.3em 0.6em;
+  box-shadow: 2px 2px 0 var(--color-ink);
+  color: #fff;
+}
+.ah-badge--totp     { background: var(--color-totp);     color: #fff; }
+.ah-badge--password { background: var(--color-password); color: var(--color-ink); }
+.ah-badge--passkey  { background: var(--color-passkey);  color: #fff; }
+.ah-badge--success  { background: var(--color-success);  color: var(--color-ink); }
+.ah-badge--error    { background: var(--color-error);    color: #fff; }
+
+/* Role-colored accent text. */
+.ah-totp     { color: var(--color-totp); }
+.ah-password { color: var(--color-password); }
+.ah-passkey  { color: var(--color-passkey); }
+.ah-success  { color: var(--color-success); }
+.ah-error    { color: var(--color-error); }
+
+/* ---- COVER / SECTION LAYOUTS ------------------------------------------ */
+/* Used by the `cover` and `section` slide layouts below. */
+.slidev-layout.cover,
+.slidev-layout.section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.slidev-layout.cover h1 {
+  display: inline-block;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  /* Extra right padding: Archivo Black is heavy and the base h1's negative
+     letter-spacing pulls the final glyph to the box edge, so a tight box clips
+     it (the last "L" in "Hell"). */
+  padding: 0.15em 0.45em 0.15em 0.4em;
+  /* Slidev's canvas is 980px logical. A ~18-char Archivo Black title at the old
+     3.4rem ceiling rendered ~1115px wide and ran off the right edge, clipping
+     the final letter. Drop the ceiling + cqw coefficient so the widest title
+     (~18-19 chars) clears the slide with margin to spare. */
+  font-size: clamp(2rem, 6cqw, 2.7rem);
+  /* Hard stop: the inked block can never exceed the slide's content width,
+     even if a future title is longer than the font sizing anticipates. */
+  max-width: 100%;
+  box-shadow: var(--shadow-brut-lg);
+}
+.slidev-layout.cover .ah-tagline {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  margin-top: 1.1rem;
+  font-size: 1.05rem;
+  color: var(--color-muted);
+}
+
+/* Section dividers hold a single centered title with no other content, so —
+   unlike content h1s — a long one should shrink to fit rather than overflow.
+   The widest current title ("Authentication Hell: The Game", ~29 chars) renders
+   ~837px at this 2.7rem ceiling, clearing the ~852px content area (980px canvas
+   minus the layout's px-16). `text-wrap: balance` (overriding the base
+   `text-wrap: nowrap`) is the safety net for any future title longer still. */
+.slidev-layout.section h1 {
+  font-size: clamp(1.6rem, 8cqw, 2.7rem);
+  text-wrap: balance;
+}
+
+/* ---- AGENDA (<Toc> on the section divider) --------------------------- */
+/* `<Toc>` emits nested <ol>/<li>; we counter-number the top level and
+   render each entry as a brutalist card. The active section (Slidev adds
+   `.active`/`.active-parent` as you present) inverts to ink-on-paper. */
+.ah-toc {
+  counter-reset: ah-toc;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.ah-toc .slidev-toc-item {
+  counter-increment: ah-toc;
+  list-style: none;
+  margin: 0 0 0.9rem;
+}
+.ah-toc .slidev-toc-item a {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.55rem 0.9rem;
+  border: 3px solid var(--color-ink);
+  box-shadow: var(--shadow-brut-sm);
+  background: var(--color-card);
+  color: var(--color-ink);
+  font-size: 1.15rem;
+}
+.ah-toc .slidev-toc-item a::before {
+  content: counter(ah-toc, decimal-leading-zero);
+  color: var(--color-muted);
+}
+.ah-toc .slidev-toc-item.active a {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+.ah-toc .slidev-toc-item.active a::before {
+  color: var(--color-paper);
+}

@@ -1,0 +1,12 @@
+{
+  "name": "slidev-theme-authentication-hell",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "keywords": ["slidev-theme", "slidev"],
+  "engines": { "slidev": ">=52.0.0" },
+  "slidev": {
+    "defaults": { "transition": "slide-left" },
+    "colorSchema": "light"
+  }
+}
