@@ -9,7 +9,10 @@ class Achievement::Awarder
   end
 
   def call
-    return unless @user.grant_achievement(@key)
+    earned = @user.grant_achievement(@key)
+    return unless earned
+
+    SendAchievementEventJob.perform_later(@user, @key.to_s, earned.created_at) if Gamestats::Client.configured?
 
     Turbo::StreamsChannel.broadcast_append_to(
       @user, :toasts,
