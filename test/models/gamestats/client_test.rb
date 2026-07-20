@@ -30,6 +30,33 @@ class Gamestats::ClientTest < ActiveSupport::TestCase
     )
   end
 
+  test "rename_player patches the authorized JSON payload" do
+    request = capture_request(Net::HTTPOK.new("1.1", "200", "OK")) do
+      with_credentials(CREDENTIALS) do
+        Gamestats::Client.rename_player(old_username: "userone", new_username: "usertwo")
+      end
+    end
+
+    assert_kind_of Net::HTTP::Patch, request
+    assert_equal "/api/v1/accounts/42/players/rename", request.path
+    assert_equal "Bearer test-key", request["Authorization"]
+    assert_equal "application/json", request["Content-Type"]
+    assert_equal(
+      { "username" => "userone", "new_username" => "usertwo" },
+      JSON.parse(request.body)
+    )
+  end
+
+  test "rename_player raises NotFoundError on a 404" do
+    capture_request(Net::HTTPNotFound.new("1.1", "404", "Not Found")) do
+      with_credentials(CREDENTIALS) do
+        assert_raises(Gamestats::Client::NotFoundError) do
+          Gamestats::Client.rename_player(old_username: "userone", new_username: "usertwo")
+        end
+      end
+    end
+  end
+
   test "raises on a non-success response" do
     capture_request(Net::HTTPUnauthorized.new("1.1", "401", "Unauthorized")) do
       with_credentials(CREDENTIALS) do

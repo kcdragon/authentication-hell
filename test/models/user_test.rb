@@ -1,6 +1,8 @@
 require "test_helper"
 
 class UserTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+
   def valid_attributes(**overrides)
     { username: "newuser", email_address: "new@example.com", password: "password" }.merge(overrides)
   end
@@ -41,6 +43,22 @@ class UserTest < ActiveSupport::TestCase
     user = User.new(valid_attributes(username: users(:one).username.upcase))
     assert_not user.valid?
     assert user.errors[:username].any?
+  end
+
+  test "renaming enqueues a gamestats rename with the old and new usernames" do
+    user = users(:one)
+
+    assert_enqueued_with(job: Gamestats::RenamePlayerJob, args: [ "userone", "renamed" ]) do
+      user.update!(username: "renamed")
+    end
+  end
+
+  test "updating other attributes does not enqueue a gamestats rename" do
+    user = users(:one)
+
+    assert_no_enqueued_jobs only: Gamestats::RenamePlayerJob do
+      user.update!(highest_level_completed: 1)
+    end
   end
 
   test "email_address is required and unique" do

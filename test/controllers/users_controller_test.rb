@@ -56,6 +56,34 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     assert_select "p", text: /Lv 1 · Password Complexity/
   end
 
+  test "update renames the username" do
+    sign_in_as(@user)
+
+    patch user_path, params: { user: { username: "renamed" } }
+
+    assert_redirected_to user_path
+    assert_equal "renamed", @user.reload.username
+    assert_equal "Profile updated.", flash[:notice]
+  end
+
+  test "update rejects a taken username and does not change it" do
+    sign_in_as(@user)
+
+    patch user_path, params: { user: { username: users(:two).username } }
+
+    assert_response :unprocessable_entity
+    assert_equal "userone", @user.reload.username
+  end
+
+  test "update rejects an invalid username format" do
+    sign_in_as(@user)
+
+    patch user_path, params: { user: { username: "no spaces" } }
+
+    assert_response :unprocessable_entity
+    assert_equal "userone", @user.reload.username
+  end
+
   test "update attaches an avatar" do
     sign_in_as(@user)
 
