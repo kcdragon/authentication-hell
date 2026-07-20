@@ -4,6 +4,7 @@ module Gamestats::Client
   extend self
 
   class Error < StandardError; end
+  class NotFoundError < Error; end
 
   HOST = "gamestats.ai".freeze
 
@@ -18,6 +19,12 @@ module Gamestats::Client
       occurred_at: occurred_at.iso8601)
   end
 
+  def rename_player(old_username:, new_username:)
+    patch("/api/v1/accounts/#{account_id}/players/rename",
+      username: old_username,
+      new_username:)
+  end
+
   private
 
   def api_key
@@ -29,8 +36,16 @@ module Gamestats::Client
   end
 
   def post(path, body = nil)
+    send_request(Net::HTTP::Post, path, body)
+  end
+
+  def patch(path, body = nil)
+    send_request(Net::HTTP::Patch, path, body)
+  end
+
+  def send_request(request_class, path, body)
     uri = URI::HTTPS.build(host: HOST, path:)
-    request = Net::HTTP::Post.new(uri)
+    request = request_class.new(uri)
     request["Authorization"] = "Bearer #{api_key}"
     request["Content-Type"] = "application/json"
     request.body = body.to_json if body
@@ -39,10 +54,9 @@ module Gamestats::Client
       http.request(request)
     end
 
-    unless response.is_a?(Net::HTTPSuccess)
-      raise Error, "gamestats.ai #{path} returned #{response.code}: #{response.body}"
-    end
+    return response if response.is_a?(Net::HTTPSuccess)
 
-    response
+    raise NotFoundError, "gamestats.ai #{path} returned 404: #{response.body}" if response.is_a?(Net::HTTPNotFound)
+    raise Error, "gamestats.ai #{path} returned #{response.code}: #{response.body}"
   end
 end

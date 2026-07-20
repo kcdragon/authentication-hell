@@ -2,6 +2,17 @@
   <h1 class="text-[30px]">Profile</h1>
 
   <div class="ah-card ah-card--flush border-[3px] bg-paper p-5 shadow-brut-sm mt-5">
+    <h2 class="text-xl">Username</h2>
+    <p class="ah-hint mt-1">3–20 characters: letters, numbers, and underscores only.</p>
+
+    <%= form_with model: Current.user, url: user_path, method: :patch, class: "mt-4 flex flex-wrap items-end gap-3" do |form| %>
+      <%= form.text_field :username, autocomplete: "off",
+            class: "block shadow-sm rounded-md border border-gray-400 focus:outline-solid focus:outline-blue-600 px-3 py-2 w-full sm:w-auto sm:flex-1" %>
+      <%= form.submit "Save username", class: "ah-btn ah-btn--primary text-[13px] cursor-pointer" %>
+    <% end %>
+  </div>
+
+  <div class="ah-card ah-card--flush border-[3px] bg-paper p-5 shadow-brut-sm mt-5">
     <div class="flex items-center gap-4">
       <%= avatar_badge(Current.user, size_classes: "h-16 w-16") %>
       <div>

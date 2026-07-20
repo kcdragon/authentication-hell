@@ -23,6 +23,7 @@ class User < ApplicationRecord
   encrypts :totp_secret
 
   before_create { self.webauthn_id ||= WebAuthn.generate_user_id }
+  after_update_commit :notify_gamestats_of_username_change, if: :saved_change_to_username?
 
   normalizes :email_address, with: ->(e) { e.strip.downcase }
   normalizes :username, with: ->(u) { u.strip }
@@ -177,6 +178,10 @@ class User < ApplicationRecord
   end
 
   private
+
+  def notify_gamestats_of_username_change
+    Gamestats::RenamePlayerJob.perform_later(*saved_change_to_username)
+  end
 
   def password_or_passkey_present
     return if password_digest.present? || webauthn_credentials.any?
