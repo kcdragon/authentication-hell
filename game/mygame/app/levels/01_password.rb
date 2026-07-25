@@ -51,6 +51,8 @@ class PasswordLevel < Level
 
   def complete? = @cleared == true
 
+  def objective_reached? = certificate_spawned?
+
   def next_level = ApiKeyLevel.new(game)
 
   def draw_hud(frame)

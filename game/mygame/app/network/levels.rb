@@ -9,6 +9,11 @@ class Network::Levels
     DR.http_post("#{playing_url}?level=#{level}", {}, HEADERS)
   end
 
+  def self.milestone(level, ms)
+    DR.http_post("#{milestone_url}?level=#{level}&ms=#{ms}", {}, HEADERS)
+  end
+
   def self.complete_url = "#{Network.server_base}/games/levels/complete"
   def self.playing_url = "#{Network.server_base}/games/levels/playing"
+  def self.milestone_url = "#{Network.server_base}/games/levels/milestone"
 end

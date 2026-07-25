@@ -113,6 +113,22 @@ class ApiKeyLevelTest < Minitest::Test
                  "no need to poll once the bridge is out"
   end
 
+  def test_objective_is_reached_once_the_bridge_extends
+    refute @level.objective_reached?, "the objective isn't met while the bridge is retracted"
+
+    @level.update(@frame)
+    DR.complete!(STATUS_URL, body: '{"opened":true}')
+    100.times { @level.update(@frame) }
+
+    assert @level.bridge.extended?
+    assert @level.objective_reached?, "extending the bridge meets the objective"
+  end
+
+  def test_objective_is_safe_before_setup
+    fresh = ApiKeyLevel.new(build_game)
+    refute fresh.objective_reached?, "no bridge exists during loading, before setup runs"
+  end
+
   def test_completes_when_the_certificate_is_collected
     refute @level.complete?
     @level.collectables.find { |c| c.is_a?(Certificate) }.alive = false

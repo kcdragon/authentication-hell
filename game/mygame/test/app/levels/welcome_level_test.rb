@@ -13,6 +13,10 @@ class WelcomeLevelTest < Minitest::Test
     assert_equal 200, @level.start_x
   end
 
+  def test_the_tutorial_has_no_mid_level_objective
+    assert_equal false, @level.objective_reached?, "the welcome tutorial reports no objective milestone"
+  end
+
   def test_setup_seeds_a_reachable_ledge_and_no_enemy_yet
     @level.setup(@frame)
     assert_empty @level.enemies

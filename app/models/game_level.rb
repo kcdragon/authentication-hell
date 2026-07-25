@@ -27,7 +27,14 @@ class GameLevel
       achievement_description: "Collect every ruby hidden in the RubyConf wildflowers.")
   ].freeze
 
+  OBJECTIVE_NAMES = {
+    1 => "password_forged", 2 => "bridge_extended",
+    3 => "totp_registered", 4 => "rubies_collected"
+  }.freeze
+
   def achievement_key = "level_#{number}_complete"
+
+  def objective_name = OBJECTIVE_NAMES[number]
 
   def achievement
     Achievement.new(key: achievement_key, name: "#{name} Cleared",

@@ -55,6 +55,8 @@ class ApiKeyLevel < Level
 
   def complete? = @cleared == true
 
+  def objective_reached? = !!@bridge&.extended?
+
   def next_level = TotpLevel.new(game)
 
   def render_floor(frame, cam, cam_y = 0)

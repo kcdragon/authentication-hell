@@ -2,7 +2,7 @@ class Games::LevelsController < ApplicationController
   include NowPlaying
 
   # WASM can't send a CSRF token.
-  skip_forgery_protection only: %i[ complete playing ]
+  skip_forgery_protection only: %i[ complete playing milestone ]
 
   def complete
     level = GameLevel.find(params[:level].to_i)
@@ -11,6 +11,7 @@ class Games::LevelsController < ApplicationController
     Current.user.record_level_completed(level.number)
     record_best_time(level)
     Achievement::Awarder.call(Current.user, level.achievement_key) if level.awards_achievement?
+    Gamestats::LevelProgression.completed(Current.user, level, reported_ms)
     advance_now_playing_past(level)
     head :no_content
   end
@@ -21,10 +22,24 @@ class Games::LevelsController < ApplicationController
 
     mark_now_playing(level)
     clear_permanent_toasts
+    Gamestats::LevelProgression.started(Current.user, level)
+    head :no_content
+  end
+
+  def milestone
+    level = GameLevel.find(params[:level].to_i)
+    return head(:no_content) unless level&.objective_name
+
+    Gamestats::LevelProgression.objective(Current.user, level, reported_ms)
     head :no_content
   end
 
   private
+
+  def reported_ms
+    ms = params[:ms].to_s
+    ms.to_i if ms.match?(/\A\d+\z/)
+  end
 
   def record_best_time(level)
     ms = params[:ms].to_s

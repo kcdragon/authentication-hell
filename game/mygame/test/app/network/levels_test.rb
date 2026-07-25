@@ -14,4 +14,9 @@ class NetworkLevelsTest < Minitest::Test
     Network::Levels.playing(3)
     assert_equal "http://test/games/levels/playing?level=3", DR.last_url
   end
+
+  def test_milestone_reports_the_level_and_time_in_the_query_string
+    Network::Levels.milestone(4, 4200)
+    assert_equal "http://test/games/levels/milestone?level=4&ms=4200", DR.last_url
+  end
 end

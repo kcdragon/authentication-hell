@@ -174,6 +174,14 @@ class TotpLevelTest < Minitest::Test
     assert_includes DR.urls, START_URL, "assembling the QR fires the start call"
   end
 
+  def test_objective_is_reached_once_every_qr_piece_is_collected
+    refute @level.objective_reached?, "the objective isn't met while pieces remain"
+
+    collect_pieces!
+
+    assert @level.objective_reached?, "assembling the QR meets the objective"
+  end
+
   def test_completion_does_not_rearm_the_challenge
     register!
     @level.totp.record_status("complete" => true)

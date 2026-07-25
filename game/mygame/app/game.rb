@@ -74,6 +74,7 @@ class Game
     @started = true
     setup_level
     begin_level_intro
+    Network::Levels.playing(@level.number)
   end
 
   def handle_pause_input
@@ -109,6 +110,8 @@ class Game
         .clamp(0, WORLD_H - SCREEN_H)
 
     @level.update(@frame)
+
+    report_objective if !@objective_reported && @level.objective_reached?
 
     @level.enemies.each { |enemy| enemy.update if enemy.alive } unless @player.game_over
 
@@ -253,7 +256,13 @@ class Game
     @player.place_at(@level.start_x, @level.start_y)
     @camera_x = 0
     @camera_y = 0
+    @objective_reported = false
     @level.setup(@frame)
+  end
+
+  def report_objective
+    @objective_reported = true
+    Network::Levels.milestone(@level.number, completion_ms)
   end
 
   def beat_game

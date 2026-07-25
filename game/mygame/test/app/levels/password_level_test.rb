@@ -169,6 +169,16 @@ class PasswordLevelTest < Minitest::Test
     assert_instance_of ApiKeyLevel, @level.next_level, "the password level hands off — it isn't the final level"
   end
 
+  def test_objective_is_reached_once_the_password_is_forged
+    @level.setup(@frame)
+    refute @level.objective_reached?, "the objective isn't met while characters are still missing"
+
+    collect_all
+    @level.update(@frame)
+
+    assert @level.objective_reached?, "forging the password (spawning the exit) meets the objective"
+  end
+
   def test_draw_hud_paints_a_slot_for_every_required_character
     @level.draw_hud(@frame)
     solids_per_slot = 2

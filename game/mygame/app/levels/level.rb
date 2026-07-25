@@ -32,6 +32,8 @@ class Level
 
   def complete? = false
 
+  def objective_reached? = false
+
   def next_level = nil
 
   def title = "Authentication Hell"

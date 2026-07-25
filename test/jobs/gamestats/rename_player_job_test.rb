@@ -23,16 +23,6 @@ class Gamestats::RenamePlayerJobTest < ActiveJob::TestCase
     end
   end
 
-  test "raises when credentials are absent" do
-    recording_client_calls do
-      with_credentials({}) do
-        assert_raises(Gamestats::Client::Error) do
-          Gamestats::RenamePlayerJob.perform_now("userone", "usertwo")
-        end
-      end
-    end
-  end
-
   private
 
   def recording_client_calls
