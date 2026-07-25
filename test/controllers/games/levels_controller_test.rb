@@ -287,7 +287,77 @@ class Games::LevelsControllerTest < ActionDispatch::IntegrationTest
     assert_nil @user.reload.now_playing_level
   end
 
+  test "playing reports a progression start when gamestats is configured" do
+    sign_in_as(@user)
+
+    with_gamestats do
+      assert_enqueued_jobs 1, only: SendProgressionEventJob do
+        post games_levels_playing_url, params: { level: 1 }
+      end
+    end
+  end
+
+  test "complete reports per-level and game-wide progression events when gamestats is configured" do
+    sign_in_as(@user)
+
+    with_gamestats do
+      assert_enqueued_jobs 2, only: SendProgressionEventJob do
+        post games_levels_complete_url, params: { level: 1, ms: 9_000 }
+      end
+    end
+  end
+
+  test "milestone requires authentication" do
+    post games_levels_milestone_url, params: { level: 1 }
+    assert_redirected_to new_session_path
+  end
+
+  test "milestone reports the level objective when gamestats is configured" do
+    sign_in_as(@user)
+
+    with_gamestats do
+      assert_enqueued_jobs 1, only: SendProgressionEventJob do
+        post games_levels_milestone_url, params: { level: 1, ms: 4_200 }
+      end
+    end
+
+    assert_response :no_content
+  end
+
+  test "milestone no-ops for a level without an objective" do
+    sign_in_as(@user)
+
+    with_gamestats do
+      assert_no_enqueued_jobs only: SendProgressionEventJob do
+        post games_levels_milestone_url, params: { level: 0, ms: 4_200 }
+      end
+    end
+
+    assert_response :no_content
+  end
+
+  test "milestone ignores an unknown level" do
+    sign_in_as(@user)
+
+    with_gamestats do
+      assert_no_enqueued_jobs only: SendProgressionEventJob do
+        post games_levels_milestone_url, params: { level: 999 }
+      end
+    end
+
+    assert_response :no_content
+  end
+
   private
+
+  def with_gamestats
+    Rails.application.define_singleton_method(:credentials) do
+      ActiveSupport::HashWithIndifferentAccess.new(gamestats: { api_key: "test-key", account_id: 42 })
+    end
+    yield
+  ensure
+    Rails.application.singleton_class.remove_method(:credentials)
+  end
 
   def promoted_level_data
     {

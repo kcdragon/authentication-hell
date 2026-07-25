@@ -7,16 +7,36 @@ module Gamestats::Client
   class NotFoundError < Error; end
 
   HOST = "gamestats.ai".freeze
+  UNVERSIONED = "development".freeze
 
   def configured?
     api_key.present? && account_id.present?
   end
 
-  def achievement_event(player_username:, achievement_name:, occurred_at:)
+  def achievement_event(player_username:, achievement_name:, occurred_at:, version_name: deployed_version)
     post("/api/v1/accounts/#{account_id}/achievement_events",
+      version_name:,
       player_username:,
       achievement_name:,
       occurred_at: occurred_at.iso8601)
+  end
+
+  def progression_event(player_username:, progression_type_name:, progression_name:,
+    milestone_type_name:, milestone_name:, occurred_at:,
+    time_elapsed: nil, is_new_instance: false, version_name: deployed_version)
+    body = {
+      version_name:,
+      player_username:,
+      progression_name:,
+      progression_type_name:,
+      progression_milestone_name: milestone_name,
+      progression_milestone_type_name: milestone_type_name,
+      occurred_at: occurred_at.iso8601
+    }
+    body[:is_new_instance] = true if is_new_instance
+    body[:time_elapsed] = time_elapsed unless time_elapsed.nil?
+
+    post("/api/v1/accounts/#{account_id}/progression_events", body)
   end
 
   def rename_player(old_username:, new_username:)
@@ -26,6 +46,10 @@ module Gamestats::Client
   end
 
   private
+
+  def deployed_version
+    ENV["KAMAL_VERSION"].presence || UNVERSIONED
+  end
 
   def api_key
     Rails.application.credentials.dig(:gamestats, :api_key)
@@ -44,6 +68,8 @@ module Gamestats::Client
   end
 
   def send_request(request_class, path, body)
+    raise Error, "gamestats.ai is not configured" unless configured?
+
     uri = URI::HTTPS.build(host: HOST, path:)
     request = request_class.new(uri)
     request["Authorization"] = "Bearer #{api_key}"

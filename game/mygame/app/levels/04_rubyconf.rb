@@ -51,6 +51,8 @@ class RubyConfLevel < Level
 
   def complete? = @cleared == true
 
+  def objective_reached? = all_rubies_collected?
+
   def render_world(frame, cam, cam_y = 0)
     @plants.each { |plant| plant.render(frame, cam, cam_y) }
   end

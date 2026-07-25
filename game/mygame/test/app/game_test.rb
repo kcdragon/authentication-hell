@@ -227,6 +227,60 @@ class GameCompleteReportTest < Minitest::Test
   end
 end
 
+class GameStartRunTest < Minitest::Test
+  include GameTest
+
+  def setup
+    DR.reset!
+    @game = Game.new(->(g) { Level.build(0, g) })
+    @game.instance_variable_set(:@frame, build_frame(player: @game.player, level: @game.level))
+  end
+
+  def test_start_run_reports_the_first_level_as_playing
+    @game.send(:start_run)
+    assert_includes DR.urls, "http://test/games/levels/playing?level=0",
+                    "the opening level's start must be reported, not just later levels"
+  end
+end
+
+class GameObjectiveReportTest < Minitest::Test
+  include GameTest
+
+  def setup
+    DR.reset!
+    @game = Game.new(->(g) { JsonLevel.new(g, "slug" => "arena") })
+    at_tick(0)
+    @game.send(:setup_level)
+    @game.level.begin_clock(0)
+  end
+
+  def at_tick(tick)
+    @game.instance_variable_set(:@frame, build_frame(player: @game.player,
+                                                     level: @game.level, tick_count: tick))
+  end
+
+  def milestone_count = DR.urls.count { |url| url.include?("/games/levels/milestone") }
+
+  def test_reaching_the_objective_reports_a_milestone_once
+    def (@game.level).objective_reached? = true
+    at_tick(300)
+    @game.send(:update_world)
+
+    assert_includes DR.urls, "http://test/games/levels/milestone?level=99&ms=5000"
+
+    fired = milestone_count
+    @game.send(:update_world)
+    assert_equal fired, milestone_count, "the objective milestone fires once per level"
+  end
+
+  def test_an_uneventful_tick_reports_no_milestone
+    at_tick(300)
+    @game.send(:update_world)
+
+    assert_equal 0, milestone_count
+  end
+end
+
 class GameUnlockTest < Minitest::Test
   include GameTest
 

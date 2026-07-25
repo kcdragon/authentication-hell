@@ -159,6 +159,15 @@ class RubyConfLevelTest < Minitest::Test
     assert @level.complete?
   end
 
+  def test_objective_is_reached_once_every_ruby_is_collected
+    @level.setup(@frame)
+    refute @level.objective_reached?, "the objective isn't met while rubies remain"
+
+    collect_all_rubies
+
+    assert @level.objective_reached?, "gathering every ruby meets the objective"
+  end
+
   def test_draw_captions_the_ruby_tally
     @level.setup(@frame)
     @level.draw(@frame)

@@ -85,8 +85,9 @@ Rails.application.routes.draw do
     post "level_api_key/start"  => "level_api_key_challenge#start",  as: :level_api_key_start
     post "level_api_key/create" => "level_api_key_challenge#create", as: :level_api_key_create
 
-    post "levels/complete" => "levels#complete", as: :levels_complete
-    post "levels/playing"  => "levels#playing",  as: :levels_playing
+    post "levels/complete"  => "levels#complete",  as: :levels_complete
+    post "levels/playing"   => "levels#playing",   as: :levels_playing
+    post "levels/milestone" => "levels#milestone", as: :levels_milestone
 
     post "death" => "deaths#create", as: :death
     post "defeats" => "defeats#create", as: :defeats

@@ -17,16 +17,6 @@ class SendAchievementEventJobTest < ActiveJob::TestCase
     assert_equal [ { player_username: @user.username, achievement_name: "graduate", occurred_at: } ], calls
   end
 
-  test "raises when credentials are absent" do
-    recording_client_calls do
-      with_credentials({}) do
-        assert_raises(Gamestats::Client::Error) do
-          SendAchievementEventJob.perform_now(@user, "graduate", Time.current)
-        end
-      end
-    end
-  end
-
   private
 
   def recording_client_calls

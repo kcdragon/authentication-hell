@@ -60,6 +60,8 @@ class TotpLevel < Level
 
   def complete? = @cleared == true
 
+  def objective_reached? = all_pieces_collected?
+
   def next_level = RubyConfLevel.new(game)
 
   def render_world(frame, cam, cam_y = 0)
