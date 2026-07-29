@@ -8,7 +8,11 @@ image: kcdragon/authentication-hell
 # Deploy to these servers.
 servers:
   web:
-    - 5.78.199.12
+    hosts:
+      - 5.78.199.12
+    options:
+      cpus: "1"
+      memory: "2g"
   # job:
   #   hosts:
   #     - 192.168.0.1
