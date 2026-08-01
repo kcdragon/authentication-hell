@@ -117,6 +117,54 @@ class Gamestats::ClientTest < ActiveSupport::TestCase
     end
   end
 
+  test "upload_achievement_image posts the authorized multipart form" do
+    image_path = Rails.root.join("app/assets/images/achievements/totp_survivor.png")
+
+    request = capture_request(Net::HTTPCreated.new("1.1", "201", "Created")) do
+      with_credentials(CREDENTIALS) do
+        Gamestats::Client.upload_achievement_image(
+          achievement_name: "totp_survivor", image_path: image_path.to_s)
+      end
+    end
+
+    assert_kind_of Net::HTTP::Post, request
+    assert_equal "/api/v1/accounts/42/achievement_images", request.path
+    assert_equal "Bearer test-key", request["Authorization"]
+    assert_equal "multipart/form-data", request["Content-Type"]
+
+    parts = request.instance_variable_get(:@body_data)
+    assert_includes parts, [ "achievement_name", "totp_survivor" ]
+
+    name, io, opts = parts.find { |part| part.first == "image" }
+    assert_equal "image", name
+    assert_respond_to io, :read
+    assert_equal "totp_survivor.png", opts[:filename]
+    assert_equal "image/png", opts[:content_type]
+  end
+
+  test "upload_achievement_image raises on a non-success response" do
+    image_path = Rails.root.join("app/assets/images/achievements/totp_survivor.png")
+
+    capture_request(Net::HTTPUnauthorized.new("1.1", "401", "Unauthorized")) do
+      with_credentials(CREDENTIALS) do
+        assert_raises(Gamestats::Client::Error) do
+          Gamestats::Client.upload_achievement_image(
+            achievement_name: "totp_survivor", image_path: image_path.to_s)
+        end
+      end
+    end
+  end
+
+  test "upload_achievement_image raises when not configured" do
+    with_credentials({}) do
+      assert_raises(Gamestats::Client::Error) do
+        Gamestats::Client.upload_achievement_image(
+          achievement_name: "totp_survivor",
+          image_path: Rails.root.join("app/assets/images/achievements/totp_survivor.png").to_s)
+      end
+    end
+  end
+
   test "raises when not configured before making any request" do
     with_credentials({}) do
       assert_raises(Gamestats::Client::Error) do
