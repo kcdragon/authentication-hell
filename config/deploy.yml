@@ -9,7 +9,7 @@ image: kcdragon/authentication-hell
 servers:
   web:
     hosts:
-      - 5.78.199.12
+      - 178.156.170.199
     options:
       cpus: "1"
       memory: "2g"
@@ -77,12 +77,12 @@ aliases:
   dbc: app exec --interactive --reuse "bin/rails dbconsole --include-password"
 
 # Persist sqlite database files and local Active Storage files on the Hetzner
-# block volume "sqlite-volume-1" (ID 105430602), mounted at /mnt/HC_Volume_105430602.
+# block volume (ID 106516992), mounted at /mnt/HC_Volume_106516992.
 # The subdirectory must be owned by the container's rails user:
-#   mkdir -p /mnt/HC_Volume_105430602/authentication_hell_storage
-#   chown -R 1000:1000 /mnt/HC_Volume_105430602/authentication_hell_storage
+#   mkdir -p /mnt/HC_Volume_106516992/authentication_hell_storage
+#   chown -R 1000:1000 /mnt/HC_Volume_106516992/authentication_hell_storage
 volumes:
-  - "/mnt/HC_Volume_105430602/authentication_hell_storage:/rails/storage"
+  - "/mnt/HC_Volume_106516992/authentication_hell_storage:/rails/storage"
 
 # Bridge fingerprinted assets, like JS and CSS, between versions to avoid
 # hitting 404 on in-flight requests. Combines all files from new and old
