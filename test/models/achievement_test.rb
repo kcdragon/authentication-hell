@@ -54,6 +54,13 @@ class AchievementTest < ActiveSupport::TestCase
     assert_nil Achievement.find("nope")
   end
 
+  test "every catalog achievement has an image path derived from its key" do
+    Achievement.all.each do |achievement|
+      assert achievement.image?, "expected #{achievement.key} to have an image"
+      assert_equal "achievements/#{achievement.key}.png", achievement.image_path
+    end
+  end
+
   private
 
   def active_keys(pacific_time)

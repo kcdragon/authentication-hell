@@ -1,16 +1,25 @@
 class Achievement
   attr_reader :key, :name, :description, :emoji, :window
 
-  def initialize(key:, name:, description:, emoji:, window: nil)
+  def initialize(key:, name:, description:, emoji:, window: nil, image: true)
     @key = key
     @name = name
     @description = description
     @emoji = emoji
     @window = window
+    @image = image
   end
 
   def active_at?(time)
     window&.cover?(time)
+  end
+
+  def image?
+    @image
+  end
+
+  def image_path
+    "achievements/#{key}.png" if image?
   end
 
   SURVIVOR = [

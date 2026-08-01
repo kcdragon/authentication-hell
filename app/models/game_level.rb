@@ -38,7 +38,7 @@ class GameLevel
 
   def achievement
     Achievement.new(key: achievement_key, name: "#{name} Cleared",
-      emoji: emoji, description: achievement_description)
+      emoji: emoji, description: achievement_description, image: awards_achievement?)
   end
 
   def bonus? = @bonus
