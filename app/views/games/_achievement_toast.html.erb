@@ -3,7 +3,7 @@
 <div id="<%= achievement_toast_id(achievement) %>"
      class="game-toast w-max max-w-[90vw] border-[3px] border-ink rounded-[3px] bg-password text-ink px-3.5 py-3 shadow-brut pointer-events-none">
   <div class="flex items-center gap-3">
-    <span class="text-2xl" aria-hidden="true"><%= achievement.emoji %></span>
+    <%= achievement_icon achievement, size: 32 %>
     <div>
       <p class="font-display text-[11px] uppercase tracking-tight">🏆 Achievement unlocked</p>
       <p class="font-display text-lg uppercase tracking-tight mt-0.5"><%= achievement.name %></p>

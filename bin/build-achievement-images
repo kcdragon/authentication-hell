@@ -1,0 +1,130 @@
+#!/usr/bin/env ruby
+require_relative "../config/environment"
+require "net/http"
+require "json"
+require "base64"
+require "fileutils"
+require "tempfile"
+require "optparse"
+
+# Generates a fun, brand-matched illustration per achievement via an image API
+# (OpenAI gpt-image-1 by default) and writes a small PNG per Achievement.all key
+# under app/assets/images/achievements/. AI output isn't reproducible, so the
+# committed PNGs are the source of truth: existing files are skipped unless --force.
+#
+# Needs a real key in credentials (openai.api_key, or the OPENAI_API_KEY env var)
+# and magick (ImageMagick) on PATH. To use a different provider, adjust MODEL /
+# ENDPOINT / the request body in generate_png and the credentials key in api_key.
+#
+# Usage:
+#   bin/build-achievement-images                        # generate any missing images
+#   bin/build-achievement-images --force                # regenerate every image
+#   bin/build-achievement-images --only totp_survivor,graduate [--force]
+
+MODEL       = "gpt-image-1"
+ENDPOINT    = URI("https://api.openai.com/v1/images/generations")
+API_SIZE    = "1024x1024"
+RENDER_SIZE = 256
+
+APP_ROOT   = File.expand_path("..", __dir__)
+OUTPUT_DIR = File.join(APP_ROOT, "app/assets/images/achievements")
+
+INK   = "#111111"
+PAPER = "#f5f2e9"
+
+# key => [ accent hex, subject phrase ]. Accents follow the design system's
+# auth-method palette (totp purple, password amber, passkey blue, api teal,
+# success green, red for ruby/events).
+SUBJECTS = {
+  "password_survivor"  => [ "#f5a623", "a chunky padlock shielding a bold password field" ],
+  "totp_survivor"      => [ "#8b5cf6", "a phone showing a six-digit authenticator code with a ticking clock" ],
+  "passkey_survivor"   => [ "#2f6bff", "a heroic key crossed with a fingerprint shield" ],
+  "graduate"           => [ "#f5a623", "a rolled diploma certificate with a wax seal and ribbon" ],
+  "social_sharer"      => [ "#2f6bff", "a megaphone broadcasting a certificate out to the world" ],
+  "beta_tester"        => [ "#0d9488", "a bubbling lab beaker marked as an early test build" ],
+  "rubyconf_attendee"  => [ "#e5342a", "a faceted ruby gem pinned to a conference lanyard badge" ],
+  "rubyconf_talk"      => [ "#e5342a", "a stage microphone under a spotlight during a live demo" ],
+  "level_0_complete"   => [ "#16a34a", "an open doorway with a graduation cap welcoming you in" ],
+  "level_1_complete"   => [ "#f5a623", "assorted character-class tiles forging into one strong password" ],
+  "level_2_complete"   => [ "#0d9488", "a minted API key extending a bridge across a gap" ],
+  "level_3_complete"   => [ "#8b5cf6", "a stopwatch linked to three rolling one-time codes" ],
+  "level_4_complete"   => [ "#e5342a", "a basket of rubies gathered among wildflowers" ]
+}.freeze
+
+def system!(*args) = system(*args, exception: true)
+
+def api_key
+  Rails.application.credentials.dig(:openai, :api_key) || ENV["OPENAI_API_KEY"].presence
+end
+
+def prompt_for(achievement, accent, subject)
+  <<~PROMPT.squish
+    A bold neo-brutalist achievement badge illustration: #{subject}.
+    Theme "#{achievement.name}" — #{achievement.description}
+    Flat vector style, thick uniform black (#{INK}) ink outlines, hard-edged geometric
+    shapes, no gradients, and absolutely no text, letters, or numbers. Limited palette of
+    cream paper (#{PAPER}), black ink, white, and a single accent color #{accent}. One
+    hard-edged solid-black offset drop shadow. Playful, fun, chunky, a single centered
+    icon with generous margins on a transparent background. Square composition.
+  PROMPT
+end
+
+def generate_png(prompt)
+  request = Net::HTTP::Post.new(ENDPOINT)
+  request["Authorization"] = "Bearer #{api_key}"
+  request["Content-Type"] = "application/json"
+  request.body = { model: MODEL, prompt:, size: API_SIZE, background: "transparent", n: 1 }.to_json
+
+  response = Net::HTTP.start(ENDPOINT.host, ENDPOINT.port, use_ssl: true, read_timeout: 180) do |http|
+    http.request(request)
+  end
+
+  unless response.is_a?(Net::HTTPSuccess)
+    abort "image API returned #{response.code}: #{response.body}"
+  end
+
+  encoded = JSON.parse(response.body).dig("data", 0, "b64_json")
+  abort "image API response had no image data: #{response.body}" if encoded.nil?
+  Base64.decode64(encoded)
+end
+
+def write_png(png_bytes, path)
+  Tempfile.create([ "achievement", ".png" ]) do |tmp|
+    tmp.binmode
+    tmp.write(png_bytes)
+    tmp.flush
+    system! "magick", tmp.path, "-resize", "#{RENDER_SIZE}x#{RENDER_SIZE}", "-strip", path
+  end
+end
+
+options = { force: false, only: nil }
+OptionParser.new do |parser|
+  parser.on("--force", "Regenerate images that already exist") { options[:force] = true }
+  parser.on("--only KEYS", "Comma-separated achievement keys to (re)generate") do |keys|
+    options[:only] = keys.split(",").map(&:strip)
+  end
+end.parse!
+
+abort "Set openai.api_key in credentials (bin/rails credentials:edit) or OPENAI_API_KEY." if api_key.blank?
+
+FileUtils.mkdir_p(OUTPUT_DIR)
+
+targets = Achievement.all.select(&:image?)
+targets = targets.select { |achievement| options[:only].include?(achievement.key) } if options[:only]
+abort "No matching achievements to generate." if targets.empty?
+
+targets.each do |achievement|
+  path = File.join(OUTPUT_DIR, "#{achievement.key}.png")
+
+  if File.exist?(path) && !options[:force]
+    puts "skip   #{achievement.key} (exists — pass --force to regenerate)"
+    next
+  end
+
+  accent, subject = SUBJECTS.fetch(achievement.key)
+  puts "gen    #{achievement.key} …"
+  write_png(generate_png(prompt_for(achievement, accent, subject)), path)
+  puts "wrote  #{path}"
+end
+
+puts "== Done. Achievement images in app/assets/images/achievements/ =="

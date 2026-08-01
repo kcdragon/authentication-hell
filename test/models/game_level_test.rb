@@ -40,6 +40,7 @@ class GameLevelTest < ActiveSupport::TestCase
     assert_equal level.achievement_key, achievement.key
     assert_equal "#{level.name} Cleared", achievement.name
     assert_equal level.emoji, achievement.emoji
+    assert achievement.image?
   end
 
   test "built-in levels award achievements; promoted ones do not" do
@@ -88,6 +89,14 @@ class GameLevelTest < ActiveSupport::TestCase
     test "promoted carries the level data for the game payload" do
       promote("level-9", "Level 9")
       assert_equal "level-9", GameLevel.find(5).data["slug"]
+    end
+
+    test "promoted achievements fall back to emoji with no image" do
+      promote("level-9", "Level 9")
+      achievement = GameLevel.find(5).achievement
+
+      assert_not achievement.image?
+      assert_nil achievement.image_path
     end
 
     private

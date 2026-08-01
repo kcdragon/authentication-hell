@@ -93,6 +93,24 @@ recorded automatically.
 
 One-time setup (per developer): `gh extension install basecamp/gh-signoff`.
 
+## Achievement images
+
+Each achievement's icon is a committed PNG under `app/assets/images/achievements/`
+(one per key, e.g. `totp_survivor.png`), generated from a text prompt by an image API:
+
+```bash
+bin/build-achievement-images                       # generate any missing images
+bin/build-achievement-images --force               # regenerate all
+bin/build-achievement-images --only graduate,totp_survivor --force
+```
+
+It reads the achievement catalog from `Achievement.all` and needs an image-API key —
+add `openai.api_key` via `bin/rails credentials:edit` (or set `OPENAI_API_KEY`) — plus
+`magick` (ImageMagick) on `PATH`. AI output isn't reproducible, so the **committed PNGs
+are the source of truth**: existing files are skipped unless you pass `--force`, and
+**commit the generated PNGs** alongside the change. An achievement with no image on disk
+falls back to its emoji, so it's safe to run/commit incrementally.
+
 ## Deployment
 
 Deploys run via **Kamal** (Docker) to https://authenticationhell.com:

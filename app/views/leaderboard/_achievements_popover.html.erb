@@ -12,7 +12,7 @@
       <% earned.each do |record| %>
         <% achievement = record.achievement %>
         <li class="flex items-center gap-2">
-          <span class="text-lg" aria-hidden="true"><%= achievement.emoji %></span>
+          <%= achievement_icon achievement, size: 24 %>
           <span class="font-semibold text-[13px] leading-tight"><%= achievement.name %></span>
         </li>
       <% end %>
