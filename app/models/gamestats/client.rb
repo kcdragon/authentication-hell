@@ -45,6 +45,26 @@ module Gamestats::Client
       new_username:)
   end
 
+  def upload_achievement_image(achievement_name:, image_path:)
+    raise Error, "gamestats.ai is not configured" unless configured?
+
+    uri = URI::HTTPS.build(host: HOST, path: "/api/v1/accounts/#{account_id}/achievement_images")
+    request = Net::HTTP::Post.new(uri)
+    request["Authorization"] = "Bearer #{api_key}"
+
+    File.open(image_path, "rb") do |image|
+      request.set_form(
+        [ [ "achievement_name", achievement_name ],
+          [ "image", image, { filename: File.basename(image_path), content_type: "image/png" } ] ],
+        "multipart/form-data")
+
+      response = Net::HTTP.start(uri.host, uri.port, use_ssl: true) { |http| http.request(request) }
+      return response if response.is_a?(Net::HTTPSuccess)
+
+      raise Error, "gamestats.ai #{uri.path} returned #{response.code}: #{response.body}"
+    end
+  end
+
   private
 
   def deployed_version

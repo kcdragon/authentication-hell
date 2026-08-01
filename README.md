@@ -111,6 +111,11 @@ are the source of truth**: existing files are skipped unless you pass `--force`,
 **commit the generated PNGs** alongside the change. An achievement with no image on disk
 falls back to its emoji, so it's safe to run/commit incrementally.
 
+To show these images alongside the achievements in gamestats.ai reports, upload them once
+(after generating/regenerating) with `bin/rails gamestats:upload_achievement_images` — it
+sends each PNG to the gamestats API keyed by achievement key, so it matches the unlock
+events the app already reports.
+
 ## Deployment
 
 Deploys run via **Kamal** (Docker) to https://authenticationhell.com:
