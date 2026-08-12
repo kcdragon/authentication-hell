@@ -104,5 +104,5 @@ group :test do
   # COMPATIBLE_PLAYWRIGHT_VERSION, which bin/setup installs automatically. Bump
   # both gems together and re-run bin/setup so the JS side stays in sync.
   gem "capybara-playwright-driver", "0.5.9"
-  gem "playwright-ruby-client", "1.60.0"
+  gem "playwright-ruby-client", "1.61.0"
 end
