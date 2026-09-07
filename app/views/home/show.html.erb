@@ -1,4 +1,5 @@
 <% content_for :title, "Authentication Hell" %>
+<% content_for :meta_description, "Play through the full credential gauntlet — passkeys, two-factor codes, passwords, email confirmation, and recovery codes — in a security-onboarding course disguised as a game." %>
 <% start_path = authenticated? ? game_path : new_registration_path
    levels = GameLevel.all
    # Cosmetic m:ss per module — matches the in-game scrubber / "Authentication Hell" playlist.

@@ -1,5 +1,16 @@
+<% content_for :title, "Resend confirmation email" %>
+<% content_for :meta_description, "Didn't get your Authentication Hell confirmation email? Enter your address and we'll send a fresh link." %>
+
+<% content_for :head do %>
+  <meta name="robots" content="noindex, follow">
+<% end %>
+
 <div class="mx-auto max-w-md w-full ah-card p-6">
   <h1 class="text-[28px]">Resend confirmation email</h1>
+
+  <p class="mt-4 font-medium text-muted">
+    Didn't get your confirmation email? Enter your address and we'll send a fresh link to confirm your account.
+  </p>
 
   <%= form_with url: email_confirmation_path, class: "mt-4 space-y-3.5" do |form| %>
     <div class="space-y-1.5">
@@ -9,4 +20,10 @@
 
     <%= form.submit "Resend confirmation", class: "ah-btn ah-btn--primary shadow-brut cursor-pointer" %>
   <% end %>
+
+  <p class="mt-6 font-medium text-sm text-muted">
+    <%= link_to "Back to sign in", new_session_path, class: "text-ink underline underline-offset-[3px] decoration-2 hover:no-underline" %>
+    &middot;
+    <%= link_to "Create an account", new_registration_path, class: "text-ink underline underline-offset-[3px] decoration-2 hover:no-underline" %>
+  </p>
 </div>
