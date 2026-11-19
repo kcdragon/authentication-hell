@@ -33,9 +33,11 @@ Rails.application.configure do
   # Skip http-to-https redirect for the default health check endpoint.
   # config.ssl_options = { redirect: { exclude: ->(request) { request.path == "/up" } } }
 
-  # Log to STDOUT with the current request id as a default log tag.
-  config.log_tags = [ :request_id ]
-  config.logger   = ActiveSupport::TaggedLogging.logger(STDOUT)
+  # Log one JSON object per line to STDOUT in the shared Rowhome Labs format
+  # (rowhome-labs-infra README, "Log format (Rails apps)"), tagged with the request id.
+  config.log_tags = { request_id: :request_id }
+  config.rails_semantic_logger.appenders { |appenders| appenders.add(io: $stdout, formatter: :json) }
+  config.active_job.log_arguments = false
 
   # Change to "debug" to log everything (including potentially personally-identifiable information!).
   config.log_level = ENV.fetch("RAILS_LOG_LEVEL", "info")

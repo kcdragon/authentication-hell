@@ -6,6 +6,11 @@ class ApplicationController < ActionController::Base
 
   private
 
+  def append_info_to_payload(payload)
+    super
+    payload[:user_id] = Current.user&.id
+  end
+
   # Chrome blocks every hop of a cross-origin <iframe> navigation unless the
   # response drops X-Frame-Options and carries CORP: cross-origin. Dev-only,
   # for the Slidev talk decks (localhost:3030) embedding the game.
