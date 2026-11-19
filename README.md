@@ -6,7 +6,7 @@ packages it to HTML5/WASM and Rails serves the result.
 
 ## Requirements
 
-- **Ruby 4.0.2** (see `.ruby-version`)
+- **Ruby 4.0.10** (see `.ruby-version`)
 - A working **DragonRuby GTK** is bundled under `game/` (the engine binaries are
   gitignored per DragonRuby's license, so they must be present locally).
 - That's it — **SQLite** is the only datastore (primary, cache, queue, and cable
