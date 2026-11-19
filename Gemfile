@@ -59,11 +59,11 @@ gem "thruster", require: false
 gem "image_processing", "~> 1.2"
 
 # Admin dashboard at /admin, gated to super admins (see config/initializers/avo.rb)
-gem "avo"
+gem "avo", "~> 3.33.4"
 
-# Error monitoring in production (see config/initializers/airbrake.rb)
+# Error monitoring in production (see config/initializers/honeybadger.rb)
 group :production do
-  gem "airbrake", "~> 13.0"
+  gem "honeybadger", "~> 6.10"
 end
 
 group :development, :test do
