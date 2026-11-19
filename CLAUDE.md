@@ -14,7 +14,7 @@ One repo, two things:
 ## Rails app
 
 ### Stack
-- **Rails 8.1** on the edge `8-1-stable` branch (`bundle update rails` pulls new commits). **Ruby 4.0.2** (`.ruby-version`).
+- **Rails 8.1** on the edge `8-1-stable` branch (`bundle update rails` pulls new commits). **Ruby 4.0.10** (`.ruby-version`).
 - **SQLite** everywhere including production (separate files per concern under `storage/`); **Solid Queue/Cache/Cable**, no Redis.
 - **Hotwire** (Turbo + Stimulus), **importmap** (no JS bundler/npm), **Propshaft**, **Tailwind** via `tailwindcss-rails`.
 - Deploy via **Kamal** (Docker); `config/deploy.yml` has placeholder servers.
