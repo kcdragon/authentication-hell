@@ -41,6 +41,9 @@
 # bin/build-game) is intentionally NOT ignored so it goes into the image.
 /public/development_game_assets
 
+# Ignore the Slidev talk decks (and their node_modules).
+/talks/
+
 # Ignore CI service files.
 /.github
 

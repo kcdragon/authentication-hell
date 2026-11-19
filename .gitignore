@@ -60,3 +60,6 @@
 # SimpleCov code coverage reports
 /coverage
 
+
+# macOS Finder metadata
+.DS_Store
