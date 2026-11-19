@@ -35,6 +35,9 @@ gem "webauthn"
 # Deliver production email through Postmark's API (registers the :postmark delivery method)
 gem "postmark-rails"
 
+# One JSON log line per event on stdout in production, in the shared Rowhome Labs format
+gem "rails_semantic_logger", "~> 5.2"
+
 # Windows does not include zoneinfo files, so bundle the tzinfo-data gem
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 

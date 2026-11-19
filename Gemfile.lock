@@ -372,6 +372,10 @@ GEM
     rails-html-sanitizer (1.7.2)
       loofah (~> 2.25, >= 2.25.3)
       nokogiri (>= 1.15.7, != 1.16.7, != 1.16.6, != 1.16.5, != 1.16.4, != 1.16.3, != 1.16.2, != 1.16.1, != 1.16.0.rc1, != 1.16.0)
+    rails_semantic_logger (5.2.0)
+      rack
+      railties (>= 7.2)
+      semantic_logger (>= 5.1)
     rainbow (3.1.1)
     rake (13.4.2)
     rb-fsevent (0.11.2)
@@ -439,6 +443,9 @@ GEM
       rexml (~> 3.2, >= 3.2.5)
       rubyzip (>= 1.2.2, < 4.0)
       websocket (~> 1.0)
+    semantic_logger (5.2.0)
+      concurrent-ruby (~> 1.0)
+      logger (~> 1.5)
     simplecov (0.22.0)
       docile (~> 1.1)
       simplecov-html (~> 0.11)
@@ -570,6 +577,7 @@ DEPENDENCIES
   propshaft
   puma (>= 5.0)
   rails!
+  rails_semantic_logger (~> 5.2)
   rotp
   rqrcode
   rubocop-rails-omakase
@@ -727,6 +735,7 @@ CHECKSUMS
   rails (8.1.4.1)
   rails-dom-testing (2.3.0) sha256=8acc7953a7b911ca44588bf08737bc16719f431a1cc3091a292bca7317925c1d
   rails-html-sanitizer (1.7.2) sha256=a21ef45b7a6639fc8e2282473c547514cb86ae271616162a946bf89148fa2424
+  rails_semantic_logger (5.2.0) sha256=c02dcc300bbfc520beb48e997305652d3b6f1d87fb1ca5325af75f55d4568350
   railties (8.1.4.1)
   rainbow (3.1.1) sha256=039491aa3a89f42efa1d6dec2fc4e62ede96eb6acd95e52f1ad581182b79bc6a
   rake (13.4.2) sha256=cb825b2bd5f1f8e91ca37bddb4b9aaf345551b4731da62949be002fa89283701
@@ -751,6 +760,7 @@ CHECKSUMS
   safety_net_attestation (0.5.0) sha256=c8cd01dd550dbe8553862918af6355a04672db11d218ec96104ce3955293f2aa
   securerandom (0.4.1) sha256=cc5193d414a4341b6e225f0cb4446aceca8e50d5e1888743fac16987638ea0b1
   selenium-webdriver (4.44.0) sha256=6f1df072529af369589c46f0e01132952aabb250cfd683c274d74dc1eb5d8477
+  semantic_logger (5.2.0) sha256=603fb25c6c216b0ec468eb19897f7b06e6fd54d41fd8974765ae03048a736fd9
   simplecov (0.22.0) sha256=fe2622c7834ff23b98066bb0a854284b2729a569ac659f82621fc22ef36213a5
   simplecov-html (0.13.2) sha256=bd0b8e54e7c2d7685927e8d6286466359b6f16b18cb0df47b508e8d73c777246
   simplecov_json_formatter (0.1.4) sha256=529418fbe8de1713ac2b2d612aa3daa56d316975d307244399fa4838c601b428
