@@ -1,0 +1,6 @@
+config/master.key
+config/credentials/*.key
+.conductor/settings.local.toml
+game/dragonruby
+game/dragonruby-publish
+game/.dragonruby/**
