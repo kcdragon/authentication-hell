@@ -1,0 +1,13 @@
+#!/bin/sh
+set -e
+
+IMAGE=ghcr.io/kcdragon/authentication-hell-hotcell:latest
+
+docker build --pull --platform linux/amd64 -t "$IMAGE" hotcell
+docker push "$IMAGE"
+
+if bin/kamal accessory details active_storage 2>/dev/null | grep -q "Up "; then
+  bin/kamal accessory reboot active_storage
+else
+  bin/kamal accessory boot active_storage
+fi

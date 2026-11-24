@@ -245,28 +245,32 @@ class UserTest < ActiveSupport::TestCase
     assert user.errors[:avatar].any?
   end
 
-  test "avatar processing refuses formats from libvips' untrusted loaders" do
-    svg = %(<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8"/></svg>)
+  test "analyzes every accepted avatar format in the hot cell" do
+    %w[ avatar.png avatar.jpg avatar.gif avatar.webp ].each do |fixture|
+      blob = ActiveStorage::Blob.create_and_upload!(io: file_fixture(fixture).open, filename: fixture)
 
-    assert_raises(Vips::Error) { Vips::Image.new_from_buffer(svg, "").avg }
-  end
+      blob.analyze
 
-  test "avatar processing still decodes every accepted avatar format" do
-    pixel = Vips::Image.black(4, 4)
-
-    %w[ .png .jpg .gif .webp ].each do |format|
-      encoded = pixel.write_to_buffer(format)
-      assert_equal 4, Vips::Image.new_from_buffer(encoded, "").width, "#{format} should decode"
+      assert_equal [ 80, 40 ], blob.metadata.values_at(:width, :height), "#{fixture} should be analyzed"
     end
   end
 
-  test "builds the 64x64 nav variant of an uploaded avatar" do
+  test "builds the 64x64 nav variant of an uploaded avatar in the hot cell" do
     user = users(:one)
-    user.avatar.attach(io: Rails.root.join("public/icon.png").open, filename: "icon.png", content_type: "image/png")
+    user.avatar.attach(io: file_fixture("avatar.png").open, filename: "avatar.png")
 
-    thumbnail = Vips::Image.new_from_buffer(user.avatar.variant(:nav).processed.download, "")
+    thumbnail = user.avatar.variant(:nav).processed.image.blob
+    thumbnail.analyze
 
-    assert_equal [ 64, 64 ], [ thumbnail.width, thumbnail.height ]
+    assert_equal [ 64, 64 ], thumbnail.metadata.values_at(:width, :height)
+  end
+
+  test "the hot cell refuses an SVG disguised as a PNG" do
+    disguised_svg = ActiveStorage::Blob.create_and_upload!(
+      io: file_fixture("svg_disguised_as.png").open, filename: "avatar.png", content_type: "image/png", identify: false
+    )
+
+    assert_raises(HotCell::PermanentFailure) { disguised_svg.variant(resize_to_fill: [ 64, 64 ]).processed }
   end
 
   test "record_level_completed advances the high-water mark and returns true" do

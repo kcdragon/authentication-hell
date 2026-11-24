@@ -12,6 +12,7 @@ end
 require_relative "../config/environment"
 require "rails/test_help"
 require_relative "test_helpers/session_test_helper"
+require_relative "test_helpers/hot_cell_test_helper"
 
 # Every digest path (fixtures, has_secure_password, recovery codes) falls back to
 # BCrypt::Engine.cost; at the default cost hashing dominates suite runtime.

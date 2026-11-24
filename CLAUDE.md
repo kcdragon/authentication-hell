@@ -6,7 +6,7 @@ Guidance for Claude Code (claude.ai/code) working in this repo.
 
 One repo, two things:
 
-1. **A Rails 8.1 web app** (root) — a gamified auth system: a full credential stack (sign-up, sign-in, email confirmation, password reset, TOTP 2FA, recovery codes, WebAuthn passkeys, profile, achievements) wrapped around an embedded game where colliding with an enemy forces re-authentication mid-play.
+1. **A Rails 8.2 (edge) web app** (root) — a gamified auth system: a full credential stack (sign-up, sign-in, email confirmation, password reset, TOTP 2FA, recovery codes, WebAuthn passkeys, profile, achievements) wrapped around an embedded game where colliding with an enemy forces re-authentication mid-play.
 2. **A bundled copy of DragonRuby GTK** under `game/` — the proprietary engine binary plus our game source in `game/mygame/`. Everything under `game/` except `game/mygame/` is vendored as-is; treat it as a tool, not our code.
 
 **How they connect:** `bin/build-game` packages `game/mygame/` to an HTML5/WASM bundle in `public/game_assets/` (gitignored build artifact); Rails serves it at `/game` via `GamesController`. See "DragonRuby game served at /game".
@@ -14,7 +14,8 @@ One repo, two things:
 ## Rails app
 
 ### Stack
-- **Rails 8.1** on the edge `8-1-stable` branch (`bundle update rails` pulls new commits). **Ruby 4.0.10** (`.ruby-version`).
+- **Rails 8.2.0.alpha** tracking `rails/rails` `main` (`bundle update rails --conservative` pulls new commits), required by HotCell until 8.2 ships. **Ruby 4.0.10** (`.ruby-version`).
+- **Uploaded images are processed in a [HotCell](https://github.com/basecamp/hotcell) sidecar**, not in Rails: avatar analysis and variants run libvips in the `active_storage` cell (no network, no secrets, read-only). The app has no libvips or `ruby-vips`. The cell lives in `hotcell/` (its own Gemfile, Dockerfile, limits) and `bin/hotcell` runs it locally; `bin/dev` and the test suite start it for you. Its sockets are under `$XDG_RUNTIME_DIR/hotcell-<checkout hash>` because worktree paths exceed the 108-byte socket limit. In production it's the `active_storage` Kamal accessory; ship cell changes with `bin/deploy-hotcell` (Kamal never rebuilds accessories on `kamal deploy`).
 - **SQLite** everywhere including production (separate files per concern under `storage/`); **Solid Queue/Cache/Cable**, no Redis.
 - **Hotwire** (Turbo + Stimulus), **importmap** (no JS bundler/npm), **Propshaft**, **Tailwind** via `tailwindcss-rails`.
 - Deploy via **Kamal** (Docker); `config/deploy.yml` has placeholder servers.

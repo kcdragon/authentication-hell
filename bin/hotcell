@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+require "bundler"
+require_relative "../config/local_hot_cell"
+
+app_root = File.expand_path("..", __dir__)
+cell_root = File.join(app_root, "hotcell")
+
+Bundler.with_unbundled_env do
+  ENV["BUNDLE_GEMFILE"] = File.join(cell_root, "Gemfile")
+  ENV["HOTCELL_CONFIG"] = File.join(cell_root, "config.rb")
+  ENV["HOTCELL_OPERATIONS"] = File.join(cell_root, "operations")
+  ENV["HOTCELL_DIR"] = LocalHotCell.socket_dir(app_root)
+  ENV["OMP_NUM_THREADS"] ||= "1"
+
+  exec "bundle", "exec", "hotcell", "--development", *ARGV
+end
