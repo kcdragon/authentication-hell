@@ -245,6 +245,30 @@ class UserTest < ActiveSupport::TestCase
     assert user.errors[:avatar].any?
   end
 
+  test "avatar processing refuses formats from libvips' untrusted loaders" do
+    svg = %(<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><rect width="8" height="8"/></svg>)
+
+    assert_raises(Vips::Error) { Vips::Image.new_from_buffer(svg, "").avg }
+  end
+
+  test "avatar processing still decodes every accepted avatar format" do
+    pixel = Vips::Image.black(4, 4)
+
+    %w[ .png .jpg .gif .webp ].each do |format|
+      encoded = pixel.write_to_buffer(format)
+      assert_equal 4, Vips::Image.new_from_buffer(encoded, "").width, "#{format} should decode"
+    end
+  end
+
+  test "builds the 64x64 nav variant of an uploaded avatar" do
+    user = users(:one)
+    user.avatar.attach(io: Rails.root.join("public/icon.png").open, filename: "icon.png", content_type: "image/png")
+
+    thumbnail = Vips::Image.new_from_buffer(user.avatar.variant(:nav).processed.download, "")
+
+    assert_equal [ 64, 64 ], [ thumbnail.width, thumbnail.height ]
+  end
+
   test "record_level_completed advances the high-water mark and returns true" do
     user = users(:one)
     assert user.record_level_completed(2)
