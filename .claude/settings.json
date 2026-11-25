@@ -1,10 +1,4 @@
 {
-  "permissions": {
-    "deny": [
-      "Bash(gh signoff)",
-      "Bash(gh signoff:*)"
-    ]
-  },
   "hooks": {
     "PostToolUse": [
       {

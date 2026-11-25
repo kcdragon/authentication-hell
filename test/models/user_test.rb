@@ -245,6 +245,34 @@ class UserTest < ActiveSupport::TestCase
     assert user.errors[:avatar].any?
   end
 
+  test "analyzes every accepted avatar format in the hot cell" do
+    %w[ avatar.png avatar.jpg avatar.gif avatar.webp ].each do |fixture|
+      blob = ActiveStorage::Blob.create_and_upload!(io: file_fixture(fixture).open, filename: fixture)
+
+      blob.analyze
+
+      assert_equal [ 80, 40 ], blob.metadata.values_at(:width, :height), "#{fixture} should be analyzed"
+    end
+  end
+
+  test "builds the 64x64 nav variant of an uploaded avatar in the hot cell" do
+    user = users(:one)
+    user.avatar.attach(io: file_fixture("avatar.png").open, filename: "avatar.png")
+
+    thumbnail = user.avatar.variant(:nav).processed.image.blob
+    thumbnail.analyze
+
+    assert_equal [ 64, 64 ], thumbnail.metadata.values_at(:width, :height)
+  end
+
+  test "the hot cell refuses an SVG disguised as a PNG" do
+    disguised_svg = ActiveStorage::Blob.create_and_upload!(
+      io: file_fixture("svg_disguised_as.png").open, filename: "avatar.png", content_type: "image/png", identify: false
+    )
+
+    assert_raises(HotCell::PermanentFailure) { disguised_svg.variant(resize_to_fill: [ 64, 64 ]).processed }
+  end
+
   test "record_level_completed advances the high-water mark and returns true" do
     user = users(:one)
     assert user.record_level_completed(2)

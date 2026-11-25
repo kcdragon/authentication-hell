@@ -22,6 +22,10 @@ module AuthenticationHell
     require_relative "../app/middleware/game_cross_origin_isolation"
     config.middleware.insert_before ActionDispatch::Static, GameCrossOriginIsolation
 
+    config.active_storage.variant_processor = ActiveStorage::HotCell::Client::Transformers::Image::Vips
+    config.active_storage.analyzers = [ ActiveStorage::HotCell::Client::Analyzers::Image::Vips ]
+    config.active_storage.previewers = []
+
     # Configuration for the application, engines, and railties goes here.
     #
     # These settings can be overridden in specific environments using the files

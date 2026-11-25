@@ -13,6 +13,7 @@ servers:
     options:
       cpus: "1"
       memory: "2g"
+      group-add: 10001
   # job:
   #   hosts:
   #     - 192.168.0.1
@@ -55,6 +56,9 @@ env:
     # When you start using multiple servers, you should split out job processing to a dedicated machine.
     SOLID_QUEUE_IN_PUMA: true
 
+    HOTCELL_ROOT: /run/hotcell
+    HOTCELL_GROUP: 10001
+
     # Set number of processes dedicated to Solid Queue (default: 1)
     # JOB_CONCURRENCY: 3
 
@@ -83,6 +87,7 @@ aliases:
 #   chown -R 1000:1000 /mnt/HC_Volume_106516992/authentication_hell_storage
 volumes:
   - "/mnt/HC_Volume_106516992/authentication_hell_storage:/rails/storage"
+  - "hotcell-sockets:/run/hotcell/active_storage"
 
 # Bridge fingerprinted assets, like JS and CSS, between versions to avoid
 # hitting 404 on in-flight requests. Combines all files from new and old
@@ -113,6 +118,27 @@ builder:
 # Use a different ssh user than root
 # ssh:
 #   user: app
+
+accessories:
+  active_storage:
+    image: ghcr.io/kcdragon/authentication-hell-hotcell:latest
+    roles: [ web ]
+    network: none
+    volumes:
+      - "hotcell-sockets:/run/hotcell/cell"
+    options:
+      cpus: "1"
+      memory: "2g"
+      memory-swap: "2g"
+      read-only: true
+      cap-drop: ALL
+      security-opt: no-new-privileges:true
+      user: "10001:10001"
+      pids-limit: 512
+      tmpfs: /tmp:rw,nosuid,nodev,noexec,size=256m
+    env:
+      clear:
+        HOTCELL_DIR: /run/hotcell/cell
 
 # Use accessory services (secrets come from .kamal/secrets).
 # accessories:
