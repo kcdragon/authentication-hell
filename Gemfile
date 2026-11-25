@@ -44,7 +44,7 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
 gem "solid_cache"
 gem "solid_queue"
-gem "solid_cable"
+gem "solid_cable", "~> 4.0.2"
 
 # AWS S3 client for off-site database backups (see BackupDbToS3Job)
 gem "aws-sdk-s3", require: false
