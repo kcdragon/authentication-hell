@@ -17,12 +17,14 @@ def system!(*args) = system(*args, exception: true)
 
 # The game runs as WASM in the browser and can't read env vars at runtime, so
 # bake the Rails server origin (scheme + host[:port]) into the bundle here. Dev
-# targets the local server (CONDUCTOR_PORT under Conductor, else 3000); any other
+# targets the local server's port (CONDUCTOR_PORT under Conductor, else the PORT
+# bin/dev and dev-server set, else 3000); any other
 # environment must pass GAME_SERVER_ORIGIN so we never ship a localhost build.
 # main.rb reads this file.
 origin =
   if RAILS_ENV == "development"
-    ENV.fetch("GAME_SERVER_ORIGIN", "http://localhost:#{ENV.fetch("CONDUCTOR_PORT", "3000")}")
+    port = ENV["CONDUCTOR_PORT"] || ENV["PORT"] || "3000"
+    ENV.fetch("GAME_SERVER_ORIGIN", "http://localhost:#{port}")
   else
     ENV.fetch("GAME_SERVER_ORIGIN") { abort "Set GAME_SERVER_ORIGIN for a #{RAILS_ENV} build (e.g. https://authenticationhell.com)" }
   end
@@ -60,7 +62,7 @@ puts "== Unzipping into public/#{RAILS_ENV}_game_assets/#{version} =="
 system! "unzip", "-o", "-q", ZIP, "-d", dest
 
 # Sanity-check the layout, then drop the bundle's standalone index.html: the game
-# is rendered inline by GamesController (app/views/games/show.html.erb loads the
+# is rendered by GamesController#frame (app/views/games/frame.html.erb loads the
 # loader directly), so DragonRuby's own HTML page is unused.
 index = File.join(dest, "index.html")
 abort "index.html missing — check zip layout!" unless File.exist?(index)
@@ -70,7 +72,7 @@ FileUtils.rm_f(index)
 # swapping the frame for a "Click Here to Load Game" link that escapes into the top
 # window (its "only chrome works in iFrames" assumption predates Safari's
 # SharedArrayBuffer support). We embed the game in a same-origin, cross-origin-isolated
-# iframe on purpose (/game/frame inside /play), so disable that guard's browser check —
+# iframe on purpose (/game/frame inside /game), so disable that guard's browser check —
 # every browser then takes the loader's normal loadLoadMainModule() path.
 loader   = File.join(dest, "dragonruby-html5-loader.js")
 original = File.read(loader)
@@ -80,4 +82,4 @@ abort "Loader iframe guard not found — DragonRuby loader changed; re-check bin
 File.write(loader, patched)
 puts "== Patched loader to boot inside the iframe on all browsers =="
 
-puts "== Done. Game assets in public/#{RAILS_ENV}_game_assets/#{version}/, Rails page at /play =="
+puts "== Done. Game assets in public/#{RAILS_ENV}_game_assets/#{version}/, Rails page at /game =="
